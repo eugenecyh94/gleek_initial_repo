@@ -7,6 +7,7 @@ Material UI: https://mui.com/
 
 <h2>Commands to Set up from Cloned Repo</h3>
 1. Install all packages by running the following command in the main folder "is4103_project": 
+
 ```bash
 npm run setup
 ```
@@ -25,6 +26,7 @@ node server.js
 
 <h2>Commands to Format and Run Project </h2>
 1. To format using prettier from respective folders run the following command:
+
 ```bash
 npm run format
 ```
