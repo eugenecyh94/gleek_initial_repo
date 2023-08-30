@@ -31,18 +31,16 @@ const ActivityList = () => {
   }, [isLoading, allActivities]);
 
   return (
-    <>
-      {isLoading && <CircularProgress />}
-      {!isLoading && (
-        <GridStyle container spacing={3}>
+      <>
+        {isLoading && <CircularProgress/>}
+        {!isLoading && <GridStyle container spacing={3}>
           {allActivities.map((activity) => (
-            <Grid key={activity.name} item xs={12} sm={6} md={4} lg={3}>
-              <ActivityListItem key={activity.name} activity={activity} />
-            </Grid>
+              <Grid key={activity.name} item xs={12} sm={6} md={4} lg={3}>
+                <ActivityListItem key={activity.name} activity={activity}/>
+              </Grid>
           ))}
-        </GridStyle>
-      )}
-    </>
+        </GridStyle>}
+      </>
   );
 };
 
