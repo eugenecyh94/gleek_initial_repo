@@ -5,12 +5,12 @@ const router = express.Router();
 /**
  * Read all activities.
  * @route GET /activity/all
- * @returns {object} An object containing the count and list of movies.
- * @throws {Error} If an error occurs while retrieving the movies.
+ * @returns {object} An object containing the list of activities.
+ * @throws {Error} If an error occurs while retrieving the activities.
  */
 router.get("/all", async (req, res) => {
   try {
-    const activities = await ActivityModel.find({}).exec();
+    const activities = await ActivityModel.find().exec();
     res.status(200).json({
       data: activities,
     });
@@ -35,9 +35,7 @@ router.get("/:activityId", async (req, res) => {
       return res.status(202).json({ data: activity });
     }
 
-    return res
-      .status(404)
-      .json({ error: "The activity you are looking doesn't exist" });
+    return res.status(404).json({ error: "Activity does not exist" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -53,35 +51,38 @@ router.get("/:activityId", async (req, res) => {
  * @returns {string} A success message if the activity is added successfully.
  * @throws {Error} If the activity already exists, an error occurs while saving the activity, or validation fails.
  */
-// TODO - To be tested.
+
 // TODO - Update pricing logic and image persisting logic
 router.post("/add", async (req, res) => {
   try {
-    console.log(req.body);
+    console.log("add req body::", req.body);
     const { title, description, tags, price, image } = req.body;
-    const { theme, type, duration, location, size } = tags;
+    const newActivity = new ActivityModel({
+      title: title,
+      description: description,
+      tags: tags,
+      price: price,
+      image: image,
+    });
     const activityExists = await ActivityModel.findOne({ title });
 
     if (activityExists) {
-      return res.status(400).json({ message: "activity already exists" });
+      return res.status(400).json({
+        message:
+          "Title already exists for other activities, please use another title to create",
+      });
     }
-
-    const newActivity = new ActivityModel({
-      title,
-      description,
-      tags,
-      price,
-      image,
-    });
 
     await newActivity.save();
 
-    res.status(201).json({ message: "activity added successfully" });
+    res
+      .status(201)
+      .json({ message: "Activity added successfully", data: newActivity });
   } catch (error) {
     console.log(error);
     res
       .status(500)
-      .json({ error: "Failed to add activity", message: error.message });
+      .json({ error: "Activity cannot be added", message: error.message });
   }
 });
 
@@ -95,16 +96,52 @@ router.post("/add", async (req, res) => {
 // TODO - To be tested.
 router.patch("/update/:activityId", async (req, res) => {
   try {
+    console.log("update req body::", req.body);
+    const { title, description, tags, price, image } = req.body;
+    const activityExists = await ActivityModel.findOne({ title });
+
+    if (activityExists) {
+      return res.status(400).json({
+        message:
+          "Title already exists for other activities, please use another title to update",
+      });
+    }
+
     const updatedActivity = await ActivityModel.findByIdAndUpdate(
       { _id: req.params.activityId },
       req.body,
       { new: true },
     );
+
     res
       .status(200)
-      .json({ msg: "activity updated successfully", updatedActivity });
+      .json({ msg: "Activity updated successfully", data: updatedActivity });
   } catch (err) {
-    res.status(500).json({ err: `Something went wrong: ${err}` });
+    res
+      .status(500)
+      .json({ error: "Activity cannot be updated", message: error.message });
+  }
+});
+
+/**
+ * Delete a an activity by its ID.
+ * @route DELETE /activity/delete/:activityId
+ * @param {string} activityId - The ID of the activity to delete.
+ * @returns {object} A success message and the deleted activity object.
+ * @throws {Error} If the activity is not found or an error occurs while deleting them.
+ */
+router.delete("/delete/:activityId", async (req, res) => {
+  try {
+    const deleteActivity = await ActivityModel.findByIdAndDelete(
+      req.params.activityId,
+    );
+    res
+      .status(200)
+      .json({ msg: "Activity deleted successfully", data: deleteActivity });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ err: "Activity cannot be deleted", message: error.message });
   }
 });
 
