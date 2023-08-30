@@ -1,8 +1,11 @@
 import { useEffect } from "react";
-import { updateAllActivity } from "../zustand/GlobalStore";
+import {
+  updateAllActivity,
+} from "../zustand/GlobalStore";
 import AxiosConnect from "./AxiosConnect";
 
 const SocketConnection = () => {
+
   const subscribeActivitiesData = () => {
     AxiosConnect.get("activity/all")
       .then((body) => {
