@@ -1,10 +1,13 @@
 import React from "react";
+import { Box, TextField } from "@mui/material";
 
 function LoginPage(props) {
   return (
-    <div>
-      <h1>LOGINPAGE</h1>
-    </div>
+    <Box>
+      <form>
+        <TextField placeholder="Username"></TextField>
+      </form>
+    </Box>
   );
 }
 

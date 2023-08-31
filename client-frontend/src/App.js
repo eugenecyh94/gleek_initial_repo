@@ -1,6 +1,5 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import NavBar from "./components/NavBar";
 import CartPage from "./containers/CartPage";
 import ShopPage from "./containers/ShopPage";
 import HomePage from "./containers/HomePage";
@@ -11,7 +10,6 @@ import RegisterPage from "./containers/RegisterPage";
 function App() {
   return (
     <div>
-      <NavBar />
       <Layout>
         <Routes>
           <Route path="/" element={<HomePage />} />

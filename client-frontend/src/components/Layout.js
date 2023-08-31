@@ -1,14 +1,15 @@
 import React from "react";
 import NavBar from "./NavBar";
+import { Box } from "@mui/material";
 
 const Layout = ({ children }) => {
   return (
     <div>
       <NavBar />
-      <div style={{ paddingTop: "64px" }}>
+      <Box>
         {/* Content will be rendered here */}
         {children}
-      </div>
+      </Box>
     </div>
   );
 };

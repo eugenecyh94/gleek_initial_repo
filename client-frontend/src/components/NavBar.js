@@ -22,7 +22,7 @@ function NavBar(props) {
   const navigate = useNavigate();
   return (
     <div>
-      <AppBar elevation={0} color="dark_purple">
+      <AppBar position="static" elevation={0} color="dark_purple">
         <Box
           display="flex"
           flexDirection="row"

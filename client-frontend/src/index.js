@@ -5,6 +5,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import reportWebVitals from "./reportWebVitals";
 import theme from "./themes/theme"; // Import your main theme
 import { BrowserRouter } from "react-router-dom";
+import "./index.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
