@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { Box, TextField, Button, Typography, Grid } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-
 import AccountSidebar from "./AccountSidebar";
 
 function AccountDetails(props) {
@@ -38,9 +36,9 @@ function AccountDetails(props) {
     // }))
   };
 
-  const theme = useTheme();
-  const tertiary = theme.palette.tertiary.main;
-  const primary = theme.palette.primary.main;
+  // const theme = useTheme();
+  // const tertiary = theme.palette.tertiary.main;
+  // const primary = theme.palette.primary.main;
   return (
     <Box
       display="flex"
