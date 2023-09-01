@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -8,19 +8,31 @@ import {
   FormControlLabel,
   Checkbox,
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 
 import AccountSidebar from "./AccountSidebar";
 
 function Privacy(props) {
-  const theme = useTheme();
-  const tertiary = theme.palette.tertiary.main;
-  const primary = theme.palette.primary.main;
-
   // Modal
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  const mockedData = {
+    marketingUpdates: true,
+  };
+  const [formData, setFormData] = useState(mockedData);
+
+  const handleCheckboxChange = (event) => {
+    const { name, checked } = event.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: checked,
+    }));
+  };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(formData);
+  };
 
   return (
     <Box
@@ -52,61 +64,69 @@ function Privacy(props) {
             Privacy Settings
           </Typography>
         </Box>
-        <FormGroup>
-          <FormControlLabel
-            control={<Checkbox defaultChecked />}
-            label="I agree to receive marketing updates from Gleek via email."
-          />
-          <FormControlLabel
-            control={<Checkbox defaultChecked />}
-            label="I agree to the Terms & Conditions of Gleek."
-            disabled={true}
-          />
-          <Button width="5rem" onClick={handleOpen}>
-            Open T&C
-          </Button>
-          <Modal
-            open={open}
-            onClose={handleClose}
-            aria-labelledby="modal-modal-title"
-            aria-describedby="modal-modal-description"
-          >
-            <Box
-              sx={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: "80%",
-                bgcolor: "background.paper",
-                boxShadow: 24,
-                borderRadius: "25px",
-                p: 4,
-              }}
+        <form onSubmit={handleSubmit}>
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={formData.marketingUpdates}
+                  onChange={handleCheckboxChange}
+                  name="marketingUpdates"
+                  color="primary"
+                />
+              }
+              label="I agree to receive marketing updates from Gleek via email."
+            />
+            <FormControlLabel
+              control={<Checkbox defaultChecked />}
+              label="I agree to the Terms & Conditions of Gleek."
+              disabled={true}
+            />
+            <Button width="5rem" onClick={handleOpen}>
+              Open T&C
+            </Button>
+            <Modal
+              open={open}
+              onClose={handleClose}
+              aria-labelledby="modal-modal-title"
+              aria-describedby="modal-modal-description"
             >
-              <Typography id="modal-modal-title" variant="h6" component="h2">
-                Terms & Conditions
-              </Typography>
-              <Typography
-                id="modal-modal-description"
-                overflow="auto"
-                maxHeight="30em"
-                sx={{ mt: 2 }}
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: "80%",
+                  bgcolor: "background.paper",
+                  boxShadow: 24,
+                  borderRadius: "25px",
+                  p: 4,
+                }}
               >
-                {new Array(2000).fill("text").join(" ")}
-              </Typography>
-            </Box>
-          </Modal>
-        </FormGroup>
-
-        <Button
-          sx={{ marginTop: "32px" }}
-          mt={4}
-          variant="contained"
-          type="submit"
-        >
-          <Typography variant="body1">Update</Typography>
-        </Button>
+                <Typography id="modal-modal-title" variant="h6" component="h2">
+                  Terms & Conditions
+                </Typography>
+                <Typography
+                  id="modal-modal-description"
+                  overflow="auto"
+                  maxHeight="30em"
+                  sx={{ mt: 2 }}
+                >
+                  {new Array(2000).fill("text").join(" ")}
+                </Typography>
+              </Box>
+            </Modal>
+            <Button
+              sx={{ marginTop: "32px" }}
+              mt={4}
+              variant="contained"
+              type="submit"
+            >
+              <Typography variant="body1">Update</Typography>
+            </Button>
+          </FormGroup>
+        </form>
       </Box>
     </Box>
   );
