@@ -26,7 +26,6 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AccountSidebar from "./AccountSidebar";
 
 function Privacy(props) {
-
   const theme = useTheme();
   const tertiary = theme.palette.tertiary.main;
   const primary = theme.palette.primary.main;
@@ -53,7 +52,7 @@ function Privacy(props) {
         <Box
           display="flex"
           flexDirection="column"
-          alignItems="center"
+          alignItems="left"
           marginBottom={2}
         >
           <Typography color="secondary" variant="h4">
