@@ -6,6 +6,8 @@ import HomePage from "./containers/HomePage";
 import Layout from "./components/Layout";
 import LoginPage from "./containers/LoginPage";
 import RegisterPage from "./containers/RegisterPage";
+import AccountDetails from "./containers/Settings/AccountDetails";
+import Privacy from "./containers/Settings/Privacy";
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
           <Route path="/Shop" element={<ShopPage />} />
           <Route path="/Login" element={<LoginPage />} />
           <Route path="/Register" element={<RegisterPage />} />
+          <Route path="/settings/profile" element={<AccountDetails />} />
+          <Route path="/settings/privacy" element={<Privacy />} />
         </Routes>
       </Layout>
     </div>
