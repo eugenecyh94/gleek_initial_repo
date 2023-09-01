@@ -15,9 +15,14 @@ const Layout = ({ children }) => {
       display="flex"
     >
       <NavBar />
-      <Box flex={1}>
-        {/* Content will be rendered here */}
-        {children}
+      <Box
+        flex={1}
+        display="flex"
+        flexDirection="row"
+        justifyContent="space-evenly"
+        alignItems="center"
+      >
+        <Box flex={1}>{children}</Box>
       </Box>
       <Footer />
     </Box>
