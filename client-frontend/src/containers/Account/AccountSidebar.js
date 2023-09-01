@@ -8,6 +8,31 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import { NavLink } from "react-router-dom";
+import { styled } from "@mui/system";
+const CustomNavLink = styled(NavLink)(({ theme }) => ({
+  "&.active": {
+    color: theme.palette.primary.main,
+    fontWeight: 600,
+  },
+}));
+
+const CustomListItemButton = ({ route, text }) => {
+  return (
+    <ListItemButton
+      component={CustomNavLink}
+      to={route}
+      sx={{
+        "&.active": {
+          color: "primary",
+          fontWeight: 600,
+        },
+      }}
+    >
+      <ListItemText primary={text} sx={{ textAlign: "center" }} />
+    </ListItemButton>
+  );
+};
 
 function AccountSidebar(props) {
   const theme = useTheme();
@@ -23,49 +48,22 @@ function AccountSidebar(props) {
           padding: "16px",
         }}
       >
-        {/* <Avatar
-          alt="User Avatar"
-          src=""
-          sx={{ width: 100, height: 100 }}
-        /> */}
-
         <AccountCircleIcon style={{ fontSize: "4rem" }} color="accent" />
 
-        <Typography variant="h6">Account Settings</Typography>
-        {/* <Link
-          href="/settings/profile"
-          color="secondary"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Typography variant="h6">Update Personal Info</Typography>
-          <ArrowForwardIosIcon fontSize="small"/>
-        </Link> */}
+        <Typography align="center" variant="h6">
+          Account Settings
+        </Typography>
       </div>
-
       <List>
-        <ListItemButton component={Link} href="/settings/profile">
-          <ListItemText
-            primary="Account Details"
-            sx={{ textAlign: "center" }}
-          />
-        </ListItemButton>
-        <ListItemButton component={Link} href="/settings/privacy">
-          <ListItemText
-            primary="Privacy Settings"
-            sx={{ textAlign: "center" }}
-          />
-        </ListItemButton>
-        <ListItemButton
-          component={Link}
-          href="/settings/security"
-          disabled={true}
-        >
-          <ListItemText primary="Security" sx={{ textAlign: "center" }} />
-        </ListItemButton>
+        <CustomListItemButton
+          route="/settings/profile"
+          text="Account Details"
+        />
+        <CustomListItemButton
+          route="/settings/privacy"
+          text="Privacy Settings"
+        />
+        <CustomListItemButton route="/settings/security" text="Security" />
       </List>
     </div>
   );
