@@ -6,8 +6,8 @@ import HomePage from "./containers/HomePage";
 import Layout from "./components/Layout";
 import LoginPage from "./containers/LoginPage";
 import RegisterPage from "./containers/RegisterPage";
-import AccountDetails from "./containers/Settings/AccountDetails";
-import Privacy from "./containers/Settings/Privacy";
+import AccountDetails from "./containers/Account/AccountDetails";
+import Privacy from "./containers/Account/Privacy";
 
 function App() {
   return (
