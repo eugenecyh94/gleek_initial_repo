@@ -7,8 +7,12 @@ import {
   MenuItem,
   Menu,
   Link,
+  IconButton,
+  Icon,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "@mui/material/styles";
+import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 
 function NavBar(props) {
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -20,9 +24,12 @@ function NavBar(props) {
     setAnchorEl(null);
   };
   const navigate = useNavigate();
+  const theme = useTheme();
+  const primary = theme.palette.primary.main;
+  const accent = theme.palette.accent.main;
   return (
     <div>
-      <AppBar position="static" elevation={0} color="dark_purple">
+      <AppBar position="static" elevation={0} bgcolor={primary}>
         <Box
           display="flex"
           flexDirection="row"
@@ -36,7 +43,13 @@ function NavBar(props) {
               navigate("/");
             }}
           >
-            <Typography ml={2} color="secondary" my={2} variant="h3">
+            <Typography
+              fontWeight={700}
+              ml={2}
+              color={accent}
+              my={1}
+              variant="h4"
+            >
               Gleek
             </Typography>
           </Link>
@@ -45,28 +58,32 @@ function NavBar(props) {
             display="flex"
             flexDirection="row"
             justifyContent="space-evenly"
+            alignItems="center"
           >
+            <IconButton
+              onClick={() => {
+                navigate("/Cart");
+              }}
+              disableRipple
+              disableFocusRipple
+              aria-label="cart"
+              color="accent"
+              sx={{ marginRight: "16px" }}
+            >
+              <ShoppingBagOutlinedIcon />
+            </IconButton>
             <Button
+              sx={{ marginRight: "16px" }}
               variant="text"
               onClick={() => {
                 navigate("/Shop");
               }}
             >
-              <Typography color="secondary" variant="body1">
+              <Typography fontWeight={700} color={accent} variant="body1">
                 Shop
               </Typography>
             </Button>
-            <Button
-              variant="text"
-              onClick={() => {
-                navigate("/Cart");
-              }}
-            >
-              <Typography color="secondary" variant="body1">
-                Cart
-              </Typography>
-            </Button>
-            <Box>
+            <Box sx={{ marginRight: "24px" }}>
               <Button
                 id="basic-button"
                 aria-controls={open ? "basic-menu" : undefined}
@@ -74,8 +91,8 @@ function NavBar(props) {
                 aria-expanded={open ? "true" : undefined}
                 onClick={handleClick}
               >
-                <Typography color="secondary" variant="body1">
-                  WELCOME
+                <Typography fontWeight={700} color={accent} variant="body1">
+                  Welcome!
                 </Typography>
               </Button>
               <Menu
@@ -86,8 +103,14 @@ function NavBar(props) {
                 MenuListProps={{
                   "aria-labelledby": "basic-button",
                 }}
+                slotProps={{
+                  paper: {
+                    elevation: 2,
+                  },
+                }}
               >
                 <MenuItem
+                  sx={{ px: "32px" }}
                   onClick={() => {
                     navigate("/Login");
                   }}
@@ -95,6 +118,7 @@ function NavBar(props) {
                   Login
                 </MenuItem>
                 <MenuItem
+                  sx={{ px: "32px" }}
                   onClick={() => {
                     navigate("/Register");
                   }}

@@ -1,4 +1,7 @@
+@import url("https://fonts.googleapis.com/css2?family=Fredoka&display=swap");
+
 * {
+  font-family: "Fredoka";
   margin: 0;
   padding: 0;
   box-sizing: border-box;
