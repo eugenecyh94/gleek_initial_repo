@@ -1,6 +1,6 @@
-import "./App.css";
 import { Route, Routes } from "react-router-dom";
-import ActivityList from "./components/activity/ActivityList";
+import "./App.css";
+import Home from "./components/Home";
 import SocketConnection from "./utils/SocketConnection";
 
 function App() {
@@ -8,7 +8,7 @@ function App() {
     <div>
       <SocketConnection />
       <Routes>
-        <Route exact path="/" element={<ActivityList />} />
+        <Route exact path="/" element={<Home />} />
       </Routes>
     </div>
   );
