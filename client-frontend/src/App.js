@@ -6,6 +6,8 @@ import HomePage from "./containers/HomePage";
 import Layout from "./components/Layout";
 import LoginPage from "./containers/LoginPage";
 import RegisterPage from "./containers/RegisterPage";
+import AccountDetails from "./containers/Settings/AccountDetails";
+import Privacy from "./containers/Settings/Privacy";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SocketConnection from "./utils/SocketConnection";
 
@@ -16,6 +18,8 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/settings/profile" element={<AccountDetails />} />
+          <Route path="/settings/privacy" element={<Privacy />} />
           <Route
             path="/cart"
             element={
