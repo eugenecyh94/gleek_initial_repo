@@ -11,7 +11,7 @@ function Footer(props) {
   const accent = theme.palette.accent.main;
 
   return (
-    <Box minHeight={150} bgcolor={tertiary} p={3}>
+    <Box minHeight={150} mt={8} bgcolor={tertiary} p={3}>
       <Box
         mb={2}
         display="flex"

@@ -22,7 +22,9 @@ const Layout = ({ children }) => {
         justifyContent="space-evenly"
         alignItems="center"
       >
-        <Box flex={1}>{children}</Box>
+        <Box flex={1} mt={8}>
+          {children}
+        </Box>
       </Box>
       <Footer />
     </Box>

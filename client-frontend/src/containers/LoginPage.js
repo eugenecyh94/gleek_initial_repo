@@ -14,6 +14,7 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import LockPersonIcon from "@mui/icons-material/LockPerson";
+import { useNavigate } from "react-router-dom";
 
 function LoginPage(props) {
   const theme = useTheme();
@@ -25,7 +26,7 @@ function LoginPage(props) {
   const [error, setError] = useState("");
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const [passwordError, setPasswordError] = useState("");
-
+  const navigate = useNavigate();
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
@@ -143,7 +144,13 @@ function LoginPage(props) {
           >
             <Typography variant="body1">Login</Typography>
           </Button>
-          <Button sx={{ marginTop: "16px" }} variant="text" onClick={() => {}}>
+          <Button
+            sx={{ marginTop: "16px" }}
+            variant="text"
+            onClick={() => {
+              navigate("/register");
+            }}
+          >
             <Typography fontWeight={700} color="secondary" variant="body2">
               Don't have an account? Sign Up
             </Typography>
