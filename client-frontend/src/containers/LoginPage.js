@@ -65,7 +65,7 @@ function LoginPage(props) {
         <Box
           display="flex"
           flexDirection="column"
-          p={6}
+          p={4}
           bgcolor={tertiary}
           borderRadius={10}
           sx={{ width: "25rem" }}
