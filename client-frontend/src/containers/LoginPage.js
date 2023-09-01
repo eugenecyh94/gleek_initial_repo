@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Box,
   TextField,
@@ -9,6 +9,7 @@ import {
   FormControl,
   InputLabel,
   OutlinedInput,
+  FormHelperText,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
@@ -18,13 +19,41 @@ function LoginPage(props) {
   const theme = useTheme();
   const tertiary = theme.palette.tertiary.main;
   const primary = theme.palette.primary.main;
-  const [showPassword, setShowPassword] = React.useState(false);
-
+  const [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [error, setError] = useState("");
   const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const [passwordError, setPasswordError] = useState("");
 
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    if (name === "username") {
+      setUsername(value);
+      if (value.trim() === "") {
+        setError("Username is required");
+      } else {
+        setError("");
+      }
+    } else if (name === "password") {
+      setPassword(value);
+      if (value.trim() === "") {
+        setPasswordError("Password is required");
+      } else {
+        setPasswordError("");
+      }
+    }
+  };
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    const formData = { username, password };
+    console.log(formData);
+  };
+
   return (
     <Box
       display="flex"
@@ -32,7 +61,7 @@ function LoginPage(props) {
       justifyContent="space-evenly"
       alignItems="center"
     >
-      <form>
+      <form onSubmit={handleSubmit}>
         <Box
           display="flex"
           flexDirection="column"
@@ -53,25 +82,38 @@ function LoginPage(props) {
           <TextField
             size="small"
             autoFocus
+            autoComplete="on"
             id="username"
             required
-            autoComplete
+            name="username"
             placeholder="Username"
+            onChange={handleChange}
+            onBlur={handleChange}
             label="Username"
+            value={username}
+            helperText={error}
+            error={error.length > 0}
             sx={{ marginTop: "32px" }}
           ></TextField>
           <FormControl
             sx={{ marginTop: "32px" }}
             size="small"
             required
-            autoComplete
             variant="outlined"
           >
-            <InputLabel htmlFor="outlined-adornment-password">
+            <InputLabel
+              error={passwordError.length > 0}
+              htmlFor="outlined-adornment-password"
+            >
               Password
             </InputLabel>
             <OutlinedInput
               id="password"
+              onChange={handleChange}
+              onBlur={handleChange}
+              name="password"
+              value={password}
+              error={passwordError.length > 0}
               type={showPassword ? "text" : "password"}
               endAdornment={
                 <InputAdornment position="end">
@@ -87,12 +129,17 @@ function LoginPage(props) {
               }
               label="Password"
             />
+            {passwordError.length > 0 && (
+              <FormHelperText error id="my-helper-text">
+                {passwordError}
+              </FormHelperText>
+            )}
           </FormControl>
           <Button
             sx={{ marginTop: "32px" }}
             mt={4}
             variant="contained"
-            onClick={() => {}}
+            type="submit"
           >
             <Typography variant="body1">Login</Typography>
           </Button>
@@ -101,7 +148,7 @@ function LoginPage(props) {
               Don't have an account? Sign Up
             </Typography>
           </Button>
-          <Button sx={{ marginTop: "32px" }} variant="text" onClick={() => {}}>
+          <Button sx={{ marginTop: "32px" }} variant="text">
             <Typography color="secondary" variant="body2">
               Forgot Password?
             </Typography>
