@@ -15,10 +15,10 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/Cart" element={<CartPage />} />
-          <Route path="/Shop" element={<ShopPage />} />
-          <Route path="/Login" element={<LoginPage />} />
-          <Route path="/Register" element={<RegisterPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/shop" element={<ShopPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route path="/settings/profile" element={<AccountDetails />} />
           <Route path="/settings/privacy" element={<Privacy />} />
         </Routes>

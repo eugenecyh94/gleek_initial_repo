@@ -62,7 +62,7 @@ function NavBar(props) {
           >
             <IconButton
               onClick={() => {
-                navigate("/Cart");
+                navigate("/cart");
               }}
               disableRipple
               disableFocusRipple
@@ -76,7 +76,7 @@ function NavBar(props) {
               sx={{ marginRight: "16px" }}
               variant="text"
               onClick={() => {
-                navigate("/Shop");
+                navigate("/shop");
               }}
             >
               <Typography fontWeight={700} color={accent} variant="body1">
@@ -112,7 +112,7 @@ function NavBar(props) {
                 <MenuItem
                   sx={{ px: "32px" }}
                   onClick={() => {
-                    navigate("/Login");
+                    navigate("/login");
                   }}
                 >
                   Login
@@ -120,7 +120,7 @@ function NavBar(props) {
                 <MenuItem
                   sx={{ px: "32px" }}
                   onClick={() => {
-                    navigate("/Register");
+                    navigate("/register");
                   }}
                 >
                   Register

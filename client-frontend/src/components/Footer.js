@@ -11,9 +11,9 @@ function Footer(props) {
   const accent = theme.palette.accent.main;
 
   return (
-    <Box minHeight={200} bgcolor={tertiary} p={4}>
+    <Box minHeight={150} mt={8} bgcolor={tertiary} p={3}>
       <Box
-        mb={3}
+        mb={2}
         display="flex"
         flexDirection="row"
         justifyContent="space-evenly"
@@ -67,38 +67,23 @@ function Footer(props) {
             <Typography color={accent} mb={1} fontWeight={700} variant="body1">
               FOLLOW US
             </Typography>
-            <Link href="/ " underline="hover" onClick={() => {}}>
-              <Typography color={accent} variant="body2">
-                Facebook
-              </Typography>
-            </Link>
-            <Link href="/ " underline="hover" onClick={() => {}}>
-              <Typography color={accent} variant="body2">
-                Instagram
-              </Typography>
-            </Link>
-            <Link href="/ " underline="hover" onClick={() => {}}>
-              <Typography color={accent} variant="body2">
-                Twitter
-              </Typography>
-            </Link>
+            <Box align="center">
+              <Link href="/ " onClick={() => {}}>
+                <TwitterIcon fontSize="large" color="accent" />
+              </Link>
+              <Link href="/ " onClick={() => {}}>
+                <FacebookIcon fontSize="large" color="accent" />
+              </Link>
+              <Link href="/ " onClick={() => {}}>
+                <InstagramIcon fontSize="large" color="accent" />
+              </Link>
+            </Box>
           </Box>
         </Box>
       </Box>
-      <Typography mb={2} align="center" color={accent} variant="body2">
+      <Typography mb={1} align="center" color={accent} variant="body2">
         © 2023 Gleek
       </Typography>
-      <Box align="center">
-        <Link href="/ " onClick={() => {}}>
-          <TwitterIcon fontSize="large" color="accent" />
-        </Link>
-        <Link href="/ " onClick={() => {}}>
-          <FacebookIcon fontSize="large" color="accent" />
-        </Link>
-        <Link href="/ " onClick={() => {}}>
-          <InstagramIcon fontSize="large" color="accent" />
-        </Link>
-      </Box>
     </Box>
   );
 }
