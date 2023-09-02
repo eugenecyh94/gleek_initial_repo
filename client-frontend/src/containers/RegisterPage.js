@@ -91,11 +91,6 @@ function RegisterPage(props) {
   };
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log(formData);
-  };
-
-  useEffect(() => {
-    // Loop through the keys (field names) of the formData object
     for (const fieldName in formData) {
       let errors = validator(formData, fieldName);
       setErrorData((prevData) => ({
@@ -103,7 +98,23 @@ function RegisterPage(props) {
         [fieldName]: errors[fieldName] || "",
       }));
     }
-  }, []);
+
+    if (!Object.values(errorData).every((error) => error === "")) {
+      return;
+    }
+    console.log(formData);
+  };
+
+  // useEffect(() => {
+  //   // Loop through the keys (field names) of the formData object
+  //   for (const fieldName in formData) {
+  //     let errors = validator(formData, fieldName);
+  //     setErrorData((prevData) => ({
+  //       ...prevData,
+  //       [fieldName]: errors[fieldName] || "",
+  //     }));
+  //   }
+  // }, []);
 
   const validator = (formData, fieldName) => {
     let errors = {};
@@ -226,7 +237,7 @@ function RegisterPage(props) {
       justifyContent="space-evenly"
       alignItems="center"
     >
-      <form onSubmit={handleSubmit}>
+      <form>
         <Box
           display="flex"
           flexDirection="column"
@@ -309,8 +320,8 @@ function RegisterPage(props) {
               <TextField
                 size="small"
                 autoComplete="on"
-                id="team"
                 required
+                id="team"
                 name="team"
                 placeholder="Team"
                 label="Team"
@@ -505,6 +516,7 @@ function RegisterPage(props) {
             variant="contained"
             type="submit"
             disabled={!Object.values(errorData).every((error) => error === "")}
+            onClick={handleSubmit}
           >
             <Typography variant="body1">Register</Typography>
           </Button>
