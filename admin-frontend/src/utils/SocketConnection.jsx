@@ -1,16 +1,8 @@
 import { useEffect } from "react";
-import {
-  // activityStateStore,
-  updateAllActivity,
-} from "../zustand/GlobalStore";
+import { updateAllActivity } from "../zustand/GlobalStore";
 import AxiosConnect from "./AxiosConnect";
 
 const SocketConnection = () => {
-  const subscribeData = () => {
-    subscribeActivitiesData();
-    // subscribeBookingsData();
-  };
-
   const subscribeActivitiesData = () => {
     AxiosConnect.get("activity/all")
       .then((body) => {
@@ -22,9 +14,16 @@ const SocketConnection = () => {
       });
   };
 
+  const subscribeData = () => {
+    subscribeActivitiesData();
+    // subscribeBookingsData();
+  };
+
   useEffect(() => {
     subscribeData();
   }, [subscribeData]);
+
+  return <></>;
 };
 
 export default SocketConnection;
