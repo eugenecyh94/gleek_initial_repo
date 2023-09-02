@@ -59,11 +59,18 @@ function AccountSidebar(props) {
           route="/settings/profile"
           text="Account Details"
         />
+           <CustomListItemButton
+          route="/settings/billing"
+          text="Billing"
+        />
         <CustomListItemButton
           route="/settings/privacy"
           text="Privacy Settings"
         />
-        <CustomListItemButton route="/settings/security" text="Security" />
+        <CustomListItemButton
+          route="/settings/password"
+          text="Manage Password"
+        />
       </List>
     </div>
   );

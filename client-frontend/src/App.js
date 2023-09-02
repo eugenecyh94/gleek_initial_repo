@@ -8,6 +8,8 @@ import LoginPage from "./containers/LoginPage";
 import RegisterPage from "./containers/RegisterPage";
 import AccountDetails from "./containers/Account/AccountDetails";
 import Privacy from "./containers/Account/Privacy";
+import PasswordChange from "./containers/Account/PasswordChange";
+import BillingChange from "./containers/Account/BillingChange";
 
 function App() {
   return (
@@ -21,6 +23,8 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/settings/profile" element={<AccountDetails />} />
           <Route path="/settings/privacy" element={<Privacy />} />
+          <Route path="/settings/password" element={<PasswordChange />} />
+          <Route path="/settings/billing" element={<BillingChange />} />
         </Routes>
       </Layout>
     </div>
