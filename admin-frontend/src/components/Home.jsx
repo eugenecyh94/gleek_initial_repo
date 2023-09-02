@@ -1,12 +1,12 @@
-import HomePageNavBar from "./navbar/HomePageNavBar";
-import SideNavBar from "./navbar/SideNavBar";
+import { Toolbar } from "@mui/material";
+import Layout from "./Layout";
 
 const Home = () => {
   return (
-    <>
-      <HomePageNavBar />
-      <SideNavBar />
-    </>
+    <Layout>
+      <Toolbar />
+      Home
+    </Layout>
   );
 };
 export default Home;
