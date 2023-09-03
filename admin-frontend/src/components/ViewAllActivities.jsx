@@ -3,10 +3,10 @@ import Layout from "./Layout";
 
 const ViewAllActivities = () => {
   return (
-      <Layout>
-        <Toolbar />
-        View All Activities content
-      </Layout>
+    <Layout>
+      <Toolbar />
+      View All Activities content
+    </Layout>
   );
 };
 

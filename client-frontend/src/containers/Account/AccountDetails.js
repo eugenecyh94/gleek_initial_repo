@@ -178,7 +178,6 @@ function AccountDetails(props) {
               sx={{ width: "100%" }}
             />
           </Grid>
-      
         </Grid>
         Update when client model is confirmed.
         <Button
