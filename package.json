@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "setup": "npm run setup-client-frontend & npm run setup-admin-frontend & npm run setup-server",
+    "setup": "npm install & npm run setup-client-frontend & npm run setup-admin-frontend & npm run setup-server",
     "dev": "concurrently \"npm run server\" \"npm run client-frontend\" \"npm run admin-frontend\"",
     "setup-client-frontend": "cd client-frontend && npm install",
     "setup-admin-frontend": "cd admin-frontend && npm install",
