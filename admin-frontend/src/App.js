@@ -10,7 +10,11 @@ function App() {
       <SocketConnection />
       <Routes>
         <Route exact path="/" element={<Home />} />
-        <Route exact path="/viewPublishedActivities" element={<ViewAllActivities />} />
+        <Route
+          exact
+          path="/viewPublishedActivities"
+          element={<ViewAllActivities />}
+        />
       </Routes>
     </div>
   );

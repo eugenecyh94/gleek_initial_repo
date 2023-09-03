@@ -18,7 +18,6 @@ function BillingChange(props) {
       ...prevData,
       [name]: value,
     }));
-
   };
 
   // const theme = useTheme();
@@ -55,7 +54,6 @@ function BillingChange(props) {
           </Typography>
         </Box>
         <Grid container spacing={2} alignItems="left" justifyContent="left">
-
           <Grid item xs={6}>
             <TextField
               id="billingAddress"

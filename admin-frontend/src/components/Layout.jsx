@@ -4,7 +4,7 @@ import SideNavBar from "./navbar/SideNavBar";
 
 const Layout = ({ children }) => {
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: "flex" }}>
       <HomePageNavBar />
       <SideNavBar />
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
