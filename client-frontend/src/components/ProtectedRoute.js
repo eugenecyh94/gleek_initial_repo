@@ -10,21 +10,19 @@ const ProtectedRoute = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true); // Initial loading state
 
   useEffect(() => {
-    if (!authenticated) {
-      AxiosConnect.post("/gleek/validate-token")
-        .then((response) => {
-          console.log(response);
-          setAuthenticated(true);
-          setIsLoading(false); // Mark loading as complete
-        })
-        .catch((error) => {
-          console.log(error);
-          setAuthenticated(false);
-          setIsLoading(false); // Mark loading as complete
-          setClient(null);
-          navigate("/login");
-        });
-    }
+    AxiosConnect.post("/gleek/validate-token")
+      .then((response) => {
+        console.log(response);
+        setAuthenticated(true);
+        setIsLoading(false); // Mark loading as complete
+      })
+      .catch((error) => {
+        console.log(error);
+        setAuthenticated(false);
+        setIsLoading(false); // Mark loading as complete
+        setClient(null);
+        navigate("/login");
+      });
   }, []);
 
   // Render nothing while loading
