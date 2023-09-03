@@ -10,32 +10,39 @@ import {
   InputLabel,
   OutlinedInput,
   FormHelperText,
+  CircularProgress,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import LockPersonIcon from "@mui/icons-material/LockPerson";
 import { useNavigate } from "react-router-dom";
+import useClientStore from "../zustand/clientStore.js";
 
 function LoginPage(props) {
   const theme = useTheme();
+  const { isLoading, clientError, login, client } = useClientStore(); // Destructure the relevant state and actions
   const tertiary = theme.palette.tertiary.main;
   const primary = theme.palette.primary.main;
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const [passwordError, setPasswordError] = useState("");
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [openError, setOpenError] = useState(false);
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
   const handleChange = (event) => {
     const { name, value } = event.target;
-    if (name === "username") {
-      setUsername(value);
+    if (name === "email") {
+      setEmail(value);
       if (value.trim() === "") {
-        setError("Username is required");
+        setError("Email is required");
       } else {
         setError("");
       }
@@ -48,11 +55,26 @@ function LoginPage(props) {
       }
     }
   };
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const formData = { username, password };
-    console.log(formData);
+    const responseStatus = await login(email, password);
+
+    if (responseStatus) {
+      setOpen(true);
+      navigate("/");
+    } else {
+      setOpenError(true);
+    }
+  };
+
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpen(false);
+    setOpenError(false);
   };
 
   return (
@@ -62,6 +84,20 @@ function LoginPage(props) {
       justifyContent="space-evenly"
       alignItems="center"
     >
+      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+        <Alert onClose={handleClose} severity="success" sx={{ width: "100%" }}>
+          Login is successful!
+        </Alert>
+      </Snackbar>
+      <Snackbar open={openError} autoHideDuration={6000} onClose={handleClose}>
+        <Alert onClose={handleClose} severity="error" sx={{ width: "100%" }}>
+          {clientError &&
+            clientError.response &&
+            clientError.response.data &&
+            (clientError.response.data.errors?.[0]?.msg ||
+              clientError.response.data)}
+        </Alert>
+      </Snackbar>
       <form onSubmit={handleSubmit}>
         <Box
           display="flex"
@@ -84,14 +120,14 @@ function LoginPage(props) {
             size="small"
             autoFocus
             autoComplete="on"
-            id="username"
+            id="email"
             required
-            name="username"
-            placeholder="Username"
+            name="email"
+            placeholder="Email"
             onChange={handleChange}
             onBlur={handleChange}
-            label="Username"
-            value={username}
+            label="Email"
+            value={email}
             helperText={error}
             error={error.length > 0}
             sx={{ marginTop: "32px" }}
@@ -136,14 +172,19 @@ function LoginPage(props) {
               </FormHelperText>
             )}
           </FormControl>
-          <Button
-            sx={{ marginTop: "32px" }}
-            mt={4}
-            variant="contained"
-            type="submit"
-          >
-            <Typography variant="body1">Login</Typography>
-          </Button>
+          {!isLoading && (
+            <Button
+              sx={{ marginTop: "32px" }}
+              mt={4}
+              variant="contained"
+              type="submit"
+            >
+              <Typography variant="body1">Login</Typography>
+            </Button>
+          )}
+          {isLoading && (
+            <CircularProgress sx={{ margin: "auto", marginTop: "32px" }} />
+          )}
           <Button
             sx={{ marginTop: "16px" }}
             variant="text"
