@@ -57,6 +57,6 @@ export const updateAllActivity = (newAllActivities) => {
 };
 
 export const useSelectedNavItemStore = create((set) => ({
-  selectedItem: 'Home', 
+  selectedItem: "Home",
   setSelectedItem: (item) => set({ selectedItem: item }),
 }));

@@ -32,7 +32,7 @@ const SideNavBar = () => {
   const theme = useTheme();
   const selectedItem = useSelectedNavItemStore((state) => state.selectedItem);
   const setSelectedItem = useSelectedNavItemStore(
-    (state) => state.setSelectedItem
+    (state) => state.setSelectedItem,
   );
   const handleItemClick = (item) => {
     setSelectedItem(item);

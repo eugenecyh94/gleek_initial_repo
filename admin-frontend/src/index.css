@@ -12,6 +12,8 @@ code {
     monospace;
 }
 @font-face {
-  font-family: 'Fredoka';
-  src: local('Fredoka'), url(./fonts/Fredoka-Regular.ttf) format('truetype');
+  font-family: "Fredoka";
+  src:
+    local("Fredoka"),
+    url(./fonts/Fredoka-Regular.ttf) format("truetype");
 }
