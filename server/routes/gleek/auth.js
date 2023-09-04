@@ -5,8 +5,10 @@ import {
   postLogin,
   validateToken,
   clearCookies,
+  postChangePassword,
 } from "../../controller/clientController.js";
 import shopRoutes from "./shop.js";
+import verifyToken from "../../middleware/clientAuth.js";
 const router = express.Router();
 
 // /gleek/register => POST
@@ -34,5 +36,7 @@ router.post(
 router.post("/validate-token", validateToken);
 
 router.get("/logout", clearCookies);
+
+router.post("/reset-password", verifyToken, postChangePassword);
 
 export default router;
