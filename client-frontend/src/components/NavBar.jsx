@@ -41,7 +41,7 @@ function NavBar(props) {
 
   const logout = async () => {
     try {
-      const response = await AxiosConnect.get("/gleek/logout");
+      const response = await AxiosConnect.get("/gleek/auth/logout");
       setAuthenticated(false);
       navigate("/");
     } catch (error) {
@@ -159,8 +159,8 @@ function NavBar(props) {
             {authenticated && (
               <Box sx={{ marginRight: "24px" }}>
                 <IconButton
-                  id="basic-button"
-                  aria-controls={open2 ? "basic-menu" : undefined}
+                  id="icon-button"
+                  aria-controls={open2 ? "authenticated-menu" : undefined}
                   aria-haspopup="true"
                   aria-expanded={open2 ? "true" : undefined}
                   onClick={handleClick2}
@@ -173,12 +173,12 @@ function NavBar(props) {
                   <AccountBoxIcon />
                 </IconButton>
                 <Menu
-                  id="basic-menu"
+                  id="authenticated-menu"
                   anchorEl={anchorE2}
                   open={open2}
                   onClose={handleClose2}
                   MenuListProps={{
-                    "aria-labelledby": "basic-button",
+                    "aria-labelledby": "icon-button",
                   }}
                   slotProps={{
                     paper: {

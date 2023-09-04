@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Box,
   TextField,
@@ -16,7 +16,7 @@ import { useTheme } from "@mui/material/styles";
 import LockPersonIcon from "@mui/icons-material/LockPerson";
 import { useNavigate } from "react-router-dom";
 
-function RegisterPage(props) {
+const RegisterPage = () => {
   // themes
   const theme = useTheme();
   const tertiary = theme.palette.tertiary.main;
@@ -25,7 +25,6 @@ function RegisterPage(props) {
   // user input
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordVerify, setShowPasswordVerify] = useState(false);
-  const [isRedirected, setIsRedirected] = useState(true); // Initially set to true
   const [formData, setFormData] = useState({
     password: "",
     email: "",
@@ -77,7 +76,6 @@ function RegisterPage(props) {
   const handleChange = (event) => {
     // name is field name
     // value is formData
-    setIsRedirected(true);
     const { name, value } = event.target;
     setFormData((prevData) => ({
       ...prevData,
@@ -172,24 +170,24 @@ function RegisterPage(props) {
   };
 
   const validateIsRequired = (data, errors, fieldName) => {
-    if (data == "") {
+    if (data === "") {
       errors[fieldName] = `${fieldName} is required!`;
     }
   };
 
   const validateEmail = (data, errors, fieldName) => {
-    if (data == "") {
+    if (data === "") {
       errors[fieldName] = `${fieldName} is required!`;
     } else {
       const re =
-        /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        /^(([^<>()\]\\.,;:\s@"]+(\.[^<>()\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       const result = re.test(String(data).toLowerCase());
       if (!result) errors[fieldName] = "Invalid Email address format!";
     }
   };
 
   const validatePostalCode = (data, errors, fieldName) => {
-    if (data == "") {
+    if (data === "") {
       errors[fieldName] = `${fieldName} is required!`;
     } else {
       const re = /^\d{6}$/;
@@ -199,7 +197,7 @@ function RegisterPage(props) {
   };
 
   const validatePhoneNumber = (data, errors, fieldName) => {
-    if (data == "") {
+    if (data === "") {
       errors[fieldName] = `${fieldName} is required!`;
     } else {
       const re = /^65\d{8}$/;
@@ -209,7 +207,7 @@ function RegisterPage(props) {
   };
 
   const validatePassword = (data, errors, fieldName) => {
-    if (data == "") {
+    if (data === "") {
       errors[fieldName] = `${fieldName} is required!`;
     } else {
       const re = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).*/;
@@ -226,7 +224,7 @@ function RegisterPage(props) {
     }
   };
   const validatePasswordVerify = (data, password, errors, fieldName) => {
-    if (password != data) {
+    if (password !== data) {
       errors[fieldName] = `Password does not match!`;
     }
   };
@@ -536,6 +534,6 @@ function RegisterPage(props) {
       <Box>IMAGE TO BE ADDED LATER</Box>
     </Box>
   );
-}
+};
 
 export default RegisterPage;
