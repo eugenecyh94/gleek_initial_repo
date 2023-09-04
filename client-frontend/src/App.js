@@ -1,23 +1,49 @@
-import logo from "./logo.svg";
-import "./App.css";
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import CartPage from "./containers/CartPage";
+import ShopPage from "./containers/ShopPage";
+import HomePage from "./containers/HomePage";
+import Layout from "./components/Layout";
+import LoginPage from "./containers/LoginPage";
+import RegisterPage from "./containers/RegisterPage";
+import ProtectedRoute from "./components/ProtectedRoute";
+import SocketConnection from "./utils/SocketConnection";
+import AccountDetails from "./containers/Account/AccountDetails";
+import Privacy from "./containers/Account/Privacy";
+import PasswordChange from "./containers/Account/PasswordChange";
+import BillingChange from "./containers/Account/BillingChange";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <SocketConnection />
+      <Layout>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/settings/profile" element={<AccountDetails />} />
+          <Route path="/settings/privacy" element={<Privacy />} />
+          <Route path="/settings/password" element={<PasswordChange />} />
+          <Route path="/settings/billing" element={<BillingChange />} />
+          <Route
+            path="/cart"
+            element={
+              <ProtectedRoute>
+                <CartPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/shop"
+            element={
+              <ProtectedRoute>
+                <ShopPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+        </Routes>
+      </Layout>
     </div>
   );
 }

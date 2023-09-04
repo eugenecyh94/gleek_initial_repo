@@ -11,3 +11,9 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+@font-face {
+  font-family: "Fredoka";
+  src:
+    local("Fredoka"),
+    url(./fonts/Fredoka-Regular.ttf) format("truetype");
+}
