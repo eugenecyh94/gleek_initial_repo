@@ -37,7 +37,7 @@ function PasswordChange(props) {
       display="flex"
       flexDirection="row"
       justifyContent="space-evenly"
-      alignItems="center"
+      alignItems="top"
       p={8}
       width={"100%"}
     >

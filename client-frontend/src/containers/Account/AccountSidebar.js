@@ -67,7 +67,6 @@ function AccountSidebar(props) {
           route="/settings/picture"
           text="Change Picture"
         />
-        <CustomListItemButton route="/settings/billing" text="Billing" />
         <CustomListItemButton
           route="/settings/privacy"
           text="Privacy Settings"
