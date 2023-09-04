@@ -192,10 +192,10 @@ function NavBar(props) {
                   <MenuItem
                     sx={{ px: "32px" }}
                     onClick={() => {
-                      navigate("/login");
+                      navigate("/settings");
                     }}
                   >
-                    Profile
+                    Profile Settings
                   </MenuItem>
                   <MenuItem sx={{ px: "32px" }} onClick={logout}>
                     Log out

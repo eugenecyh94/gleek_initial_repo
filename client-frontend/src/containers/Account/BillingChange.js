@@ -32,7 +32,7 @@ function BillingChange(props) {
       p={8}
       width={"100%"}
     >
-      <Box width={"30%"}>
+      <Box width={"30%"} >
         <AccountSidebar />
       </Box>
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import CartPage from "./containers/CartPage";
 import ShopPage from "./containers/ShopPage";
 import HomePage from "./containers/HomePage";
@@ -12,6 +12,7 @@ import AccountDetails from "./containers/Account/AccountDetails";
 import Privacy from "./containers/Account/Privacy";
 import PasswordChange from "./containers/Account/PasswordChange";
 import BillingChange from "./containers/Account/BillingChange";
+import ProfilePicture from "./containers/Account/ProfilePicture";
 
 function App() {
   return (
@@ -20,10 +21,13 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/settings" element={<Navigate to="/settings/profile" />} />
           <Route path="/settings/profile" element={<AccountDetails />} />
+          <Route path="/settings/picture" element={<ProfilePicture />} />
           <Route path="/settings/privacy" element={<Privacy />} />
           <Route path="/settings/password" element={<PasswordChange />} />
           <Route path="/settings/billing" element={<BillingChange />} />
+  
           <Route
             path="/cart"
             element={
