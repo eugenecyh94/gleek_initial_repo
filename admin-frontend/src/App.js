@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import "./App.css";
 import Home from "./components/Home";
 import SocketConnection from "./utils/SocketConnection";
-import ViewAllActivities from "./components/ViewAllActivities";
+import ViewPublishedActivities from "./components/ViewPublishedActivities";
 
 function App() {
   return (
@@ -13,7 +13,7 @@ function App() {
         <Route
           exact
           path="/viewPublishedActivities"
-          element={<ViewAllActivities />}
+          element={<ViewPublishedActivities />}
         />
       </Routes>
     </div>
