@@ -1,27 +1,31 @@
 import React, { useState } from "react";
 import { Box, TextField, Button, Typography, Grid } from "@mui/material";
 import AccountSidebar from "./AccountSidebar";
+import useClientStore from "../../zustand/clientStore";
 
 function PasswordChange(props) {
+  const { changePassword } = useClientStore();
   const mockedData = {
     oldPassword: "",
     newPassword: "",
   };
-
   const [formData, setFormData] = useState(mockedData);
+  const [errorData, setErrorData] = useState({
+    oldPassword: "",
+    newPassword: "",
+  });
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+    const newErrorData = { ...errorData };
+
+    //validatePassword(value, newErrorData, name);
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
-
-    // const errors = validator(formData, name)
-    // setErrorData((prevData) => ({
-    //   ...prevData,
-    //   [name]: errors[name] || "", // Replace the error with an empty string if it's empty
-    // }))
+    setErrorData(newErrorData);
   };
 
   const isFormValid =
@@ -29,7 +33,27 @@ function PasswordChange(props) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData);
+    changePassword(formData.oldPassword, formData.newPassword);
+  };
+
+  const validatePassword = (data, errors, fieldName) => {
+    if (data === "") {
+      errors[fieldName] = `${fieldName} is required!`;
+    } else {
+      const re = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).*/;
+      let result = re.test(String(data));
+      if (!result) {
+        errors[fieldName] =
+          "New password must contain at least one lower case letter, one upper case letter, number and special character.";
+        result = false;
+      } else if (data.length < 8) {
+        errors[fieldName] = "Your password has less than 8 characters.";
+        result = false;
+      } else {
+        // Valid password
+        errors[fieldName] = "";
+      }
+    }
   };
 
   return (
@@ -37,7 +61,7 @@ function PasswordChange(props) {
       display="flex"
       flexDirection="row"
       justifyContent="space-evenly"
-      alignItems="center"
+      alignItems="top"
       p={8}
       width={"100%"}
     >
@@ -73,7 +97,7 @@ function PasswordChange(props) {
           </Grid>
           <Grid item xs={6}>
             <TextField
-              error={!formData.oldPassword.trim()}
+              error={formData.oldPassword.trim() === ""}
               id="oldPassword"
               onChange={handleChange}
               name="oldPassword"
@@ -84,13 +108,16 @@ function PasswordChange(props) {
               sx={{ width: "100%" }}
               required
               helperText={
-                formData.oldPassword.trim() ? "" : "Old Password is required"
+                formData.oldPassword.trim() === ""
+                  ? "Old Password is required"
+                  : ""
               }
+         
             />
           </Grid>
           <Grid item xs={6}>
             <TextField
-              error={!formData.newPassword.trim()}
+              error={Boolean(errorData.newPassword)}
               id="newPassword"
               onChange={handleChange}
               name="newPassword"
@@ -100,9 +127,7 @@ function PasswordChange(props) {
               disabled={false}
               sx={{ width: "100%" }}
               required
-              helperText={
-                formData.newPassword.trim() ? "" : "New Password is required"
-              }
+              helperText={errorData.newPassword}
             />
           </Grid>
         </Grid>

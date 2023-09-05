@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import AxiosConnect from "../utils/AxiosConnect";
+import { changePassword } from "./clientActions.js";
 
 const useClientStore = create((set) => ({
   authenticated: false,
@@ -39,6 +40,7 @@ const useClientStore = create((set) => ({
       authenticated: false, // Set authenticated to false
     });
   },
+  changePassword: changePassword,
 }));
 
 export default useClientStore;
