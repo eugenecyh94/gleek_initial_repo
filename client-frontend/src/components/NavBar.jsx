@@ -13,7 +13,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
-import useClientStore from "../zustand/clientStore.js";
+import useClientStore from "../zustand/ClientStore.js";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import AxiosConnect from "../utils/AxiosConnect.js";
 function NavBar(props) {

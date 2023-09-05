@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import AxiosConnect from "../utils/AxiosConnect";
-import { changePassword } from "./clientActions.js";
+import { changePassword } from "./ClientActions.js";
 
 const useClientStore = create((set) => ({
   authenticated: false,
