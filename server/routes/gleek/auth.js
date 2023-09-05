@@ -37,6 +37,6 @@ router.post("/validate-token", validateToken);
 
 router.get("/logout", clearCookies);
 
-router.post("/reset-password", verifyToken, postChangePassword);
+router.post("/change-password", verifyToken, postChangePassword);
 
 export default router;
