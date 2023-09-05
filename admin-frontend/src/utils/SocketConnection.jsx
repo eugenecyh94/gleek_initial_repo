@@ -1,29 +1,31 @@
 import { useEffect } from "react";
-import { updateAllActivity } from "../zustand/GlobalStore";
+import { updateAllActivity, useAdminStore } from "../zustand/GlobalStore";
 import AxiosConnect from "./AxiosConnect";
 
 const SocketConnection = () => {
-  const subscribeActivitiesData = () => {
-    AxiosConnect.get("activity/all")
-      .then((body) => {
-        console.log("all activity subscribed::", body);
-        updateAllActivity(body.data);
-      })
-      .catch((e) => {
-        console.log("Error is ", e.error);
-      });
-  };
+   const { setAuthenticated, setAdmin } = useAdminStore();
 
-  const subscribeData = () => {
-    subscribeActivitiesData();
-    // subscribeBookingsData();
-  };
+   const subscribeActivitiesData = () => {
+      AxiosConnect.get("activity/all")
+         .then((body) => {
+            console.log("all activity subscribed::", body);
+            updateAllActivity(body.data);
+         })
+         .catch((e) => {
+            console.log("Error is ", e.error);
+         });
+   };
 
-  useEffect(() => {
-    subscribeData();
-  }, [subscribeData]);
+   const subscribeData = () => {
+      subscribeActivitiesData();
+      // subscribeBookingsData();
+   };
 
-  return <></>;
+   useEffect(() => {
+      subscribeData();
+   }, [subscribeData]);
+
+   return <></>;
 };
 
 export default SocketConnection;
