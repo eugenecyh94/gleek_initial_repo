@@ -72,7 +72,7 @@ export const useAdminStore = create((set) => ({
    login: async (email, password) => {
       set({ isLoading: true, adminError: null });
       try {
-         const response = await AxiosConnect.post("/gleek/login", {
+         const response = await AxiosConnect.post("/gleekAdmin/login", {
             email: email,
             password: password,
          });
@@ -84,6 +84,7 @@ export const useAdminStore = create((set) => ({
          }, 500);
          return true;
       } catch (error) {
+         console.log(error);
          setTimeout(() => {
             set({
                adminError: error,

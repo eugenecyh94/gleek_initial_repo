@@ -1,12 +1,10 @@
 import { useEffect } from "react";
-import { updateAllActivity, useAdminStore } from "../zustand/GlobalStore";
+import { updateAllActivity } from "../zustand/GlobalStore";
 import AxiosConnect from "./AxiosConnect";
 
 const SocketConnection = () => {
-   const { setAuthenticated, setAdmin } = useAdminStore();
-
    const subscribeActivitiesData = () => {
-      AxiosConnect.get("activity/all")
+      AxiosConnect.get("/activity/all")
          .then((body) => {
             console.log("all activity subscribed::", body);
             updateAllActivity(body.data);

@@ -33,7 +33,6 @@ export const getAllAdmin = async (req, res) => {
 
       res.json(admins);
    } catch (err) {
-      console.error(err.message);
       res.status(500).json("Server Error");
    }
 };
@@ -51,7 +50,6 @@ export const register = async (req, res) => {
 
    try {
       const { name, email, password } = req.body;
-
       let admin = await Admin.findOne({ email }); //returns a promise
 
       if (admin) {
@@ -80,7 +78,18 @@ export const register = async (req, res) => {
 
       jwt.sign(payload, secret, { expiresIn: 360000 }, (err, token) => {
          if (err) throw err;
-         res.json({ token });
+         try {
+            res.cookie("token", token, {
+               httpOnly: true,
+               maxAge: 3600000, // Expires in 1 hour (milliseconds)
+               sameSite: "None", // Adjust this based on your security requirements
+               secure: true, // Use secure cookies in production
+               path: "/", // Set the path to your application root
+            });
+         } catch (cookieError) {
+            return res.status(500).send("Error setting cookie");
+         }
+         res.status(200).json({ token, admin: { email: admin.email } });
       });
    } catch (err) {
       return res.status(500).send("Server Error");
@@ -101,7 +110,6 @@ export const login = async (req, res) => {
    if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
    }
-
    try {
       const { email, password } = req.body;
       let admin = await Admin.findOne({ email });
@@ -126,7 +134,18 @@ export const login = async (req, res) => {
 
       jwt.sign(payload, secret, { expiresIn: 360000 }, (err, token) => {
          if (err) throw err;
-         res.json({ token });
+         try {
+            res.cookie("token", token, {
+               httpOnly: true,
+               maxAge: 3600000, // Expires in 1 hour (milliseconds)
+               sameSite: "None", // Adjust this based on your security requirements
+               secure: true, // Use secure cookies in production
+               path: "/", // Set the path to your application root
+            });
+         } catch (cookieError) {
+            return res.status(500).send("Error setting cookie");
+         }
+         res.status(200).json({ token, admin: { email: admin.email } });
       });
    } catch (err) {
       return res.status(500).send("Server Error");
