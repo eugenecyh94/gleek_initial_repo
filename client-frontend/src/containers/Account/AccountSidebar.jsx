@@ -41,7 +41,7 @@ function AccountSidebar(props) {
   const primary = theme.palette.primary.main;
   const tertiary = theme.palette.tertiary.main;
   return (
-    <div style={{ width: "100%" , height:"100vh"}}>
+    <div style={{ width: "100%", height: "100vh" }}>
       <div
         style={{
           display: "flex",
@@ -50,9 +50,10 @@ function AccountSidebar(props) {
           padding: "16px",
         }}
       >
-        <Avatar sx={{ bgcolor: primary, width: 200, height: 200 }} src="https://i.imgur.com/ZTevUo0.png">
-     
-        </Avatar>
+        <Avatar
+          sx={{ bgcolor: primary, width: 200, height: 200 }}
+          src="https://i.imgur.com/ZTevUo0.png"
+        ></Avatar>
         {/* 
         <Typography align="center" variant="h6">
           Account Settings
@@ -63,10 +64,7 @@ function AccountSidebar(props) {
           route="/settings/profile"
           text="Account Details"
         />
-          <CustomListItemButton
-          route="/settings/picture"
-          text="Change Picture"
-        />
+        <CustomListItemButton route="/settings/picture" text="Change Picture" />
         <CustomListItemButton
           route="/settings/privacy"
           text="Privacy Settings"

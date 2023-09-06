@@ -112,7 +112,6 @@ function PasswordChange(props) {
                   ? "Old Password is required"
                   : ""
               }
-         
             />
           </Grid>
           <Grid item xs={6}>

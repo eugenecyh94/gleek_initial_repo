@@ -3,8 +3,7 @@ import cors from "cors";
 import "./loadEnvironment.js";
 import "./database/urbanOriginsDb.js";
 import activityController from "./controller/activityController.js";
-import userController from "./controller/userController.js";
-import authController from "./controller/authController.js";
+import gleekAdminRoutes from "./routes/gleekAdmin/gleekAdmin.js";
 import gleekRoutes from "./routes/gleek/gleek.js";
 import cookieParser from "cookie-parser";
 const app = express();
@@ -35,8 +34,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use("/activity", activityController);
-app.use("/users", userController);
-app.use("/auth", authController);
+app.use("/gleekAdmin", gleekAdminRoutes);
 
 app.use("/gleek", gleekRoutes);
 

@@ -20,12 +20,15 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/settings" element={<Navigate to="/settings/profile" />} />
+          <Route
+            path="/settings"
+            element={<Navigate to="/settings/profile" />}
+          />
           <Route path="/settings/profile" element={<AccountDetails />} />
           <Route path="/settings/picture" element={<ProfilePicture />} />
           <Route path="/settings/privacy" element={<Privacy />} />
           <Route path="/settings/password" element={<PasswordChange />} />
-  
+
           <Route
             path="/cart"
             element={

@@ -180,7 +180,7 @@ function AccountDetails(props) {
           </Grid>
           <Grid item xs={12}>
             <Typography color="primary" variant="h7">
-             Billing Information
+              Billing Information
             </Typography>
           </Grid>
           <Grid item xs={6}>

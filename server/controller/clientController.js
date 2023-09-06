@@ -139,7 +139,8 @@ export const postChangePassword = async (req, res) => {
 
     const isSame = await bcrypt.compare(oldPassword, client.password);
 
-    if (!isSame) return res.status(401).json("Old password entered is incorrect.");
+    if (!isSame)
+      return res.status(401).json("Old password entered is incorrect.");
 
     const salt = await bcrypt.genSalt(10);
     const hashed = await bcrypt.hash(newPassword, salt);
@@ -147,9 +148,8 @@ export const postChangePassword = async (req, res) => {
     const updatedClient = await Client.findOneAndUpdate(
       { _id: client.id },
       { password: hashed },
-      { new: true }
+      { new: true },
     );
-
 
     return res.status(200).json("Password successfully changed.");
   } catch (err) {

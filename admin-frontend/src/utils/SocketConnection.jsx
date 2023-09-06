@@ -4,7 +4,7 @@ import AxiosConnect from "./AxiosConnect";
 
 const SocketConnection = () => {
   const subscribeActivitiesData = () => {
-    AxiosConnect.get("activity/all")
+    AxiosConnect.get("/activity/all")
       .then((body) => {
         console.log("all activity subscribed::", body);
         updateAllActivity(body.data);
