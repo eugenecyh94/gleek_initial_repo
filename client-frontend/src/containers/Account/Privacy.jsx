@@ -39,11 +39,11 @@ function Privacy(props) {
       display="flex"
       flexDirection="row"
       justifyContent="space-evenly"
-      alignItems="center"
+      alignItems="top"
       p={8}
       sx={{ width: "100%" }}
     >
-      <Box width={"30%"}>
+      <Box width={"30%"} >
         <AccountSidebar />
       </Box>
 

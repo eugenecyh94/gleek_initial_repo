@@ -8,6 +8,8 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import Avatar from "@mui/material/Avatar";
+
 import { NavLink } from "react-router-dom";
 import { styled } from "@mui/system";
 const CustomNavLink = styled(NavLink)(({ theme }) => ({
@@ -39,7 +41,7 @@ function AccountSidebar(props) {
   const primary = theme.palette.primary.main;
   const tertiary = theme.palette.tertiary.main;
   return (
-    <div style={{ width: "100%" }}>
+    <div style={{ width: "100%" , height:"100vh"}}>
       <div
         style={{
           display: "flex",
@@ -48,18 +50,23 @@ function AccountSidebar(props) {
           padding: "16px",
         }}
       >
-        <AccountCircleIcon style={{ fontSize: "4rem" }} color="accent" />
-
+        <Avatar sx={{ bgcolor: primary, width: 200, height: 200 }} src="https://i.imgur.com/ZTevUo0.png">
+     
+        </Avatar>
+        {/* 
         <Typography align="center" variant="h6">
           Account Settings
-        </Typography>
+        </Typography> */}
       </div>
       <List>
         <CustomListItemButton
           route="/settings/profile"
           text="Account Details"
         />
-        <CustomListItemButton route="/settings/billing" text="Billing" />
+          <CustomListItemButton
+          route="/settings/picture"
+          text="Change Picture"
+        />
         <CustomListItemButton
           route="/settings/privacy"
           text="Privacy Settings"
