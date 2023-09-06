@@ -4,7 +4,7 @@ import Home from "./components/Home";
 import Layout from "./components/Layout";
 import LoginPage from "./components/LoginPage";
 import SocketConnection from "./utils/SocketConnection";
-import ViewAllActivities from "./components/ViewAllActivities";
+import ViewPublishedActivities from "./components/ViewPublishedActivities";
 
 function App() {
    return (
