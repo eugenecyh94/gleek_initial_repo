@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AxiosConnect from "../utils/AxiosConnect";
-import useClientStore from "../zustand/ClientStore";
+import useClientStore from "../zustand/clientStore";
 import { useNavigate } from "react-router-dom";
 
 const ProtectedRoute = ({ children }) => {

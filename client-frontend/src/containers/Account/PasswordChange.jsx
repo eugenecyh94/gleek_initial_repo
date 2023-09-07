@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Box, TextField, Button, Typography, Grid } from "@mui/material";
 import AccountSidebar from "./AccountSidebar";
-import useClientStore from "../../zustand/ClientStore";
+import useClientStore from "../../zustand/clientStore";
 
 function PasswordChange(props) {
   const { changePassword } = useClientStore();
@@ -112,7 +112,6 @@ function PasswordChange(props) {
                   ? "Old Password is required"
                   : ""
               }
-         
             />
           </Grid>
           <Grid item xs={6}>

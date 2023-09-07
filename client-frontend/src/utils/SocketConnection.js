@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import useClientStore from "../zustand/ClientStore";
+import useClientStore from "../zustand/clientStore";
 import AxiosConnect from "./AxiosConnect";
 
 const SocketConnection = () => {
