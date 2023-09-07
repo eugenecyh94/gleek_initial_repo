@@ -16,7 +16,7 @@ function App() {
                <Route
                   exact
                   path="/viewPublishedActivities"
-                  element={<ViewAllActivities />}
+                  element={<ViewPublishedActivities />}
                />
                <Route path="/login" element={<LoginPage />} />
             </Routes>

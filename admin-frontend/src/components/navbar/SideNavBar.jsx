@@ -32,7 +32,7 @@ const SideNavBar = () => {
   const theme = useTheme();
   const selectedItem = useSelectedNavItemStore((state) => state.selectedItem);
   const setSelectedItem = useSelectedNavItemStore(
-    (state) => state.setSelectedItem,
+    (state) => state.setSelectedItem
   );
   const handleItemClick = (item) => {
     setSelectedItem(item);
@@ -43,7 +43,7 @@ const SideNavBar = () => {
       <Drawer
         variant="permanent"
         sx={{
-          width: drawerWidth,
+          width: 120,
           flexShrink: 0,
           [`& .MuiDrawer-paper`]: {
             width: drawerWidth,
