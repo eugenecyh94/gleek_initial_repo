@@ -5,6 +5,7 @@ import Layout from "./components/Layout";
 import LoginPage from "./components/LoginPage";
 import SocketConnection from "./utils/SocketConnection";
 import ViewPublishedActivities from "./components/ViewPublishedActivities";
+import ProtectedRoute from "./components/ProtectedRoutes.jsx";
 
 function App() {
    return (
@@ -16,7 +17,11 @@ function App() {
                <Route
                   exact
                   path="/viewPublishedActivities"
-                  element={<ViewPublishedActivities />}
+                  element={
+                     <ProtectedRoute>
+                        <ViewPublishedActivities />
+                     </ProtectedRoute>
+                  }
                />
                <Route path="/login" element={<LoginPage />} />
             </Routes>

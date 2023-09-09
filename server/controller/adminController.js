@@ -1,12 +1,9 @@
-import express from "express";
-const router = express.Router();
-import { check, validationResult } from "express-validator";
+import { validationResult } from "express-validator";
 import bcrypt from "bcryptjs";
 import Admin from "../model/adminModel.js";
 import jwt from "jsonwebtoken";
-import "../loadEnvironment.js";
 
-const secret = process.env.JWT_SECRET || "";
+const secret = process.env.JWT_SECRET;
 
 //@route GET api/admin
 //@access Public
@@ -78,6 +75,7 @@ export const register = async (req, res) => {
 
       jwt.sign(payload, secret, { expiresIn: 360000 }, (err, token) => {
          if (err) throw err;
+         // Set the JWT token as a cookie
          try {
             res.cookie("token", token, {
                httpOnly: true,
@@ -87,6 +85,7 @@ export const register = async (req, res) => {
                path: "/", // Set the path to your application root
             });
          } catch (cookieError) {
+            console.error(cookieError);
             return res.status(500).send("Error setting cookie");
          }
          res.status(200).json({ token, admin: { email: admin.email } });
@@ -141,11 +140,12 @@ export const login = async (req, res) => {
                sameSite: "None", // Adjust this based on your security requirements
                secure: true, // Use secure cookies in production
                path: "/", // Set the path to your application root
-            });
+            })
+               .status(200)
+               .json({ token, admin: { email: admin.email } });
          } catch (cookieError) {
             return res.status(500).send("Error setting cookie");
          }
-         res.status(200).json({ token, admin: { email: admin.email } });
       });
    } catch (err) {
       return res.status(500).send("Server Error");
@@ -154,14 +154,13 @@ export const login = async (req, res) => {
 
 export const validateToken = async (req, res) => {
    const token = req.cookies.token;
-
+   console.log(token);
    if (!token) {
       return res.status(403).send("A token is required for authentication");
    }
 
    try {
       const decoded = jwt.verify(token, secret);
-
       const admin = await Admin.findById(decoded.admin.id);
 
       if (!admin) {
@@ -169,6 +168,7 @@ export const validateToken = async (req, res) => {
       }
       res.status(200).json({ token, admin: { email: admin.email } });
    } catch (err) {
+      console.log(err.message);
       // If verification fails (e.g., due to an invalid or expired token), send an error response
       return res.status(401).send("Invalid Token");
    }

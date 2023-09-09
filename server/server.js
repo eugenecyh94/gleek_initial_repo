@@ -18,12 +18,12 @@ const customCors = (req, callback) => {
       // Apply credentials: true for http://localhost:3001
       const corsOptions = {
          origin,
-         credentials: origin === "http://localhost:3001",
+         credentials: true,
       };
       callback(null, corsOptions);
    } else {
       // Disallow CORS for other origins
-      callback(new Error("Not allowed by CORS"));
+      callback();
    }
 };
 

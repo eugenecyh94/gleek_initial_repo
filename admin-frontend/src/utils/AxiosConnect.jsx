@@ -8,6 +8,7 @@ AxiosConnect.post = (command, req) => {
       method: "POST",
       url: `${uri}${command}`,
       data: req,
+      withCredentials: true,
    };
    return axios(options);
 };
@@ -17,6 +18,7 @@ AxiosConnect.get = (command) => {
    const options = {
       method: "GET",
       url: `${uri}${command}`,
+      withCredentials: true,
    };
    return axios(options);
 };
