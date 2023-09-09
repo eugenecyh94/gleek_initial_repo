@@ -21,15 +21,18 @@ function NavBar(props) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [anchorE2, setAnchorE2] = React.useState(null);
   const open = Boolean(anchorEl);
+  const open2 = Boolean(anchorE2);
+  console.log("open" + open);
+  console.log("open2" + open2);
+  const boxLivesForeverElement = document.getElementById("boxLivesForever");
   const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
+    setAnchorEl(boxLivesForeverElement);
   };
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const open2 = Boolean(anchorE2);
   const handleClick2 = (event) => {
-    setAnchorE2(event.currentTarget);
+    setAnchorE2(boxLivesForeverElement);
   };
   const handleClose2 = () => {
     setAnchorE2(null);
@@ -42,6 +45,7 @@ function NavBar(props) {
   const logout = async () => {
     try {
       const response = await AxiosConnect.get("/gleek/auth/logout");
+      setAnchorE2(null);
       setAuthenticated(false);
       navigate("/");
     } catch (error) {
@@ -110,12 +114,14 @@ function NavBar(props) {
                 </Typography>
               </Button>
             )}
+            <Box id="boxLivesForever" sx={{ height: "58px" }}></Box>
             {!authenticated && (
               <Box sx={{ marginRight: "24px" }}>
                 <Button
                   id="basic-button"
                   aria-controls={open ? "basic-menu" : undefined}
                   aria-haspopup="true"
+                  aria-label="welcome"
                   aria-expanded={open ? "true" : undefined}
                   onClick={handleClick}
                 >

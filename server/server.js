@@ -23,7 +23,7 @@ const customCors = (req, callback) => {
     callback(null, corsOptions);
   } else {
     // Disallow CORS for other origins
-    callback(new Error("Not allowed by CORS"));
+    callback();
   }
 };
 
