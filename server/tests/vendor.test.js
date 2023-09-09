@@ -65,4 +65,17 @@ describe("Vendor Model", () => {
       console.error(error);
     }
   });
+
+  it("should retrieve all vendors", async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:5000/vendor/viewAllVendors"
+      );
+
+      assert.equal(response.status, 201);
+      expect(response.data).to.have.lengthOf.above(0);
+    } catch (error) {
+      console.error(error);
+    }
+  });
 });
