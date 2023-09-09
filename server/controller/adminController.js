@@ -46,7 +46,7 @@ export const register = async (req, res) => {
    }
 
    try {
-      const { name, email, password } = req.body;
+      const { name, email, password, role } = req.body;
       let admin = await Admin.findOne({ email }); //returns a promise
 
       if (admin) {
@@ -60,6 +60,7 @@ export const register = async (req, res) => {
          name,
          email,
          password,
+         role,
       });
 
       const salt = await bcrypt.genSalt(10);
@@ -154,7 +155,6 @@ export const login = async (req, res) => {
 
 export const validateToken = async (req, res) => {
    const token = req.cookies.token;
-   console.log(token);
    if (!token) {
       return res.status(403).send("A token is required for authentication");
    }
@@ -171,5 +171,50 @@ export const validateToken = async (req, res) => {
       console.log(err.message);
       // If verification fails (e.g., due to an invalid or expired token), send an error response
       return res.status(401).send("Invalid Token");
+   }
+};
+
+export const changePassword = async (req, res) => {
+   const token = req.cookies.token;
+   try {
+      const { password } = req.body;
+      const decoded = jwt.verify(token, secret);
+      const admin = await Admin.findById(decoded.admin.id);
+
+      if (!admin) {
+         return res
+            .status(400)
+            .json({ errors: [{ msg: "Invalid Credentials" }] });
+      }
+
+      const payload = {
+         admin: {
+            id: admin.id,
+         },
+      };
+
+      const salt = await bcrypt.genSalt(10);
+      admin.password = await bcrypt.hash(password, salt);
+
+      await admin.save(); //saves to the database
+
+      jwt.sign(payload, secret, { expiresIn: 360000 }, (err, token) => {
+         if (err) throw err;
+         try {
+            res.cookie("token", token, {
+               httpOnly: true,
+               maxAge: 3600000, // Expires in 1 hour (milliseconds)
+               sameSite: "None", // Adjust this based on your security requirements
+               secure: true, // Use secure cookies in production
+               path: "/", // Set the path to your application root
+            })
+               .status(200)
+               .json({ token, admin: { email: admin.email } });
+         } catch (cookieError) {
+            return res.status(500).send("Error setting cookie");
+         }
+      });
+   } catch (err) {
+      return res.status(500).send("Server Error " + err.message);
    }
 };

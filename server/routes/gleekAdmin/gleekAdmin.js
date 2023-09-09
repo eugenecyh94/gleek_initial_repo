@@ -7,6 +7,7 @@ import {
    clearCookies,
    getAdmin,
    getAllAdmin,
+   changePassword,
 } from "../../controller/adminController.js";
 const router = express.Router();
 
@@ -39,5 +40,7 @@ router.get("/logout", clearCookies);
 router.get("/", getAllAdmin);
 
 router.get("/:id", getAdmin);
+
+router.post("/changePassword", changePassword);
 
 export default router;

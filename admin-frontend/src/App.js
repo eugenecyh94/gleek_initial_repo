@@ -6,6 +6,7 @@ import LoginPage from "./components/LoginPage";
 import SocketConnection from "./utils/SocketConnection";
 import ViewPublishedActivities from "./components/ViewPublishedActivities";
 import ProtectedRoute from "./components/ProtectedRoutes.jsx";
+import ChangePassword from "./components/ChangePassword.jsx";
 
 function App() {
    return (
@@ -20,6 +21,15 @@ function App() {
                   element={
                      <ProtectedRoute>
                         <ViewPublishedActivities />
+                     </ProtectedRoute>
+                  }
+               />
+               <Route
+                  exact
+                  path="/changePassword"
+                  element={
+                     <ProtectedRoute>
+                        <ChangePassword />
                      </ProtectedRoute>
                   }
                />

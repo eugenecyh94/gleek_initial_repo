@@ -101,4 +101,29 @@ export const useAdminStore = create((set) => ({
          authenticated: false, // Set authenticated to false
       });
    },
+   changePassword: async (password) => {
+      try {
+         const response = await AxiosConnect.post(
+            "/gleekAdmin/changePassword",
+            {
+               password: password,
+            }
+         );
+         const data = response.data;
+         set({ admin: data.admin, authenticated: true });
+         setTimeout(() => {
+            set({ isLoading: false });
+         }, 500);
+         return true;
+      } catch (error) {
+         console.log(error);
+         setTimeout(() => {
+            set({
+               adminError: error,
+               isLoading: false,
+            });
+         }, 500);
+         return false;
+      }
+   },
 }));
