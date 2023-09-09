@@ -28,7 +28,7 @@ const customCors = (req, callback) => {
   }
 };
 
-app.use(cors({ origin: "*" }));
+app.use(cors(customCors));
 
 app.use(cookieParser());
 
