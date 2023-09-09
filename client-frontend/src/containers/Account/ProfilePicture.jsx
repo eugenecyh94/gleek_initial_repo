@@ -46,8 +46,6 @@ function AccountDetails(props) {
       alert("Please select a valid PNG or JPEG image.");
       e.target.value = "";
     }
-
- 
   };
 
   const handleUploadProfilePicture = (e) => {

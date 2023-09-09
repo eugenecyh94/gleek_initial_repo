@@ -18,7 +18,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import LockPersonIcon from "@mui/icons-material/LockPerson";
 import { useNavigate } from "react-router-dom";
-import useClientStore from "../zustand/clientStore.js";
+import useClientStore from "../zustand/ClientStore.js";
 
 const LoginPage = () => {
   const theme = useTheme();
