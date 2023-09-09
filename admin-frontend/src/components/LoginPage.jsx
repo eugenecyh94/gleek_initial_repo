@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Box,
   TextField,
@@ -18,22 +18,13 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import LockPersonIcon from "@mui/icons-material/LockPerson";
 import { useNavigate } from "react-router-dom";
-<<<<<<<< HEAD:admin-frontend/src/components/LoginPage.jsx
 import { useAdminStore } from "../zustand/GlobalStore.js";
 import HomePageNavBar from "./navbar/HomePageNavBar.jsx";
-========
-import useClientStore from "../zustand/ClientStore.js";
->>>>>>>> origin/shop-page:client-frontend/src/containers/LoginPage.jsx
 
-const LoginPage = () => {
+function LoginPage(props) {
   const theme = useTheme();
-<<<<<<<< HEAD:admin-frontend/src/components/LoginPage.jsx
   const { isLoading, AdminError, login, admin } = useAdminStore(); // Destructure the relevant state and actions
   const tertiary = theme.palette.secondary.main;
-========
-  const { isLoading, clientError, login } = useClientStore();
-  const tertiary = theme.palette.tertiary.main;
->>>>>>>> origin/shop-page:client-frontend/src/containers/LoginPage.jsx
   const primary = theme.palette.primary.main;
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
@@ -47,7 +38,6 @@ const LoginPage = () => {
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
-  // Client validator for email and password
   const handleChange = (event) => {
     const { name, value } = event.target;
     if (name === "email") {
@@ -55,14 +45,7 @@ const LoginPage = () => {
       if (value.trim() === "") {
         setError("Email is required");
       } else {
-        const re =
-          /^(([^<>()\]\\.,;:\s@"]+(\.[^<>()\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        const result = re.test(String(value).toLowerCase());
-        if (!result) {
-          setError("Invalid Email address format!");
-        } else {
-          setError("");
-        }
+        setError("");
       }
     } else if (name === "password") {
       setPassword(value);
@@ -223,6 +206,6 @@ const LoginPage = () => {
       <Box>IMAGE TO BE ADDED LATER</Box>
     </Box>
   );
-};
+}
 
 export default LoginPage;
