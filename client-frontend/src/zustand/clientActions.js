@@ -6,7 +6,7 @@ export const changePassword = async (oldPassword, newPassword) => {
       oldPassword: oldPassword,
       newPassword: newPassword,
     });
-    alert("Password changed successfully.")
+    alert("Password changed successfully.");
   } catch (error) {
     console.error(error);
     alert(error.response.data);
