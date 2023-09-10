@@ -20,6 +20,7 @@
     }
   },
   "dependencies": {
+    "@mui/x-data-grid": "^6.12.1",
     "concurrently": "^3.6.1",
     "cookie-parser": "^1.4.6",
     "nodemon": "^3.0.1"
