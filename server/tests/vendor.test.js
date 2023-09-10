@@ -125,9 +125,12 @@ describe("Vendor Model", () => {
       const allVendors = await axios.get(
         "http://localhost:5000/vendor/viewAllVendors"
       );
+      const updateData = { ...allVendors.data[0], disabled: true };
       const vendorId = allVendors.data[0]._id;
-      const response = await axios.post(
-        `http://localhost:5000/vendor/disableVendor/${vendorId}`
+
+      const response = await axios.patch(
+        `http://localhost:5000/vendor/updateVendor/${vendorId}`,
+        updateData
       );
 
       assert.equal(response.status, 201);

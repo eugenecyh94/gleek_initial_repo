@@ -43,11 +43,12 @@ export const deleteAllVendors = async (req, res) => {
   }
 };
 
-export const disableVendor = async (req, res) => {
+export const updateVendor = async (req, res) => {
   try {
+    const updateData = req.body;
     const updatedVendor = await VendorModel.findOneAndUpdate(
       { _id: req.params.id },
-      { disabled: true },
+      { ...updateData },
       { new: true }
     );
     return res.status(201).json(updatedVendor);
