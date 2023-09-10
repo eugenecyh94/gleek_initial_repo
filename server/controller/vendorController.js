@@ -35,9 +35,7 @@ export const getVendor = async (req, res) => {
 
 export const deleteAllVendors = async (req, res) => {
   try {
-    const deleteRes = await VendorModel.deleteMany({
-      companyUEN: "123456789A",
-    });
+    const deleteRes = await VendorModel.deleteMany({});
     return res.status(200).json(deleteRes);
   } catch (e) {
     console.log(e);
