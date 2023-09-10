@@ -42,3 +42,17 @@ export const deleteAllVendors = async (req, res) => {
     res.status(500).json("Server Error");
   }
 };
+
+export const disableVendor = async (req, res) => {
+  try {
+    const updatedVendor = await VendorModel.findOneAndUpdate(
+      { _id: req.params.id },
+      { disabled: true },
+      { new: true }
+    );
+    return res.status(201).json(updatedVendor);
+  } catch (e) {
+    console.log(e);
+    res.status(500).json("Server Error");
+  }
+};

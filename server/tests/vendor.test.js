@@ -119,4 +119,22 @@ describe("Vendor Model", () => {
       console.error(error);
     }
   });
+
+  it("should disable vendor", async () => {
+    try {
+      const allVendors = await axios.get(
+        "http://localhost:5000/vendor/viewAllVendors"
+      );
+      const vendorId = allVendors.data[0]._id;
+      const response = await axios.post(
+        `http://localhost:5000/vendor/disableVendor/${vendorId}`
+      );
+
+      assert.equal(response.status, 201);
+      expect(response.data._id).to.be.equal(vendorId);
+      expect(response.data.disabled).to.be.true;
+    } catch (error) {
+      console.error(error);
+    }
+  });
 });
