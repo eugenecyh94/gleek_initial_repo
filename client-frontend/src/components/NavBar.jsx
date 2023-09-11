@@ -22,8 +22,6 @@ function NavBar(props) {
   const [anchorE2, setAnchorE2] = React.useState(null);
   const open = Boolean(anchorEl);
   const open2 = Boolean(anchorE2);
-  console.log("open" + open);
-  console.log("open2" + open2);
   const boxLivesForeverElement = document.getElementById("boxLivesForever");
   const handleClick = (event) => {
     setAnchorEl(boxLivesForeverElement);
