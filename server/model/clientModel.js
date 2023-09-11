@@ -12,7 +12,7 @@ const clientSchema = mongoose.Schema({
     minlength: 8,
   },
   name: { type: String, required: false },
-  phoneNumber: { type: Number, required: false },
+  phoneNumber: { type: String, required: false },
   jobTitle: { type: String, required: false },
   team: { type: String, required: false },
   companyName: { type: String, required: false },
