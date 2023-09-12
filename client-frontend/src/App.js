@@ -22,12 +22,44 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route
             path="/settings"
-            element={<Navigate to="/settings/profile" />}
+            element={
+              <ProtectedRoute>
+                <Navigate to="/settings/profile" />
+              </ProtectedRoute>
+            }
           />
-          <Route path="/settings/profile" element={<AccountDetails />} />
-          <Route path="/settings/picture" element={<ProfilePicture />} />
-          <Route path="/settings/privacy" element={<Privacy />} />
-          <Route path="/settings/password" element={<PasswordChange />} />
+          <Route
+            path="/settings/profile"
+            element={
+              <ProtectedRoute>
+                <AccountDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings/picture"
+            element={
+              <ProtectedRoute>
+                <ProfilePicture />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings/privacy"
+            element={
+              <ProtectedRoute>
+                <Privacy />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings/password"
+            element={
+              <ProtectedRoute>
+                <PasswordChange />
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/cart"
