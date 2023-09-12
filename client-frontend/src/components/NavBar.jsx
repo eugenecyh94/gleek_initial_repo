@@ -13,7 +13,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
-import useClientStore from "../zustand/clientStore.js";
+import useClientStore from "../zustand/ClientStore.js";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import AxiosConnect from "../utils/AxiosConnect.js";
 function NavBar(props) {
@@ -21,15 +21,16 @@ function NavBar(props) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [anchorE2, setAnchorE2] = React.useState(null);
   const open = Boolean(anchorEl);
+  const open2 = Boolean(anchorE2);
+  const boxLivesForeverElement = document.getElementById("boxLivesForever");
   const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
+    setAnchorEl(boxLivesForeverElement);
   };
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const open2 = Boolean(anchorE2);
   const handleClick2 = (event) => {
-    setAnchorE2(event.currentTarget);
+    setAnchorE2(boxLivesForeverElement);
   };
   const handleClose2 = () => {
     setAnchorE2(null);
@@ -41,7 +42,8 @@ function NavBar(props) {
 
   const logout = async () => {
     try {
-      const response = await AxiosConnect.get("/gleek/logout");
+      const response = await AxiosConnect.get("/gleek/auth/logout");
+      setAnchorE2(null);
       setAuthenticated(false);
       navigate("/");
     } catch (error) {
@@ -110,12 +112,14 @@ function NavBar(props) {
                 </Typography>
               </Button>
             )}
+            <Box id="boxLivesForever" sx={{ height: "58px" }}></Box>
             {!authenticated && (
               <Box sx={{ marginRight: "24px" }}>
                 <Button
                   id="basic-button"
                   aria-controls={open ? "basic-menu" : undefined}
                   aria-haspopup="true"
+                  aria-label="welcome"
                   aria-expanded={open ? "true" : undefined}
                   onClick={handleClick}
                 >
@@ -159,8 +163,8 @@ function NavBar(props) {
             {authenticated && (
               <Box sx={{ marginRight: "24px" }}>
                 <IconButton
-                  id="basic-button"
-                  aria-controls={open2 ? "basic-menu" : undefined}
+                  id="icon-button"
+                  aria-controls={open2 ? "authenticated-menu" : undefined}
                   aria-haspopup="true"
                   aria-expanded={open2 ? "true" : undefined}
                   onClick={handleClick2}
@@ -173,12 +177,12 @@ function NavBar(props) {
                   <AccountBoxIcon />
                 </IconButton>
                 <Menu
-                  id="basic-menu"
+                  id="authenticated-menu"
                   anchorEl={anchorE2}
                   open={open2}
                   onClose={handleClose2}
                   MenuListProps={{
-                    "aria-labelledby": "basic-button",
+                    "aria-labelledby": "icon-button",
                   }}
                   slotProps={{
                     paper: {
@@ -192,10 +196,10 @@ function NavBar(props) {
                   <MenuItem
                     sx={{ px: "32px" }}
                     onClick={() => {
-                      navigate("/login");
+                      navigate("/settings");
                     }}
                   >
-                    Profile
+                    Profile Settings
                   </MenuItem>
                   <MenuItem sx={{ px: "32px" }} onClick={logout}>
                     Log out

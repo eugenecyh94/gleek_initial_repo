@@ -123,3 +123,37 @@ export const clearCookies = async (req, res) => {
   res.clearCookie("token");
   res.status(200).end();
 };
+
+export const postChangePassword = async (req, res) => {
+  const errors = validationResult(req);
+
+  const client = req.user;
+  console.log(client);
+
+  if (!errors.isEmpty()) {
+    // 422 status due to validation errors
+    return res.status(422).json({ errors: errors.array() });
+  }
+  try {
+    const { oldPassword, newPassword } = req.body;
+
+    const isSame = await bcrypt.compare(oldPassword, client.password);
+
+    if (!isSame)
+      return res.status(401).json("Old password entered is incorrect.");
+
+    const salt = await bcrypt.genSalt(10);
+    const hashed = await bcrypt.hash(newPassword, salt);
+
+    const updatedClient = await Client.findOneAndUpdate(
+      { _id: client.id },
+      { password: hashed },
+      { new: true },
+    );
+
+    return res.status(200).json("Password successfully changed.");
+  } catch (err) {
+    console.error(err); // Log the error
+    return res.status(500).send("Server Error");
+  }
+};

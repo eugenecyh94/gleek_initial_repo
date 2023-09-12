@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import { ThemeProvider } from "@mui/material/styles";
 import reportWebVitals from "./reportWebVitals";
-import theme from "./themes/theme"; // Import your main theme
+import theme from "./themes/Theme"; // Import your main theme
 import { BrowserRouter } from "react-router-dom";
 import "./index.css";
 
