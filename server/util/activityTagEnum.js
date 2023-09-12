@@ -8,7 +8,8 @@ export const TYPE = {
   TALKS: "Talks/ Seminars/ Webinars",
   JOURNEY: "Learning Journeys",
   ACTIVATIONS: "Activations",
-  POPUPS: "Popups",
+  POPUP_FOOD: "Popups (Food)",
+  POPUP_NONFOOD: "Popups (Non-food)",
 };
 
 export const DURATION = {
@@ -29,4 +30,10 @@ export const SIZE = {
   SMALL: "Small (11-20 participants)",
   MEDIUM: "Medium (21-30 participants)",
   LARGE: "Large (31+ participants)",
+};
+
+export const PPT_REQUIRED = {
+  REQUIRED: "Required",
+  NOT_REQUIRED: "Not Required",
+  OPTIONAL: "Good to have but not required",
 };
