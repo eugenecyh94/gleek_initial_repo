@@ -2,7 +2,7 @@ import { validationResult } from "express-validator";
 import bcrypt from "bcryptjs";
 import Admin from "../model/adminModel.js";
 import jwt from "jsonwebtoken";
-
+import sendMail from "../util/sendMail.js";
 const secret = process.env.JWT_SECRET;
 
 //@route GET api/admin
@@ -66,6 +66,12 @@ export const register = async (req, res) => {
       const salt = await bcrypt.genSalt(10);
       admin.password = await bcrypt.hash(password, salt);
 
+      const emailResponse = await sendMail(
+         email,
+         "Registration Successful",
+         "Your account has been successfully registered"
+      );
+
       await admin.save(); //saves to the database
 
       const payload = {
@@ -92,6 +98,7 @@ export const register = async (req, res) => {
          res.status(200).json({ token, admin: { email: admin.email } });
       });
    } catch (err) {
+      console.log(err.message);
       return res.status(500).send("Server Error");
    }
 };
