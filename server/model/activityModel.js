@@ -38,6 +38,7 @@ const activitySchema = new mongoose.Schema({
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Vendor",
+    required: true,
   },
   createdDate: {
     type: Date,
