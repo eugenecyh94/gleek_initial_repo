@@ -1,32 +1,43 @@
 import mongoose from "mongoose";
 import { ActivityApprovalStatusEnum } from "../util/activityApprovalStatusEnum.js";
 import { ActivityDayAvailabilityEnum } from "../util/activityDayAvailabilityEnum.js";
-import { PPT_REQUIRED } from "../util/activityTagEnum.js";
+import { LOCATION, PPT_REQUIRED, SIZE, TYPE } from "../util/activityTagEnum.js";
 import { FoodCategoryEnum } from "../util/foodCategoryEnum.js";
+import { SustainableDevelopmentGoalsEnum } from "../util/sdgEnum.js";
 
 const activitySchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   clientMarkupPercentage: { type: Number, required: true },
-  maxParticipants: { type: Number, required: true },
-  minParticipants: { type: Number, required: true },
-  activityTag: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "ActivityTag",
+  maxParticipants: { type: Number },
+  theme: {
+    name: {
+      type: String,
+      required: true,
+    },
+    subthemes: {
+      type: [String],
+    },
   },
-  activityPricingRules: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "ActivityPricingRules",
+  activityType: { type: String, enum: TYPE, required: true },
+  duration: { type: Number, required: true },
+  location: { type: String, enum: LOCATION, required: true },
+  size: { type: String, enum: SIZE },
+  sdg: {
+    type: [String],
+    enum: SustainableDevelopmentGoalsEnum,
   },
   dayAvailabilities: {
     type: [String],
     enum: ActivityDayAvailabilityEnum,
   },
+  activityPricingRules: [
+    { type: mongoose.Schema.Types.ObjectId, ref: "ActivityPricingRules" },
+  ],
   activityImages: [String],
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Vendor",
-    required: true,
   },
   createdDate: {
     type: Date,
@@ -48,15 +59,14 @@ const activitySchema = new mongoose.Schema({
     required: true,
     default: ActivityApprovalStatusEnum.PUBLISHED,
   },
-  duration: { type: Number, required: true },
   // attributes for activity type "popup"
-  foodCategory: {
-    type: String,
-    enum: FoodCategoryEnum,
-  },
   isFoodCertPending: { type: Boolean },
   pendingCertificationType: { type: String },
   foodCertDate: { type: Date },
+  foodCategory: {
+    type: [String],
+    enum: FoodCategoryEnum,
+  },
   isPowerpointRequired: { type: String, enum: Object.values(PPT_REQUIRED) },
   popupItemsSold: { type: String },
 });

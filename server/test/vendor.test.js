@@ -1,24 +1,20 @@
 import axios from "axios";
 import chai, { assert } from "chai";
 import chaiHttp from "chai-http";
+import { after, before, beforeEach, describe, it } from "mocha";
 import mongoose from "mongoose";
 import "../loadEnvironment.js";
 import { VendorTypeEnum } from "../util/vendorTypeEnum.js";
 
 chai.use(chaiHttp);
 const expect = chai.expect;
-let db = null;
-
 const uri =
   "mongodb+srv://admin:passwordAceyyy@cluster0.qin7gar.mongodb.net/?retryWrites=true&w=majority";
 
 describe("Vendor Model", () => {
   before(async () => {
-    await mongoose.connect(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    db = mongoose.connection;
+    await mongoose.connect(uri, {});
+    mongoose.connection;
   });
 
   beforeEach(async () => {
@@ -47,7 +43,7 @@ describe("Vendor Model", () => {
   });
 
   after(async () => {
-    await db.close();
+    await mongoose.connection.close();
   });
 
   it("should create a new vendor", async () => {
