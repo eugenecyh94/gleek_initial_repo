@@ -7,8 +7,12 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import Toolbar from "@mui/material/Toolbar";
-import { Link } from "react-router-dom";
-import { useSelectedNavItemStore } from "../../zustand/GlobalStore";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  useSelectedNavItemStore,
+  activityStore,
+  useAdminStore,
+} from "../../zustand/GlobalStore";
 import styled from "@emotion/styled";
 
 const drawerWidth = 240;
@@ -30,11 +34,16 @@ const StyledLink = styled(Link)`
 
 const SideNavBar = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const selectedItem = useSelectedNavItemStore((state) => state.selectedItem);
+  const { getActivity } = activityStore();
+  const { token } = useAdminStore();
   const setSelectedItem = useSelectedNavItemStore(
     (state) => state.setSelectedItem
   );
-  const handleItemClick = (item) => {
+  const handleItemClick = async (item, link) => {
+    await getActivity(token);
+    navigate(link);
     setSelectedItem(item);
   };
 
@@ -89,16 +98,21 @@ const SideNavBar = () => {
           </Box>
           <List>
             {activityManagementList.map((item, index) => (
-              <StyledLink to={item[Object.keys(item)[0]]} key={index}>
+              <div key={index}>
                 <ListItem key={Object.keys(item)[0]} disablePadding>
                   <ListItemButton
                     selected={selectedItem === Object.keys(item)[0]}
-                    onClick={() => handleItemClick(Object.keys(item)[0])}
+                    onClick={() =>
+                      handleItemClick(
+                        Object.keys(item)[0],
+                        item[Object.keys(item)[0]]
+                      )
+                    }
                   >
                     <ListItemText primary={Object.keys(item)[0]} />
                   </ListItemButton>
                 </ListItem>
-              </StyledLink>
+              </div>
             ))}
           </List>
           <Divider />

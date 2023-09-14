@@ -1,28 +1,20 @@
 import { useTheme } from "@emotion/react";
 import { Toolbar, Typography } from "@mui/material";
 import { useEffect } from "react";
-import AxiosConnect from "../utils/AxiosConnect";
-import { updateAllActivity, useActivityStore } from "../zustand/GlobalStore";
+import { activityStore, useAdminStore } from "../zustand/GlobalStore";
 import Layout from "./Layout";
 import ActivityListTable from "./activity/ActivityListTable";
 
 const ViewPublishedActivities = () => {
   const theme = useTheme();
-
-  const subscribeActivitiesData = () => {
-    AxiosConnect.get("activity/all")
-      .then((body) => {
-        console.log("all activity subscribed::", body);
-        updateAllActivity(body.data);
-      })
-      .catch((e) => {
-        console.log("Error is ", e.error);
-      });
-  };
-  const { allActivities } = useActivityStore();
+  const { activities, getActivity } = activityStore();
+  const { token } = useAdminStore();
   useEffect(() => {
-    subscribeActivitiesData();
-  }, []);
+    async function fetchData() {
+      await getActivity(token);
+    }
+    fetchData();
+  }, [getActivity, token]);
 
   return (
     <Layout>
@@ -37,7 +29,7 @@ const ViewPublishedActivities = () => {
         View Published Activities
       </Typography>
 
-      <ActivityListTable allActivities={allActivities} />
+      <ActivityListTable allActivities={activities} />
     </Layout>
   );
 };

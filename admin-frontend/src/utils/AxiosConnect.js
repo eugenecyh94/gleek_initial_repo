@@ -12,11 +12,12 @@ AxiosConnect.post = (command, req) => {
   return axios(options);
 };
 
-AxiosConnect.get = (command) => {
+AxiosConnect.get = (command, token) => {
   console.log("axios get command::", `http://${uri}/${command}`);
   const options = {
     method: "GET",
-    url: `http://${uri}/${command}`,
+    url: `${uri}/${command}`,
+    headers: { Authorization: `Bearer ${token}` },
   };
   return axios(options);
 };
