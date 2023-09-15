@@ -8,16 +8,17 @@ AxiosConnect.post = (command, req) => {
     method: "POST",
     url: uri + command,
     data: req,
+    withCredentials: true,
   };
   return axios(options);
 };
 
-AxiosConnect.get = (command, token) => {
+AxiosConnect.get = (command) => {
   console.log("axios get command::", `http://${uri}/${command}`);
   const options = {
     method: "GET",
     url: `${uri}/${command}`,
-    headers: { Authorization: `Bearer ${token}` },
+    withCredentials: true,
   };
   return axios(options);
 };

@@ -1,5 +1,4 @@
 import express from "express";
-import auth from "../../middleware/adminAuth.js";
 import {
   addActivity,
   getActivity,
@@ -8,6 +7,6 @@ import {
 
 const router = express.Router();
 router.post("/addActivity", addActivity);
-router.get("/all", auth, getAllActivities);
+router.get("/all", getAllActivities);
 router.get("/viewActivity/:id", getActivity);
 export default router;

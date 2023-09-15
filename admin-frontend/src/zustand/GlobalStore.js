@@ -1,26 +1,5 @@
 import { create } from "zustand";
 import AxiosConnect from "../utils/AxiosConnect";
-// import update from "immutability-helper";
-// import { devtools } from "zustand/middleware";
-
-// export const updateCurrentActivity = (selectedActivity) => {
-//   useActivityStore.setState((prevState) => ({
-//     ...prevState,
-//     currentActivity: selectedActivity,
-//   }));
-//   console.log(
-//     "activity store current activity updated::",
-//     useActivityStore.getState()
-//   );
-// };
-
-export const updateAllActivity = (newAllActivities) => {
-  activityStore.setState((prevState) => ({
-    ...prevState,
-    activities: newAllActivities,
-  }));
-  console.log("activity store all activity updated", activityStore.getState());
-};
 
 export const useSelectedNavItemStore = create((set) => ({
   selectedItem: "Home",
@@ -94,12 +73,15 @@ export const useAdminStore = create((set) => ({
   },
 }));
 
-export const activityStore = create((set) => ({
+export const useActivityStore = create((set) => ({
   activities: [],
-  getActivity: async (token) => {
+  isLoading: false,
+  getActivity: async () => {
     try {
-      const response = await AxiosConnect.get("activity/all",token);
+      set({ isLoading: true });
+      const response = await AxiosConnect.get("activity/all");
       set({ activities: response.data });
+      set({ isLoading: false });
     } catch (error) {
       console.error(error);
     }

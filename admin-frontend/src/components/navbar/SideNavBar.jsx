@@ -1,3 +1,4 @@
+import styled from "@emotion/styled";
 import { Typography, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
@@ -9,11 +10,8 @@ import ListItemText from "@mui/material/ListItemText";
 import Toolbar from "@mui/material/Toolbar";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  useSelectedNavItemStore,
-  activityStore,
-  useAdminStore,
+  useSelectedNavItemStore
 } from "../../zustand/GlobalStore";
-import styled from "@emotion/styled";
 
 const drawerWidth = 240;
 const activityManagementList = [
@@ -36,13 +34,10 @@ const SideNavBar = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const selectedItem = useSelectedNavItemStore((state) => state.selectedItem);
-  const { getActivity } = activityStore();
-  const { token } = useAdminStore();
   const setSelectedItem = useSelectedNavItemStore(
     (state) => state.setSelectedItem
   );
   const handleItemClick = async (item, link) => {
-    await getActivity(token);
     navigate(link);
     setSelectedItem(item);
   };

@@ -16,7 +16,11 @@ function App() {
           <Route
             exact
             path="/viewPublishedActivities"
-            element={<ViewPublishedActivities />}
+            element={
+              <ProtectedRoute>
+                <ViewPublishedActivities />
+              </ProtectedRoute>
+            }
           />
           <Route
             exact

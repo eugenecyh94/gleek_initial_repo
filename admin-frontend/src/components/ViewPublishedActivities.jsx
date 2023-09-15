@@ -1,20 +1,19 @@
 import { useTheme } from "@emotion/react";
-import { Toolbar, Typography } from "@mui/material";
+import { CircularProgress, Toolbar, Typography } from "@mui/material";
 import { useEffect } from "react";
-import { activityStore, useAdminStore } from "../zustand/GlobalStore";
+import { useActivityStore } from "../zustand/GlobalStore";
 import Layout from "./Layout";
 import ActivityListTable from "./activity/ActivityListTable";
 
 const ViewPublishedActivities = () => {
   const theme = useTheme();
-  const { activities, getActivity } = activityStore();
-  const { token } = useAdminStore();
+  const { activities, getActivity, isLoading } = useActivityStore();
   useEffect(() => {
-    async function fetchData() {
-      await getActivity(token);
-    }
+    const fetchData = async () => {
+      await getActivity();
+    };
     fetchData();
-  }, [getActivity, token]);
+  }, [getActivity]);
 
   return (
     <Layout>
@@ -28,8 +27,11 @@ const ViewPublishedActivities = () => {
       >
         View Published Activities
       </Typography>
-
-      <ActivityListTable allActivities={activities} />
+      {isLoading ? (
+        <CircularProgress sx={{ margin: "auto", marginTop: "32px" }} />
+      ) : (
+        <ActivityListTable allActivities={activities} />
+      )}
     </Layout>
   );
 };
