@@ -1,28 +1,19 @@
 import { useTheme } from "@emotion/react";
-import { Toolbar, Typography } from "@mui/material";
+import { CircularProgress, Toolbar, Typography } from "@mui/material";
 import { useEffect } from "react";
-import AxiosConnect from "../utils/AxiosConnect";
-import { updateAllActivity, useActivityStore } from "../zustand/GlobalStore";
+import { useActivityStore } from "../zustand/GlobalStore";
 import Layout from "./Layout";
 import ActivityListTable from "./activity/ActivityListTable";
 
 const ViewPublishedActivities = () => {
   const theme = useTheme();
-
-  const subscribeActivitiesData = () => {
-    AxiosConnect.get("activity/all")
-      .then((body) => {
-        console.log("all activity subscribed::", body);
-        updateAllActivity(body.data);
-      })
-      .catch((e) => {
-        console.log("Error is ", e.error);
-      });
-  };
-  const { allActivities } = useActivityStore();
+  const { activities, getActivity, isLoading } = useActivityStore();
   useEffect(() => {
-    subscribeActivitiesData();
-  }, []);
+    const fetchData = async () => {
+      await getActivity();
+    };
+    fetchData();
+  }, [getActivity]);
 
   return (
     <Layout>
@@ -36,8 +27,11 @@ const ViewPublishedActivities = () => {
       >
         View Published Activities
       </Typography>
-
-      <ActivityListTable allActivities={allActivities} />
+      {isLoading ? (
+        <CircularProgress sx={{ margin: "auto", marginTop: "32px" }} />
+      ) : (
+        <ActivityListTable allActivities={activities} />
+      )}
     </Layout>
   );
 };

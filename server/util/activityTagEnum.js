@@ -6,8 +6,7 @@ export const THEME = {
 export const TYPE = {
   WORKSHOP: "Workshops",
   TALKS: "Talks/ Seminars/ Webinars",
-  JOURNEY: "Learning Journeys",
-  ACTIVATIONS: "Activations",
+  LEARNING_JOURNEY: "Learning Journeys",
   POPUP_FOOD: "Popups (Food)",
   POPUP_NONFOOD: "Popups (Non-food)",
 };
