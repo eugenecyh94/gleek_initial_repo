@@ -12,7 +12,6 @@ const useClientStore = create((set) => ({
   login: async (email, password) => {
     set({ isLoading: true, clientError: null });
     try {
-      console.log("IS THIS RAN?");
       const response = await AxiosConnect.post("/gleek/auth/login", {
         email: email,
         password: password,
@@ -42,6 +41,29 @@ const useClientStore = create((set) => ({
     });
   },
   changePassword: changePassword,
+  register: async (userData) => {
+    try {
+      const response = await AxiosConnect.post(
+        "/gleek/auth/register",
+        userData
+      );
+      const data = response.data;
+      set({ client: data.client, authenticated: true });
+      setTimeout(() => {
+        set({ isLoading: false });
+      }, 500);
+      return true;
+    } catch (error) {
+      console.error(error);
+      setTimeout(() => {
+        set({
+          clientError: error,
+          isLoading: false,
+        });
+      }, 500);
+      return false;
+    }
+  },
 }));
 
 export default useClientStore;

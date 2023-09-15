@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import CartPage from "./containers/CartPage";
 import ShopPage from "./containers/ShopPage";
@@ -14,9 +14,13 @@ import PasswordChange from "./containers/Account/PasswordChange";
 import ProfilePicture from "./containers/Account/ProfilePicture";
 
 function App() {
+
+  
+
   return (
     <div>
       <SocketConnection />
+
       <Layout>
         <Routes>
           <Route path="/" element={<HomePage />} />
