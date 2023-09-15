@@ -9,9 +9,7 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import Toolbar from "@mui/material/Toolbar";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  useSelectedNavItemStore
-} from "../../zustand/GlobalStore";
+import { useSelectedNavItemStore } from "../../zustand/GlobalStore";
 
 const drawerWidth = 240;
 const activityManagementList = [
@@ -27,6 +25,10 @@ const bookingManagementList = [{ "View Bookings": "/bookings" }];
 
 const StyledLink = styled(Link)`
   text-decoration: none;
+  color: ${({ theme }) => theme.palette.primary.main};
+`;
+
+const StyledDiv = styled("div")`
   color: ${({ theme }) => theme.palette.primary.main};
 `;
 
@@ -93,7 +95,7 @@ const SideNavBar = () => {
           </Box>
           <List>
             {activityManagementList.map((item, index) => (
-              <div key={index}>
+              <StyledDiv key={index}>
                 <ListItem key={Object.keys(item)[0]} disablePadding>
                   <ListItemButton
                     selected={selectedItem === Object.keys(item)[0]}
@@ -107,7 +109,7 @@ const SideNavBar = () => {
                     <ListItemText primary={Object.keys(item)[0]} />
                   </ListItemButton>
                 </ListItem>
-              </div>
+              </StyledDiv>
             ))}
           </List>
           <Divider />
