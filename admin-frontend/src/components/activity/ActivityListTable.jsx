@@ -51,21 +51,72 @@ const columns = [
     flex: 1,
   },
   {
+    field: "activityType",
+    headerName: "Activity Type",
+    flex: 1,
+  },
+  {
+    field: "theme",
+    headerName: "Theme",
+    flex: 1,
+    valueGetter: (params) => {
+      const p = params.value;
+      return p.name;
+    },
+  },
+  {
     field: "description",
     headerName: "Description",
     flex: 1,
   },
   {
-    field: "tag",
-    headerName: "Tag",
+    field: "duration",
+    headerName: "Duration",
     flex: 1,
   },
   {
-    field: "price",
-    headerName: "Price",
+    field: "location",
+    headerName: "Location",
+    flex: 1,
+  },
+  {
+    field: "activityPricingRules",
+    headerName: "Price (Lowest)",
     flex: 1,
     valueFormatter: (params) => {
       return `$${params.value}`;
+    },
+    valueGetter: (params) => {
+      const p = params.value;
+      p.sort((a, b) => a.pricePerPax - b.pricePerPax);
+      return p[0].pricePerPax;
+    },
+  },
+  {
+    field: "priceHighest",
+    headerName: "Price (Highest)",
+    flex: 1,
+    valueFormatter: (params) => {
+      return `$${params.value}`;
+    },
+    valueGetter: (params) => {
+      const p = params.row.activityPricingRules;
+      p.sort((a, b) => b.pricePerPax - a.pricePerPax);
+      return p[0].pricePerPax;
+    },
+  },
+  {
+    field: "createdDate",
+    headerName: "Date Created",
+    flex: 1,
+    valueFormatter: (params) => {
+      const date = new Date(params.value);
+      const formattedDate = date.toLocaleDateString(undefined, {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+      });
+      return formattedDate;
     },
   },
 ];
@@ -103,11 +154,7 @@ const ActivityListTable = (allActivities) => {
             },
           }}
           getRowId={(row) => row._id}
-          rows={
-            searchedRows === []
-              ? allActivities?.allActivities?.data
-              : searchedRows
-          }
+          rows={searchedRows}
           columns={columns}
           slots={{
             toolbar: GridToolbarFilterButton,
