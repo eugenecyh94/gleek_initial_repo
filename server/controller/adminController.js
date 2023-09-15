@@ -96,6 +96,15 @@ export const register = async (req, res) => {
             return res.status(500).send("Error setting cookie");
          }
          res.status(200).json({ token, admin: { email: admin.email } });
+         verified = admin.verified || false;
+         if (verified) {
+            return res.status(403).send("Account has been verified");
+         }
+         message =
+            "Please verify your account by clicking on the link: " +
+            "https://localhost:5000/gleekAdmin/verify/" +
+            token;
+         sendMail(admin.email, "Verify your Account", message);
       });
    } catch (err) {
       console.log(err.message);
@@ -223,5 +232,30 @@ export const changePassword = async (req, res) => {
       });
    } catch (err) {
       return res.status(500).send("Server Error " + err.message);
+   }
+};
+
+export const verifyEmail = async (req, res) => {
+   const token = req.params.token;
+
+   if (!token) {
+      return res.status(403).send("Token Not Found!");
+   }
+
+   try {
+      const decoded = jwt.verify(token, secret);
+      const admin = await Admin.findById(decoded.admin.id);
+
+      if (!admin) {
+         return res.status(401).send("Admin not found");
+      }
+
+      return res
+         .status(200)
+         .send("Account has been verified. Welcome to Urban Origins!");
+   } catch (err) {
+      console.log(err.message);
+      // If verification fails (e.g., due to an invalid or expired token), send an error response
+      return res.status(401).send("Invalid Token");
    }
 };
