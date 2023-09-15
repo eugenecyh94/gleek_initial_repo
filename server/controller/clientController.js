@@ -6,37 +6,37 @@ import jwt from "jsonwebtoken";
 const secret = process.env.JWT_SECRET_ClIENT;
 
 export const postRegister = async (req, res) => {
-  console.log("Post register called")
+
   const errors = validationResult(req);
-  console.log(req.body)
+
 
   if (!errors.isEmpty()) {
     // 422 status due to validation errors
     return res.status(422).json({ errors: errors.array() });
   }
   try {
-    const { email, password } = req.body;
+    const newClient = req.body;
+    
 
     // check if client already exists
     // Validate if client exists in our database
-    const oldClient = await Client.findOne({ email });
-    console.log(oldClient)
+    const oldClient = await Client.findOne({ email: newClient.email });
+
     if (oldClient) {
       return res.status(409).json({
         errors: [{ msg: "Client already exists! Please Login instead." }],
       });
     }
 
-    console.log("Create client")
     // Create user in our database
     const client = await Client.create({
-      email: email.toLowerCase(), // sanitize: convert email to lowercase
-      password: password,
+      email: newClient.email.toLowerCase(), // sanitize: convert email to lowercase
+      ...newClient
     });
 
     // Encrypt user password
     const salt = await bcrypt.genSalt(10);
-    client.password = await bcrypt.hash(password, salt);
+    client.password = await bcrypt.hash(newClient.password, salt);
 
     await client.save(); // saves to the database
 
