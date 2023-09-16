@@ -95,7 +95,7 @@ export const register = async (req, res) => {
             console.error(cookieError);
             return res.status(500).send("Error setting cookie");
          }
-         const message = `Please verify your account by clicking on the link: https://localhost:5000/gleekAdmin/verify/${token}`;
+         const message = `Please verify your account by clicking on the link: http://localhost:5000/gleekAdmin/verify/${token}`;
          const options = {
             to: email,
             subject: "Verify your Account",
@@ -133,6 +133,13 @@ export const login = async (req, res) => {
             .status(400)
             .json({ errors: [{ msg: "Invalid Credentials" }] });
       }
+
+      if (!admin.verified) {
+         return res
+            .status(400)
+            .json({ errors: [{ msg: "Please verify your account!" }] });
+      }
+
       const isMatch = await bcrypt.compare(password, admin.password);
 
       if (!isMatch) {
@@ -236,7 +243,6 @@ export const changePassword = async (req, res) => {
 
 export const verifyEmail = async (req, res) => {
    const token = req.params.token;
-
    if (!token) {
       return res.status(403).send("Token Not Found!");
    }
@@ -248,6 +254,14 @@ export const verifyEmail = async (req, res) => {
       if (!admin) {
          return res.status(401).send("Admin not found");
       }
+
+      if (admin.verified) {
+         res.status(404).send("Account already verified!");
+      }
+
+      admin.verified = true;
+
+      await admin.save();
 
       return res
          .status(200)

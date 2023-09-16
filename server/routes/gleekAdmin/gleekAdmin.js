@@ -8,6 +8,7 @@ import {
    getAdmin,
    getAllAdmin,
    changePassword,
+   verifyEmail,
 } from "../../controller/adminController.js";
 const router = express.Router();
 
@@ -42,5 +43,7 @@ router.get("/", getAllAdmin);
 router.get("/:id", getAdmin);
 
 router.post("/changePassword", changePassword);
+
+router.get("/verify/:token", verifyEmail);
 
 export default router;
