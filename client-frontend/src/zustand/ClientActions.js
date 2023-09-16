@@ -12,3 +12,4 @@ export const changePassword = async (oldPassword, newPassword) => {
     alert(error.response.data);
   }
 };
+
