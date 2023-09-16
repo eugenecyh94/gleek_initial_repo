@@ -12,6 +12,7 @@ import AccountDetails from "./containers/Account/AccountDetails";
 import Privacy from "./containers/Account/Privacy";
 import PasswordChange from "./containers/Account/PasswordChange";
 import ProfilePicture from "./containers/Account/ProfilePicture";
+import ActivityDetailsPage from "./containers/ActivityDetailsPage";
 
 function App() {
 
@@ -78,6 +79,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ShopPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/shop/activity/:id"
+            element={
+              <ProtectedRoute>
+                <ActivityDetailsPage />
               </ProtectedRoute>
             }
           />
