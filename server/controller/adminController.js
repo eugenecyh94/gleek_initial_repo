@@ -66,11 +66,11 @@ export const register = async (req, res) => {
       const salt = await bcrypt.genSalt(10);
       admin.password = await bcrypt.hash(password, salt);
 
-      const emailResponse = await sendMail(
-         email,
-         "Registration Successful",
-         "Your account has been successfully registered"
-      );
+      //    const emailResponse = await sendMail({}
+      //       email,
+      //       "Registration Successful",
+      //       "Your account has been successfully registered"
+      // });
 
       await admin.save(); //saves to the database
 
@@ -95,16 +95,15 @@ export const register = async (req, res) => {
             console.error(cookieError);
             return res.status(500).send("Error setting cookie");
          }
+         const message = `Please verify your account by clicking on the link: https://localhost:5000/gleekAdmin/verify/${token}`;
+         const options = {
+            to: email,
+            subject: "Verify your Account",
+            text: message,
+         };
+
+         sendMail(options);
          res.status(200).json({ token, admin: { email: admin.email } });
-         verified = admin.verified || false;
-         if (verified) {
-            return res.status(403).send("Account has been verified");
-         }
-         message =
-            "Please verify your account by clicking on the link: " +
-            "https://localhost:5000/gleekAdmin/verify/" +
-            token;
-         sendMail(admin.email, "Verify your Account", message);
       });
    } catch (err) {
       console.log(err.message);
