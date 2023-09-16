@@ -19,7 +19,7 @@ const activityManagementList = [
 const userManagementList = [
   { "Admin Team": "/adminTeam" },
   { Clients: "/clients" },
-  { "Vendor Partners": "/vendorPartners" },
+  { "Vendor Partners": "/viewAllVendors" },
 ];
 const bookingManagementList = [{ "View Bookings": "/bookings" }];
 
@@ -71,16 +71,21 @@ const SideNavBar = () => {
 
           <List>
             {userManagementList.map((item, index) => (
-              <StyledLink to={item[Object.keys(item)[0]]} key={index}>
+              <StyledDiv key={index}>
                 <ListItem disablePadding>
-                  <ListItemButton
+                <ListItemButton
                     selected={selectedItem === Object.keys(item)[0]}
-                    onClick={() => handleItemClick(Object.keys(item)[0])}
+                    onClick={() =>
+                      handleItemClick(
+                        Object.keys(item)[0],
+                        item[Object.keys(item)[0]]
+                      )
+                    }
                   >
                     <ListItemText primary={Object.keys(item)[0]} />
                   </ListItemButton>
                 </ListItem>
-              </StyledLink>
+              </StyledDiv>
             ))}
           </List>
           <Divider />

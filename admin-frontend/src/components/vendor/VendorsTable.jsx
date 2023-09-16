@@ -45,90 +45,52 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 const columns = [
   {
-    field: "title",
-    headerName: "Title",
+    field: "companyName",
+    headerName: "Name",
     flex: 1,
   },
   {
-    field: "activityType",
-    headerName: "Activity Type",
+    field: "companyUEN",
+    headerName: "UEN",
     flex: 1,
   },
   {
-    field: "theme",
-    headerName: "Theme",
+    field: "companyAddress",
+    headerName: "Address",
+    flex: 1,
+  },
+  {
+    field: "typeOfCompany",
+    headerName: "Type",
     flex: 1,
     valueGetter: (params) => {
-      const p = params.value;
-      return p.name;
+      return params.row.companyType === "Other"
+        ? "Other - " + params.row.customCompanyType
+        : params.row.companyType;
     },
   },
   {
-    field: "description",
-    headerName: "Description",
+    field: "companyNumber",
+    headerName: "HP Number",
     flex: 1,
   },
   {
-    field: "duration",
-    headerName: "Duration",
+    field: "brandNames",
+    headerName: "Brand Names",
     flex: 1,
-  },
-  {
-    field: "location",
-    headerName: "Location",
-    flex: 1,
-  },
-  {
-    field: "activityPricingRules",
-    headerName: "Price (Lowest)",
-    flex: 1,
-    valueFormatter: (params) => {
-      return `$${params.value}`;
-    },
-    valueGetter: (params) => {
-      const p = params.value;
-      p.sort((a, b) => a.pricePerPax - b.pricePerPax);
-      return p[0].pricePerPax;
-    },
-  },
-  {
-    field: "priceHighest",
-    headerName: "Price (Highest)",
-    flex: 1,
-    valueFormatter: (params) => {
-      return `$${params.value}`;
-    },
-    valueGetter: (params) => {
-      const p = params.row.activityPricingRules;
-      p.sort((a, b) => b.pricePerPax - a.pricePerPax);
-      return p[0].pricePerPax;
-    },
-  },
-  {
-    field: "createdDate",
-    headerName: "Date Created",
-    flex: 1,
-    valueFormatter: (params) => {
-      const date = new Date(params.value);
-      const formattedDate = date.toLocaleDateString(undefined, {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-      });
-      return formattedDate;
-    },
   },
 ];
 
-const ActivityListTable = (allActivities) => {
+const VendorsTable = (allVendors) => {
+  const { vendors } = allVendors;
   const [searchedRows, setSearchedRows] = useState([]);
   useEffect(() => {
-    setSearchedRows(allActivities.allActivities.data);
-  }, [allActivities.allActivities.data]);
+    setSearchedRows(vendors);
+  }, [vendors]);
 
   const requestSearch = (searchedVal) => {
-    const filteredRows = allActivities.allActivities.data.filter((row) => {
-      return row.title.toLowerCase().includes(searchedVal.toLowerCase());
+    const filteredRows = vendors.filter((row) => {
+      return row.companyName.toLowerCase().includes(searchedVal.toLowerCase());
     });
     setSearchedRows(filteredRows);
   };
@@ -140,7 +102,7 @@ const ActivityListTable = (allActivities) => {
           <SearchIcon />
         </SearchIconWrapper>
         <StyledInputBase
-          placeholder="Find an activity…"
+          placeholder="Find a vendor…"
           inputProps={{ "aria-label": "search" }}
           onChange={(event) => requestSearch(event.target.value)}
         />
@@ -163,4 +125,4 @@ const ActivityListTable = (allActivities) => {
     </Box>
   );
 };
-export default ActivityListTable;
+export default VendorsTable;

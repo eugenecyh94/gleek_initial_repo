@@ -87,3 +87,18 @@ export const useActivityStore = create((set) => ({
     }
   },
 }));
+
+export const useVendorStore = create((set) => ({
+  vendors: [],
+  isLoading: false,
+  getVendors: async () => {
+    try {
+      set({ isLoading: true });
+      const response = await AxiosConnect.get("vendor/viewAllVendors");
+      set({ vendors: response.data });
+      set({ isLoading: false });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+}));
