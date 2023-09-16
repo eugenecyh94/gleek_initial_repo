@@ -3,9 +3,10 @@ import "./App.css";
 import Home from "./components/Home";
 import Layout from "./components/Layout";
 import LoginPage from "./components/LoginPage";
-import ViewPublishedActivities from "./components/ViewPublishedActivities";
+import ViewPublishedActivities from "./components/activity/ViewPublishedActivities";
 import ProtectedRoute from "./components/ProtectedRoutes.jsx";
 import ChangePassword from "./components/ChangePassword.jsx";
+import ViewAllVendors from "./components/vendor/ViewAllVendors";
 
 function App() {
   return (
@@ -19,6 +20,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <ViewPublishedActivities />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewAllVendors"
+            element={
+              <ProtectedRoute>
+                <ViewAllVendors />
               </ProtectedRoute>
             }
           />

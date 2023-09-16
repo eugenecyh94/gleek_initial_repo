@@ -1,9 +1,9 @@
 import { useTheme } from "@emotion/react";
 import { CircularProgress, Toolbar, Typography } from "@mui/material";
 import { useEffect } from "react";
-import { useActivityStore } from "../zustand/GlobalStore";
-import Layout from "./Layout";
-import ActivityListTable from "./activity/ActivityListTable";
+import { useActivityStore } from "../../zustand/GlobalStore";
+import Layout from "../Layout";
+import ActivityListTable from "./ActivityListTable";
 
 const ViewPublishedActivities = () => {
   const theme = useTheme();
