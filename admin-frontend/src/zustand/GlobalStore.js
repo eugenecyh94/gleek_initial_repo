@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import AxiosConnect from "../utils/AxiosConnect";
+import AxiosConnect from "../utils/AxiosConnect.js";
 
 export const useSelectedNavItemStore = create((set) => ({
   selectedItem: "Home",
