@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const clientSchema = mongoose.Schema({
+const clientSchema = new mongoose.Schema({
   email: {
     type: String,
     unique: true,

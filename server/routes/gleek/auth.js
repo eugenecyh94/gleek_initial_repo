@@ -6,6 +6,8 @@ import {
   validateToken,
   clearCookies,
   postChangePassword,
+  updateClientAccountDetails
+  
 } from "../../controller/clientController.js";
 import shopRoutes from "./shop.js";
 import verifyToken from "../../middleware/clientAuth.js";
@@ -38,5 +40,7 @@ router.post("/validate-token", validateToken);
 router.get("/logout", clearCookies);
 
 router.post("/change-password", verifyToken, postChangePassword);
+
+router.patch("/updateAccount", verifyToken, updateClientAccountDetails);
 
 export default router;
