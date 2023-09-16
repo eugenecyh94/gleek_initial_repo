@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import React, { useState, useRef, useEffect } from "react";
 import {
   Box,

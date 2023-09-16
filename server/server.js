@@ -1,11 +1,12 @@
-import express from "express";
-import cors from "cors";
-import "./loadEnvironment.js";
-import "./database/urbanOriginsDb.js";
-import activityController from "./controller/activityController.js";
-import gleekAdminRoutes from "./routes/gleekAdmin/gleekAdmin.js";
-import gleekRoutes from "./routes/gleek/gleek.js";
 import cookieParser from "cookie-parser";
+import cors from "cors";
+import express from "express";
+import "./database/urbanOriginsDb.js";
+import "./loadEnvironment.js";
+import gleekRoutes from "./routes/gleek/gleek.js";
+import activityRoutes from "./routes/gleekAdmin/activityRoute.js";
+import gleekAdminRoutes from "./routes/gleekAdmin/gleekAdmin.js";
+import vendorRoutes from "./routes/gleekAdmin/vendorRoute.js";
 const app = express();
 
 const port = process.env.PORT;
@@ -18,7 +19,7 @@ const customCors = (req, callback) => {
     // Apply credentials: true for http://localhost:3001
     const corsOptions = {
       origin,
-      credentials: origin === "http://localhost:3001",
+      credentials: true,
     };
     callback(null, corsOptions);
   } else {
@@ -33,8 +34,9 @@ app.use(cookieParser());
 
 app.use(express.json());
 
-app.use("/activity", activityController);
 app.use("/gleekAdmin", gleekAdminRoutes);
+app.use("/vendor", vendorRoutes);
+app.use("/activity", activityRoutes);
 
 app.use("/gleek", gleekRoutes);
 

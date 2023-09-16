@@ -10,11 +10,15 @@ import {
   InputLabel,
   OutlinedInput,
   FormHelperText,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import LockPersonIcon from "@mui/icons-material/LockPerson";
 import { useNavigate } from "react-router-dom";
+import useClientStore from "../zustand/ClientStore";
+import useSnackbarStore from "../zustand/SnackbarStore";
 
 const RegisterPage = () => {
   // themes
@@ -24,6 +28,8 @@ const RegisterPage = () => {
   // states
   // user input
   const [showPassword, setShowPassword] = useState(false);
+  const { isLoading, clientError, register } = useClientStore();
+  const { openSnackbar } = useSnackbarStore();
   const [showPasswordVerify, setShowPasswordVerify] = useState(false);
   const [formData, setFormData] = useState({
     password: "",
@@ -58,8 +64,10 @@ const RegisterPage = () => {
     phoneNumber: "",
     passwordVerify: "",
   });
+
   // functions
   const handleClickShowPassword = () => setShowPassword((show) => !show);
+
   const handleClickShowPasswordVerify = () =>
     setShowPasswordVerify((show) => !show);
   const navigate = useNavigate();
@@ -87,7 +95,8 @@ const RegisterPage = () => {
       [name]: errors[name] || "", // Replace the error with an empty string if it's empty
     }));
   };
-  const handleSubmit = (event) => {
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
     for (const fieldName in formData) {
       let errors = validator(formData, fieldName);
@@ -100,7 +109,21 @@ const RegisterPage = () => {
     if (!Object.values(errorData).every((error) => error === "")) {
       return;
     }
-    console.log(formData);
+
+    const responseStatus = await register(formData);
+
+    if (responseStatus) {
+      openSnackbar("Register was successful!", "success");
+      navigate("/");
+    } else {
+      const error =
+        clientError &&
+        clientError.response &&
+        clientError.response.data &&
+        (clientError.response.data.errors?.[0]?.msg ||
+          clientError.response.data);
+      openSnackbar(error, "error");
+    }
   };
 
   // useEffect(() => {
@@ -161,7 +184,7 @@ const RegisterPage = () => {
           formData[fieldName],
           formData.password,
           errors,
-          fieldName,
+          fieldName
         );
         break;
       default:
@@ -223,11 +246,13 @@ const RegisterPage = () => {
       }
     }
   };
+
   const validatePasswordVerify = (data, password, errors, fieldName) => {
     if (password !== data) {
       errors[fieldName] = `Password does not match!`;
     }
   };
+
   return (
     <Box
       display="flex"
