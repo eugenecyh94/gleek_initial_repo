@@ -4,9 +4,7 @@ import { useTheme, lighten } from "@mui/material/styles";
 
 const ActivityItem = ({ activity }) => {
   const theme = useTheme();
-  const primary = theme.palette.primary.main;
   const accent = theme.palette.accent.main;
-  const secondary = theme.palette.secondary.main;
   const tertiary = theme.palette.tertiary.main;
   const tertiaryLighter = lighten(theme.palette.tertiary.main, 0.4);
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
