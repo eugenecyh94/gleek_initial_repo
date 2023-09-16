@@ -6,8 +6,7 @@ import {
   validateToken,
   clearCookies,
   postChangePassword,
-  updateClientAccountDetails
-  
+  updateClientAccountDetails,
 } from "../../controller/clientController.js";
 import shopRoutes from "./shop.js";
 import verifyToken from "../../middleware/clientAuth.js";
@@ -22,7 +21,7 @@ router.post(
     check("email", "Please enter a valid email").isEmail(),
     check("password", "Minimum password length is 8").isLength({ min: 8 }),
   ],
-  postRegister,
+  postRegister
 );
 
 router.post(
@@ -32,15 +31,11 @@ router.post(
     check("email", "Please enter a valid email").isEmail(),
     check("password", "Minimum password length is 8").isLength({ min: 8 }),
   ],
-  postLogin,
+  postLogin
 );
 
 router.post("/validate-token", validateToken);
 
 router.get("/logout", clearCookies);
-
-router.post("/change-password", verifyToken, postChangePassword);
-
-router.patch("/updateAccount", verifyToken, updateClientAccountDetails);
 
 export default router;

@@ -2,7 +2,7 @@ import AxiosConnect from "../utils/AxiosConnect";
 
 export const changePassword = async (oldPassword, newPassword) => {
   try {
-    await AxiosConnect.post("/gleek/auth/change-password", {
+    await AxiosConnect.post("/gleek/client/changePassword", {
       oldPassword: oldPassword,
       newPassword: newPassword,
     });
