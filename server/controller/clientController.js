@@ -99,7 +99,10 @@ export const postLogin = async (req, res) => {
           console.error(cookieError);
           return res.status(500).send("Error setting cookie");
         }
-        res.status(200).json({ token, client: { email: client.email } });
+        const { password, ...clientWithoutPassword } = client.toObject();
+ 
+        // console.log(clientWithoutPassword)
+        res.status(200).json({ token, client: clientWithoutPassword  });
       });
     } else {
       res.status(400).send("Invalid Credentials");
@@ -121,10 +124,12 @@ export const validateToken = async (req, res) => {
 
     const client = await Client.findById(decoded.client.id);
 
+
     if (!client) {
       return res.status(401).send("Client not found");
     }
-    res.status(200).json({ token, client: { email: client.email } });
+    const { password, ...clientWithoutPassword } = client.toObject();
+    res.status(200).json({ token, client: clientWithoutPassword });
   } catch (err) {
     // If verification fails (e.g., due to an invalid or expired token), send an error response
     return res.status(401).send("Invalid Token");
@@ -140,7 +145,7 @@ export const postChangePassword = async (req, res) => {
   const errors = validationResult(req);
 
   const client = req.user;
-  console.log(client);
+  // console.log(client);
 
   if (!errors.isEmpty()) {
     // 422 status due to validation errors
@@ -174,16 +179,22 @@ export const postChangePassword = async (req, res) => {
  * Update the client account details (except for email and password)
  */
 export const updateClientAccountDetails = async (req, res) => {
+
   try {
     const client = req.user;
     if (!client) {
       return res.status(404).send("Client not found. Token may have expired.");
     }
 
+
     const body = req.body;
+    console.log("updateClientAccountDetails: body", body)
+    
 
     // remove passwword and email in case it is sent along in the body
     const { password, email, ...updateData } = body;
+    
+    console.log("updateClientAccountDetails: UpdateData", updateData)
     const updatedClient = await Client.findOneAndUpdate(
       { _id: client.id },
       { ...updateData },
@@ -194,6 +205,8 @@ export const updateClientAccountDetails = async (req, res) => {
         },
       }
     );
+
+    console.log("updateClientAccountDetails: Updated client", updatedClient)
 
     res.status(200).json({
       success: true,

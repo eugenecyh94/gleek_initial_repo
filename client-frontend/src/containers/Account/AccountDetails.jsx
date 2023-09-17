@@ -1,26 +1,13 @@
 import React, { useState } from "react";
 import { Box, TextField, Button, Typography, Grid } from "@mui/material";
 import AccountSidebar from "./AccountSidebar";
+import useClientStore from "../../zustand/ClientStore";
+import useSnackbarStore from "../../zustand/SnackbarStore";
 
 function AccountDetails(props) {
-  const user = {
-    email: "email@email.com",
-    name: "name",
-    jobTitle: "job",
-    team: "team",
-    companyName: "company name",
-    officeAddress: "office address",
-    billingAddress: "",
-    billingPartyName: "",
-    billingEmail: "",
-    billingOfficePostalCode: "",
-    officePostalCode: "123456",
-
-    phoneNumber: "12311231",
-    passwordVerify: "",
-  };
-
-  const [formData, setFormData] = useState(user);
+  const { client, updateAccount, clientError } = useClientStore();
+  const { openSnackbar, closeSnackbar } = useSnackbarStore();
+  const [formData, setFormData] = useState(client);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -35,10 +22,23 @@ function AccountDetails(props) {
     //   [name]: errors[name] || "", // Replace the error with an empty string if it's empty
     // }))
   };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-  // const theme = useTheme();
-  // const tertiary = theme.palette.tertiary.main;
-  // const primary = theme.palette.primary.main;
+    const responseStatus = await updateAccount(formData);
+
+    if (responseStatus) {
+      openSnackbar("Profile updated successfully!", "success");
+    } else {
+      const error =
+        clientError?.response?.data?.errors?.[0]?.msg ||
+        clientError?.response?.data ||
+        null;
+
+      openSnackbar(error, "error");
+    }
+  };
+
   return (
     <Box
       display="flex"
@@ -95,7 +95,7 @@ function AccountDetails(props) {
               placeholder="Email"
               label="Email"
               value={formData.email}
-              disabled={false}
+              disabled={true}
               sx={{ width: "100%" }}
             />
           </Grid>
@@ -207,14 +207,38 @@ function AccountDetails(props) {
               sx={{ width: "100%" }}
             />
           </Grid>
+          <Grid item xs={6}>
+            <TextField
+              id="billingOfficePostalCode"
+              onChange={handleChange}
+              name="billingOfficePostalCode"
+              placeholder=""
+              label="Billing Office Postal Code"
+              value={formData.billingOfficePostalCode}
+              disabled={false}
+              sx={{ width: "100%" }}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField
+              id="billingEmail"
+              onChange={handleChange}
+              name="billingEmail"
+              placeholder="Billing Email"
+              label="Billing Email"
+              value={formData.billingEmail}
+              disabled={false}
+              sx={{ width: "100%" }}
+            />
+          </Grid>
         </Grid>
-        Update when client model is confirmed.
+
         <Button
           sx={{ marginTop: "32px" }}
           mt={4}
           variant="contained"
           type="submit"
-          disabled={true}
+          onClick={handleSubmit}
         >
           <Typography variant="body1">Update</Typography>
         </Button>
