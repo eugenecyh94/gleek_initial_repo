@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import AxiosConnect from "../utils/AxiosConnect.jsx";
+import AxiosConnect from "../utils/AxiosConnect";
 import { useAdminStore } from "../zustand/GlobalStore";
 import { useNavigate } from "react-router-dom";
 

@@ -8,6 +8,9 @@ const useShopStore = create((set) => ({
   setCurrentPage: (newPage) => set({ currentPage: newPage }),
   sortBy: "Newest First",
   setSortBy: (newSortBy) => set({ sortBy: newSortBy }),
+  currentActivity: null,
+  setCurrentActivity: (newCurrentActivity) =>
+    set({ currentActivity: newCurrentActivity }),
 }));
 
 export default useShopStore;

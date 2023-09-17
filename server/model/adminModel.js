@@ -26,6 +26,11 @@ const adminSchema = new mongoose.Schema({
       default: Date.now(),
       required: true,
    },
+   verified: {
+      type: Boolean,
+      default: false,
+      required: true,
+   },
 });
 const Admin = mongoose.model("Admin", adminSchema, "admins");
 

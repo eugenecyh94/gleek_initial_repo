@@ -4,17 +4,15 @@ import { useTheme, lighten } from "@mui/material/styles";
 
 const ActivityItem = ({ activity }) => {
   const theme = useTheme();
-  const primary = theme.palette.primary.main;
   const accent = theme.palette.accent.main;
-  const secondary = theme.palette.secondary.main;
   const tertiary = theme.palette.tertiary.main;
   const tertiaryLighter = lighten(theme.palette.tertiary.main, 0.4);
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
   const isMediumScreen = useMediaQuery((theme) =>
-    theme.breakpoints.between("sm", "md"),
+    theme.breakpoints.between("sm", "md")
   );
   const isLargeScreen = useMediaQuery((theme) =>
-    theme.breakpoints.between("md", "lg"),
+    theme.breakpoints.between("md", "lg")
   );
   let containerStyle = {
     height: "15rem", // Default for extra-large screens

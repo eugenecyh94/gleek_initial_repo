@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   AppBar,
   Typography,
@@ -16,6 +16,8 @@ import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 import useClientStore from "../zustand/ClientStore.js";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import AxiosConnect from "../utils/AxiosConnect.js";
+import SearchBar from "./SearchBar/SearchBar.jsx";
+import SearchIcon from "@mui/icons-material/Search";
 function NavBar(props) {
   const { authenticated, client, setAuthenticated } = useClientStore();
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -39,6 +41,7 @@ function NavBar(props) {
   const theme = useTheme();
   const primary = theme.palette.primary.main;
   const accent = theme.palette.accent.main;
+  const tertiary = theme.palette.tertiary.main;
 
   const logout = async () => {
     try {
@@ -52,6 +55,10 @@ function NavBar(props) {
     }
   };
 
+  const [value, setValue] = useState("");
+  const onChange = (event, { newValue }) => {
+    setValue(newValue);
+  };
   return (
     <div>
       <AppBar position="static" elevation={0} bgcolor={primary}>
@@ -78,6 +85,19 @@ function NavBar(props) {
               Gleek
             </Typography>
           </Link>
+          <Box display="flex" flexDirection="row">
+            <SearchBar value={value} onChange={onChange} />
+            <IconButton
+              onClick={() => {
+                navigate("/shop");
+              }}
+              sx={{ marginLeft: "5px" }}
+              color="tertiary"
+              aria-label="search"
+            >
+              <SearchIcon />
+            </IconButton>
+          </Box>
           <Box
             mr={2}
             display="flex"

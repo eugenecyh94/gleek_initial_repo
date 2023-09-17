@@ -6,7 +6,9 @@ import LoginPage from "./components/LoginPage";
 import ViewPublishedActivities from "./components/activity/ViewPublishedActivities";
 import ProtectedRoute from "./components/ProtectedRoutes.jsx";
 import ChangePassword from "./components/ChangePassword.jsx";
+import ResetPassword from "./components/ResetPassword";
 import ViewAllVendors from "./components/vendor/ViewAllVendors";
+import ViewAllClients from "./components/client/ViewAllClients";
 
 function App() {
   return (
@@ -34,10 +36,28 @@ function App() {
           />
           <Route
             exact
+            path="/resetPassword"
+            element={
+              <ProtectedRoute>
+                <ResetPassword />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
             path="/changePassword"
             element={
               <ProtectedRoute>
                 <ChangePassword />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewAllClients"
+            element={
+              <ProtectedRoute>
+                <ViewAllClients />
               </ProtectedRoute>
             }
           />
