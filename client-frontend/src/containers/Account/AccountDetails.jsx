@@ -39,23 +39,21 @@ function AccountDetails(props) {
       ...prevData,
       [name]: errors[name] || "", // Replace the error with an empty string if it's empty
     }));
-    console.log(errorData);
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    try {
+      const responseStatus = await updateAccount(formData);
 
-    const responseStatus = await updateAccount(formData);
-
-    if (responseStatus) {
-      openSnackbar("Profile updated successfully!", "success");
-    } else {
-      const error =
-        clientError?.response?.data?.errors?.[0]?.msg ||
-        clientError?.response?.data ||
+      responseStatus &&
+        openSnackbar("Profile updated successfully!", "success");
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.errors?.[0]?.msg ||
+        error?.response?.data ||
         null;
-
-      openSnackbar(error, "error");
+      openSnackbar(errorMessage, "error");
     }
   };
 
@@ -107,7 +105,7 @@ function AccountDetails(props) {
               disabled={false}
               sx={{ width: "100%" }}
               helperText={errorData.name}
-              error={errorData.name}
+              error={!!errorData.name}
             />
           </Grid>
           <Grid item xs={6}>
@@ -122,7 +120,7 @@ function AccountDetails(props) {
               disabled={true}
               sx={{ width: "100%" }}
               helperText={errorData.email}
-              error={errorData.email}
+              error={!!errorData.email}
             />
           </Grid>
           <Grid item xs={6}>
@@ -137,7 +135,7 @@ function AccountDetails(props) {
               disabled={false}
               sx={{ width: "100%" }}
               helperText={errorData.phoneNumber}
-              error={errorData.phoneNumber}
+              error={!!errorData.phoneNumber}
             />
           </Grid>
           <Grid item xs={6}>
@@ -152,7 +150,7 @@ function AccountDetails(props) {
               disabled={false}
               sx={{ width: "100%" }}
               helperText={errorData.jobTitle}
-              error={errorData.jobTitle}
+              error={!!errorData.jobTitle}
             />
           </Grid>
           <Grid item xs={6}>
@@ -167,7 +165,7 @@ function AccountDetails(props) {
               disabled={false}
               sx={{ width: "100%" }}
               helperText={errorData.team}
-              error={errorData.team}
+              error={!!errorData.team}
             />
           </Grid>
           <Grid item xs={12}>
@@ -187,7 +185,7 @@ function AccountDetails(props) {
               disabled={false}
               sx={{ width: "100%" }}
               helperText={errorData.companyName}
-              error={errorData.companyName}
+              error={!!errorData.companyName}
             />
           </Grid>
           <Grid item xs={6}>
@@ -203,7 +201,7 @@ function AccountDetails(props) {
               disabled={false}
               sx={{ width: "100%" }}
               helperText={errorData.officePostalCode}
-              error={errorData.officePostalCode}
+              error={!!errorData.officePostalCode}
             />
           </Grid>
           <Grid item xs={12}>
@@ -219,7 +217,7 @@ function AccountDetails(props) {
               disabled={false}
               sx={{ width: "100%" }}
               helperText={errorData.officeAddress}
-              error={errorData.officeAddress}
+              error={!!errorData.officeAddress}
             />
           </Grid>
           <Grid item xs={12}>
@@ -239,7 +237,7 @@ function AccountDetails(props) {
               disabled={false}
               sx={{ width: "100%" }}
               helperText={errorData.billingAddress}
-              error={errorData.billingAddress}
+              error={!!errorData.billingAddress}
             />
           </Grid>
           <Grid item xs={6}>
@@ -254,7 +252,7 @@ function AccountDetails(props) {
               disabled={false}
               sx={{ width: "100%" }}
               helperText={errorData.billingPartyName}
-              error={errorData.billingPartyName}
+              error={!!errorData.billingPartyName}
             />
           </Grid>
           <Grid item xs={6}>
@@ -269,7 +267,7 @@ function AccountDetails(props) {
               disabled={false}
               sx={{ width: "100%" }}
               helperText={errorData.billingOfficePostalCode}
-              error={errorData.billingOfficePostalCode}
+              error={!!errorData.billingOfficePostalCode}
             />
           </Grid>
           <Grid item xs={6}>
@@ -284,7 +282,7 @@ function AccountDetails(props) {
               disabled={false}
               sx={{ width: "100%" }}
               helperText={errorData.billingEmail}
-              error={errorData.billingEmail}
+              error={!!errorData.billingEmail}
             />
           </Grid>
         </Grid>

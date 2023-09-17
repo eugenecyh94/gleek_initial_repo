@@ -100,9 +100,9 @@ export const postLogin = async (req, res) => {
           return res.status(500).send("Error setting cookie");
         }
         const { password, ...clientWithoutPassword } = client.toObject();
- 
+
         // console.log(clientWithoutPassword)
-        res.status(200).json({ token, client: clientWithoutPassword  });
+        res.status(200).json({ token, client: clientWithoutPassword });
       });
     } else {
       res.status(400).send("Invalid Credentials");
@@ -123,7 +123,6 @@ export const validateToken = async (req, res) => {
     const decoded = jwt.verify(token, secret);
 
     const client = await Client.findById(decoded.client.id);
-
 
     if (!client) {
       return res.status(401).send("Client not found");
@@ -186,15 +185,13 @@ export const updateClientAccountDetails = async (req, res) => {
       return res.status(404).send("Client not found. Token may have expired.");
     }
 
-
     const body = req.body;
-    console.log("updateClientAccountDetails: body", body)
-    
+    console.log("updateClientAccountDetails: body", body);
 
     // remove passwword and email in case it is sent along in the body
     const { password, email, ...updateData } = body;
-    
-    console.log("updateClientAccountDetails: UpdateData", updateData)
+
+    console.log("updateClientAccountDetails: UpdateData", updateData);
     const updatedClient = await Client.findOneAndUpdate(
       { _id: client.id },
       { ...updateData },
@@ -206,7 +203,7 @@ export const updateClientAccountDetails = async (req, res) => {
       }
     );
 
-    console.log("updateClientAccountDetails: Updated client", updatedClient)
+    console.log("updateClientAccountDetails: Updated client", updatedClient);
 
     res.status(200).json({
       success: true,

@@ -29,7 +29,7 @@ const useClientStore = create((set) => ({
           isLoading: false,
         });
       }, 500);
-      return false;
+      throw error;
     }
   },
   logout: () => {
@@ -77,26 +77,18 @@ const useClientStore = create((set) => ({
   },
   updateAccount: async (userData) => {
     try {
-
       const response = await AxiosConnect.patch(
         "/gleek/client/updateAccount",
         userData
       );
       const data = response.data;
-      set({ client: data.client});
+      set({ client: data.client });
       setTimeout(() => {
         set({ isLoading: false });
       }, 500);
       return true;
     } catch (error) {
-      console.error(error)
-      setTimeout(() => {
-        set({
-          clientError: error,
-          isLoading: false,
-        });
-      }, 500);
-      return false;
+      throw error;
     }
   },
 }));
