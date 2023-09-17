@@ -51,26 +51,12 @@ const ClientsTable = ({ clients, updateClient }) => {
     },
     {
       field: "phoneNumber",
-      headerName: "Address",
+      headerName: "Phone Number",
       flex: 1,
     },
     {
       field: "signupDate",
       headerName: "Sign-Up Date",
-      flex: 1,
-      valueFormatter: (params) => {
-        const date = new Date(params.value);
-        const formattedDate = date.toLocaleDateString(undefined, {
-          day: "2-digit",
-          month: "2-digit",
-          year: "2-digit",
-        });
-        return formattedDate;
-      },
-    },
-    {
-      field: "approvedDate",
-      headerName: "Approved Date",
       flex: 1,
       valueFormatter: (params) => {
         const date = new Date(params.value);
@@ -107,6 +93,22 @@ const ClientsTable = ({ clients, updateClient }) => {
           label="reject"
         />,
       ],
+    });
+  }
+  if (selectedTab === "approvedTab") {
+    columns.push({
+      field: "approvedDate",
+      headerName: "Approved Date",
+      flex: 1,
+      valueFormatter: (params) => {
+        const date = new Date(params.value);
+        const formattedDate = date.toLocaleDateString(undefined, {
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        });
+        return formattedDate;
+      },
     });
   }
 
