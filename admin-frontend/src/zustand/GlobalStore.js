@@ -1,38 +1,7 @@
 import { create } from "zustand";
+import AxiosConnect from "../utils/AxiosConnect.js";
 // import update from "immutability-helper";
 // import { devtools } from "zustand/middleware";
-
-const currentActivity = {
-   title: "",
-   description: "",
-   tags: {
-      theme: [""],
-      type: [""],
-      duration: "",
-      location: [""],
-      size: [""],
-   },
-   price: 0,
-   image: "",
-};
-const currentBooking = {
-   bookingId: "",
-   activityId: "",
-   date: 0,
-   status: "",
-};
-const allActivities = [currentActivity];
-const allBookings = [currentBooking];
-
-export const useActivityStore = create((set) => ({
-   currentActivity,
-   allActivities,
-}));
-
-export const useBookingStore = create((set) => ({
-   currentBooking,
-   allBookings,
-}));
 
 export const updateCurrentActivity = (selectedActivity) => {
    useActivityStore.setState((prevState) => ({

@@ -36,9 +36,3 @@ export const PPT_REQUIRED = {
    NOT_REQUIRED: "Not Required",
    OPTIONAL: "Good to have but not required",
 };
-
-export const PPT_REQUIRED = {
-   REQUIRED: "Required",
-   NOT_REQUIRED: "Not Required",
-   OPTIONAL: "Good to have but not required",
-};
