@@ -309,7 +309,7 @@ export const recoverPassword = async (req, res) => {
             text: message,
          };
          sendMail(options);
-         return res.status(200).json(`Recovery email sent!: ${token}`);
+         return res.status(200).json(`Recovery email sent!`);
       });
    } catch (err) {
       return res.status(500).send("Server Error " + err.message);

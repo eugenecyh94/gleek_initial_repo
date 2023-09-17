@@ -112,6 +112,29 @@ export const useAdminStore = create((set) => ({
          return false;
       }
    },
+   recoverPassword: async (email) => {
+      try {
+         const response = await AxiosConnect.post(
+            "/gleekAdmin/recoverPassword",
+            {
+               email: email,
+            }
+         );
+         const data = response.data;
+         setTimeout(() => {
+            set({ isLoading: false });
+         }, 500);
+         return data;
+      } catch (error) {
+         console.log(error);
+         setTimeout(() => {
+            set({
+               isLoading: false,
+            });
+         }, 500);
+         return false;
+      }
+   },
 }));
 
 export const useActivityStore = create((set) => ({

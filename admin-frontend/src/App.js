@@ -9,6 +9,7 @@ import ChangePassword from "./components/ChangePassword.jsx";
 import ResetPassword from "./components/ResetPassword";
 import ViewAllVendors from "./components/vendor/ViewAllVendors";
 import SocketConnection from "./utils/SocketConnection";
+import ForgotPassword from "./components/ForgotPassword";
 
 function App() {
    return (
@@ -54,6 +55,11 @@ function App() {
                   }
                />
                <Route path="/login" element={<LoginPage />} />
+               <Route
+                  exact
+                  path="/forgotPassword"
+                  element={<ForgotPassword />}
+               />
             </Routes>
          </Layout>
       </div>
