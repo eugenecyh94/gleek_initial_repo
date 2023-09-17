@@ -77,6 +77,8 @@ export const register = async (req, res) => {
       const payload = {
          admin: {
             id: admin.id,
+            email: admin.email,
+            name: admin.name,
          },
       };
 
@@ -103,7 +105,7 @@ export const register = async (req, res) => {
          };
 
          sendMail(options);
-         res.status(200).json({ token, admin: { email: admin.email } });
+         res.status(200).json({ token, admin: payload.admin });
       });
    } catch (err) {
       console.log(err.message);
@@ -151,6 +153,8 @@ export const login = async (req, res) => {
       const payload = {
          admin: {
             id: admin.id,
+            email: admin.email,
+            name: admin.name,
          },
       };
 
@@ -165,7 +169,7 @@ export const login = async (req, res) => {
                path: "/", // Set the path to your application root
             })
                .status(200)
-               .json({ token, admin: { email: admin.email } });
+               .json({ token, admin: payload.admin });
          } catch (cookieError) {
             return res.status(500).send("Error setting cookie");
          }
@@ -183,12 +187,13 @@ export const validateToken = async (req, res) => {
 
    try {
       const decoded = jwt.verify(token, secret);
+      console.log(decoded.admin);
       const admin = await Admin.findById(decoded.admin.id);
 
       if (!admin) {
          return res.status(401).send("Admin not found");
       }
-      res.status(200).json({ token, admin: { email: admin.email } });
+      res.status(200).json({ token, admin: admin });
    } catch (err) {
       console.log(err.message);
       // If verification fails (e.g., due to an invalid or expired token), send an error response
@@ -212,6 +217,8 @@ export const changePassword = async (req, res) => {
       const payload = {
          admin: {
             id: admin.id,
+            email: admin.email,
+            name: admin.name,
          },
       };
 
@@ -231,7 +238,7 @@ export const changePassword = async (req, res) => {
                path: "/", // Set the path to your application root
             })
                .status(200)
-               .json({ token, admin: { email: admin.email } });
+               .json({ token, admin: payload.admin });
          } catch (cookieError) {
             return res.status(500).send("Error setting cookie");
          }
@@ -287,6 +294,8 @@ export const recoverPassword = async (req, res) => {
       const payload = {
          admin: {
             id: admin.id,
+            email: admin.email,
+            name: admin.name,
          },
       };
 

@@ -8,10 +8,12 @@ import ProtectedRoute from "./components/ProtectedRoutes.jsx";
 import ChangePassword from "./components/ChangePassword.jsx";
 import ResetPassword from "./components/ResetPassword";
 import ViewAllVendors from "./components/vendor/ViewAllVendors";
+import SocketConnection from "./utils/SocketConnection";
 
 function App() {
    return (
       <div>
+         <SocketConnection />
          <Layout>
             <Routes>
                <Route exact path="/" element={<Home />} />
