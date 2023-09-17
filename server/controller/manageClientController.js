@@ -9,3 +9,18 @@ export const getAllClients = async (req, res) => {
     return res.status(500).send("Server Error");
   }
 };
+
+export const updateClient = async (req, res) => {
+  try {
+    const updateData = req.body;
+    const updatedClient = await Client.findOneAndUpdate(
+      { _id: req.params.id },
+      { ...updateData, approvedDate: Date.now() },
+      { new: true }
+    );
+    return res.status(201).json(updatedClient);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("Server Error");
+  }
+};

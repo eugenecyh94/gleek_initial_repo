@@ -7,6 +7,7 @@ import ViewPublishedActivities from "./components/activity/ViewPublishedActiviti
 import ProtectedRoute from "./components/ProtectedRoutes.jsx";
 import ChangePassword from "./components/ChangePassword.jsx";
 import ViewAllVendors from "./components/vendor/ViewAllVendors";
+import ViewAllClients from "./components/client/ViewAllClients";
 
 function App() {
   return (
@@ -29,6 +30,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <ViewAllVendors />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewAllClients"
+            element={
+              <ProtectedRoute>
+                <ViewAllClients />
               </ProtectedRoute>
             }
           />
