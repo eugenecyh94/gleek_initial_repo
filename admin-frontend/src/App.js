@@ -6,6 +6,7 @@ import LoginPage from "./components/LoginPage";
 import ViewPublishedActivities from "./components/activity/ViewPublishedActivities";
 import ProtectedRoute from "./components/ProtectedRoutes.jsx";
 import ChangePassword from "./components/ChangePassword.jsx";
+import ResetPassword from "./components/ResetPassword";
 import ViewAllVendors from "./components/vendor/ViewAllVendors";
 import ViewAllClients from "./components/client/ViewAllClients";
 
@@ -35,10 +36,10 @@ function App() {
           />
           <Route
             exact
-            path="/viewAllClients"
+            path="/resetPassword"
             element={
               <ProtectedRoute>
-                <ViewAllClients />
+                <ResetPassword />
               </ProtectedRoute>
             }
           />
@@ -48,6 +49,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <ChangePassword />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewAllClients"
+            element={
+              <ProtectedRoute>
+                <ViewAllClients />
               </ProtectedRoute>
             }
           />
