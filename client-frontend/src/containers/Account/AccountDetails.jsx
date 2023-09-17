@@ -37,7 +37,7 @@ function AccountDetails(props) {
 
     setErrorData((prevData) => ({
       ...prevData,
-      [name]: errors[name] || "", // Replace the error with an empty string if it's empty
+      [name]: errors[name] || "",
     }));
   };
 
@@ -95,6 +95,7 @@ function AccountDetails(props) {
           </Grid>
           <Grid item xs={6}>
             <TextField
+              required
               id="name"
               onChange={handleChange}
               onBlur={handleChange}
@@ -110,6 +111,7 @@ function AccountDetails(props) {
           </Grid>
           <Grid item xs={6}>
             <TextField
+              required
               id="email"
               onChange={handleChange}
               onBlur={handleChange}
@@ -125,6 +127,7 @@ function AccountDetails(props) {
           </Grid>
           <Grid item xs={6}>
             <TextField
+              required
               id="phoneNumber"
               name="phoneNumber"
               placeholder="Phone Number"
@@ -140,6 +143,7 @@ function AccountDetails(props) {
           </Grid>
           <Grid item xs={6}>
             <TextField
+              required
               id="jobTitle"
               name="jobTitle"
               placeholder="Job Title"
@@ -155,6 +159,7 @@ function AccountDetails(props) {
           </Grid>
           <Grid item xs={6}>
             <TextField
+              required
               id="team"
               name="team"
               placeholder="Team"
@@ -175,6 +180,7 @@ function AccountDetails(props) {
           </Grid>
           <Grid item xs={6}>
             <TextField
+              required
               id="companyName"
               name="companyName"
               placeholder="Company Name"
@@ -190,8 +196,8 @@ function AccountDetails(props) {
           </Grid>
           <Grid item xs={6}>
             <TextField
-              id="officePostalCode"
               required
+              id="officePostalCode"
               name="officePostalCode"
               placeholder="Office Postal Code"
               label="Office Postal Code"
@@ -206,6 +212,7 @@ function AccountDetails(props) {
           </Grid>
           <Grid item xs={12}>
             <TextField
+              required
               multiline
               id="officeAddress"
               name="officeAddress"
@@ -227,6 +234,7 @@ function AccountDetails(props) {
           </Grid>
           <Grid item xs={6}>
             <TextField
+              required
               id="billingAddress"
               onChange={handleChange}
               onBlur={handleChange}
@@ -242,6 +250,7 @@ function AccountDetails(props) {
           </Grid>
           <Grid item xs={6}>
             <TextField
+              required
               id="billingPartyName"
               onChange={handleChange}
               onBlur={handleChange}
@@ -257,6 +266,7 @@ function AccountDetails(props) {
           </Grid>
           <Grid item xs={6}>
             <TextField
+              required
               id="billingOfficePostalCode"
               onChange={handleChange}
               onBlur={handleChange}
@@ -272,6 +282,7 @@ function AccountDetails(props) {
           </Grid>
           <Grid item xs={6}>
             <TextField
+              required
               id="billingEmail"
               onChange={handleChange}
               onBlur={handleChange}
