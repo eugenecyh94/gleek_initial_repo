@@ -23,4 +23,15 @@ AxiosConnect.get = (command) => {
    return axios(options);
 };
 
+AxiosConnect.patch = (command, param, req) => {
+  console.log("axios patch command::", `http://${uri}/${command}/${param}`);
+  const options = {
+    method: "PATCH",
+    url: `${uri}/${command}/${param}`,
+    data: req,
+    withCredentials: true,
+  };
+  return axios(options);
+};
+
 export default AxiosConnect;

@@ -7,6 +7,8 @@ import gleekRoutes from "./routes/gleek/gleek.js";
 import activityRoutes from "./routes/gleekAdmin/activityRoute.js";
 import gleekAdminRoutes from "./routes/gleekAdmin/gleekAdmin.js";
 import vendorRoutes from "./routes/gleekAdmin/vendorRoute.js";
+import client from "./routes/gleekAdmin/client.js";
+
 const app = express();
 
 const port = process.env.PORT;
@@ -37,6 +39,7 @@ app.use(express.json());
 app.use("/gleekAdmin", gleekAdminRoutes);
 app.use("/vendor", vendorRoutes);
 app.use("/activity", activityRoutes);
+app.use("/client", client);
 
 app.use("/gleek", gleekRoutes);
 

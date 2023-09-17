@@ -126,3 +126,29 @@ export const useVendorStore = create((set) => ({
     }
   },
 }));
+
+export const useClientStore = create((set) => ({
+  clients: [],
+  isLoading: false,
+  getClients: async () => {
+    try {
+      set({ isLoading: true });
+      const response = await AxiosConnect.get("/client/getAllClients");
+      set({ clients: response.data });
+      set({ isLoading: false });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  updateClient: async (id, payload) => {
+    try {
+      set(() => ({ isLoading: true }));
+      await AxiosConnect.patch("client/update", id, payload);
+      const response = await AxiosConnect.get("/client/getAllClients");
+      set({ clients: response.data });
+      set(() => ({ isLoading: false }));
+    } catch (error) {
+      console.error(error);
+    }
+  },
+}));
