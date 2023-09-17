@@ -1,8 +1,32 @@
 import React from "react";
 import NavBar from "./NavBar";
-import { Box } from "@mui/material";
+import { Alert, Box, Snackbar } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import Footer from "./Footer";
+import useSnackbarStore from "../zustand/SnackbarStore";
+
+const CustomSnackbar = () => {
+  const { isOpen, message, type, closeSnackbar } = useSnackbarStore();
+
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    closeSnackbar();
+  };
+
+  return (
+    <>
+      {isOpen && (
+        <Snackbar open={isOpen} autoHideDuration={3000} onClose={handleClose}>
+          <Alert onClose={handleClose} severity={type} sx={{ width: "100%" }}>
+            {message}
+          </Alert>
+        </Snackbar>
+      )}
+    </>
+  );
+};
 
 const Layout = ({ children }) => {
   const theme = useTheme();
@@ -14,6 +38,7 @@ const Layout = ({ children }) => {
       flexDirection="column"
       display="flex"
     >
+     <CustomSnackbar/>
       <NavBar />
       <Box
         flex={1}

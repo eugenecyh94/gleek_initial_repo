@@ -3,16 +3,15 @@ import "./App.css";
 import Home from "./components/Home";
 import Layout from "./components/Layout";
 import LoginPage from "./components/LoginPage";
-import SocketConnection from "./utils/SocketConnection";
-import ViewPublishedActivities from "./components/ViewPublishedActivities";
+import ViewPublishedActivities from "./components/activity/ViewPublishedActivities";
 import ProtectedRoute from "./components/ProtectedRoutes.jsx";
 import ChangePassword from "./components/ChangePassword.jsx";
 import ResetPassword from "./components/ResetPassword";
+import ViewAllVendors from "./components/vendor/ViewAllVendors";
 
 function App() {
    return (
       <div>
-         <SocketConnection />
          <Layout>
             <Routes>
                <Route exact path="/" element={<Home />} />
@@ -22,6 +21,15 @@ function App() {
                   element={
                      <ProtectedRoute>
                         <ViewPublishedActivities />
+                     </ProtectedRoute>
+                  }
+               />
+               <Route
+                  exact
+                  path="/viewAllVendors"
+                  element={
+                     <ProtectedRoute>
+                        <ViewAllVendors />
                      </ProtectedRoute>
                   }
                />

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Box,
   TextField,
@@ -18,11 +18,11 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import LockPersonIcon from "@mui/icons-material/LockPerson";
 import { useNavigate } from "react-router-dom";
-import useClientStore from "../zustand/clientStore.js";
+import useClientStore from "../zustand/ClientStore.js";
 
-function LoginPage(props) {
+const LoginPage = () => {
   const theme = useTheme();
-  const { isLoading, clientError, login, client } = useClientStore(); // Destructure the relevant state and actions
+  const { isLoading, clientError, login } = useClientStore();
   const tertiary = theme.palette.tertiary.main;
   const primary = theme.palette.primary.main;
   const [showPassword, setShowPassword] = useState(false);
@@ -37,6 +37,7 @@ function LoginPage(props) {
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
+  // Client validator for email and password
   const handleChange = (event) => {
     const { name, value } = event.target;
     if (name === "email") {
@@ -44,7 +45,14 @@ function LoginPage(props) {
       if (value.trim() === "") {
         setError("Email is required");
       } else {
-        setError("");
+        const re =
+          /^(([^<>()\]\\.,;:\s@"]+(\.[^<>()\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        const result = re.test(String(value).toLowerCase());
+        if (!result) {
+          setError("Invalid Email address format!");
+        } else {
+          setError("");
+        }
       }
     } else if (name === "password") {
       setPassword(value);
@@ -206,6 +214,6 @@ function LoginPage(props) {
       <Box>IMAGE TO BE ADDED LATER</Box>
     </Box>
   );
-}
+};
 
 export default LoginPage;

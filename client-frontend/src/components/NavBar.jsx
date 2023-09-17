@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   AppBar,
   Typography,
@@ -13,23 +13,26 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
-import useClientStore from "../zustand/clientStore.js";
+import useClientStore from "../zustand/ClientStore.js";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import AxiosConnect from "../utils/AxiosConnect.js";
+import SearchBar from "./SearchBar/SearchBar.jsx";
+import SearchIcon from "@mui/icons-material/Search";
 function NavBar(props) {
   const { authenticated, client, setAuthenticated } = useClientStore();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [anchorE2, setAnchorE2] = React.useState(null);
   const open = Boolean(anchorEl);
+  const open2 = Boolean(anchorE2);
+  const boxLivesForeverElement = document.getElementById("boxLivesForever");
   const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
+    setAnchorEl(boxLivesForeverElement);
   };
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const open2 = Boolean(anchorE2);
   const handleClick2 = (event) => {
-    setAnchorE2(event.currentTarget);
+    setAnchorE2(boxLivesForeverElement);
   };
   const handleClose2 = () => {
     setAnchorE2(null);
@@ -38,10 +41,12 @@ function NavBar(props) {
   const theme = useTheme();
   const primary = theme.palette.primary.main;
   const accent = theme.palette.accent.main;
+  const tertiary = theme.palette.tertiary.main;
 
   const logout = async () => {
     try {
-      const response = await AxiosConnect.get("/gleek/logout");
+      const response = await AxiosConnect.get("/gleek/auth/logout");
+      setAnchorE2(null);
       setAuthenticated(false);
       navigate("/");
     } catch (error) {
@@ -50,6 +55,10 @@ function NavBar(props) {
     }
   };
 
+  const [value, setValue] = useState("");
+  const onChange = (event, { newValue }) => {
+    setValue(newValue);
+  };
   return (
     <div>
       <AppBar position="static" elevation={0} bgcolor={primary}>
@@ -76,6 +85,19 @@ function NavBar(props) {
               Gleek
             </Typography>
           </Link>
+          <Box display="flex" flexDirection="row">
+            <SearchBar value={value} onChange={onChange} />
+            <IconButton
+              onClick={() => {
+                navigate("/shop");
+              }}
+              sx={{ marginLeft: "5px" }}
+              color="tertiary"
+              aria-label="search"
+            >
+              <SearchIcon />
+            </IconButton>
+          </Box>
           <Box
             mr={2}
             display="flex"
@@ -110,12 +132,14 @@ function NavBar(props) {
                 </Typography>
               </Button>
             )}
+            <Box id="boxLivesForever" sx={{ height: "58px" }}></Box>
             {!authenticated && (
               <Box sx={{ marginRight: "24px" }}>
                 <Button
                   id="basic-button"
                   aria-controls={open ? "basic-menu" : undefined}
                   aria-haspopup="true"
+                  aria-label="welcome"
                   aria-expanded={open ? "true" : undefined}
                   onClick={handleClick}
                 >
@@ -159,8 +183,8 @@ function NavBar(props) {
             {authenticated && (
               <Box sx={{ marginRight: "24px" }}>
                 <IconButton
-                  id="basic-button"
-                  aria-controls={open2 ? "basic-menu" : undefined}
+                  id="icon-button"
+                  aria-controls={open2 ? "authenticated-menu" : undefined}
                   aria-haspopup="true"
                   aria-expanded={open2 ? "true" : undefined}
                   onClick={handleClick2}
@@ -173,12 +197,12 @@ function NavBar(props) {
                   <AccountBoxIcon />
                 </IconButton>
                 <Menu
-                  id="basic-menu"
+                  id="authenticated-menu"
                   anchorEl={anchorE2}
                   open={open2}
                   onClose={handleClose2}
                   MenuListProps={{
-                    "aria-labelledby": "basic-button",
+                    "aria-labelledby": "icon-button",
                   }}
                   slotProps={{
                     paper: {
@@ -192,10 +216,10 @@ function NavBar(props) {
                   <MenuItem
                     sx={{ px: "32px" }}
                     onClick={() => {
-                      navigate("/login");
+                      navigate("/settings");
                     }}
                   >
-                    Profile
+                    Profile Settings
                   </MenuItem>
                   <MenuItem sx={{ px: "32px" }} onClick={logout}>
                     Log out

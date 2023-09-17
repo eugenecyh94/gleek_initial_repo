@@ -44,7 +44,7 @@ function AccountDetails(props) {
       display="flex"
       flexDirection="row"
       justifyContent="space-evenly"
-      alignItems="center"
+      alignItems="top"
       p={8}
       width={"100%"}
     >
@@ -174,6 +174,35 @@ function AccountDetails(props) {
               label="Office Address"
               value={formData.officeAddress}
               onChange={handleChange}
+              disabled={false}
+              sx={{ width: "100%" }}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Typography color="primary" variant="h7">
+              Billing Information
+            </Typography>
+          </Grid>
+          <Grid item xs={6}>
+            <TextField
+              id="billingAddress"
+              onChange={handleChange}
+              name="billingAddress"
+              placeholder=""
+              label="Billing Address"
+              value={formData.billingAddress}
+              disabled={false}
+              sx={{ width: "100%" }}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField
+              id="billingPartyName"
+              onChange={handleChange}
+              name="billingPartyName"
+              placeholder=""
+              label="Billing Party Name"
+              value={formData.billingPartyName}
               disabled={false}
               sx={{ width: "100%" }}
             />

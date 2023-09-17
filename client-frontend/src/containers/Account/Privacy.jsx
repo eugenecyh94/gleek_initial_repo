@@ -39,7 +39,7 @@ function Privacy(props) {
       display="flex"
       flexDirection="row"
       justifyContent="space-evenly"
-      alignItems="center"
+      alignItems="top"
       p={8}
       sx={{ width: "100%" }}
     >

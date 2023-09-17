@@ -16,9 +16,7 @@ const Layout = ({ children }) => {
             justifyContent="space-evenly"
             alignItems="center"
             sx={{ flexGrow: 1, p: 3 }}>
-            <Box flex={1} mt={8}>
-               {children}
-            </Box>
+            <Box flex={1}>{children}</Box>
          </Box>
       </Box>
    ) : (

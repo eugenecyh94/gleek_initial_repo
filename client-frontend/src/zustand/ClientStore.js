@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import AxiosConnect from "../utils/AxiosConnect";
+import { changePassword } from "./ClientActions.js";
 
 const useClientStore = create((set) => ({
   authenticated: false,
@@ -11,7 +12,8 @@ const useClientStore = create((set) => ({
   login: async (email, password) => {
     set({ isLoading: true, clientError: null });
     try {
-      const response = await AxiosConnect.post("/gleek/login", {
+      console.log("IS THIS RAN?");
+      const response = await AxiosConnect.post("/gleek/auth/login", {
         email: email,
         password: password,
       });
@@ -38,6 +40,30 @@ const useClientStore = create((set) => ({
       client: null, // Clear client data
       authenticated: false, // Set authenticated to false
     });
+  },
+  changePassword: changePassword,
+  register: async (userData) => {
+    try {
+      const response = await AxiosConnect.post(
+        "/gleek/auth/register",
+        userData
+      );
+      const data = response.data;
+      set({ client: data.client, authenticated: true });
+      setTimeout(() => {
+        set({ isLoading: false });
+      }, 500);
+      return true;
+    } catch (error) {
+      console.error(error);
+      setTimeout(() => {
+        set({
+          clientError: error,
+          isLoading: false,
+        });
+      }, 500);
+      return false;
+    }
   },
 }));
 
