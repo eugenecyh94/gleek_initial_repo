@@ -22,6 +22,30 @@ const currentBooking = {
    date: 0,
    status: "",
 };
+
+//Based on survey form suzanna provided
+//5 types, including others, each leading to different inputs/components
+//Talk, Workshop, Learning Journey, Popups, Others
+//Pop up fields haven't been included
+//Most fields commented for ease of initial build
+const currentActivityCreationForm = {
+   vendor: "Admin", //vendor ID, dropdown for admin to select, else default will be admin
+   activityType: "",
+   activityName: "",
+   activityDescription: "",
+   activityTitle: "", //for learning journey
+   additionalDetails: "", //for others.
+   idealDuration: 0,
+   themes: [""],
+   sdg: [""],
+   minParticipants: 0,
+   maxParticipants: 0,
+   availability: "",   //dropdown
+   availabilitySpecifics:"",
+   differentCharges: false,
+   pictures:[""], //to be changed to object after pic upload implemented
+}
+
 const allActivities = [currentActivity];
 const allBookings = [currentBooking];
 
@@ -34,6 +58,10 @@ export const useBookingStore = create((set) => ({
    currentBooking,
    allBookings,
 }));
+
+export const useActivityCreationFormStore = create((set) => ({
+   currentActivityCreationForm
+}))
 
 export const updateCurrentActivity = (selectedActivity) => {
    useActivityStore.setState((prevState) => ({

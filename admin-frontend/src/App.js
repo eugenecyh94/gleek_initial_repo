@@ -7,6 +7,7 @@ import SocketConnection from "./utils/SocketConnection";
 import ViewPublishedActivities from "./components/ViewPublishedActivities";
 import ProtectedRoute from "./components/ProtectedRoutes.jsx";
 import ChangePassword from "./components/ChangePassword.jsx";
+import MultiStepActivityCreationForm from "./components/activityCreation/MultiStepActivityCreationForm";
 
 function App() {
    return (
@@ -33,7 +34,8 @@ function App() {
                      </ProtectedRoute>
                   }
                />
-               <Route path="/login" element={<LoginPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/createActivity" element={<MultiStepActivityCreationForm/>}/>
             </Routes>
          </Layout>
       </div>
