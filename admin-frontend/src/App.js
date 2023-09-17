@@ -7,6 +7,7 @@ import SocketConnection from "./utils/SocketConnection";
 import ViewPublishedActivities from "./components/ViewPublishedActivities";
 import ProtectedRoute from "./components/ProtectedRoutes.jsx";
 import ChangePassword from "./components/ChangePassword.jsx";
+import ResetPassword from "./components/ResetPassword";
 
 function App() {
    return (
@@ -21,6 +22,15 @@ function App() {
                   element={
                      <ProtectedRoute>
                         <ViewPublishedActivities />
+                     </ProtectedRoute>
+                  }
+               />
+               <Route
+                  exact
+                  path="/resetPassword"
+                  element={
+                     <ProtectedRoute>
+                        <ResetPassword />
                      </ProtectedRoute>
                   }
                />
