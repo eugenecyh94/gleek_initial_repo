@@ -52,6 +52,7 @@ const setCookieAndRespond = (res, token, email) => {
  * If an error occurs during the process, the transaction will be rolled back.
  */
 export const postRegister = async (req, res) => {
+  console.log("clientController postRegister(): req.body", req.body)
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -63,6 +64,7 @@ export const postRegister = async (req, res) => {
     }
 
     const { acceptTermsAndConditions, ...newClient } = req.body;
+    console.log("clientController postRegister(): acceptTermsAndConditions", acceptTermsAndConditions)
 
     if (await clientExists(newClient.email)) {
       return res.status(409).json({

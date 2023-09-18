@@ -13,6 +13,8 @@ import {
   Snackbar,
   Alert,
   Grid,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
@@ -22,6 +24,7 @@ import useClientStore from "../zustand/ClientStore";
 import useSnackbarStore from "../zustand/SnackbarStore";
 import registerImage from "../assets/register.png";
 import { validator } from "../utils/ClientFieldsValidator";
+import TermsAndConditionsModal from "../components/Modals/TermsAndConditionsModal";
 
 const RegisterPage = () => {
   // themes
@@ -71,6 +74,11 @@ const RegisterPage = () => {
     passwordVerify: "",
   });
 
+  // Modal
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
   // functions
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -100,6 +108,22 @@ const RegisterPage = () => {
     }));
   };
 
+  const handleAcceptTermsChange = (event) => {
+    const { checked } = event.target;
+
+    setFormData((prevData) => ({
+      ...prevData,
+      acceptTermsAndConditions: checked,
+    }));
+  };
+
+  const disableButton = () => {
+    return (
+      !Object.values(errorData).every((error) => error === "") ||
+      !formData.acceptTermsAndConditions
+    );
+  };
+
   const handleSubmit = async (event) => {
     "";
     event.preventDefault();
@@ -112,6 +136,7 @@ const RegisterPage = () => {
     }
     if (!Object.values(errorData).every((error) => error === "")) {
       openSnackbar("There are errors in your registration details.", "error");
+      return;
     }
     try {
       const responseStatus = await register(formData);
@@ -128,7 +153,6 @@ const RegisterPage = () => {
       openSnackbar(errorMessage, "error");
     }
   };
-
 
   return (
     <Box
@@ -450,6 +474,26 @@ const RegisterPage = () => {
               )}
             </FormControl>
           </Grid>
+          <Grid item xs={12} md={12}>
+            <Box display="flex" flexDirection="row">
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formData.acceptTermsAndConditions}
+                    onChange={handleAcceptTermsChange} // Update formData.acceptTermsAndConditions
+                    name="acceptTermsAndConditions"
+                    color="primary"
+                  />
+                }
+                label="I agree to the Terms & Conditions of Gleek."
+              />
+
+              <Button width="5rem" onClick={handleOpen}>
+                Open T&C
+              </Button>
+              <TermsAndConditionsModal open={open} handleClose={handleClose} />
+            </Box>
+          </Grid>
         </Grid>
 
         <Button
@@ -457,7 +501,7 @@ const RegisterPage = () => {
           mt={4}
           variant="contained"
           type="submit"
-          disabled={!Object.values(errorData).every((error) => error === "")}
+          disabled={disableButton()}
           onClick={handleSubmit}
         >
           <Typography variant="body1">Register</Typography>
