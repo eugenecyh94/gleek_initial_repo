@@ -1,5 +1,29 @@
 import { create } from "zustand";
 import AxiosConnect from "../utils/AxiosConnect.js";
+// import update from "immutability-helper";
+// import { devtools } from "zustand/middleware";
+
+export const updateCurrentActivity = (selectedActivity) => {
+  useActivityStore.setState((prevState) => ({
+    ...prevState,
+    currentActivity: selectedActivity,
+  }));
+  console.log(
+    "activity store current activity updated::",
+    useActivityStore.getState()
+  );
+};
+
+export const updateAllActivity = (newAllActivities) => {
+  useActivityStore.setState((prevState) => ({
+    ...prevState,
+    allActivities: newAllActivities,
+  }));
+  console.log(
+    "activity store all activity updated::",
+    useActivityStore.getState()
+  );
+};
 
 export const useSelectedNavItemStore = create((set) => ({
   selectedItem: "Home",
@@ -79,7 +103,7 @@ export const useActivityStore = create((set) => ({
   getActivity: async () => {
     try {
       set({ isLoading: true });
-      const response = await AxiosConnect.get("activity/all");
+      const response = await AxiosConnect.get("/activity/all");
       set({ activities: response.data });
       set({ isLoading: false });
     } catch (error) {
@@ -94,9 +118,35 @@ export const useVendorStore = create((set) => ({
   getVendors: async () => {
     try {
       set({ isLoading: true });
-      const response = await AxiosConnect.get("vendor/viewAllVendors");
+      const response = await AxiosConnect.get("/vendor/viewAllVendors");
       set({ vendors: response.data });
       set({ isLoading: false });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+}));
+
+export const useClientStore = create((set) => ({
+  clients: [],
+  isLoading: false,
+  getClients: async () => {
+    try {
+      set({ isLoading: true });
+      const response = await AxiosConnect.get("/client/getAllClients");
+      set({ clients: response.data });
+      set({ isLoading: false });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  updateClient: async (id, payload) => {
+    try {
+      set(() => ({ isLoading: true }));
+      await AxiosConnect.patch("client/update", id, payload);
+      const response = await AxiosConnect.get("/client/getAllClients");
+      set({ clients: response.data });
+      set(() => ({ isLoading: false }));
     } catch (error) {
       console.error(error);
     }

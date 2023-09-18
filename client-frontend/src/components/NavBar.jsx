@@ -207,7 +207,7 @@ function NavBar(props) {
                   }}
                 >
                   <MenuItem disabled sx={{ px: "32px" }}>
-                    {client.email}
+                    {client?.email}
                   </MenuItem>
                   <MenuItem
                     sx={{ px: "32px" }}
