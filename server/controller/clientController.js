@@ -9,7 +9,10 @@ import {
   createClient,
   encryptUserPassword,
 } from "../service/clientService.js";
-import { createClientConsent } from "../service/consentService.js";
+import {
+  createClientConsent,
+  updateConsent,
+} from "../service/consentService.js";
 
 const secret = process.env.JWT_SECRET_ClIENT;
 
@@ -31,7 +34,7 @@ const generateJwtToken = async (clientId) => {
 /*
  * Set JWT Token into cookie and return HTTP 200
  */
-const setCookieAndRespond = (res, token, email) => {
+const setCookieAndRespond = (res, token, client) => {
   try {
     res.cookie("token", token, {
       httpOnly: true,
@@ -40,7 +43,8 @@ const setCookieAndRespond = (res, token, email) => {
       secure: true, // Use secure cookies in production
       path: "/", // Set the path to your application root
     });
-    res.status(200).json({ token, client: { email } });
+    console.log(client);
+    res.status(200).json({ token, client: client });
   } catch (cookieError) {
     console.error(cookieError);
     res.status(500).send("Error setting cookie");
@@ -52,7 +56,7 @@ const setCookieAndRespond = (res, token, email) => {
  * If an error occurs during the process, the transaction will be rolled back.
  */
 export const postRegister = async (req, res) => {
-  console.log("clientController postRegister(): req.body", req.body)
+  console.log("clientController postRegister(): req.body", req.body);
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -64,7 +68,10 @@ export const postRegister = async (req, res) => {
     }
 
     const { acceptTermsAndConditions, ...newClient } = req.body;
-    console.log("clientController postRegister(): acceptTermsAndConditions", acceptTermsAndConditions)
+    console.log(
+      "clientController postRegister(): acceptTermsAndConditions",
+      acceptTermsAndConditions
+    );
 
     if (await clientExists(newClient.email)) {
       return res.status(409).json({
@@ -87,7 +94,8 @@ export const postRegister = async (req, res) => {
     const token = await generateJwtToken(createdClient.id);
     await session.commitTransaction();
     session.endSession();
-    setCookieAndRespond(res, token, createdClient.email);
+    const { password, ...clientWithoutPassword } = createdClient.toObject();
+    setCookieAndRespond(res, token, clientWithoutPassword);
   } catch (err) {
     console.error(err);
     await session.abortTransaction();
@@ -170,6 +178,9 @@ export const clearCookies = async (req, res) => {
   res.status(200).end();
 };
 
+/*
+ * Change password
+ */
 export const postChangePassword = async (req, res) => {
   const errors = validationResult(req);
 
@@ -238,6 +249,57 @@ export const updateClientAccountDetails = async (req, res) => {
       success: true,
       message: "Your profile is successfully updated!",
       client: updatedClient,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json("Server Error");
+  }
+};
+
+/*
+ * Update the client settings (Receive marketing emails)
+ *
+ */
+export const updateConsentSettings = async (req, res) => {
+  try {
+    const client = req.user;
+    if (!client) {
+      return res.status(404).send("Client not found. Token may have expired.");
+    }
+
+    const body = req.body;
+    console.log("updatePrivacySettings: body", body);
+
+    const updateData = body;
+
+    const updatedConsent = await updateConsent(client, updateData);
+
+    console.log("updatePrivacySettings: Updated consent", updatedConsent);
+
+    res.status(200).json({
+      msg: "Your privacy settings has been successfully updated!",
+      consent: updatedConsent,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json("Server Error");
+  }
+};
+
+/*
+ * Change password
+ */
+export const getConsentSettings = async (req, res) => {
+  try {
+    const client = req.user;
+    if (!client) {
+      return res.status(404).send("Client not found.");
+    }
+    const settings = await getClientConsent(client.id);
+
+    res.status(200).json({
+      msg: "Retrieved consent settings.",
+      consent: settings,
     });
   } catch (e) {
     console.error(e);

@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
   Typography,
-  Modal,
   FormGroup,
   FormControlLabel,
   Checkbox,
@@ -11,28 +10,51 @@ import {
 
 import AccountSidebar from "./AccountSidebar";
 import TermsAndConditionsModal from "../../components/Modals/TermsAndConditionsModal";
+import AxiosConnect from "../../utils/AxiosConnect";
+import useSnackbarStore from "../../zustand/SnackbarStore";
 
 function Privacy(props) {
   // Modal
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const { openSnackbar, closeSnackbar } = useSnackbarStore();
+  const [settings, setSettings] = useState({});
+  useEffect(() => {
+    const subscribeConsent = async () => {
+      try {
+        const response = await AxiosConnect.patch("/gleek/client/consent");
 
-  const mockedData = {
-    marketingUpdates: true,
+        setSettings(response.data.consent || {}); // Provide an initial value here
+      } catch (err) {
+        console.error(err);
+        openSnackbar(err.msg, "error");
+      }
+    };
+    subscribeConsent();
+  }, []);
+
+  const updateConsent = async (event) => {
+    event.preventDefault();
+    try {
+      const response = await AxiosConnect.patch(
+        "/gleek/client/consent",
+        settings
+      );
+
+      openSnackbar(response.data.msg, "success");
+    } catch (err) {
+      console.error(err);
+      openSnackbar(err.msg, "error");
+    }
   };
-  const [formData, setFormData] = useState(mockedData);
 
   const handleCheckboxChange = (event) => {
     const { name, checked } = event.target;
-    setFormData((prevData) => ({
+    setSettings((prevData) => ({
       ...prevData,
       [name]: checked,
     }));
-  };
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(formData);
   };
 
   return (
@@ -65,23 +87,42 @@ function Privacy(props) {
             Privacy Settings
           </Typography>
         </Box>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={updateConsent}>
           <FormGroup>
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={formData.marketingUpdates}
+                  checked={!!settings.receiveMarketing}
                   onChange={handleCheckboxChange}
-                  name="marketingUpdates"
+                  name="receiveMarketing"
                   color="primary"
                 />
               }
               label="I agree to receive marketing updates from Gleek via email."
             />
             <FormControlLabel
-              control={<Checkbox defaultChecked />}
+              control={
+                <Checkbox
+                  checked={!!settings.receiveEmails}
+                  onChange={handleCheckboxChange}
+                  name="receiveEmails"
+                  color="primary"
+                />
+              }
+              label="I agree to receive email updates from Gleek."
+              disabled
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={!!settings.acceptTermsAndConditions}
+                  onChange={handleCheckboxChange}
+                  name="acceptTermsAndConditions"
+                  color="primary"
+                />
+              }
               label="I agree to the Terms & Conditions of Gleek."
-              disabled={true}
+              disabled
             />
 
             <Button width="5rem" onClick={handleOpen}>

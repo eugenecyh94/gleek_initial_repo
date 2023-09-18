@@ -60,6 +60,7 @@ const useClientStore = create((set) => ({
         userData
       );
       const data = response.data;
+      console.log("CLIENT DATA AFTER REGISTER", data.client)
       set({ client: data.client, authenticated: true });
       setTimeout(() => {
         set({ isLoading: false });
