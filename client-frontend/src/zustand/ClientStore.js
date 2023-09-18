@@ -60,20 +60,14 @@ const useClientStore = create((set) => ({
         userData
       );
       const data = response.data;
+      console.log("CLIENT DATA AFTER REGISTER", data.client)
       set({ client: data.client, authenticated: true });
       setTimeout(() => {
         set({ isLoading: false });
       }, 500);
       return true;
     } catch (error) {
-      console.error(error);
-      setTimeout(() => {
-        set({
-          clientError: error,
-          isLoading: false,
-        });
-      }, 500);
-      return false;
+      throw error;
     }
   },
   updateAccount: async (userData) => {
