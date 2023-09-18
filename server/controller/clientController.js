@@ -6,9 +6,7 @@ import jwt from "jsonwebtoken";
 const secret = process.env.JWT_SECRET_ClIENT;
 
 export const postRegister = async (req, res) => {
-
   const errors = validationResult(req);
-
 
   if (!errors.isEmpty()) {
     // 422 status due to validation errors
@@ -16,7 +14,6 @@ export const postRegister = async (req, res) => {
   }
   try {
     const newClient = req.body;
-    
 
     // check if client already exists
     // Validate if client exists in our database
@@ -31,7 +28,7 @@ export const postRegister = async (req, res) => {
     // Create user in our database
     const client = await Client.create({
       email: newClient.email.toLowerCase(), // sanitize: convert email to lowercase
-      ...newClient
+      ...newClient,
     });
 
     // Encrypt user password
@@ -102,7 +99,10 @@ export const postLogin = async (req, res) => {
           console.error(cookieError);
           return res.status(500).send("Error setting cookie");
         }
-        res.status(200).json({ token, client: { email: client.email } });
+        const { password, ...clientWithoutPassword } = client.toObject();
+
+        // console.log(clientWithoutPassword)
+        res.status(200).json({ token, client: clientWithoutPassword });
       });
     } else {
       res.status(400).send("Invalid Credentials");
@@ -127,7 +127,8 @@ export const validateToken = async (req, res) => {
     if (!client) {
       return res.status(401).send("Client not found");
     }
-    res.status(200).json({ token, client: { email: client.email } });
+    const { password, ...clientWithoutPassword } = client.toObject();
+    res.status(200).json({ token, client: clientWithoutPassword });
   } catch (err) {
     // If verification fails (e.g., due to an invalid or expired token), send an error response
     return res.status(401).send("Invalid Token");
@@ -143,7 +144,7 @@ export const postChangePassword = async (req, res) => {
   const errors = validationResult(req);
 
   const client = req.user;
-  console.log(client);
+  // console.log(client);
 
   if (!errors.isEmpty()) {
     // 422 status due to validation errors
@@ -163,12 +164,54 @@ export const postChangePassword = async (req, res) => {
     const updatedClient = await Client.findOneAndUpdate(
       { _id: client.id },
       { password: hashed },
-      { new: true },
+      { new: true }
     );
 
     return res.status(200).json("Password successfully changed.");
   } catch (err) {
     console.error(err); // Log the error
     return res.status(500).send("Server Error");
+  }
+};
+
+/*
+ * Update the client account details (except for email and password)
+ */
+export const updateClientAccountDetails = async (req, res) => {
+
+  try {
+    const client = req.user;
+    if (!client) {
+      return res.status(404).send("Client not found. Token may have expired.");
+    }
+
+    const body = req.body;
+    console.log("updateClientAccountDetails: body", body);
+
+    // remove passwword and email in case it is sent along in the body
+    const { password, email, ...updateData } = body;
+
+    console.log("updateClientAccountDetails: UpdateData", updateData);
+    const updatedClient = await Client.findOneAndUpdate(
+      { _id: client.id },
+      { ...updateData },
+      {
+        new: true,
+        select: {
+          password: 0,
+        },
+      }
+    );
+
+    console.log("updateClientAccountDetails: Updated client", updatedClient);
+
+    res.status(200).json({
+      success: true,
+      message: "Your profile is successfully updated!",
+      client: updatedClient,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json("Server Error");
   }
 };

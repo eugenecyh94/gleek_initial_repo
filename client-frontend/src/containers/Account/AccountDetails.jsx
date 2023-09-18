@@ -1,26 +1,30 @@
 import React, { useState } from "react";
 import { Box, TextField, Button, Typography, Grid } from "@mui/material";
 import AccountSidebar from "./AccountSidebar";
+import useClientStore from "../../zustand/ClientStore";
+import useSnackbarStore from "../../zustand/SnackbarStore";
+import { validator } from "../../utils/ClientFieldsValidator";
 
 function AccountDetails(props) {
-  const user = {
-    email: "email@email.com",
-    name: "name",
-    jobTitle: "job",
-    team: "team",
-    companyName: "company name",
-    officeAddress: "office address",
+  const { client, updateAccount, clientError } = useClientStore();
+  const { openSnackbar, closeSnackbar } = useSnackbarStore();
+  const [formData, setFormData] = useState(client);
+  const [errorData, setErrorData] = useState({
+    password: "",
+    email: "",
+    name: "",
+    jobTitle: "",
+    team: "",
+    companyName: "",
+    officeAddress: "",
     billingAddress: "",
     billingPartyName: "",
     billingEmail: "",
+    officePostalCode: "",
     billingOfficePostalCode: "",
-    officePostalCode: "123456",
-
-    phoneNumber: "12311231",
+    phoneNumber: "",
     passwordVerify: "",
-  };
-
-  const [formData, setFormData] = useState(user);
+  });
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -29,16 +33,30 @@ function AccountDetails(props) {
       [name]: value,
     }));
 
-    // const errors = validator(formData, name)
-    // setErrorData((prevData) => ({
-    //   ...prevData,
-    //   [name]: errors[name] || "", // Replace the error with an empty string if it's empty
-    // }))
+    const errors = validator(formData, name);
+
+    setErrorData((prevData) => ({
+      ...prevData,
+      [name]: errors[name] || "",
+    }));
   };
 
-  // const theme = useTheme();
-  // const tertiary = theme.palette.tertiary.main;
-  // const primary = theme.palette.primary.main;
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      const responseStatus = await updateAccount(formData);
+
+      responseStatus &&
+        openSnackbar("Profile updated successfully!", "success");
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.errors?.[0]?.msg ||
+        error?.response?.data ||
+        null;
+      openSnackbar(errorMessage, "error");
+    }
+  };
+
   return (
     <Box
       display="flex"
@@ -77,62 +95,82 @@ function AccountDetails(props) {
           </Grid>
           <Grid item xs={6}>
             <TextField
+              required
               id="name"
               onChange={handleChange}
+              onBlur={handleChange}
               name="name"
               placeholder="Name"
               label="Name"
               value={formData.name}
               disabled={false}
               sx={{ width: "100%" }}
+              helperText={errorData.name}
+              error={!!errorData.name}
             />
           </Grid>
           <Grid item xs={6}>
             <TextField
+              required
               id="email"
               onChange={handleChange}
+              onBlur={handleChange}
               name="email"
               placeholder="Email"
               label="Email"
               value={formData.email}
-              disabled={false}
+              disabled={true}
               sx={{ width: "100%" }}
+              helperText={errorData.email}
+              error={!!errorData.email}
             />
           </Grid>
           <Grid item xs={6}>
             <TextField
+              required
               id="phoneNumber"
               name="phoneNumber"
               placeholder="Phone Number"
               label="Phone Number"
               value={formData.phoneNumber}
               onChange={handleChange}
+              onBlur={handleChange}
               disabled={false}
               sx={{ width: "100%" }}
+              helperText={errorData.phoneNumber}
+              error={!!errorData.phoneNumber}
             />
           </Grid>
           <Grid item xs={6}>
             <TextField
+              required
               id="jobTitle"
               name="jobTitle"
               placeholder="Job Title"
               label="Job Title"
               value={formData.jobTitle}
               onChange={handleChange}
+              onBlur={handleChange}
               disabled={false}
               sx={{ width: "100%" }}
+              helperText={errorData.jobTitle}
+              error={!!errorData.jobTitle}
             />
           </Grid>
           <Grid item xs={6}>
             <TextField
+              required
               id="team"
               name="team"
               placeholder="Team"
               label="Team"
               value={formData.team}
               onChange={handleChange}
+              onBlur={handleChange}
               disabled={false}
               sx={{ width: "100%" }}
+              helperText={errorData.team}
+              error={!!errorData.team}
             />
           </Grid>
           <Grid item xs={12}>
@@ -142,31 +180,39 @@ function AccountDetails(props) {
           </Grid>
           <Grid item xs={6}>
             <TextField
+              required
               id="companyName"
               name="companyName"
               placeholder="Company Name"
               label="Company Name"
               value={formData.companyName}
               onChange={handleChange}
+              onBlur={handleChange}
               disabled={false}
               sx={{ width: "100%" }}
+              helperText={errorData.companyName}
+              error={!!errorData.companyName}
             />
           </Grid>
           <Grid item xs={6}>
             <TextField
-              id="officePostalCode"
               required
+              id="officePostalCode"
               name="officePostalCode"
               placeholder="Office Postal Code"
               label="Office Postal Code"
               value={formData.officePostalCode}
               onChange={handleChange}
+              onBlur={handleChange}
               disabled={false}
               sx={{ width: "100%" }}
+              helperText={errorData.officePostalCode}
+              error={!!errorData.officePostalCode}
             />
           </Grid>
           <Grid item xs={12}>
             <TextField
+              required
               multiline
               id="officeAddress"
               name="officeAddress"
@@ -174,8 +220,11 @@ function AccountDetails(props) {
               label="Office Address"
               value={formData.officeAddress}
               onChange={handleChange}
+              onBlur={handleChange}
               disabled={false}
               sx={{ width: "100%" }}
+              helperText={errorData.officeAddress}
+              error={!!errorData.officeAddress}
             />
           </Grid>
           <Grid item xs={12}>
@@ -185,36 +234,77 @@ function AccountDetails(props) {
           </Grid>
           <Grid item xs={6}>
             <TextField
+              required
               id="billingAddress"
               onChange={handleChange}
+              onBlur={handleChange}
               name="billingAddress"
               placeholder=""
               label="Billing Address"
               value={formData.billingAddress}
               disabled={false}
               sx={{ width: "100%" }}
+              helperText={errorData.billingAddress}
+              error={!!errorData.billingAddress}
             />
           </Grid>
           <Grid item xs={6}>
             <TextField
+              required
               id="billingPartyName"
               onChange={handleChange}
+              onBlur={handleChange}
               name="billingPartyName"
               placeholder=""
               label="Billing Party Name"
               value={formData.billingPartyName}
               disabled={false}
               sx={{ width: "100%" }}
+              helperText={errorData.billingPartyName}
+              error={!!errorData.billingPartyName}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField
+              required
+              id="billingOfficePostalCode"
+              onChange={handleChange}
+              onBlur={handleChange}
+              name="billingOfficePostalCode"
+              placeholder=""
+              label="Billing Office Postal Code"
+              value={formData.billingOfficePostalCode}
+              disabled={false}
+              sx={{ width: "100%" }}
+              helperText={errorData.billingOfficePostalCode}
+              error={!!errorData.billingOfficePostalCode}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField
+              required
+              id="billingEmail"
+              onChange={handleChange}
+              onBlur={handleChange}
+              name="billingEmail"
+              placeholder="Billing Email"
+              label="Billing Email"
+              value={formData.billingEmail}
+              disabled={false}
+              sx={{ width: "100%" }}
+              helperText={errorData.billingEmail}
+              error={!!errorData.billingEmail}
             />
           </Grid>
         </Grid>
-        Update when client model is confirmed.
+
         <Button
           sx={{ marginTop: "32px" }}
           mt={4}
           variant="contained"
           type="submit"
-          disabled={true}
+          disabled={!Object.values(errorData).every((error) => error === "")}
+          onClick={handleSubmit}
         >
           <Typography variant="body1">Update</Typography>
         </Button>
