@@ -50,6 +50,8 @@ const RegisterPage = () => {
     billingOfficePostalCode: "",
     phoneNumber: "",
     passwordVerify: "",
+    // Client consent
+    acceptTermsAndConditions: false,
   });
 
   const [errorData, setErrorData] = useState({
@@ -68,17 +70,6 @@ const RegisterPage = () => {
     phoneNumber: "",
     passwordVerify: "",
   });
-
-  // useEffect(() => {
-  //   // Validate initial form data when the component mounts
-  //   for (const fieldName in formData) {
-  //     let errors = validator(formData, fieldName);
-  //     setErrorData((prevData) => ({
-  //       ...prevData,
-  //       [fieldName]: errors[fieldName] || "",
-  //     }));
-  //   }
-  // }, []);
 
   // functions
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -109,8 +100,8 @@ const RegisterPage = () => {
     }));
   };
 
-
   const handleSubmit = async (event) => {
+    "";
     event.preventDefault();
     for (const fieldName in formData) {
       let errors = validator(formData, fieldName);
@@ -119,26 +110,25 @@ const RegisterPage = () => {
         [fieldName]: errors[fieldName] || "",
       }));
     }
-
     if (!Object.values(errorData).every((error) => error === "")) {
-      return;
+      openSnackbar("There are errors in your registration details.", "error");
     }
+    try {
+      const responseStatus = await register(formData);
 
-    const responseStatus = await register(formData);
-
-    if (responseStatus) {
-      openSnackbar("Register was successful!", "success");
-      navigate("/");
-    } else {
-      const error =
-        clientError &&
-        clientError.response &&
-        clientError.response.data &&
-        (clientError.response.data.errors?.[0]?.msg ||
-          clientError.response.data);
-      openSnackbar(error, "error");
+      if (responseStatus) {
+        openSnackbar("Register was successful!", "success");
+        navigate("/");
+      }
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.errors?.[0]?.msg ||
+        error?.response?.data ||
+        null;
+      openSnackbar(errorMessage, "error");
     }
   };
+
 
   return (
     <Box
