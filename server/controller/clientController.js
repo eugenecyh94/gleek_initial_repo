@@ -6,9 +6,7 @@ import jwt from "jsonwebtoken";
 const secret = process.env.JWT_SECRET_ClIENT;
 
 export const postRegister = async (req, res) => {
-
   const errors = validationResult(req);
-
 
   if (!errors.isEmpty()) {
     // 422 status due to validation errors
@@ -16,7 +14,6 @@ export const postRegister = async (req, res) => {
   }
   try {
     const newClient = req.body;
-    
 
     // check if client already exists
     // Validate if client exists in our database
@@ -31,7 +28,7 @@ export const postRegister = async (req, res) => {
     // Create user in our database
     const client = await Client.create({
       email: newClient.email.toLowerCase(), // sanitize: convert email to lowercase
-      ...newClient
+      ...newClient,
     });
 
     // Encrypt user password
@@ -98,6 +95,13 @@ export const postLogin = async (req, res) => {
             secure: true, // Use secure cookies in production
             path: "/", // Set the path to your application root
           });
+          res.cookie("userRole", "Client", {
+            httpOnly: true,
+            maxAge: 3600000,
+            sameSite: "None",
+            secure: true,
+            path: "/",
+          });
         } catch (cookieError) {
           console.error(cookieError);
           return res.status(500).send("Error setting cookie");
@@ -163,7 +167,7 @@ export const postChangePassword = async (req, res) => {
     const updatedClient = await Client.findOneAndUpdate(
       { _id: client.id },
       { password: hashed },
-      { new: true },
+      { new: true }
     );
 
     return res.status(200).json("Password successfully changed.");

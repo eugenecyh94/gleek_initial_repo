@@ -20,7 +20,7 @@ import LockPersonIcon from "@mui/icons-material/LockPerson";
 import { useNavigate } from "react-router-dom";
 import useClientStore from "../zustand/ClientStore.js";
 
-const LoginPage = () => {
+const LoginPage = (props) => {
   const theme = useTheme();
   const { isLoading, clientError, login } = useClientStore();
   const tertiary = theme.palette.tertiary.main;
@@ -66,7 +66,7 @@ const LoginPage = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const responseStatus = await login(email, password);
+    const responseStatus = await props.loginMethod(email, password);
 
     if (responseStatus) {
       setOpen(true);
@@ -85,6 +85,13 @@ const LoginPage = () => {
     setOpenError(false);
   };
 
+  const errorMessage = (error) => {
+    if (error && error.response && error.response.data) {
+      return error.response.data.errors?.[0]?.msg || error.response.data;
+    }
+    return null;
+  };
+
   return (
     <Box
       display="flex"
@@ -99,11 +106,7 @@ const LoginPage = () => {
       </Snackbar>
       <Snackbar open={openError} autoHideDuration={6000} onClose={handleClose}>
         <Alert onClose={handleClose} severity="error" sx={{ width: "100%" }}>
-          {clientError &&
-            clientError.response &&
-            clientError.response.data &&
-            (clientError.response.data.errors?.[0]?.msg ||
-              clientError.response.data)}
+          {errorMessage(props.error)}
         </Alert>
       </Snackbar>
       <form onSubmit={handleSubmit}>
@@ -122,7 +125,7 @@ const LoginPage = () => {
             </Box>
           </Box>
           <Typography color="secondary" variant="h5">
-            Login
+            {props.title}
           </Typography>
           <TextField
             size="small"
@@ -180,7 +183,7 @@ const LoginPage = () => {
               </FormHelperText>
             )}
           </FormControl>
-          {!isLoading && (
+          {!props.loading && (
             <Button
               sx={{ marginTop: "32px" }}
               mt={4}
@@ -190,14 +193,14 @@ const LoginPage = () => {
               <Typography variant="body1">Login</Typography>
             </Button>
           )}
-          {isLoading && (
+          {props.loading && (
             <CircularProgress sx={{ margin: "auto", marginTop: "32px" }} />
           )}
           <Button
             sx={{ marginTop: "16px" }}
             variant="text"
             onClick={() => {
-              navigate("/register");
+              navigate(props.registerlink);
             }}
           >
             <Typography fontWeight={700} color="secondary" variant="body2">

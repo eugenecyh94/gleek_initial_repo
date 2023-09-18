@@ -13,15 +13,14 @@ import Privacy from "./containers/Account/Privacy";
 import PasswordChange from "./containers/Account/PasswordChange";
 import ProfilePicture from "./containers/Account/ProfilePicture";
 import ActivityDetailsPage from "./containers/ActivityDetailsPage";
+import useClientStore from "./zustand/ClientStore";
+import VendorRegisterPage from "./containers/Vendor/VendorRegisterPage";
 
 function App() {
-
-  
-
+  const { isLoading, clientError, login } = useClientStore();
   return (
     <div>
       <SocketConnection />
-
       <Layout>
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -90,8 +89,26 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+          <Route
+            path="/client/login"
+            element={
+              <LoginPage
+                loading={isLoading}
+                error={clientError}
+                title="Client Login"
+                registerlink="/client/register"
+                loginMethod={login}
+              />
+            }
+          />
+          <Route path="/client/register" element={<RegisterPage />} />
+          <Route
+            path="/vendor/login"
+            element={
+              <LoginPage title="Vendor Login" registerlink="/vendor/register" />
+            }
+          />
+          <Route path="/vendor/register" element={<VendorRegisterPage />} />
         </Routes>
       </Layout>
     </div>

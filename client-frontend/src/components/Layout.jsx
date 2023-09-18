@@ -38,7 +38,7 @@ const Layout = ({ children }) => {
       flexDirection="column"
       display="flex"
     >
-     <CustomSnackbar/>
+      <CustomSnackbar />
       <NavBar />
       <Box
         flex={1}
