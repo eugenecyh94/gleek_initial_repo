@@ -19,24 +19,32 @@ import { useTheme } from "@mui/material/styles";
 import LockPersonIcon from "@mui/icons-material/LockPerson";
 import { useNavigate } from "react-router-dom";
 import useClientStore from "../zustand/ClientStore.js";
+import useSnackbarStore from "../zustand/SnackbarStore.js";
+
+import loginImage from "../assets/login.png";
 
 const LoginPage = () => {
   const theme = useTheme();
   const { isLoading, clientError, login } = useClientStore();
-  const tertiary = theme.palette.tertiary.main;
-  const primary = theme.palette.primary.main;
+  const { openSnackbar, closeSnackbar } = useSnackbarStore();
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const handleClickShowPassword = () => setShowPassword((show) => !show);
+
   const [passwordError, setPasswordError] = useState("");
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [openError, setOpenError] = useState(false);
+
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
+
+  const tertiary = theme.palette.tertiary.main;
+  const primary = theme.palette.primary.main;
+
   // Client validator for email and password
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -63,16 +71,21 @@ const LoginPage = () => {
       }
     }
   };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    try {
+      const responseStatus = await login(email, password);
 
-    const responseStatus = await login(email, password);
-
-    if (responseStatus) {
-      setOpen(true);
-      navigate("/");
-    } else {
-      setOpenError(true);
+      if (responseStatus) {
+        openSnackbar("Logged in!", "success");
+        navigate("/");
+      } else {
+        setOpenError(true);
+      }
+    } catch (err) {
+      console.error(err);
+      openSnackbar("Invalid login.", "error");
     }
   };
 
@@ -92,38 +105,38 @@ const LoginPage = () => {
       justifyContent="space-evenly"
       alignItems="center"
     >
-      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
-        <Alert onClose={handleClose} severity="success" sx={{ width: "100%" }}>
-          Login is successful!
-        </Alert>
-      </Snackbar>
-      <Snackbar open={openError} autoHideDuration={6000} onClose={handleClose}>
-        <Alert onClose={handleClose} severity="error" sx={{ width: "100%" }}>
-          {clientError &&
-            clientError.response &&
-            clientError.response.data &&
-            (clientError.response.data.errors?.[0]?.msg ||
-              clientError.response.data)}
-        </Alert>
-      </Snackbar>
       <form onSubmit={handleSubmit}>
         <Box
           display="flex"
           flexDirection="column"
           p={4}
-          bgcolor={tertiary}
+          bgcolor={"grey.50"}
           borderRadius={10}
           sx={{ width: "25rem" }}
-          boxShadow={2}
+          boxShadow={1}
         >
-          <Box display="flex" flexDirection="column" alignItems="center">
-            <Box borderRadius="50%" bgcolor={primary} p={1}>
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            padding={3}
+          >
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              width="50px"
+              height="50px"
+              bgcolor={primary}
+              borderRadius="50%"
+            >
               <LockPersonIcon fontSize="large" color="accent" />
             </Box>
+            <Typography color="secondary" variant="h3">
+              Login
+            </Typography>
           </Box>
-          <Typography color="secondary" variant="h5">
-            Login
-          </Typography>
+
           <TextField
             size="small"
             autoFocus
@@ -211,7 +224,16 @@ const LoginPage = () => {
           </Button>
         </Box>
       </form>
-      <Box>IMAGE TO BE ADDED LATER</Box>
+      <Box
+        width={"30%"}
+        component="img"
+        sx={{
+          maxHeight: "auto",
+          maxWidth: "100%",
+        }}
+        alt="Illustrations by Storyset"
+        src={loginImage}
+      />
     </Box>
   );
 };
