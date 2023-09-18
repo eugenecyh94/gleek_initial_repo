@@ -19,14 +19,13 @@ const HomePageNavBar = () => {
    const navigate = useNavigate();
    const settings = ["Profile", "Account", "Dashboard", "Logout"];
    const [anchorElUser, setAnchorElUser] = useState(null);
-   const { authenticated, admin, logout } = useAdminStore();
+   const { authenticated, admin, logout, login } = useAdminStore();
 
    const handleOpenUserMenu = (event) => {
       setAnchorElUser(event.currentTarget);
    };
 
    const handleLogout = async (event) => {
-      console.log("Function entered", event);
       const response = await logout();
       navigate("/");
    };
@@ -90,10 +89,23 @@ const HomePageNavBar = () => {
                            </Typography>
                         </Link>
                      </MenuItem>
+                     <MenuItem
+                        key="manageProfile"
+                        onClick={handleCloseUserMenu}>
+                        <Link
+                           to="/manageProfile"
+                           style={{ all: "unset", cursor: "pointer" }}>
+                           <Typography textAlign="center">
+                              Manage Profile
+                           </Typography>
+                        </Link>
+                     </MenuItem>
                   </Menu>
                </Box>
             ) : (
-               <></>
+               <Link to="/login" style={{ all: "unset", cursor: "pointer" }}>
+                  <Typography textAlign="center">Login</Typography>
+               </Link>
             )}
          </Toolbar>
       </AppBar>

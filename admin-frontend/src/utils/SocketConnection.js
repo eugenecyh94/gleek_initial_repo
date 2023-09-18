@@ -8,8 +8,6 @@ const SocketConnection = () => {
       try {
          const response = await AxiosConnect.post("/gleekAdmin/validate-token");
          const data = response.data;
-         console.log(data);
-
          setAuthenticated(true);
          setAdmin(data.admin);
       } catch (error) {

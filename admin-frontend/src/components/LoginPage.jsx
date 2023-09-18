@@ -140,9 +140,7 @@ function LoginPage(props) {
                            <LockPersonIcon fontSize="large" color="accent" />
                         </Box>
                      </Box>
-                     <Typography color="secondary" variant="h5">
-                        Login
-                     </Typography>
+                     <Typography variant="h5">Login</Typography>
                      <TextField
                         size="small"
                         autoFocus
@@ -213,22 +211,8 @@ function LoginPage(props) {
                            sx={{ margin: "auto", marginTop: "32px" }}
                         />
                      )}
-                     <Button
-                        sx={{ marginTop: "16px" }}
-                        variant="text"
-                        onClick={() => {
-                           navigate("/register");
-                        }}>
-                        <Typography
-                           fontWeight={700}
-                           color="secondary"
-                           variant="body2">
-                           Don't have an account? Sign Up
-                        </Typography>
-                     </Button>
                      <Button sx={{ marginTop: "32px" }} variant="text">
                         <Typography
-                           color="secondary"
                            variant="body2"
                            onClick={handleForgotPassword}>
                            Forgot Password?

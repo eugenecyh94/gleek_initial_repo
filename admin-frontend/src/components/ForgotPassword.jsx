@@ -28,26 +28,28 @@ const ForgotPassword = () => {
    // states
    // user input
    const [email, setEmail] = useState("");
-   const [error, setError] = useState("");
+   const [emailError, setEmailError] = useState("");
 
    // functions
 
    const handleSubmit = async (event) => {
       event.preventDefault();
 
-      if (!error) {
+      if (!emailError && email != "") {
          const response = await recoverPassword(email);
          if (response) {
             window.alert(response);
          } else {
             window.alert("Error Ocurred while performing request!");
          }
+      } else {
+         setEmailError(validateEmail(email));
       }
    };
 
    const handleChange = async (event) => {
       const { value } = event.target;
-      setError(validateEmail(value));
+      setEmailError(validateEmail(value));
       setEmail(value);
    };
 
@@ -61,12 +63,12 @@ const ForgotPassword = () => {
          const result = re.test(String(data).toLowerCase());
          if (!result) error = "Invalid Email address format!";
       }
+      console.log(error);
       return error;
    };
 
    return (
-      <Layout>
-         <Toolbar />
+      <>
          <Box
             display="flex"
             flexDirection="row"
@@ -90,32 +92,33 @@ const ForgotPassword = () => {
                      </Box>
                   </Box>
                   <Typography variant="h5">Recover Password</Typography>
-                  <Box display="flex" flexDirection="row">
-                     <FormControl
-                        sx={{ marginTop: "24px" }}
-                        size="small"
-                        required
-                        onChange={handleChange}
-                        variant="outlined">
-                        <InputLabel htmlFor="outlined-adornment-password">
-                           Email Address
-                        </InputLabel>
-                        <OutlinedInput id="email" name="email" label="Email" />
-                     </FormControl>
-                  </Box>
+                  <TextField
+                     size="small"
+                     autoComplete="on"
+                     id="email"
+                     required
+                     name="email"
+                     placeholder="Email"
+                     onChange={handleChange}
+                     onBlur={handleChange}
+                     label="Email"
+                     value={email}
+                     helperText={emailError}
+                     error={emailError.length > 0}
+                     sx={{ marginTop: "32px" }}></TextField>
                   <Button
                      sx={{ marginTop: "24px" }}
                      mt={4}
                      variant="contained"
                      type="submit"
-                     disabled={!error === "" || email.length === 0}
+                     disabled={emailError != ""}
                      onClick={handleSubmit}>
                      <Typography variant="body1">Send Recovery Link</Typography>
                   </Button>
                </Box>
             </form>
          </Box>
-      </Layout>
+      </>
    );
 };
 

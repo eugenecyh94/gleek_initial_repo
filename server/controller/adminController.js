@@ -187,7 +187,6 @@ export const validateToken = async (req, res) => {
 
    try {
       const decoded = jwt.verify(token, secret);
-      console.log(decoded.admin);
       const admin = await Admin.findById(decoded.admin.id);
 
       if (!admin) {
@@ -318,7 +317,6 @@ export const recoverPassword = async (req, res) => {
 
 export const resetPassword = async (req, res) => {
    const token = req.params.token;
-   console.log(token);
    if (!token) {
       return res.status(403).send("Token Not Found!");
    }
