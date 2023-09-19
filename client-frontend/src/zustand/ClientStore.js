@@ -57,10 +57,10 @@ const useClientStore = create((set) => ({
     try {
       const response = await AxiosConnect.post(
         "/gleek/auth/register",
-        userData
+        userData,
       );
       const data = response.data;
-      console.log("CLIENT DATA AFTER REGISTER", data.client)
+      console.log("CLIENT DATA AFTER REGISTER", data.client);
       set({ client: data.client, authenticated: true });
       setTimeout(() => {
         set({ isLoading: false });
@@ -74,7 +74,7 @@ const useClientStore = create((set) => ({
     try {
       const response = await AxiosConnect.patch(
         "/gleek/client/updateAccount",
-        userData
+        userData,
       );
       const data = response.data;
       set({ client: data.client });

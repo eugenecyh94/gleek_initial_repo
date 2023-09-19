@@ -49,7 +49,7 @@ export const updateVendor = async (req, res) => {
     const updatedVendor = await VendorModel.findOneAndUpdate(
       { _id: req.params.id },
       { ...updateData },
-      { new: true }
+      { new: true },
     );
     return res.status(201).json(updatedVendor);
   } catch (e) {

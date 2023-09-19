@@ -39,7 +39,7 @@ function Privacy(props) {
     try {
       const response = await AxiosConnect.patch(
         "/gleek/client/consent",
-        settings
+        settings,
       );
 
       openSnackbar(response.data.msg, "success");

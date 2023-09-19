@@ -3,7 +3,7 @@ import {
   postChangePassword,
   updateClientAccountDetails,
   updateConsentSettings,
-  getConsentSettings
+  getConsentSettings,
 } from "../../controller/clientController.js";
 
 import verifyToken from "../../middleware/clientAuth.js";
