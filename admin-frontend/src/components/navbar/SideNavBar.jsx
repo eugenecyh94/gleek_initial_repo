@@ -78,7 +78,7 @@ const SideNavBar = () => {
                     onClick={() =>
                       handleItemClick(
                         Object.keys(item)[0],
-                        item[Object.keys(item)[0]]
+                        item[Object.keys(item)[0]],
                       )
                     }
                   >
@@ -107,7 +107,7 @@ const SideNavBar = () => {
                     onClick={() =>
                       handleItemClick(
                         Object.keys(item)[0],
-                        item[Object.keys(item)[0]]
+                        item[Object.keys(item)[0]],
                       )
                     }
                   >

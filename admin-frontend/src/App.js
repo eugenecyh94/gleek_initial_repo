@@ -63,13 +63,13 @@ function App() {
             }
           />
           <Route path="/login" element={<LoginPage />} />
-            {/*for testing image upload component*/}
-            <Route
-                path="/uploadTest"
-                element={
-                <ImageAndFileUpload limit={5} name="test" size={2000000} />
-                }
-            />
+          {/*for testing image upload component*/}
+          <Route
+            path="/uploadTest"
+            element={
+              <ImageAndFileUpload limit={5} name="test" size={2000000} />
+            }
+          />
         </Routes>
       </Layout>
     </div>

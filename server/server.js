@@ -15,8 +15,8 @@ const app = express();
 const port = process.env.PORT;
 // Custom middleware to apply different CORS options based on the origin
 const customCors = (req, callback) => {
-   const whitelist = ["http://localhost:3001", "http://localhost:3002"];
-   const origin = req.header("Origin");
+  const whitelist = ["http://localhost:3001", "http://localhost:3002"];
+  const origin = req.header("Origin");
 
   if (whitelist.includes(origin)) {
     // Apply credentials: true for http://localhost:3001
@@ -47,5 +47,5 @@ app.use("/gleek", gleekRoutes);
 app.use("/testActivity", activityTestController);
 
 app.listen(port, () => {
-   console.log(`Server is running on port: ${port}`);
+  console.log(`Server is running on port: ${port}`);
 });

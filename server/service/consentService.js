@@ -3,7 +3,7 @@ import Consent from "../model/consentModel.js";
 export const createClientConsent = async (
   clientId,
   acceptTermsAndConditions,
-  session
+  session,
 ) => {
   const consentData = {
     client: clientId,
@@ -23,7 +23,7 @@ export const updateConsent = async (clientId, updateData) => {
     },
     {
       new: true,
-    }
+    },
   );
 
   return updatedConsent;
