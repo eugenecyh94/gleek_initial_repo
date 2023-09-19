@@ -11,6 +11,7 @@ import ViewAllVendors from "./components/vendor/ViewAllVendors";
 import SocketConnection from "./utils/SocketConnection";
 import ForgotPassword from "./components/ForgotPassword";
 import AccountDetails from "./components/profile/AccountDetails";
+import AddAdminPage from "./components/admin/AddAdminPage";
 
 function App() {
    return (
@@ -61,6 +62,15 @@ function App() {
                   element={
                      <ProtectedRoute>
                         <AccountDetails />
+                     </ProtectedRoute>
+                  }
+               />
+               <Route
+                  exact
+                  path="/adminTeam/addAdmin"
+                  element={
+                     <ProtectedRoute>
+                        <AddAdminPage />
                      </ProtectedRoute>
                   }
                />

@@ -135,6 +135,29 @@ export const useAdminStore = create((set) => ({
          return false;
       }
    },
+   register: async (newAdmin) => {
+      set({ isLoading: true, adminError: null });
+      try {
+         const response = await AxiosConnect.post(
+            "/gleekAdmin/register",
+            newAdmin
+         );
+         const data = response.data;
+         console.log(data);
+         setTimeout(() => {
+            set({ isLoading: false });
+         }, 500);
+         return true;
+      } catch (error) {
+         console.log(error);
+         setTimeout(() => {
+            set({
+               isLoading: false,
+            });
+         }, 500);
+         return false;
+      }
+   },
 }));
 
 export const useActivityStore = create((set) => ({

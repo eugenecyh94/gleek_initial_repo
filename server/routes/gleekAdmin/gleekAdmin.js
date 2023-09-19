@@ -21,7 +21,6 @@ router.post(
    [
       // Validation middleware using check
       check("email", "Please enter a valid email").isEmail(),
-      check("password", "Minimum password length is 8").isLength({ min: 8 }),
    ],
    register
 );

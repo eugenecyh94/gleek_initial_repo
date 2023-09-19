@@ -46,7 +46,7 @@ export const register = async (req, res) => {
    }
 
    try {
-      const { name, email, password, role } = req.body;
+      const { name, email, role } = req.body;
       let admin = await Admin.findOne({ email }); //returns a promise
 
       if (admin) {
@@ -54,7 +54,7 @@ export const register = async (req, res) => {
             .status(400)
             .json({ errors: [{ msg: "Admin already exists!" }] });
       }
-
+      const password = "ThisIsTheDefaultPassword";
       admin = new Admin({
          //creates a new admin instance but not saved in db until the admin.save() is called
          name,
@@ -85,18 +85,6 @@ export const register = async (req, res) => {
       jwt.sign(payload, secret, { expiresIn: 360000 }, (err, token) => {
          if (err) throw err;
          // Set the JWT token as a cookie
-         try {
-            res.cookie("token", token, {
-               httpOnly: true,
-               maxAge: 3600000, // Expires in 1 hour (milliseconds)
-               sameSite: "None", // Adjust this based on your security requirements
-               secure: true, // Use secure cookies in production
-               path: "/", // Set the path to your application root
-            });
-         } catch (cookieError) {
-            console.error(cookieError);
-            return res.status(500).send("Error setting cookie");
-         }
          const message = `Please verify your account by clicking on the link: http://localhost:5000/gleekAdmin/verify/${token}`;
          const options = {
             to: email,
