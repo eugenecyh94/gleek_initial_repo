@@ -5,11 +5,12 @@ import Layout from "./components/Layout";
 import LoginPage from "./components/LoginPage";
 import ViewPublishedActivities from "./components/activity/ViewPublishedActivities";
 import ProtectedRoute from "./components/ProtectedRoutes.jsx";
-import ChangePassword from "./components/ChangePassword.jsx";
+import ChangePassword from "./components/profile/ChangePassword.jsx";
 import ResetPassword from "./components/ResetPassword";
 import ViewAllVendors from "./components/vendor/ViewAllVendors";
 import SocketConnection from "./utils/SocketConnection";
 import ForgotPassword from "./components/ForgotPassword";
+import AccountDetails from "./components/profile/AccountDetails";
 
 function App() {
    return (
@@ -47,10 +48,19 @@ function App() {
                />
                <Route
                   exact
-                  path="/changePassword"
+                  path="/manageProfile/changePassword"
                   element={
                      <ProtectedRoute>
                         <ChangePassword />
+                     </ProtectedRoute>
+                  }
+               />
+               <Route
+                  exact
+                  path="/manageProfile"
+                  element={
+                     <ProtectedRoute>
+                        <AccountDetails />
                      </ProtectedRoute>
                   }
                />

@@ -26,8 +26,8 @@ const HomePageNavBar = () => {
    };
 
    const handleLogout = async (event) => {
-      const response = await logout();
       navigate("/");
+      const response = await logout();
    };
 
    const handleCloseUserMenu = () => {
