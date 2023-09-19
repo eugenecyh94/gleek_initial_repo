@@ -1,10 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import ActivityItem from "../components/ActivityItem";
 import {
   Box,
   Typography,
   Grid,
-  Paper,
   Link,
   Button,
   InputLabel,
@@ -15,7 +14,9 @@ import {
 import useShopStore from "../zustand/ShopStore";
 import { useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
-
+import PriceFilter from "../components/Filters/PriceFilter";
+import CheckBoxGroup from "../components/Filters/CheckBoxGroup";
+import RadioButtonGroup from "../components/Filters/RadioButtonGroup";
 const ShopPage = (props) => {
   const navigate = useNavigate();
   const activitiesSampleData = [
@@ -27,6 +28,8 @@ const ShopPage = (props) => {
       durationMinutes: 200, // ideal duration?
       startPricePerPax: 20,
       rating: 4.0,
+      description:
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
       image:
         "https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aW1hZ2V8ZW58MHx8MHx8fDA%3D&w=1000&q=80",
       date: new Date(2023, 6, 17),
@@ -39,6 +42,7 @@ const ShopPage = (props) => {
       durationMinutes: 200,
       startPricePerPax: 20,
       rating: 4.0,
+      description: "description",
       image:
         "https://dfstudio-d420.kxcdn.com/wordpress/wp-content/uploads/2019/06/digital_camera_photo-1080x675.jpg",
       date: new Date(2023, 6, 18),
@@ -51,6 +55,7 @@ const ShopPage = (props) => {
       durationMinutes: 200,
       startPricePerPax: 20,
       rating: 4.0,
+      description: "description",
       image:
         "https://www.freecodecamp.org/news/content/images/2022/09/jonatan-pie-3l3RwQdHRHg-unsplash.jpg",
       date: new Date(2023, 6, 19),
@@ -63,6 +68,7 @@ const ShopPage = (props) => {
       durationMinutes: 200,
       startPricePerPax: 20,
       rating: 4.0,
+      description: "description",
       image:
         "https://image.shutterstock.com/image-vector/dotted-spiral-vortex-royaltyfree-images-600w-2227567913.jpg",
       date: new Date(2023, 6, 10),
@@ -75,6 +81,7 @@ const ShopPage = (props) => {
       durationMinutes: 200,
       startPricePerPax: 10,
       rating: 4.0,
+      description: "description",
       image:
         "https://image.shutterstock.com/image-vector/dotted-spiral-vortex-royaltyfree-images-600w-2227567913.jpg",
       date: new Date(2023, 6, 20),
@@ -87,6 +94,7 @@ const ShopPage = (props) => {
       durationMinutes: 200,
       startPricePerPax: 20,
       rating: 4.0,
+      description: "description",
       image:
         "https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aW1hZ2V8ZW58MHx8MHx8fDA%3D&w=1000&q=80",
       date: new Date(2023, 6, 21),
@@ -99,6 +107,7 @@ const ShopPage = (props) => {
       durationMinutes: 200,
       startPricePerPax: 20,
       rating: 4.0,
+      description: "description",
       image:
         "https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aW1hZ2V8ZW58MHx8MHx8fDA%3D&w=1000&q=80",
       date: new Date(2023, 6, 22),
@@ -111,6 +120,7 @@ const ShopPage = (props) => {
       durationMinutes: 200,
       startPricePerPax: 20,
       rating: 4.0,
+      description: "description",
       image:
         "https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aW1hZ2V8ZW58MHx8MHx8fDA%3D&w=1000&q=80",
       date: new Date(2023, 6, 23),
@@ -123,6 +133,7 @@ const ShopPage = (props) => {
       durationMinutes: 200,
       startPricePerPax: 40,
       rating: 4.0,
+      description: "description",
       image:
         "https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aW1hZ2V8ZW58MHx8MHx8fDA%3D&w=1000&q=80",
       date: new Date(2023, 6, 24),
@@ -135,6 +146,7 @@ const ShopPage = (props) => {
       durationMinutes: 200,
       startPricePerPax: 20,
       rating: 4.0,
+      description: "description",
       image:
         "https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aW1hZ2V8ZW58MHx8MHx8fDA%3D&w=1000&q=80",
       date: new Date(2023, 6, 25),
@@ -147,6 +159,8 @@ const ShopPage = (props) => {
       durationMinutes: 200,
       startPricePerPax: 20,
       rating: 4.0,
+      description:
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
       image:
         "https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aW1hZ2V8ZW58MHx8MHx8fDA%3D&w=1000&q=80",
       date: new Date(2023, 6, 26),
@@ -159,6 +173,7 @@ const ShopPage = (props) => {
       durationMinutes: 200,
       startPricePerPax: 20,
       rating: 4.0,
+      description: "description",
       image:
         "https://dfstudio-d420.kxcdn.com/wordpress/wp-content/uploads/2019/06/digital_camera_photo-1080x675.jpg",
       date: new Date(2023, 5, 17),
@@ -171,6 +186,7 @@ const ShopPage = (props) => {
       durationMinutes: 200, // ideal duration?
       startPricePerPax: 20,
       rating: 4.0,
+      description: "description",
       image:
         "https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aW1hZ2V8ZW58MHx8MHx8fDA%3D&w=1000&q=80",
       date: new Date(2023, 5, 18),
@@ -183,6 +199,7 @@ const ShopPage = (props) => {
       durationMinutes: 200,
       startPricePerPax: 20,
       rating: 4.0,
+      description: "description",
       image:
         "https://dfstudio-d420.kxcdn.com/wordpress/wp-content/uploads/2019/06/digital_camera_photo-1080x675.jpg",
       date: new Date(2023, 5, 19),
@@ -195,6 +212,7 @@ const ShopPage = (props) => {
       durationMinutes: 200,
       startPricePerPax: 20,
       rating: 4.0,
+      description: "description",
       image:
         "https://www.freecodecamp.org/news/content/images/2022/09/jonatan-pie-3l3RwQdHRHg-unsplash.jpg",
       date: new Date(2023, 5, 20),
@@ -207,6 +225,7 @@ const ShopPage = (props) => {
       durationMinutes: 200,
       startPricePerPax: 20,
       rating: 4.0,
+      description: "description",
       image:
         "https://image.shutterstock.com/image-vector/dotted-spiral-vortex-royaltyfree-images-600w-2227567913.jpg",
       date: new Date(2023, 5, 21),
@@ -219,6 +238,7 @@ const ShopPage = (props) => {
       durationMinutes: 200,
       startPricePerPax: 20,
       rating: 4.0,
+      description: "description",
       image:
         "https://image.shutterstock.com/image-vector/dotted-spiral-vortex-royaltyfree-images-600w-2227567913.jpg",
       date: new Date(2023, 5, 22),
@@ -231,6 +251,7 @@ const ShopPage = (props) => {
       durationMinutes: 200,
       startPricePerPax: 20,
       rating: 4.0,
+      description: "description",
       image:
         "https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aW1hZ2V8ZW58MHx8MHx8fDA%3D&w=1000&q=80",
       date: new Date(2023, 5, 23),
@@ -243,6 +264,7 @@ const ShopPage = (props) => {
       durationMinutes: 200,
       startPricePerPax: 20,
       rating: 4.0,
+      description: "description",
       image:
         "https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aW1hZ2V8ZW58MHx8MHx8fDA%3D&w=1000&q=80",
       date: new Date(2023, 5, 24),
@@ -255,6 +277,7 @@ const ShopPage = (props) => {
       durationMinutes: 200,
       startPricePerPax: 20,
       rating: 4.0,
+      description: "description",
       image:
         "https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aW1hZ2V8ZW58MHx8MHx8fDA%3D&w=1000&q=80",
       date: new Date(2023, 5, 25),
@@ -267,6 +290,7 @@ const ShopPage = (props) => {
       durationMinutes: 200,
       startPricePerPax: 20,
       rating: 4.0,
+      description: "description",
       image:
         "https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aW1hZ2V8ZW58MHx8MHx8fDA%3D&w=1000&q=80",
       date: new Date(2023, 5, 26),
@@ -279,6 +303,7 @@ const ShopPage = (props) => {
       durationMinutes: 200,
       startPricePerPax: 20,
       rating: 4.0,
+      description: "description",
       image:
         "https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aW1hZ2V8ZW58MHx8MHx8fDA%3D&w=1000&q=80",
       date: new Date(2023, 5, 27),
@@ -291,6 +316,7 @@ const ShopPage = (props) => {
       durationMinutes: 200,
       startPricePerPax: 20,
       rating: 4.0,
+      description: "description",
       image:
         "https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aW1hZ2V8ZW58MHx8MHx8fDA%3D&w=1000&q=80",
       date: new Date(2023, 5, 28),
@@ -303,6 +329,7 @@ const ShopPage = (props) => {
       durationMinutes: 200,
       startPricePerPax: 20,
       rating: 4.0,
+      description: "description",
       image:
         "https://dfstudio-d420.kxcdn.com/wordpress/wp-content/uploads/2019/06/digital_camera_photo-1080x675.jpg",
       date: new Date(2023, 5, 29),
@@ -315,6 +342,8 @@ const ShopPage = (props) => {
     setCurrentPage,
     sortBy,
     setSortBy,
+    currentActivity,
+    setCurrentActivity,
   } = useShopStore();
   const theme = useTheme();
 
@@ -332,7 +361,7 @@ const ShopPage = (props) => {
 
   useEffect(() => {
     const sortedActivities = activitiesSampleData.sort(
-      (a, b) => b.date - a.date,
+      (a, b) => b.date - a.date
     );
     setActivities(sortedActivities);
   }, []);
@@ -348,11 +377,11 @@ const ShopPage = (props) => {
       sortedActivities = sortedActivities.sort((a, b) => b.date - a.date);
     } else if (event.target.value === "Price High to Low") {
       sortedActivities = sortedActivities.sort(
-        (a, b) => b.startPricePerPax - a.startPricePerPax,
+        (a, b) => b.startPricePerPax - a.startPricePerPax
       );
     } else if (event.target.value === "Price Low to High") {
       sortedActivities = sortedActivities.sort(
-        (a, b) => a.startPricePerPax - b.startPricePerPax,
+        (a, b) => a.startPricePerPax - b.startPricePerPax
       );
     }
 
@@ -360,13 +389,117 @@ const ShopPage = (props) => {
     setCurrentPage(currentPage);
   };
 
+  const minRangeValue = 0;
+  const maxRangeValue = 100;
+  const [sliderValue, setSliderValue] = React.useState([
+    minRangeValue,
+    maxRangeValue,
+  ]);
+  const handleSliderChange = (event, newValue) => {
+    setSliderValue(newValue);
+  };
+
+  // Fetched from BE
+  const Locations = {
+    ONSITE: "On-site (within the company premises)",
+    OFFSITE: "Off-site (external venues or outdoor locations)",
+    VIRTUAL: "Virtual (online sessions)",
+    HYBRID: "Hybrid (online + virtual at the same time)",
+  };
+
+  const initialLocationState = Object.fromEntries(
+    Object.entries(Locations).map(([key, value]) => [key, false])
+  );
+
+  const [locationState, setLocationState] =
+    React.useState(initialLocationState);
+
+  const handleLocationChange = (event) => {
+    setLocationState({
+      ...locationState,
+      [event.target.name]: event.target.checked,
+    });
+  };
+
+  // Fetch from BE
+  const SustainableDevelopmentGoals = {
+    NO_POVERTY: "No Poverty",
+    ZERO_HUNGER: "Zero Hunger",
+    GOOD_HEALTH_AND_WELL_BEING: "Good Health and Well-being",
+    QUALITY_EDUCATION: "Quality Education",
+    GENDER_EQUALITY: "Gender Equality",
+    CLEAN_WATER_AND_SANITATION: "Clean Water and Sanitation",
+    AFFORDABLE_AND_CLEAN_ENERGY: "Affordable and Clean Energy",
+    DECENT_WORK_AND_ECONOMIC_GROWTH: "Decent Work and Economic Growth",
+    INDUSTRY_INNOVATION_AND_INFRASTRUCTURE:
+      "Industry, Innovation, and Infrastructure",
+    REDUCED_INEQUALITIES: "Reduced Inequalities",
+    SUSTAINABLE_CITIES_AND_COMMUNITIES: "Sustainable Cities and Communities",
+    RESPONSIBLE_CONSUMPTION_AND_PRODUCTION:
+      "Responsible Consumption and Production",
+    CLIMATE_ACTION: "Climate Action",
+    LIFE_BELOW_WATER: "Life Below Water",
+    LIFE_ON_LAND: "Life on Land",
+    PEACE_AND_JUSTICE_STRONG_INSTITUTIONS:
+      "Peace and Justice Strong Institutions",
+    PARTNERSHIPS_FOR_THE_GOALS: "Partnerships for the Goals",
+  };
+
+  const initialSGState = Object.fromEntries(
+    Object.entries(SustainableDevelopmentGoals).map(([key, value]) => [
+      key,
+      false,
+    ])
+  );
+
+  const [sgState, setSGState] = React.useState(initialSGState);
+  const handleSGChange = (event) => {
+    setSGState({
+      ...sgState,
+      [event.target.name]: event.target.checked,
+    });
+  };
+
+  const SIZE = {
+    COSY: "Cosy (1-10 participants)",
+    SMALL: "Small (11-20 participants)",
+    MEDIUM: "Medium (21-30 participants)",
+    LARGE: "Large (31+ participants)",
+  };
+
+  const [durationState, setDurationState] = useState("");
+
+  const handleDurationChange = (event) => {
+    setDurationState(event.target.value);
+  };
   return (
     <Grid container spacing={5} p={5}>
       {/* Left Column */}
       <Grid item xs={12} sm={12} md={12} lg={3}>
-        <Paper>
-          <Typography variant="h6">Filters</Typography>
-        </Paper>
+        <PriceFilter
+          minRangeValue={minRangeValue}
+          maxRangeValue={maxRangeValue}
+          sliderValue={sliderValue}
+          handleSliderChange={handleSliderChange}
+        />
+        <RadioButtonGroup
+          value={durationState}
+          handleChange={handleDurationChange}
+          title="Duration"
+          VALUES={SIZE}
+        />
+        <CheckBoxGroup
+          title="Location"
+          handleChange={handleLocationChange}
+          state={locationState}
+          VALUES={Locations}
+        />
+        <CheckBoxGroup
+          title="Sustainable Development Goals"
+          handleChange={handleSGChange}
+          state={sgState}
+          VALUES={SustainableDevelopmentGoals}
+        />
       </Grid>
 
       {/* Right Column */}
@@ -419,7 +552,14 @@ const ShopPage = (props) => {
               <Link
                 href={`/shop/activity/${activity.id}`}
                 underline="none"
-                onClick={() => {
+                onClick={(event) => {
+                  event.preventDefault();
+                  const clickedActivity = activities.find(
+                    (item) => item.id === activity.id
+                  );
+                  if (clickedActivity) {
+                    setCurrentActivity(clickedActivity);
+                  }
                   navigate(`/shop/activity/${activity.id}`);
                 }}
               >

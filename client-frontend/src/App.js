@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import CartPage from "./containers/CartPage";
 import ShopPage from "./containers/ShopPage";
@@ -12,11 +12,16 @@ import AccountDetails from "./containers/Account/AccountDetails";
 import Privacy from "./containers/Account/Privacy";
 import PasswordChange from "./containers/Account/PasswordChange";
 import ProfilePicture from "./containers/Account/ProfilePicture";
+import ActivityDetailsPage from "./containers/ActivityDetailsPage";
 
 function App() {
+
+  
+
   return (
     <div>
       <SocketConnection />
+
       <Layout>
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -74,6 +79,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ShopPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/shop/activity/:id"
+            element={
+              <ProtectedRoute>
+                <ActivityDetailsPage />
               </ProtectedRoute>
             }
           />

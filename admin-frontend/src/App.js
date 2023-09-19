@@ -3,17 +3,17 @@ import "./App.css";
 import Home from "./components/Home";
 import Layout from "./components/Layout";
 import LoginPage from "./components/LoginPage";
-import SocketConnection from "./utils/SocketConnection";
-import ViewPublishedActivities from "./components/ViewPublishedActivities";
+import ViewPublishedActivities from "./components/activity/ViewPublishedActivities";
 import ProtectedRoute from "./components/ProtectedRoutes.jsx";
 import ChangePassword from "./components/ChangePassword.jsx";
-import MultiStepActivityCreationForm from "./components/activityCreation/MultiStepActivityCreationForm";
+import ResetPassword from "./components/ResetPassword";
+import ViewAllVendors from "./components/vendor/ViewAllVendors";
+import ViewAllClients from "./components/client/ViewAllClients";
 import ImageAndFileUpload from "./components/activityCreation/ImageAndFileUpload";
 
 function App() {
   return (
     <div>
-      <SocketConnection />
       <Layout>
         <Routes>
           <Route exact path="/" element={<Home />} />
@@ -28,6 +28,24 @@ function App() {
           />
           <Route
             exact
+            path="/viewAllVendors"
+            element={
+              <ProtectedRoute>
+                <ViewAllVendors />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/resetPassword"
+            element={
+              <ProtectedRoute>
+                <ResetPassword />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
             path="/changePassword"
             element={
               <ProtectedRoute>
@@ -35,18 +53,23 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/login" element={<LoginPage />} />
           <Route
-            path="/createActivity"
-            element={<MultiStepActivityCreationForm />}
-          />
-          {/*for testing image upload component*/}
-          <Route
-            path="/uploadTest"
+            exact
+            path="/viewAllClients"
             element={
-              <ImageAndFileUpload limit={5} name="test" size={2000000} />
+              <ProtectedRoute>
+                <ViewAllClients />
+              </ProtectedRoute>
             }
           />
+          <Route path="/login" element={<LoginPage />} />
+            {/*for testing image upload component*/}
+            <Route
+                path="/uploadTest"
+                element={
+                <ImageAndFileUpload limit={5} name="test" size={2000000} />
+                }
+            />
         </Routes>
       </Layout>
     </div>

@@ -1,9 +1,12 @@
+import mongoose from "mongoose";
+import { PaxIntervalEnum } from "../util/paxIntervalEnum.js";
+
 const activityPricingRulesSchema = new mongoose.Schema({
-  minParticipantBasePrice: {
-    type: Number,
-    required: true,
+  paxInterval: {
+    type: String,
+    enum: PaxIntervalEnum,
   },
-  maxParticipantBasePrice: {
+  pricePerPax: {
     type: Number,
     required: true,
   },
@@ -11,6 +14,10 @@ const activityPricingRulesSchema = new mongoose.Schema({
   publicHolidayAddon: Number,
   onlineAddon: Number,
   offlineAddon: Number,
+  activity: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Activity",
+  },
 });
 const ActivityPricingRulesModel = mongoose.model(
   "ActivityPricingRules",

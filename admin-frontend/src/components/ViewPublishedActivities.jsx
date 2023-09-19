@@ -1,7 +1,7 @@
 import { useTheme } from "@emotion/react";
 import { Toolbar, Typography } from "@mui/material";
 import { useEffect } from "react";
-import AxiosConnect from "../utils/AxiosConnect";
+import AxiosConnect from "../utils/AxiosConnect.js";
 import { updateAllActivity, useActivityStore } from "../zustand/GlobalStore";
 import Layout from "./Layout";
 import ActivityListTable from "./activity/ActivityListTable";
