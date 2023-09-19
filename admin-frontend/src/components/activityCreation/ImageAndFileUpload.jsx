@@ -95,14 +95,15 @@ const ImageAndFileUpload = (ImageUploadProps) => {
   };
 
   const handleSubmit = () => {
-    //Ways to craft request for return to backend
-    //Alternative way is to use new FormData() then form.append()
-    const req = {
-      activityName: activityName,
-      images: fileList,
-    };
-    console.log(req);
-    AxiosConnect.postMultiPart("/testActivity/create", req)
+    const formData = new FormData();
+    formData.append("activityName", activityName);
+    for (let i = 0; i < fileList.length; i++) {
+      formData.append("images", fileList[i]);
+    }
+    // formData.append("images", fileList);s
+    console.log(formData.get("activityName"));
+    console.log(formData.get("images"));
+    AxiosConnect.postMultiPart("/testActivity/create", formData)
       .then((body) => {
         console.log("activity successfully created", body);
       })

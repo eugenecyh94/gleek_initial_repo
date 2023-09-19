@@ -70,7 +70,7 @@ describe("Vendor Model", () => {
     try {
       const response = await axios.post(
         "http://localhost:5000/vendor/addVendor",
-        newVendorData
+        newVendorData,
       );
 
       assert.equal(response.status, 201);
@@ -84,7 +84,7 @@ describe("Vendor Model", () => {
   it("should retrieve all vendors", async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/vendor/viewAllVendors"
+        "http://localhost:5000/vendor/viewAllVendors",
       );
 
       assert.equal(response.status, 201);
@@ -98,7 +98,7 @@ describe("Vendor Model", () => {
     const vendorId = "64fc716990022721c81ed366";
     try {
       const response = await axios.get(
-        `http://localhost:5000/vendor/viewVendor/${vendorId}`
+        `http://localhost:5000/vendor/viewVendor/${vendorId}`,
       );
       assert.equal(response.status, 201);
       expect(response.data._id).to.equal(vendorId);
@@ -110,7 +110,7 @@ describe("Vendor Model", () => {
   it("should delete all vendors", async () => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/vendor/deleteAllVendors"
+        "http://localhost:5000/vendor/deleteAllVendors",
       );
 
       assert.equal(response.status, 200);
@@ -123,14 +123,14 @@ describe("Vendor Model", () => {
   it("should disable vendor", async () => {
     try {
       const allVendors = await axios.get(
-        "http://localhost:5000/vendor/viewAllVendors"
+        "http://localhost:5000/vendor/viewAllVendors",
       );
       const updateData = { ...allVendors.data[0], disabled: true };
       const vendorId = allVendors.data[0]._id;
 
       const response = await axios.patch(
         `http://localhost:5000/vendor/updateVendor/${vendorId}`,
-        updateData
+        updateData,
       );
 
       assert.equal(response.status, 201);

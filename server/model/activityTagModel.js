@@ -20,6 +20,6 @@ const activityTagSchema = new mongoose.Schema({
 const ActivityTagModel = mongoose.model(
   "ActivityTag",
   activityTagSchema,
-  "activities"
+  "activities",
 );
 export default ActivityTagModel;
