@@ -19,13 +19,16 @@ import InputAdornment from "@mui/material/InputAdornment";
 import Paper from "@mui/material/Paper";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
+import Snackbar from "@mui/material/Snackbar";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import Snackbar from "@mui/material/Snackbar";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { useEffect, useState } from "react";
 import {
   ActivityDayAvailabilityEnum,
@@ -34,15 +37,12 @@ import {
   LocationEnum,
   SustainableDevelopmentGoalsEnum,
 } from "../../utils/TypeEnum";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { useActivityStore, useSnackbarStore } from "../../zustand/GlobalStore";
+import { useActivityStore } from "../../zustand/GlobalStore";
 
 const CreateActivityForm = ({ themes, theme }) => {
   const { createActivity } = useActivityStore();
-  const { openSnackbar, closeSnackbar, isOpen, messageList, type } =
-    useSnackbarStore();
+  const [isOpen, setIsOpen] = useState(false);
+  const [isError, setError] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState(
     themes?.[0]?.parent?._id || ""
   );
@@ -65,7 +65,7 @@ const CreateActivityForm = ({ themes, theme }) => {
   const [sdg, setSdg] = useState([]);
   const [dayAvailabilities, setDayAvailabilities] = useState([]);
   const [duration, setDuration] = useState();
-  const [formErrors, setFormErrors] = useState({});
+  const [formErrors, setFormErrors] = useState();
 
   const foodCategories = Object.values(FoodCategoryEnum);
   const sdgList = Object.values(SustainableDevelopmentGoalsEnum);
@@ -78,6 +78,14 @@ const CreateActivityForm = ({ themes, theme }) => {
     const endIndex = startIndex + optionsPerColumn;
     columnsArray.push(sdgList.slice(startIndex, endIndex));
   }
+
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setIsOpen(false);
+    setError(false);
+  };
 
   const handleThemeChange = (event) => {
     const themeId = event.target.value;
@@ -147,7 +155,6 @@ const CreateActivityForm = ({ themes, theme }) => {
   };
 
   const handleFoodCertDateChange = (date) => {
-    console.log("FOOD CERT DATE", date.toISOString());
     setFoodCertDate(date);
   };
 
@@ -201,7 +208,7 @@ const CreateActivityForm = ({ themes, theme }) => {
     if (!dayAvailabilities || dayAvailabilities?.length === 0) {
       errors.dayAvailabilities = "At least one Day Availability is required";
     }
-    if (!sdg) {
+    if (!sdg || sdg?.length === 0) {
       errors.sdg = "At least one sustainability goal needs to be provided!";
     }
     if (!title) {
@@ -243,6 +250,28 @@ const CreateActivityForm = ({ themes, theme }) => {
     return Object.keys(errors).length === 0;
   };
 
+  const resetForm = () => {
+    setSelectedTheme(themes?.[0]?.parent?._id || "");
+    setSelectedSubTheme([]);
+    setSubthemes([]);
+    setMaxParticipants();
+    setMarkup();
+    setActivityType("");
+    setTitle();
+    setDescription();
+    setData([]);
+    setIsFood(false);
+    setIsFoodCertPending(false);
+    setSelectedFoodCat([]);
+    setFoodCertDate(null);
+    setLocation("");
+    setPopupitems();
+    setSdg([]);
+    setDayAvailabilities([]);
+    setDuration();
+    setFormErrors({});
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     const payload = {
@@ -279,22 +308,13 @@ const CreateActivityForm = ({ themes, theme }) => {
     if (validateForm()) {
       try {
         const responseStatus = await createActivity(payload);
-        responseStatus &&
-          openSnackbar("Profile updated successfully!", "success");
+        resetForm();
+        setIsOpen(true);
       } catch (error) {
-        const errorMessage =
-          error?.response?.data?.errors?.[0]?.msg ||
-          error?.response?.data ||
-          null;
-
-        openSnackbar(errorMessage, "error");
+        setError(true);
       }
     } else {
-      console.log("ERROR");
-      for (const key in formErrors) {
-        messageList.push(formErrors[key]);
-      }
-      openSnackbar(messageList, "error");
+      setError(true);
     }
   };
 
@@ -326,6 +346,7 @@ const CreateActivityForm = ({ themes, theme }) => {
             label="Title"
             disabled={false}
             fullWidth
+            value={title ?? ""}
             onChange={handleTitleChange}
             error={title !== null && title?.length === 0}
           />
@@ -384,6 +405,7 @@ const CreateActivityForm = ({ themes, theme }) => {
             rows={4}
             fullWidth
             onChange={handleDescriptionChange}
+            value={description ?? ""}
             required
             error={description !== null && description?.length === 0}
           />
@@ -584,6 +606,7 @@ const CreateActivityForm = ({ themes, theme }) => {
             InputProps={{
               endAdornment: <InputAdornment position="end">min</InputAdornment>,
             }}
+            value={duration ?? ""}
             error={duration !== null && duration?.length === 0}
           />
         </Grid>
@@ -611,6 +634,7 @@ const CreateActivityForm = ({ themes, theme }) => {
                   />
                 }
                 label={option}
+                sx={{ width: "100%" }}
               />
             ))}
           </Grid>
@@ -636,6 +660,7 @@ const CreateActivityForm = ({ themes, theme }) => {
             disabled={false}
             fullWidth
             type="number"
+            value={maxParticipants ?? ""}
             onChange={handleMaxParticipantsChange}
             error={maxParticipants !== null && maxParticipants === 0}
           />
@@ -649,6 +674,7 @@ const CreateActivityForm = ({ themes, theme }) => {
             disabled={false}
             fullWidth
             type="number"
+            value={markup ?? ""}
             InputProps={{
               endAdornment: <InputAdornment position="start">%</InputAdornment>,
             }}
@@ -770,11 +796,18 @@ const CreateActivityForm = ({ themes, theme }) => {
           </Button>
         </Grid>
       </Grid>
-      <Snackbar open={isOpen} autoHideDuration={6000}>
-        <Alert severity={type} sx={{ width: "100%" }}>
-          {messageList.map((item, index) => (
-            <div key={index}>{item}</div>
-          ))}
+      <Snackbar open={isOpen} autoHideDuration={6000} onClose={handleClose}>
+        <Alert severity="success" sx={{ width: "100%" }}>
+          Activity Created Successfully!
+        </Alert>
+      </Snackbar>
+      <Snackbar open={isError} autoHideDuration={6000} onClose={handleClose}>
+        <Alert severity="error" sx={{ width: "100%" }}>
+          {!formErrors
+            ? "Error creating form!"
+            : Object.values(formErrors)?.map((item, key) => (
+                <div key={key}>{item}</div>
+              ))}
         </Alert>
       </Snackbar>
     </form>

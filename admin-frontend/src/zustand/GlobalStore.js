@@ -10,7 +10,7 @@ export const updateCurrentActivity = (selectedActivity) => {
   }));
   console.log(
     "activity store current activity updated::",
-    useActivityStore.getState(),
+    useActivityStore.getState()
   );
 };
 
@@ -21,7 +21,7 @@ export const updateAllActivity = (newAllActivities) => {
   }));
   console.log(
     "activity store all activity updated::",
-    useActivityStore.getState(),
+    useActivityStore.getState()
   );
 };
 
@@ -177,18 +177,6 @@ export const useClientStore = create((set) => ({
     } catch (error) {
       console.error(error);
     }
-  },
-}));
-
-export const useSnackbarStore = create((set) => ({
-  isOpen: false,
-  messageList: [],
-  type: "success",
-  openSnackbar: (messageList, type) => {
-    set({ isOpen: true, messageList, type });
-  },
-  closeSnackbar: () => {
-    set({ isOpen: false, messageList: "", type: "success" });
   },
 }));
 
