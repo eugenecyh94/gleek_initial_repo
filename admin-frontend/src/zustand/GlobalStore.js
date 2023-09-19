@@ -100,11 +100,38 @@ export const useAdminStore = create((set) => ({
 export const useActivityStore = create((set) => ({
   activities: [],
   isLoading: false,
+  newActivity: null,
   getActivity: async () => {
     try {
       set({ isLoading: true });
       const response = await AxiosConnect.get("/activity/all");
       set({ activities: response.data });
+      set({ isLoading: false });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  createActivity: async (newActivityData) => {
+    try {
+      const response = await AxiosConnect.post(
+        "/activity/addActivity",
+        newActivityData
+      );
+      set({ newActivity: response.data.activity });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+}));
+
+export const useThemeStore = create((set) => ({
+  themes: [],
+  isLoading: false,
+  getThemes: async () => {
+    try {
+      set({ isLoading: true });
+      const response = await AxiosConnect.get("/activity/getThemes");
+      set({ themes: response.data });
       set({ isLoading: false });
     } catch (error) {
       console.error(error);
@@ -150,5 +177,17 @@ export const useClientStore = create((set) => ({
     } catch (error) {
       console.error(error);
     }
+  },
+}));
+
+export const useSnackbarStore = create((set) => ({
+  isOpen: false,
+  messageList: [],
+  type: "success",
+  openSnackbar: (messageList, type) => {
+    set({ isOpen: true, messageList, type });
+  },
+  closeSnackbar: () => {
+    set({ isOpen: false, messageList: "", type: "success" });
   },
 }));

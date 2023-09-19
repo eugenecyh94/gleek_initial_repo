@@ -3,4 +3,5 @@ export const FoodCategoryEnum = {
   NON_HALAL: "Non-halal",
   VEGETARIAN: "Vegetarian",
   VEGAN: "Vegan",
+  OTHER: "Other",
 };

@@ -88,14 +88,51 @@ export const bulkAddThemes = async (req, res) => {
 };
 
 const processThemes = async (data) => {
-  await Promise.all(
-    data.map(async ({ name, parent }) => {
-      let parentTheme = parent
-        ? await ThemeModel.findOne({ name: parent })
-        : null;
-      if (!parentTheme)
-        parentTheme = await new ThemeModel({ name: parent }).save();
-      return new ThemeModel({ name, parent: parentTheme }).save();
-    })
-  );
+  for (const { name, parent } of data) {
+    let parentTheme = null;
+
+    if (parent) {
+      console.log(parent);
+      parentTheme = await ThemeModel.findOne({ name: parent });
+    }
+
+    if (!parentTheme) {
+      parentTheme = new ThemeModel({ name: parent });
+      await parentTheme.save();
+    }
+
+    const childTheme = new ThemeModel({ name, parent: parentTheme });
+    await childTheme.save();
+  }
+};
+
+export const getAllThemes = async (req, res) => {
+  try {
+    const themes = await ThemeModel.find().populate("parent");
+
+    const parentThemesWithChildren = {};
+
+    themes.forEach((theme) => {
+      const parentId = theme.parent ? theme.parent._id.toString() : null;
+
+      if (!parentThemesWithChildren[parentId]) {
+        parentThemesWithChildren[parentId] = {
+          parent: theme.parent,
+          children: [],
+        };
+      }
+
+      parentThemesWithChildren[parentId].children.push(theme);
+    });
+    const parentThemes = Object.values(parentThemesWithChildren);
+    console.log(parentThemesWithChildren);
+    res.status(200).json({
+      data: parentThemes,
+    });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: "Themes cannot be added", message: error.message });
+  }
 };

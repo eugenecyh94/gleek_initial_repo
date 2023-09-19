@@ -9,6 +9,7 @@ import ChangePassword from "./components/ChangePassword.jsx";
 import ResetPassword from "./components/ResetPassword";
 import ViewAllVendors from "./components/vendor/ViewAllVendors";
 import ViewAllClients from "./components/client/ViewAllClients";
+import CreateActivityPage from "./components/activity/CreateActivityPage";
 
 function App() {
   return (
@@ -16,6 +17,15 @@ function App() {
       <Layout>
         <Routes>
           <Route exact path="/" element={<Home />} />
+          <Route
+            exact
+            path="/createActivity"
+            element={
+              <ProtectedRoute>
+                <CreateActivityPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             exact
             path="/viewPublishedActivities"
