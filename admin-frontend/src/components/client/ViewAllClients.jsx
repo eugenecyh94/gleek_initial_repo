@@ -1,9 +1,5 @@
 import { useTheme } from "@emotion/react";
-import {
-  CircularProgress,
-  Toolbar,
-  Typography
-} from "@mui/material";
+import { CircularProgress, Toolbar, Typography } from "@mui/material";
 import { useEffect } from "react";
 import { useClientStore } from "../../zustand/GlobalStore";
 import Layout from "../Layout";

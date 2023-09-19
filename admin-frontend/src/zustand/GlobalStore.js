@@ -10,7 +10,7 @@ export const updateCurrentActivity = (selectedActivity) => {
   }));
   console.log(
     "activity store current activity updated::",
-    useActivityStore.getState()
+    useActivityStore.getState(),
   );
 };
 
@@ -21,7 +21,7 @@ export const updateAllActivity = (newAllActivities) => {
   }));
   console.log(
     "activity store all activity updated::",
-    useActivityStore.getState()
+    useActivityStore.getState(),
   );
 };
 
@@ -189,5 +189,13 @@ export const useSnackbarStore = create((set) => ({
   },
   closeSnackbar: () => {
     set({ isOpen: false, messageList: "", type: "success" });
+  },
+}));
+
+export const useImageUploadTestStore = create((set) => ({
+  imageList: [],
+  setImageList: (newImageList) => {
+    set({ imageList: newImageList });
+    console.log(useImageUploadTestStore.getState());
   },
 }));

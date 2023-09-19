@@ -17,6 +17,17 @@ const Search = styled("div")(({ theme }) => ({
   marginTop: 16,
   marginBottom: 16,
   width: "100%",
+  position: "relative",
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.light_purple.main, 0.15),
+  },
+  marginRight: theme.spacing(2),
+  marginLeft: 0,
+  marginTop: 16,
+  marginBottom: 16,
+  width: "100%",
 }));
 
 const SearchIconWrapper = styled("div")(({ theme }) => ({
@@ -27,9 +38,27 @@ const SearchIconWrapper = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
+  padding: theme.spacing(0, 2),
+  height: "100%",
+  position: "absolute",
+  pointerEvents: "none",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
 }));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  color: "inherit",
+  "& .MuiInputBase-input": {
+    padding: theme.spacing(1, 1, 1, 0),
+    // vertical padding + font size from searchIcon
+    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+    transition: theme.transitions.create("width"),
+    width: "100%",
+    [theme.breakpoints.up("md")]: {
+      width: "20ch",
+    },
+  },
   color: "inherit",
   "& .MuiInputBase-input": {
     padding: theme.spacing(1, 1, 1, 0),
@@ -137,7 +166,17 @@ const ActivityListTable = (allActivities) => {
   useEffect(() => {
     setSearchedRows(allActivities.allActivities.data);
   }, [allActivities.allActivities.data]);
+  const [searchedRows, setSearchedRows] = useState([]);
+  useEffect(() => {
+    setSearchedRows(allActivities.allActivities.data);
+  }, [allActivities.allActivities.data]);
 
+  const requestSearch = (searchedVal) => {
+    const filteredRows = allActivities.allActivities.data.filter((row) => {
+      return row.title.toLowerCase().includes(searchedVal.toLowerCase());
+    });
+    setSearchedRows(filteredRows);
+  };
   const requestSearch = (searchedVal) => {
     const filteredRows = allActivities.allActivities.data.filter((row) => {
       return row.title.toLowerCase().includes(searchedVal.toLowerCase());

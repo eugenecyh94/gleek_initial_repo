@@ -15,9 +15,6 @@ import ProfilePicture from "./containers/Account/ProfilePicture";
 import ActivityDetailsPage from "./containers/ActivityDetailsPage";
 
 function App() {
-
-  
-
   return (
     <div>
       <SocketConnection />

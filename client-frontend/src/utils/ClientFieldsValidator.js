@@ -45,7 +45,7 @@ export const validator = (formData, fieldName) => {
         formData[fieldName],
         formData.password,
         errors,
-        fieldName
+        fieldName,
       );
       break;
     default:
@@ -55,13 +55,13 @@ export const validator = (formData, fieldName) => {
 
 export const validateIsRequired = (data, errors, fieldName) => {
   if (data === "") {
-    errors[fieldName] = `${fieldName} is required!`;
+    errors[fieldName] = `${fieldName} is required`;
   }
 };
 
 export const validateEmail = (data, errors, fieldName) => {
   if (data === "") {
-    errors[fieldName] = `${fieldName} is required!`;
+    errors[fieldName] = `${fieldName} is required`;
   } else {
     const re =
       /^(([^<>()\]\\.,;:\s@"]+(\.[^<>()\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -72,7 +72,7 @@ export const validateEmail = (data, errors, fieldName) => {
 
 export const validatePostalCode = (data, errors, fieldName) => {
   if (data === "") {
-    errors[fieldName] = `${fieldName} is required!`;
+    errors[fieldName] = `${fieldName} is required`;
   } else {
     const re = /^\d{6}$/;
     const result = re.test(String(data).toLowerCase());
@@ -82,7 +82,7 @@ export const validatePostalCode = (data, errors, fieldName) => {
 
 export const validatePhoneNumber = (data, errors, fieldName) => {
   if (data === "") {
-    errors[fieldName] = `${fieldName} is required!`;
+    errors[fieldName] = `${fieldName} is required`;
   } else {
     const re = /^65\d{8}$/;
     const result = re.test(String(data).toLowerCase());
@@ -92,7 +92,7 @@ export const validatePhoneNumber = (data, errors, fieldName) => {
 
 export const validatePassword = (data, errors, fieldName) => {
   if (data === "") {
-    errors[fieldName] = `${fieldName} is required!`;
+    errors[fieldName] = `${fieldName} is required`;
   } else {
     const re = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).*/;
     let result = re.test(String(data));

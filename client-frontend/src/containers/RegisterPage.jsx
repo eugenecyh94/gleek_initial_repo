@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   TextField,
@@ -12,6 +12,9 @@ import {
   FormHelperText,
   Snackbar,
   Alert,
+  Grid,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
@@ -19,6 +22,9 @@ import LockPersonIcon from "@mui/icons-material/LockPerson";
 import { useNavigate } from "react-router-dom";
 import useClientStore from "../zustand/ClientStore";
 import useSnackbarStore from "../zustand/SnackbarStore";
+import registerImage from "../assets/register.png";
+import { validator } from "../utils/ClientFieldsValidator";
+import TermsAndConditionsModal from "../components/Modals/TermsAndConditionsModal";
 
 const RegisterPage = () => {
   // themes
@@ -31,6 +37,7 @@ const RegisterPage = () => {
   const { isLoading, clientError, register } = useClientStore();
   const { openSnackbar } = useSnackbarStore();
   const [showPasswordVerify, setShowPasswordVerify] = useState(false);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     password: "",
     email: "",
@@ -46,8 +53,10 @@ const RegisterPage = () => {
     billingOfficePostalCode: "",
     phoneNumber: "",
     passwordVerify: "",
+    // Client consent
+    acceptTermsAndConditions: false,
   });
-  // error
+
   const [errorData, setErrorData] = useState({
     password: "",
     email: "",
@@ -65,30 +74,33 @@ const RegisterPage = () => {
     passwordVerify: "",
   });
 
+  // Modal
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
   // functions
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
   const handleClickShowPasswordVerify = () =>
     setShowPasswordVerify((show) => !show);
-  const navigate = useNavigate();
+
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
     console.log(formData);
   };
 
-  // Due to async nature of react, only this will log the updated state in real time
-  // useEffect(() => {
-  //   console.log(formData);
-  // }, [formData]);
-
   const handleChange = (event) => {
-    // name is field name
-    // value is formData
     const { name, value } = event.target;
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
+  };
+
+  // When a field loses focus, validate the field.
+  const handleValidate = (event) => {
+    const { name, value } = event.target;
     const errors = validator(formData, name);
     setErrorData((prevData) => ({
       ...prevData,
@@ -96,7 +108,24 @@ const RegisterPage = () => {
     }));
   };
 
+  const handleAcceptTermsChange = (event) => {
+    const { checked } = event.target;
+
+    setFormData((prevData) => ({
+      ...prevData,
+      acceptTermsAndConditions: checked,
+    }));
+  };
+
+  const disableButton = () => {
+    return (
+      !Object.values(errorData).every((error) => error === "") ||
+      !formData.acceptTermsAndConditions
+    );
+  };
+
   const handleSubmit = async (event) => {
+    "";
     event.preventDefault();
     for (const fieldName in formData) {
       let errors = validator(formData, fieldName);
@@ -105,151 +134,23 @@ const RegisterPage = () => {
         [fieldName]: errors[fieldName] || "",
       }));
     }
-
     if (!Object.values(errorData).every((error) => error === "")) {
+      openSnackbar("There are errors in your registration details.", "error");
       return;
     }
+    try {
+      const responseStatus = await register(formData);
 
-    const responseStatus = await register(formData);
-
-    if (responseStatus) {
-      openSnackbar("Register was successful!", "success");
-      navigate("/");
-    } else {
-      const error =
-        clientError &&
-        clientError.response &&
-        clientError.response.data &&
-        (clientError.response.data.errors?.[0]?.msg ||
-          clientError.response.data);
-      openSnackbar(error, "error");
-    }
-  };
-
-  // useEffect(() => {
-  //   // Loop through the keys (field names) of the formData object
-  //   for (const fieldName in formData) {
-  //     let errors = validator(formData, fieldName);
-  //     setErrorData((prevData) => ({
-  //       ...prevData,
-  //       [fieldName]: errors[fieldName] || "",
-  //     }));
-  //   }
-  // }, []);
-
-  const validator = (formData, fieldName) => {
-    let errors = {};
-    switch (fieldName) {
-      case "name":
-        validateIsRequired(formData[fieldName], errors, fieldName);
-        break;
-      case "jobTitle":
-        validateIsRequired(formData[fieldName], errors, fieldName);
-        break;
-      case "team":
-        validateIsRequired(formData[fieldName], errors, fieldName);
-        break;
-      case "companyName":
-        validateIsRequired(formData[fieldName], errors, fieldName);
-        break;
-      case "officeAddress":
-        validateIsRequired(formData[fieldName], errors, fieldName);
-        break;
-      case "billingAddress":
-        validateIsRequired(formData[fieldName], errors, fieldName);
-        break;
-      case "billingPartyName":
-        validateIsRequired(formData[fieldName], errors, fieldName);
-        break;
-      case "email":
-        validateEmail(formData[fieldName], errors, fieldName);
-        break;
-      case "billingEmail":
-        validateEmail(formData[fieldName], errors, fieldName);
-        break;
-      case "billingOfficePostalCode":
-        validatePostalCode(formData[fieldName], errors, fieldName);
-        break;
-      case "officePostalCode":
-        validatePostalCode(formData[fieldName], errors, fieldName);
-        break;
-      case "phoneNumber":
-        validatePhoneNumber(formData[fieldName], errors, fieldName);
-        break;
-      case "password":
-        validatePassword(formData[fieldName], errors, fieldName);
-        break;
-      case "passwordVerify":
-        validatePasswordVerify(
-          formData[fieldName],
-          formData.password,
-          errors,
-          fieldName
-        );
-        break;
-      default:
-    }
-    return errors;
-  };
-
-  const validateIsRequired = (data, errors, fieldName) => {
-    if (data === "") {
-      errors[fieldName] = `${fieldName} is required!`;
-    }
-  };
-
-  const validateEmail = (data, errors, fieldName) => {
-    if (data === "") {
-      errors[fieldName] = `${fieldName} is required!`;
-    } else {
-      const re =
-        /^(([^<>()\]\\.,;:\s@"]+(\.[^<>()\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      const result = re.test(String(data).toLowerCase());
-      if (!result) errors[fieldName] = "Invalid Email address format!";
-    }
-  };
-
-  const validatePostalCode = (data, errors, fieldName) => {
-    if (data === "") {
-      errors[fieldName] = `${fieldName} is required!`;
-    } else {
-      const re = /^\d{6}$/;
-      const result = re.test(String(data).toLowerCase());
-      if (!result) errors[fieldName] = "Invalid Postal Code!";
-    }
-  };
-
-  const validatePhoneNumber = (data, errors, fieldName) => {
-    if (data === "") {
-      errors[fieldName] = `${fieldName} is required!`;
-    } else {
-      const re = /^65\d{8}$/;
-      const result = re.test(String(data).toLowerCase());
-      if (!result) errors[fieldName] = "Invalid Phone Number!";
-    }
-  };
-
-  const validatePassword = (data, errors, fieldName) => {
-    if (data === "") {
-      errors[fieldName] = `${fieldName} is required!`;
-    } else {
-      const re = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).*/;
-      let result = re.test(String(data));
-      console.log(result);
-      if (!result) {
-        errors[fieldName] =
-          "Password must contain at least one lower case letter, one \n upper case letter, number and special character.";
-        result = false;
-      } else if (data.length < 8) {
-        errors[fieldName] = "Your password has less than 8 characters.";
-        result = false;
+      if (responseStatus) {
+        openSnackbar("Register was successful!", "success");
+        navigate("/");
       }
-    }
-  };
-
-  const validatePasswordVerify = (data, password, errors, fieldName) => {
-    if (password !== data) {
-      errors[fieldName] = `Password does not match!`;
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.errors?.[0]?.msg ||
+        error?.response?.data ||
+        null;
+      openSnackbar(errorMessage, "error");
     }
   };
 
@@ -259,212 +160,248 @@ const RegisterPage = () => {
       flexDirection="row"
       justifyContent="space-evenly"
       alignItems="center"
+      height="90vh"
     >
-      <form>
+      <Box
+        display="flex"
+        component="form"
+        flexDirection="column"
+        p={4}
+        bgcolor={"grey.50"}
+        borderRadius={10}
+        sx={{ minWidth: "25rem", width: "50%" }}
+        alignItems="center"
+        boxShadow={1}
+      >
         <Box
           display="flex"
           flexDirection="column"
-          p={4}
-          bgcolor={tertiary}
-          borderRadius={10}
-          sx={{ minWidth: "25rem" }}
-          boxShadow={2}
+          alignItems="center"
+          padding={3}
         >
-          <Box display="flex" flexDirection="column" alignItems="center">
-            <Box borderRadius="50%" bgcolor={primary} p={1}>
-              <LockPersonIcon fontSize="large" color="accent" />
-            </Box>
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            width="50px"
+            height="50px"
+            bgcolor={primary}
+            borderRadius="50%"
+          >
+            <LockPersonIcon fontSize="large" color="accent" />
           </Box>
-          <Typography color="secondary" variant="h5">
+          <Typography color="secondary" variant="h3">
             Register
           </Typography>
-          <Box display="flex" flexDirection="row">
-            <Box mr={3} display="flex" flexDirection="column">
-              <TextField
-                size="small"
-                autoFocus
-                autoComplete="on"
-                id="name"
-                required
-                name="name"
-                placeholder="Name"
-                onChange={handleChange}
-                onBlur={handleChange}
-                label="Name"
-                helperText={errorData.name}
-                error={errorData.name.length > 0}
-                sx={{ marginTop: "24px" }}
-              ></TextField>
-              <TextField
-                size="small"
-                autoComplete="on"
-                id="email"
-                required
-                name="email"
-                placeholder="Email"
-                label="Email"
-                onChange={handleChange}
-                onBlur={handleChange}
-                helperText={errorData.email}
-                error={errorData.email.length > 0}
-                sx={{ marginTop: "16px" }}
-              ></TextField>
-              <TextField
-                size="small"
-                autoComplete="on"
-                id="phoneNumber"
-                required
-                name="phoneNumber"
-                placeholder="Phone Number"
-                label="Phone Number"
-                defaultValue="65"
-                onChange={handleChange}
-                onBlur={handleChange}
-                helperText={errorData.phoneNumber}
-                error={errorData.phoneNumber.length > 0}
-                sx={{ marginTop: "16px" }}
-              ></TextField>
-              <TextField
-                size="small"
-                autoComplete="on"
-                id="jobTitle"
-                required
-                onChange={handleChange}
-                onBlur={handleChange}
-                name="jobTitle"
-                placeholder="Job Title"
-                label="Job Title"
-                helperText={errorData.jobTitle}
-                error={errorData.jobTitle.length > 0}
-                sx={{ marginTop: "16px" }}
-              ></TextField>
-            </Box>
-            <Box mr={3} display="flex" flexDirection="column">
-              <TextField
-                size="small"
-                autoComplete="on"
-                required
-                id="team"
-                name="team"
-                placeholder="Team"
-                label="Team"
-                onChange={handleChange}
-                onBlur={handleChange}
-                helperText={errorData.team}
-                error={errorData.team.length > 0}
-                sx={{ marginTop: "24px" }}
-              ></TextField>
-              <TextField
-                size="small"
-                autoComplete="on"
-                id="companyName"
-                required
-                name="companyName"
-                placeholder="Company Name"
-                label="Company Name"
-                onChange={handleChange}
-                onBlur={handleChange}
-                helperText={errorData.companyName}
-                error={errorData.companyName.length > 0}
-                sx={{ marginTop: "16px" }}
-              ></TextField>
-              <TextField
-                size="small"
-                multiline
-                autoComplete="on"
-                id="officeAddress"
-                required
-                name="officeAddress"
-                placeholder="Office Address"
-                label="Office Address"
-                onChange={handleChange}
-                onBlur={handleChange}
-                helperText={errorData.officeAddress}
-                error={errorData.officeAddress.length > 0}
-                sx={{ marginTop: "16px" }}
-              ></TextField>
-              <TextField
-                size="small"
-                autoComplete="on"
-                id="officePostalCode"
-                required
-                name="officePostalCode"
-                placeholder="Office Postal Code"
-                label="Office Postal Code"
-                value={formData.officePostalCode}
-                onChange={handleChange}
-                onBlur={handleChange}
-                helperText={errorData.officePostalCode}
-                error={errorData.officePostalCode.length > 0}
-                sx={{ marginTop: "16px" }}
-              ></TextField>
-            </Box>
-            <Box mr={3} display="flex" flexDirection="column">
-              <TextField
-                size="small"
-                autoComplete="on"
-                id="billingPartyName"
-                required
-                name="billingPartyName"
-                placeholder="Billing Party Name"
-                label="Billing Party Name"
-                onChange={handleChange}
-                onBlur={handleChange}
-                helperText={errorData.billingPartyName}
-                error={errorData.billingPartyName.length > 0}
-                sx={{ marginTop: "24px" }}
-              ></TextField>
-              <TextField
-                size="small"
-                multiline
-                autoComplete="on"
-                id="billingAddress"
-                required
-                name="billingAddress"
-                placeholder="Billing Address"
-                label="Billing Address"
-                onChange={handleChange}
-                onBlur={handleChange}
-                helperText={errorData.billingAddress}
-                error={errorData.billingAddress.length > 0}
-                sx={{ marginTop: "16px" }}
-              ></TextField>
-              <TextField
-                size="small"
-                autoComplete="on"
-                id="billingOfficePostalCode"
-                required
-                name="billingOfficePostalCode"
-                placeholder="Billing Office Postal Code"
-                label="Billing Office Postal Code"
-                onChange={handleChange}
-                onBlur={handleChange}
-                helperText={errorData.billingOfficePostalCode}
-                error={errorData.billingOfficePostalCode.length > 0}
-                sx={{ marginTop: "16px" }}
-              ></TextField>
-              <TextField
-                size="small"
-                autoComplete="on"
-                id="billingEmail"
-                required
-                name="billingEmail"
-                placeholder="Billing Email"
-                label="Billing Email"
-                onChange={handleChange}
-                onBlur={handleChange}
-                helperText={errorData.billingEmail}
-                error={errorData.billingEmail.length > 0}
-                sx={{ marginTop: "16px" }}
-              ></TextField>
-            </Box>
-          </Box>
-          <Box display="flex" flexDirection="row">
+        </Box>
+
+        <Grid container spacing={3}>
+          <Grid item p={0} xs={12} md={6}>
+            <TextField
+              sx={{ width: "100%" }}
+              size="small"
+              autoFocus
+              autoComplete="on"
+              id="name"
+              required
+              name="name"
+              placeholder="Name"
+              onChange={handleChange}
+              onBlur={handleValidate}
+              label="Name"
+              helperText={errorData.name}
+              error={errorData.name.length > 0}
+            />
+          </Grid>
+          <Grid item p={0} xs={12} md={6}>
+            <TextField
+              sx={{ width: "100%" }}
+              size="small"
+              autoComplete="on"
+              id="email"
+              required
+              name="email"
+              placeholder="Email"
+              label="Email"
+              onChange={handleChange}
+              onBlur={handleValidate}
+              helperText={errorData.email}
+              error={errorData.email.length > 0}
+            />
+          </Grid>
+          <Grid item p={0} xs={12} md={6}>
+            <TextField
+              sx={{ width: "100%" }}
+              size="small"
+              autoComplete="on"
+              id="phoneNumber"
+              required
+              name="phoneNumber"
+              placeholder="Phone Number"
+              label="Phone Number"
+              defaultValue="65"
+              onChange={handleChange}
+              onBlur={handleValidate}
+              helperText={errorData.phoneNumber}
+              error={errorData.phoneNumber.length > 0}
+            />
+          </Grid>
+          {/* Add the rest of the fields here */}
+          <Grid item p={0} xs={12} md={6}>
+            <TextField
+              sx={{ width: "100%" }}
+              size="small"
+              autoComplete="on"
+              id="jobTitle"
+              required
+              name="jobTitle"
+              placeholder="Job Title"
+              label="Job Title"
+              onChange={handleChange}
+              onBlur={handleValidate}
+              helperText={errorData.jobTitle}
+              error={errorData.jobTitle.length > 0}
+            />
+          </Grid>
+          <Grid item p={0} xs={12} md={6}>
+            <TextField
+              sx={{ width: "100%" }}
+              size="small"
+              autoComplete="on"
+              required
+              id="team"
+              name="team"
+              placeholder="Team"
+              label="Team"
+              onChange={handleChange}
+              onBlur={handleValidate}
+              helperText={errorData.team}
+              error={errorData.team.length > 0}
+            />
+          </Grid>
+          <Grid item p={0} xs={12} md={6}>
+            <TextField
+              sx={{ width: "100%" }}
+              size="small"
+              autoComplete="on"
+              id="companyName"
+              required
+              name="companyName"
+              placeholder="Company Name"
+              label="Company Name"
+              onChange={handleChange}
+              onBlur={handleValidate}
+              helperText={errorData.companyName}
+              error={errorData.companyName.length > 0}
+            />
+          </Grid>
+          <Grid item p={0} xs={12} md={6}>
+            <TextField
+              sx={{ width: "100%" }}
+              size="small"
+              multiline
+              autoComplete="on"
+              id="officeAddress"
+              required
+              name="officeAddress"
+              placeholder="Office Address"
+              label="Office Address"
+              onChange={handleChange}
+              onBlur={handleValidate}
+              helperText={errorData.officeAddress}
+              error={errorData.officeAddress.length > 0}
+            />
+          </Grid>
+          <Grid item p={0} xs={12} md={6}>
+            <TextField
+              sx={{ width: "100%" }}
+              size="small"
+              autoComplete="on"
+              id="officePostalCode"
+              required
+              name="officePostalCode"
+              placeholder="Office Postal Code"
+              label="Office Postal Code"
+              value={formData.officePostalCode}
+              onChange={handleChange}
+              onBlur={handleValidate}
+              helperText={errorData.officePostalCode}
+              error={errorData.officePostalCode.length > 0}
+            />
+          </Grid>
+          <Grid item p={0} xs={12} md={6}>
+            <TextField
+              sx={{ width: "100%" }}
+              size="small"
+              autoComplete="on"
+              id="billingEmail"
+              required
+              name="billingEmail"
+              placeholder="Billing Email"
+              label="Billing Email"
+              onChange={handleChange}
+              onBlur={handleValidate}
+              helperText={errorData.billingEmail}
+              error={errorData.billingEmail.length > 0}
+            />
+          </Grid>
+          <Grid item p={0} xs={12} md={6}>
+            <TextField
+              sx={{ width: "100%" }}
+              size="small"
+              autoComplete="on"
+              id="billingOfficePostalCode"
+              required
+              name="billingOfficePostalCode"
+              placeholder="Billing Office Postal Code"
+              label="Billing Office Postal Code"
+              onChange={handleChange}
+              onBlur={handleValidate}
+              helperText={errorData.billingOfficePostalCode}
+              error={errorData.billingOfficePostalCode.length > 0}
+            />
+          </Grid>
+          <Grid item p={0} xs={12} md={6}>
+            <TextField
+              sx={{ width: "100%" }}
+              size="small"
+              autoComplete="on"
+              id="billingPartyName"
+              required
+              name="billingPartyName"
+              placeholder="Billing Party Name"
+              label="Billing Party Name"
+              onChange={handleChange}
+              onBlur={handleValidate}
+              helperText={errorData.billingPartyName}
+              error={errorData.billingPartyName.length > 0}
+            />
+          </Grid>
+          <Grid item p={0} xs={12} md={6}>
+            <TextField
+              sx={{ width: "100%" }}
+              size="small"
+              multiline
+              autoComplete="on"
+              id="billingAddress"
+              required
+              name="billingAddress"
+              placeholder="Billing Address"
+              label="Billing Address"
+              onChange={handleChange}
+              onBlur={handleValidate}
+              helperText={errorData.billingAddress}
+              error={errorData.billingAddress.length > 0}
+            />
+          </Grid>
+
+          {/* Password Field */}
+          <Grid item xs={12} md={6}>
             <FormControl
-              sx={{ marginTop: "24px" }}
               size="small"
               required
               variant="outlined"
+              sx={{ width: "100%" }}
             >
               <InputLabel htmlFor="outlined-adornment-password">
                 Password
@@ -473,7 +410,7 @@ const RegisterPage = () => {
                 id="password"
                 name="password"
                 onChange={handleChange}
-                onBlur={handleChange}
+                onBlur={handleValidate}
                 value={formData.password}
                 type={showPassword ? "text" : "password"}
                 endAdornment={
@@ -496,11 +433,15 @@ const RegisterPage = () => {
                 </FormHelperText>
               )}
             </FormControl>
+          </Grid>
+
+          {/* Confirm Password Field */}
+          <Grid item xs={12} md={6}>
             <FormControl
-              sx={{ marginTop: "24px", marginLeft: "16px" }}
               size="small"
               required
               variant="outlined"
+              sx={{ width: "100%" }}
             >
               <InputLabel htmlFor="outlined-adornment-password">
                 Confirm your password
@@ -509,7 +450,7 @@ const RegisterPage = () => {
                 id="passwordVerify"
                 name="passwordVerify"
                 onChange={handleChange}
-                onBlur={handleChange}
+                onBlur={handleValidate}
                 value={formData.passwordVerify}
                 type={showPasswordVerify ? "text" : "password"}
                 endAdornment={
@@ -532,31 +473,62 @@ const RegisterPage = () => {
                 </FormHelperText>
               )}
             </FormControl>
-          </Box>
-          <Button
-            sx={{ marginTop: "24px" }}
-            mt={4}
-            variant="contained"
-            type="submit"
-            disabled={!Object.values(errorData).every((error) => error === "")}
-            onClick={handleSubmit}
-          >
-            <Typography variant="body1">Register</Typography>
-          </Button>
-          <Button
-            sx={{ marginTop: "16px" }}
-            variant="text"
-            onClick={() => {
-              navigate("/login");
-            }}
-          >
-            <Typography fontWeight={700} color="secondary" variant="body2">
-              Already a Member? Login
-            </Typography>
-          </Button>
-        </Box>
-      </form>
-      <Box>IMAGE TO BE ADDED LATER</Box>
+          </Grid>
+          <Grid item xs={12} md={12}>
+            <Box display="flex" flexDirection="row">
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formData.acceptTermsAndConditions}
+                    onChange={handleAcceptTermsChange} // Update formData.acceptTermsAndConditions
+                    name="acceptTermsAndConditions"
+                    color="primary"
+                  />
+                }
+                label="I agree to the Terms & Conditions of Gleek."
+              />
+
+              <Button width="5rem" onClick={handleOpen}>
+                Open T&C
+              </Button>
+              <TermsAndConditionsModal open={open} handleClose={handleClose} />
+            </Box>
+          </Grid>
+        </Grid>
+
+        <Button
+          sx={{ marginTop: "24px" }}
+          mt={4}
+          variant="contained"
+          type="submit"
+          disabled={disableButton()}
+          onClick={handleSubmit}
+        >
+          <Typography variant="body1">Register</Typography>
+        </Button>
+        <Button
+          sx={{ marginTop: "16px" }}
+          variant="text"
+          onClick={() => {
+            navigate("/login");
+          }}
+        >
+          <Typography fontWeight={700} color="secondary" variant="body2">
+            Already a Member? Login
+          </Typography>
+        </Button>
+      </Box>
+
+      <Box
+        width={"30%"}
+        component="img"
+        sx={{
+          maxHeight: "auto",
+          maxWidth: "100%",
+        }}
+        alt="Communication illustrations by Storyset"
+        src={registerImage}
+      />
     </Box>
   );
 };
