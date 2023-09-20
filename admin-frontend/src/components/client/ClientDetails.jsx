@@ -15,10 +15,13 @@ import {
 import DoneIcon from "@mui/icons-material/Done";
 import CloseIcon from "@mui/icons-material/Close";
 import ProfileCard from "../common/ProfileCard";
+<<<<<<< HEAD
 import PersonIcon from '@mui/icons-material/Person';
 import BusinessIcon from '@mui/icons-material/Business';
 import PaidIcon from '@mui/icons-material/Paid';
 import BadgeIcon from '@mui/icons-material/Badge';
+=======
+>>>>>>> develop
 
 const ClientDetails = () => {
   const { clientId } = useParams();
@@ -71,7 +74,10 @@ const ClientDetails = () => {
           <Box display="flex" flexDirection="row" flexWrap="wrap">
             <ProfileCard
               title="Point of Contact"
+<<<<<<< HEAD
               icon={<PersonIcon style= {{ color: theme.palette.dark_purple.main}}/>}
+=======
+>>>>>>> develop
               fieldNames={[
                 "Name",
                 "Email",
@@ -89,7 +95,10 @@ const ClientDetails = () => {
             />
             <ProfileCard
               title="Company"
+<<<<<<< HEAD
               icon={<BusinessIcon style= {{ color: theme.palette.dark_purple.main}}/>}  
+=======
+>>>>>>> develop
               fieldNames={[
                 "Company Name",
                 "Office Address",
@@ -103,7 +112,25 @@ const ClientDetails = () => {
             />
             <ProfileCard
               title="Billing Details"
+<<<<<<< HEAD
               icon={<PaidIcon style= {{ color: theme.palette.dark_purple.main}}/>}  
+=======
+              fieldNames={[
+                "Billing Party Name",
+                "Billing Address",
+                "Billing Office Postal Code",
+                "Billing Email",
+              ]}
+              fieldValues={[
+                clientDetails.billingPartyName,
+                clientDetails.billingAddress,
+                clientDetails.billingOfficePostalCode,
+                clientDetails.billingEmail,
+              ]}
+            />
+            <ProfileCard
+              title="Billing Details"
+>>>>>>> develop
               fieldNames={[
                 "Billing Party Name",
                 "Billing Address",
@@ -120,7 +147,10 @@ const ClientDetails = () => {
             {clientDetails.status === "APPROVED" && (
               <ProfileCard
                 title="Account Details"
+<<<<<<< HEAD
                 icon={<BadgeIcon style= {{ color: theme.palette.dark_purple.main}}/>  }
+=======
+>>>>>>> develop
                 fieldNames={["Signup Date", "Status", "Approved Date"]}
                 fieldValues={[
                   clientDetails.signupDate,
@@ -132,7 +162,10 @@ const ClientDetails = () => {
             {clientDetails.status !== "APPROVED" && (
               <ProfileCard
                 title="Account Details"
+<<<<<<< HEAD
                 icon={<BadgeIcon style= {{ color: theme.palette.dark_purple.main}}/>  }
+=======
+>>>>>>> develop
                 fieldNames={["Signup Date", "Status"]}
                 fieldValues={[clientDetails.signupDate, clientDetails.status]}
               />
