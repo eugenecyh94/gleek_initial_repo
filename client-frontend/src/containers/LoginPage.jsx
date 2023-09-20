@@ -11,14 +11,11 @@ import {
   OutlinedInput,
   FormHelperText,
   CircularProgress,
-  Snackbar,
-  Alert,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import LockPersonIcon from "@mui/icons-material/LockPerson";
 import { useNavigate } from "react-router-dom";
-import useClientStore from "../zustand/ClientStore.js";
 import useSnackbarStore from "../zustand/SnackbarStore.js";
 
 import loginImage from "../assets/login.png";
