@@ -361,7 +361,7 @@ const ShopPage = (props) => {
 
   useEffect(() => {
     const sortedActivities = activitiesSampleData.sort(
-      (a, b) => b.date - a.date
+      (a, b) => b.date - a.date,
     );
     setActivities(sortedActivities);
   }, []);
@@ -377,11 +377,11 @@ const ShopPage = (props) => {
       sortedActivities = sortedActivities.sort((a, b) => b.date - a.date);
     } else if (event.target.value === "Price High to Low") {
       sortedActivities = sortedActivities.sort(
-        (a, b) => b.startPricePerPax - a.startPricePerPax
+        (a, b) => b.startPricePerPax - a.startPricePerPax,
       );
     } else if (event.target.value === "Price Low to High") {
       sortedActivities = sortedActivities.sort(
-        (a, b) => a.startPricePerPax - b.startPricePerPax
+        (a, b) => a.startPricePerPax - b.startPricePerPax,
       );
     }
 
@@ -408,7 +408,7 @@ const ShopPage = (props) => {
   };
 
   const initialLocationState = Object.fromEntries(
-    Object.entries(Locations).map(([key, value]) => [key, false])
+    Object.entries(Locations).map(([key, value]) => [key, false]),
   );
 
   const [locationState, setLocationState] =
@@ -449,7 +449,7 @@ const ShopPage = (props) => {
     Object.entries(SustainableDevelopmentGoals).map(([key, value]) => [
       key,
       false,
-    ])
+    ]),
   );
 
   const [sgState, setSGState] = React.useState(initialSGState);
@@ -555,7 +555,7 @@ const ShopPage = (props) => {
                 onClick={(event) => {
                   event.preventDefault();
                   const clickedActivity = activities.find(
-                    (item) => item.id === activity.id
+                    (item) => item.id === activity.id,
                   );
                   if (clickedActivity) {
                     setCurrentActivity(clickedActivity);

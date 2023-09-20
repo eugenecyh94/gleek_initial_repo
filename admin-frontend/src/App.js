@@ -9,6 +9,8 @@ import ChangePassword from "./components/ChangePassword.jsx";
 import ResetPassword from "./components/ResetPassword";
 import ViewAllVendors from "./components/vendor/ViewAllVendors";
 import ViewAllClients from "./components/client/ViewAllClients";
+import ClientDetails from "./components/client/ClientDetails";
+import ImageAndFileUpload from "./components/activityCreation/ImageAndFileUpload";
 
 function App() {
   return (
@@ -61,7 +63,23 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            exact
+            path="/viewClient/:clientId"
+            element={
+              <ProtectedRoute>
+                <ClientDetails />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/login" element={<LoginPage />} />
+          {/*for testing image upload component*/}
+          <Route
+            path="/uploadTest"
+            element={
+              <ImageAndFileUpload limit={5} name="test" size={2000000} />
+            }
+          />
         </Routes>
       </Layout>
     </div>

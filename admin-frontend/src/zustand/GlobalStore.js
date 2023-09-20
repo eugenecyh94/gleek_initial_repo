@@ -10,7 +10,7 @@ export const updateCurrentActivity = (selectedActivity) => {
   }));
   console.log(
     "activity store current activity updated::",
-    useActivityStore.getState()
+    useActivityStore.getState(),
   );
 };
 
@@ -21,7 +21,7 @@ export const updateAllActivity = (newAllActivities) => {
   }));
   console.log(
     "activity store all activity updated::",
-    useActivityStore.getState()
+    useActivityStore.getState(),
   );
 };
 
@@ -150,5 +150,26 @@ export const useClientStore = create((set) => ({
     } catch (error) {
       console.error(error);
     }
+  },
+  clientDetails: {},
+  getClientDetails: async (clientId) => {
+    try {
+      set({ isLoading: true });
+      const response = await AxiosConnect.get(
+        `/client/getClientDetails/${clientId}`,
+      );
+      set({ clientDetails: response.data });
+      set({ isLoading: false });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+}));
+
+export const useImageUploadTestStore = create((set) => ({
+  imageList: [],
+  setImageList: (newImageList) => {
+    set({ imageList: newImageList });
+    console.log(useImageUploadTestStore.getState());
   },
 }));

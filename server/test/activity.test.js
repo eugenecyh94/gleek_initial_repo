@@ -50,7 +50,7 @@ describe("Activity Model", () => {
     try {
       const response = await axios.post(
         "http://localhost:5000/activity/addActivity",
-        newActivityData
+        newActivityData,
       );
       assert.equal(response.status, 201);
       expect(response.data.activity).to.be.an("object");
@@ -71,7 +71,7 @@ describe("Activity Model", () => {
     const id = "650279ff7fb60db6446810ca";
     try {
       const response = await axios.get(
-        `http://localhost:5000/activity/viewActivity/${id}`
+        `http://localhost:5000/activity/viewActivity/${id}`,
       );
       assert.equal(response.status, 200);
     } catch (error) {

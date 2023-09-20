@@ -16,9 +16,22 @@ export const updateClient = async (req, res) => {
     const updatedClient = await Client.findOneAndUpdate(
       { _id: req.params.id },
       { ...updateData, approvedDate: Date.now() },
-      { new: true }
+      { new: true },
     );
     return res.status(201).json(updatedClient);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("Server Error");
+  }
+};
+
+export const getClientDetails = async (req, res) => {
+  try {
+    const client = await Client.findById(req.params.clientId);
+    if (!client) {
+      return res.status(404).json({ message: "Client not found" });
+    }
+    return res.status(200).json(client);
   } catch (err) {
     console.error(err);
     return res.status(500).send("Server Error");
