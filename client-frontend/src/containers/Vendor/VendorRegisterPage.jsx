@@ -35,7 +35,7 @@ const VendorRegisterPage = () => {
   // states
   // user input
   const [showPassword, setShowPassword] = useState(false);
-  const { vendorTypesFetcher, vendorTypes, register } = useVendorStore();
+  const { vendorTypesFetcher, vendorTypes, registerVendor } = useVendorStore();
   const { openSnackbar } = useSnackbarStore();
   const [showPasswordVerify, setShowPasswordVerify] = useState(false);
   const navigate = useNavigate();
@@ -225,7 +225,7 @@ const VendorRegisterPage = () => {
 
     try {
       console.log(formData);
-      const responseStatus = await register(formData);
+      const responseStatus = await registerVendor(formData);
 
       if (responseStatus) {
         openSnackbar("Register was successful!", "success");

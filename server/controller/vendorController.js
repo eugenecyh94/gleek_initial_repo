@@ -1,7 +1,6 @@
 import VendorModel from "../model/vendorModel.js";
 import { VendorTypeEnum } from "../util/vendorTypeEnum.js";
 import mongoose from "mongoose";
-const secret = process.env.JWT_SECRET_VENDOR;
 import jwt from "jsonwebtoken";
 import {
   createVendor,
@@ -10,6 +9,10 @@ import {
 } from "../service/vendorService.js";
 import { validationResult } from "express-validator";
 import { createVendorConsent } from "../service/consentService.js";
+import bcrypt from "bcryptjs";
+
+const secret = process.env.JWT_SECRET_VENDOR;
+// sample account: companyEmail = "test@gmail.com", password = "7655Th#123"
 
 /*
  * Generate JWT Token
@@ -46,7 +49,9 @@ const setCookieAndRespond = (res, token, vendor) => {
       path: "/",
     });
     console.log(vendor);
-    res.status(200).json({ token, vendor: vendor });
+    res
+      .status(200)
+      .json({ msg: "Retrieved Vendor Account", token, vendor: vendor });
   } catch (cookieError) {
     console.error(cookieError);
     res.status(500).send("Error setting cookie");
@@ -114,14 +119,16 @@ export const postLogin = async (req, res) => {
     return res.status(422).json({ errors: errors.array() });
   }
   try {
-    const { email, password } = req.body;
-    const client = await Client.findOne({ email });
+    const { companyEmail, password } = req.body;
 
-    if (client && (await bcrypt.compare(password, client.password))) {
+    const vendor = await VendorModel.findOne({ companyEmail });
+    const response = await bcrypt.compare(password, vendor.password);
+    console.log(response);
+    if (vendor && (await bcrypt.compare(password, vendor.password))) {
       const payload = {
-        client: {
-          id: client.id,
-          email: client.email,
+        vendor: {
+          id: vendor.id,
+          companyEmail: vendor.companyEmail,
         },
       };
       jwt.sign(payload, secret, { expiresIn: 360000 }, (err, token) => {
@@ -135,7 +142,7 @@ export const postLogin = async (req, res) => {
             secure: true, // Use secure cookies in production
             path: "/", // Set the path to your application root
           });
-          res.cookie("userRole", "Client", {
+          res.cookie("userRole", "Vendor", {
             httpOnly: true,
             maxAge: 3600000,
             sameSite: "None",
@@ -148,7 +155,11 @@ export const postLogin = async (req, res) => {
         }
         const { password, ...vendorWithoutPassword } = vendor.toObject();
 
-        res.status(200).json({ token, vendor: vendorWithoutPassword });
+        res.status(200).json({
+          msg: "Vendor Login Successful",
+          token,
+          vendor: vendorWithoutPassword,
+        });
       });
     } else {
       res.status(400).send("Invalid Credentials");
@@ -158,13 +169,47 @@ export const postLogin = async (req, res) => {
   }
 };
 
+export const validateToken = async (req, res) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.status(403).send("A token is required for authentication");
+  }
+
+  try {
+    const decoded = jwt.verify(token, secret);
+
+    const vendor = await VendorModel.findById(decoded.vendor.id);
+
+    if (!vendor) {
+      return res.status(401).send("Vendor not found");
+    }
+    const { password, ...vendorWithoutPassword } = vendor.toObject();
+    return res.status(200).json({
+      msg: "Vendor Validation Success",
+      token,
+      vendor: vendorWithoutPassword,
+    });
+  } catch (err) {
+    // If verification fails (e.g., due to an invalid or expired token), send an error response
+    return res.status(401).send("Invalid Token");
+  }
+};
 export const getAllVendorTypes = async (req, res) => {
   try {
-    res.status(200).json(VendorTypeEnum);
+    res
+      .status(200)
+      .json({ msg: "Retrieved Vendor Types", VendorTypeEnum: VendorTypeEnum });
   } catch (error) {
     console.log(e);
     res.status(500).json("Server Error");
   }
+};
+
+export const clearCookies = async (req, res) => {
+  res.clearCookie("token");
+  res.clearCookie("userRole");
+  res.status(200).end();
 };
 
 export const addVendor = async (req, res) => {

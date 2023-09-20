@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import ActivityItem from "../components/ActivityItem";
+import ActivityItem from "../../components/ActivityItem";
 import {
   Box,
   Typography,
@@ -11,12 +11,12 @@ import {
   FormControl,
   Select,
 } from "@mui/material";
-import useShopStore from "../zustand/ShopStore";
+import useShopStore from "../../zustand/ShopStore";
 import { useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
-import PriceFilter from "../components/Filters/PriceFilter";
-import CheckBoxGroup from "../components/Filters/CheckBoxGroup";
-import RadioButtonGroup from "../components/Filters/RadioButtonGroup";
+import PriceFilter from "../../components/Filters/PriceFilter";
+import CheckBoxGroup from "../../components/Filters/CheckBoxGroup";
+import RadioButtonGroup from "../../components/Filters/RadioButtonGroup";
 const ShopPage = (props) => {
   const navigate = useNavigate();
   const activitiesSampleData = [

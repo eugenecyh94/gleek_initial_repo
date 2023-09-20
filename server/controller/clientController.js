@@ -166,7 +166,6 @@ export const postLogin = async (req, res) => {
 
 export const validateToken = async (req, res) => {
   const token = req.cookies.token;
-
   if (!token) {
     return res.status(403).send("A token is required for authentication");
   }
@@ -175,12 +174,11 @@ export const validateToken = async (req, res) => {
     const decoded = jwt.verify(token, secret);
 
     const client = await Client.findById(decoded.client.id);
-
     if (!client) {
       return res.status(401).send("Client not found");
     }
     const { password, ...clientWithoutPassword } = client.toObject();
-    res.status(200).json({ token, client: clientWithoutPassword });
+    return res.status(200).json({ token, client: clientWithoutPassword });
   } catch (err) {
     // If verification fails (e.g., due to an invalid or expired token), send an error response
     return res.status(401).send("Invalid Token");
@@ -189,6 +187,7 @@ export const validateToken = async (req, res) => {
 
 export const clearCookies = async (req, res) => {
   res.clearCookie("token");
+  res.clearCookie("userRole");
   res.status(200).end();
 };
 

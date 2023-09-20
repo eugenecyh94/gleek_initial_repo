@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
-import Client from "../model/clientModel.js";
+import VendorModel from "../model/vendorModel";
 
-const secret = process.env.JWT_SECRET_ClIENT;
+const secret = process.env.JWT_SECRET_VENDOR;
 
 export const verifyToken = async (req, res, next) => {
   const token =
@@ -18,10 +18,10 @@ export const verifyToken = async (req, res, next) => {
     const decoded = await jwt.verify(token, secret);
 
     // Example: Fetch user data from a database asynchronously
-    const user = await Client.findById(decoded.client.id);
+    const user = await VendorModel.findById(decoded.vendor.id);
 
     if (!user) {
-      return res.status(401).send("Client not found");
+      return res.status(401).send("Vendor not found");
     }
 
     // Attach user data to the request

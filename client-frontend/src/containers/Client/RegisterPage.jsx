@@ -20,11 +20,11 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import LockPersonIcon from "@mui/icons-material/LockPerson";
 import { useNavigate } from "react-router-dom";
-import useClientStore from "../zustand/ClientStore";
-import useSnackbarStore from "../zustand/SnackbarStore";
-import registerImage from "../assets/register.png";
-import { validator } from "../utils/ClientFieldsValidator";
-import TermsAndConditionsModal from "../components/Modals/TermsAndConditionsModal";
+import useClientStore from "../../zustand/ClientStore";
+import useSnackbarStore from "../../zustand/SnackbarStore";
+import registerImage from "../../assets/register.png";
+import { validator } from "../../utils/ClientFieldsValidator";
+import TermsAndConditionsModal from "../../components/Modals/TermsAndConditionsModal";
 
 const RegisterPage = () => {
   // themes

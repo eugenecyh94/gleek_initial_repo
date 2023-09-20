@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import CartPage from "./containers/CartPage";
-import ShopPage from "./containers/ShopPage";
+import CartPage from "./containers/Client/CartPage";
+import ShopPage from "./containers/Client/ShopPage";
 import HomePage from "./containers/HomePage";
 import Layout from "./components/Layout";
 import LoginPage from "./containers/LoginPage";
-import RegisterPage from "./containers/RegisterPage";
-import ClientProtectedRoute from "./components/ClientProtectedRoute";
+import RegisterPage from "./containers/Client/RegisterPage";
+import ClientProtectedRoute from "./components/Routes/ClientProtectedRoute";
 import SocketConnection from "./utils/SocketConnection";
 import AccountDetails from "./containers/Account/AccountDetails";
 import Privacy from "./containers/Account/Privacy";
@@ -15,9 +15,14 @@ import ProfilePicture from "./containers/Account/ProfilePicture";
 import ActivityDetailsPage from "./containers/ActivityDetailsPage";
 import useClientStore from "./zustand/ClientStore";
 import VendorRegisterPage from "./containers/Vendor/VendorRegisterPage";
+import ErrorPage from "./containers/ErrorPage";
+import useVendorStore from "./zustand/VendorStore";
+import VendorProtectedRoute from "./components/Routes/VendorProtectedRoute";
+import ActivitiesPage from "./containers/Vendor/ActivitiesPage";
 
 function App() {
   const { isLoading, clientError, login } = useClientStore();
+  const { isLoadingVendor, vendorError, loginVendor } = useVendorStore();
   return (
     <div>
       <SocketConnection />
@@ -105,10 +110,25 @@ function App() {
           <Route
             path="/vendor/login"
             element={
-              <LoginPage title="Vendor Login" registerLink="/vendor/register" />
+              <LoginPage
+                loading={isLoadingVendor}
+                error={vendorError}
+                title="Vendor Login"
+                registerLink="/vendor/register"
+                loginMethod={loginVendor}
+              />
             }
           />
           <Route path="/vendor/register" element={<VendorRegisterPage />} />
+          <Route path="/error" element={<ErrorPage />} />
+          <Route
+            path="/vendor/activities"
+            element={
+              <VendorProtectedRoute>
+                <ActivitiesPage />
+              </VendorProtectedRoute>
+            }
+          />
         </Routes>
       </Layout>
     </div>
