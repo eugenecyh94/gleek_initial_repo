@@ -3,7 +3,7 @@ import React from "react";
 import { Typography, Box } from "@mui/material";
 import { useTheme } from "@emotion/react";
 
-const ProfileCard = ({ title, fieldNames, fieldValues }) => {
+const ProfileCard = ({ title, icon, fieldNames, fieldValues }) => {
   const theme = useTheme();
   return (
     <Box
@@ -12,19 +12,23 @@ const ProfileCard = ({ title, fieldNames, fieldValues }) => {
       minWidth="225px"
       alignItems="left"
       boxShadow={1}
-      border={`1px solid ${theme.palette.primary.main}`}
+      border={`1px solid ${theme.palette.light_purple.main}`}
       borderRadius={5}
       p={2}
       m={2}
       flex={1}
     >
-      <Typography
-        fontSize={20}
-        fontWeight={700}
-        color={theme.palette.primary.main}
-      >
-        {title}
-      </Typography>
+      <Box display="flex" flexDirection="row" alignItems="center">
+        {icon}
+        <Typography
+          fontSize={20}
+          fontWeight={700}
+          color={theme.palette.primary.main}
+          ml={1}
+        >
+          {title}
+        </Typography>
+      </Box>
       {fieldNames.map((fieldName, index) => (
         <Typography
           key={index}
