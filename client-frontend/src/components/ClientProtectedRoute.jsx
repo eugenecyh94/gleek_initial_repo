@@ -3,7 +3,7 @@ import AxiosConnect from "../utils/AxiosConnect";
 import useClientStore from "../zustand/ClientStore";
 import { useNavigate } from "react-router-dom";
 
-const ProtectedRoute = ({ children }) => {
+const ClientProtectedRoute = ({ children }) => {
   const navigate = useNavigate();
   const { setClient, setAuthenticated, authenticated, client } =
     useClientStore();
@@ -33,4 +33,4 @@ const ProtectedRoute = ({ children }) => {
   return authenticated ? <div>{children}</div> : null;
 };
 
-export default ProtectedRoute;
+export default ClientProtectedRoute;

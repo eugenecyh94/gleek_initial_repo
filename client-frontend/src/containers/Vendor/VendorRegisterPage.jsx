@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   TextField,
@@ -10,85 +10,100 @@ import {
   InputLabel,
   OutlinedInput,
   FormHelperText,
-  Snackbar,
-  Alert,
-  Select,
+  Grid,
+  FormControlLabel,
+  Checkbox,
   MenuItem,
+  Select,
+  Chip,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import LockPersonIcon from "@mui/icons-material/LockPerson";
 import { useNavigate } from "react-router-dom";
 import useClientStore from "../../zustand/ClientStore";
 import useSnackbarStore from "../../zustand/SnackbarStore";
-
+import registerImage from "../../assets/register.png";
+import { validator } from "../../utils/VendorFieldsValidator";
+import TermsAndConditionsModal from "../../components/Modals/TermsAndConditionsModal";
+import useVendorStore from "../../zustand/VendorStore";
 const VendorRegisterPage = () => {
   // themes
   const theme = useTheme();
-  const tertiary = theme.palette.tertiary.main;
   const primary = theme.palette.primary.main;
   // states
   // user input
   const [showPassword, setShowPassword] = useState(false);
-  const { isLoading, clientError, register } = useClientStore();
+  const { vendorTypesFetcher, vendorTypes, register } = useVendorStore();
   const { openSnackbar } = useSnackbarStore();
   const [showPasswordVerify, setShowPasswordVerify] = useState(false);
-
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    companyName: "",
-    companyUEN: "",
-    companyAddress: "",
-    companyPhoneNumber: "",
-    companyEmail: "",
-    vendorDetails: "",
     password: "",
-    companyType: "",
-    customCompanyType: "",
-    brandNames: [],
-    companyLogo: "",
-    signupDate: "",
-    companySocials: "",
+    companyUEN: "",
+    companyEmail: "",
+    companyName: "",
+    companyAddress: "",
+    companyPostalCode: "",
+    companyPhoneNumber: "",
     passwordVerify: "",
-    officePostalCode: "",
+    vendorType: "",
+    vendorDetails: "",
+    customCompanyType: "",
+    // Client consent
+    acceptTermsAndConditions: false,
+    brandNames: [],
+    companySocials: {},
   });
-  // error
+
   const [errorData, setErrorData] = useState({
-    companyName: "",
-    companyUEN: "",
-    companyAddress: "",
-    companyPhoneNumber: "",
-    companyEmail: "",
-    vendorDetails: "",
     password: "",
-    companyType: "",
-    customCompanyType: "",
-    brandNames: [],
-    companyLogo: "",
-    signupDate: "",
-    companySocials: "",
+    companyEmail: "",
+    companyUEN: "",
+    companyName: "",
+    companyAddress: "",
+    companyPostalCode: "",
+    companyPhoneNumber: "",
+    vendorType: "",
     passwordVerify: "",
-    officePostalCode: "",
+    vendorDetails: "",
+    customCompanyType: "",
+    brandNames: "",
+    socialMedia: "",
+    url: "",
   });
+
+  // Modal
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  useEffect(() => {
+    vendorTypesFetcher();
+  }, []);
 
   // functions
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
   const handleClickShowPasswordVerify = () =>
     setShowPasswordVerify((show) => !show);
-  const navigate = useNavigate();
+
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
-    console.log(formData);
   };
 
   const handleChange = (event) => {
-    // name is field name
-    // value is formData
     const { name, value } = event.target;
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
+  };
+
+  // When a field loses focus, validate the field.
+  const handleValidate = (event) => {
+    const { name, value } = event.target;
     const errors = validator(formData, name);
     setErrorData((prevData) => ({
       ...prevData,
@@ -96,7 +111,97 @@ const VendorRegisterPage = () => {
     }));
   };
 
+  const handleAcceptTermsChange = (event) => {
+    const { checked } = event.target;
+
+    setFormData((prevData) => ({
+      ...prevData,
+      acceptTermsAndConditions: checked,
+    }));
+  };
+
+  const disableButton = () => {
+    console.log(errorData);
+    return (
+      !Object.values(errorData).every((error) => error === "") ||
+      !formData.acceptTermsAndConditions
+    );
+  };
+
+  // Vendor Type Select Manu
+  const handleMenuChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      vendorType: value,
+      // Clear the custom input when a predefined option is selected
+      customCompanyType: "",
+    }));
+    setErrorData((prevData) => ({
+      ...prevData,
+      vendorType: "",
+    }));
+  };
+
+  const handleVendorTypeErrorCheck = (event) => {
+    const errors = validator(formData, "vendorType");
+    setErrorData((prevData) => ({
+      ...prevData,
+      vendorType: errors["vendorType"] || "", // Replace the error with an empty string if it's empty
+    }));
+  };
+
+  const handleVendorCustomTypeChange = (event) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      vendorType: "Other",
+      customCompanyType: event.target.value,
+    }));
+  };
+
+  // Chips
+  const [inputValue, setInputValue] = useState("");
+
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleAddChip = () => {
+    const trimmedValue = inputValue.trim();
+    if (trimmedValue === "" || formData.brandNames.includes(trimmedValue)) {
+      return;
+    }
+    setFormData((prevData) => ({
+      ...prevData,
+      brandNames: [...prevData.brandNames, inputValue],
+    }));
+    setInputValue("");
+  };
+
+  const handleBrandNamesValidate = () => {
+    const trimmedValue = inputValue.trim();
+    if (formData.brandNames.includes(trimmedValue)) {
+      setErrorData((prevData) => ({
+        ...prevData,
+        brandNames: "This chip already exists." || "", // Replace the error with an empty string if it's empty
+      }));
+      return;
+    }
+    setErrorData((prevData) => ({
+      ...prevData,
+      brandNames: "", // Replace the error with an empty string if it's empty
+    }));
+  };
+
+  const handleDeleteChip = (chipToDelete) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      brandNames: prevData.brandNames.filter((chip) => chip !== chipToDelete),
+    }));
+  };
+
   const handleSubmit = async (event) => {
+    "";
     event.preventDefault();
     for (const fieldName in formData) {
       let errors = validator(formData, fieldName);
@@ -105,152 +210,118 @@ const VendorRegisterPage = () => {
         [fieldName]: errors[fieldName] || "",
       }));
     }
-
+    for (let field of socialMediaFields) {
+      const { platform, url } = field;
+      handleSocialMediaValidate(platform);
+      handleURLValidate(url);
+    }
     if (!Object.values(errorData).every((error) => error === "")) {
+      openSnackbar(
+        "There are errors in your Vendor registration details.",
+        "error",
+      );
       return;
     }
 
-    const responseStatus = await register(formData);
+    try {
+      console.log(formData);
+      const responseStatus = await register(formData);
 
-    if (responseStatus) {
-      openSnackbar("Register was successful!", "success");
-      navigate("/");
-    } else {
-      const error =
-        clientError &&
-        clientError.response &&
-        clientError.response.data &&
-        (clientError.response.data.errors?.[0]?.msg ||
-          clientError.response.data);
-      openSnackbar(error, "error");
-    }
-  };
-
-  const validator = (formData, fieldName) => {
-    let errors = {};
-    switch (fieldName) {
-      case "companyName":
-        validateIsRequired(formData[fieldName], errors, fieldName);
-        break;
-      case "companyUEN":
-        validateIsRequired(formData[fieldName], errors, fieldName);
-        break;
-      case "team":
-        validateIsRequired(formData[fieldName], errors, fieldName);
-        break;
-      case "companyAddress":
-        validateIsRequired(formData[fieldName], errors, fieldName);
-        break;
-      case "vendorDetails":
-        validateIsRequired(formData[fieldName], errors, fieldName);
-        break;
-      case "billingPartyName":
-        validateIsRequired(formData[fieldName], errors, fieldName);
-        break;
-      case "companyEmail":
-        validateEmail(formData[fieldName], errors, fieldName);
-        break;
-      case "billingEmail":
-        validateEmail(formData[fieldName], errors, fieldName);
-        break;
-      case "billingOfficePostalCode":
-        validatePostalCode(formData[fieldName], errors, fieldName);
-        break;
-      case "officePostalCode":
-        validatePostalCode(formData[fieldName], errors, fieldName);
-        break;
-      case "companyPhoneNumber":
-        validatePhoneNumber(formData[fieldName], errors, fieldName);
-        break;
-      case "password":
-        validatePassword(formData[fieldName], errors, fieldName);
-        break;
-      case "passwordVerify":
-        validatePasswordVerify(
-          formData[fieldName],
-          formData.password,
-          errors,
-          fieldName,
-        );
-        break;
-      default:
-    }
-    return errors;
-  };
-
-  const validateIsRequired = (data, errors, fieldName) => {
-    if (data === "") {
-      errors[fieldName] = `${fieldName} is required!`;
-    }
-  };
-
-  const validateEmail = (data, errors, fieldName) => {
-    if (data === "") {
-      errors[fieldName] = `${fieldName} is required!`;
-    } else {
-      const re =
-        /^(([^<>()\]\\.,;:\s@"]+(\.[^<>()\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      const result = re.test(String(data).toLowerCase());
-      if (!result) errors[fieldName] = "Invalid Email address format!";
-    }
-  };
-
-  const validatePostalCode = (data, errors, fieldName) => {
-    if (data === "") {
-      errors[fieldName] = `${fieldName} is required!`;
-    } else {
-      const re = /^\d{6}$/;
-      const result = re.test(String(data).toLowerCase());
-      if (!result) errors[fieldName] = "Invalid Postal Code!";
-    }
-  };
-
-  const validatePhoneNumber = (data, errors, fieldName) => {
-    if (data === "") {
-      errors[fieldName] = `${fieldName} is required!`;
-    } else {
-      const re = /^65\d{8}$/;
-      const result = re.test(String(data).toLowerCase());
-      if (!result) errors[fieldName] = "Invalid Phone Number!";
-    }
-  };
-
-  const validatePassword = (data, errors, fieldName) => {
-    if (data === "") {
-      errors[fieldName] = `${fieldName} is required!`;
-    } else {
-      const re = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).*/;
-      let result = re.test(String(data));
-      console.log(result);
-      if (!result) {
-        errors[fieldName] =
-          "Password must contain at least one lower case letter, one \n upper case letter, number and special character.";
-        result = false;
-      } else if (data.length < 8) {
-        errors[fieldName] = "Your password has less than 8 characters.";
-        result = false;
+      if (responseStatus) {
+        openSnackbar("Register was successful!", "success");
+        navigate("/");
       }
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.errors?.[0]?.msg ||
+        error?.response?.data ||
+        null;
+      openSnackbar(errorMessage, "error");
     }
   };
 
-  const validatePasswordVerify = (data, password, errors, fieldName) => {
-    if (password !== data) {
-      errors[fieldName] = `Password does not match!`;
+  // company socials
+  const [socialMediaFields, setSocialMediaFields] = useState([
+    { platform: "", url: "" },
+  ]);
+
+  const updateCompanySocials = () => {
+    const updatedCompanySocials = socialMediaFields.reduce(
+      (acc, { platform, url }) => {
+        acc[platform] = url;
+        return acc;
+      },
+      {},
+    );
+
+    setFormData((prevData) => ({
+      ...prevData,
+      companySocials: updatedCompanySocials,
+    }));
+  };
+  const addField = () => {
+    setSocialMediaFields([...socialMediaFields, { platform: "", url: "" }]);
+    updateCompanySocials();
+  };
+
+  const removeField = (index) => {
+    const updatedFields = [...socialMediaFields];
+    updatedFields.splice(index, 1);
+    setSocialMediaFields(updatedFields);
+    updateCompanySocials();
+  };
+
+  const handlePlatformChange = (index, value) => {
+    const updatedFields = [...socialMediaFields];
+    updatedFields[index].platform = value;
+    setSocialMediaFields(updatedFields);
+    updateCompanySocials();
+  };
+
+  const handleURLChange = (index, value) => {
+    const updatedFields = [...socialMediaFields];
+    updatedFields[index].url = value;
+    setSocialMediaFields(updatedFields);
+    updateCompanySocials();
+  };
+
+  const handleSocialMediaValidate = (platform) => {
+    platform = platform ? platform : "";
+    const trimmedPlatform = platform.trim();
+    if (trimmedPlatform === "") {
+      setErrorData((prevData) => ({
+        ...prevData,
+        socialMedia: "Please do not leave any blanks for Social Media!",
+      }));
+      return;
     }
+    setErrorData((prevData) => ({
+      ...prevData,
+      socialMedia: "",
+    }));
   };
 
-  const [selectedValue, setSelectedValue] = useState("");
-  const [customValue, setCustomValue] = useState("");
-
-  const handleMenuChange = (event) => {
-    setSelectedValue(event.target.value);
-    // Clear the custom input when a predefined option is selected
-    setCustomValue("");
-  };
-
-  const handleCustomValueChange = (event) => {
-    setSelectedValue("custom");
-    setCustomValue(event.target.value);
+  const handleURLValidate = (url) => {
+    url = url ? url : "";
+    const trimmedURL = url.trim();
+    if (trimmedURL === "") {
+      setErrorData((prevData) => ({
+        ...prevData,
+        url: "Please do not leave any blanks for URLs!",
+      }));
+      return;
+    }
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+      setErrorData((prevData) => ({
+        ...prevData,
+        url: "URLs must start with http:// or https://",
+      }));
+      return;
+    }
+    setErrorData((prevData) => ({
+      ...prevData,
+      url: "",
+    }));
   };
 
   return (
@@ -259,229 +330,356 @@ const VendorRegisterPage = () => {
       flexDirection="row"
       justifyContent="space-evenly"
       alignItems="center"
+      minHeight="90vh"
     >
-      <form>
+      <Box
+        display="flex"
+        component="form"
+        flexDirection="column"
+        p={4}
+        bgcolor={"grey.50"}
+        borderRadius={10}
+        sx={{ minWidth: "25rem", width: "50%" }}
+        alignItems="center"
+        boxShadow={1}
+      >
         <Box
           display="flex"
           flexDirection="column"
-          p={4}
-          bgcolor={tertiary}
-          borderRadius={10}
-          sx={{ minWidth: "25rem" }}
-          boxShadow={2}
+          alignItems="center"
+          padding={3}
         >
-          <Box display="flex" flexDirection="column" alignItems="center">
-            <Box borderRadius="50%" bgcolor={primary} p={1}>
-              <LockPersonIcon fontSize="large" color="accent" />
-            </Box>
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            width="50px"
+            height="50px"
+            bgcolor={primary}
+            borderRadius="50%"
+          >
+            <LockPersonIcon fontSize="large" color="accent" />
           </Box>
-          <Typography color="secondary" variant="h5">
-            Vendor Register
+          <Typography color="secondary" variant="h3">
+            Register as a Vendor
           </Typography>
-          <Box display="flex" flexDirection="row">
-            <Box mr={3} display="flex" flexDirection="column">
-              {/*Company Name*/}
-              <TextField
-                size="small"
-                autoFocus
-                autoComplete="on"
-                id="companyName"
-                required
-                name="companyName"
-                placeholder="Company Name"
+        </Box>
+
+        <Grid container spacing={3}>
+          <Grid item p={0} xs={12} md={6}>
+            {/*Company Name*/}
+            <TextField
+              sx={{ width: "100%" }}
+              size="small"
+              autoComplete="on"
+              id="companyName"
+              required
+              name="companyName"
+              placeholder="Company Name"
+              label="Company Name"
+              onChange={handleChange}
+              onBlur={handleValidate}
+              helperText={errorData.companyName}
+              error={errorData.companyName.length > 0}
+            />
+          </Grid>
+          {/*Company UEN*/}
+          <Grid item p={0} xs={12} md={6}>
+            <TextField
+              sx={{ width: "100%" }}
+              size="small"
+              autoComplete="on"
+              id="companyUEN"
+              required
+              name="companyUEN"
+              placeholder="Company UEN"
+              label="Company UEN"
+              onChange={handleChange}
+              onBlur={handleValidate}
+              helperText={errorData.companyUEN}
+              error={errorData.companyUEN.length > 0}
+            />
+          </Grid>
+          {/*Company Email*/}
+          <Grid item p={0} xs={12} md={6}>
+            <TextField
+              sx={{ width: "100%" }}
+              size="small"
+              autoComplete="on"
+              id="companyEmail"
+              required
+              name="companyEmail"
+              placeholder="Company Email"
+              label="Company Email"
+              onChange={handleChange}
+              onBlur={handleValidate}
+              helperText={errorData.companyEmail}
+              error={errorData.companyEmail.length > 0}
+            />
+          </Grid>
+          <Grid item p={0} xs={12} md={6}>
+            <TextField
+              sx={{ width: "100%" }}
+              size="small"
+              autoComplete="on"
+              id="companyPhoneNumber"
+              required
+              name="companyPhoneNumber"
+              placeholder="Company Phone Number"
+              label="Company Phone Number"
+              defaultValue="65"
+              onChange={handleChange}
+              onBlur={handleValidate}
+              helperText={errorData.companyPhoneNumber}
+              error={errorData.companyPhoneNumber.length > 0}
+            />
+          </Grid>
+          <Grid item p={0} xs={12} md={6}>
+            <TextField
+              sx={{ width: "100%" }}
+              size="small"
+              multiline
+              autoComplete="on"
+              id="companyAddress"
+              required
+              name="companyAddress"
+              placeholder="Company Address"
+              label="Company Address"
+              onChange={handleChange}
+              onBlur={handleValidate}
+              helperText={errorData.companyAddress}
+              error={errorData.companyAddress.length > 0}
+            />
+          </Grid>
+          <Grid item p={0} xs={12} md={6}>
+            <TextField
+              sx={{ width: "100%" }}
+              size="small"
+              autoComplete="on"
+              id="companyPostalCode"
+              required
+              name="companyPostalCode"
+              placeholder="Company Postal Code"
+              label="Company Postal Code"
+              value={formData.companyPostalCode}
+              onChange={handleChange}
+              onBlur={handleValidate}
+              helperText={errorData.companyPostalCode}
+              error={errorData.companyPostalCode.length > 0}
+            />
+          </Grid>
+          {/* Password Field */}
+          <Grid item xs={12} md={6}>
+            <FormControl
+              size="small"
+              required
+              variant="outlined"
+              sx={{ width: "100%" }}
+            >
+              <InputLabel htmlFor="outlined-adornment-password">
+                Password
+              </InputLabel>
+              <OutlinedInput
+                id="password"
+                name="password"
                 onChange={handleChange}
-                onBlur={handleChange}
-                label="Company Name"
-                helperText={errorData.companyName}
-                error={errorData.companyName.length > 0}
-                sx={{ marginTop: "24px" }}
-              ></TextField>
-              {/*Company UEN*/}
-              <TextField
-                size="small"
-                autoComplete="on"
-                id="companyUEN"
-                required
-                name="companyUEN"
-                placeholder="Company UEN"
+                onBlur={handleValidate}
+                value={formData.password}
+                type={showPassword ? "text" : "password"}
+                endAdornment={
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      onMouseDown={handleMouseDownPassword}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                }
+                label="Password"
+              />
+              {errorData.password.length > 0 && (
+                <FormHelperText error id="my-helper-text">
+                  {errorData.password}
+                </FormHelperText>
+              )}
+            </FormControl>
+          </Grid>
+          {/* Confirm Password Field */}
+          <Grid item xs={12} md={6}>
+            <FormControl
+              size="small"
+              required
+              variant="outlined"
+              sx={{ width: "100%" }}
+            >
+              <InputLabel htmlFor="outlined-adornment-password">
+                Confirm your password
+              </InputLabel>
+              <OutlinedInput
+                id="passwordVerify"
+                name="passwordVerify"
                 onChange={handleChange}
-                onBlur={handleChange}
-                label="Company UEN"
-                helperText={errorData.companyUEN}
-                error={errorData.companyUEN.length > 0}
+                onBlur={handleValidate}
+                value={formData.passwordVerify}
+                type={showPasswordVerify ? "text" : "password"}
+                endAdornment={
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPasswordVerify}
+                      onMouseDown={handleMouseDownPassword}
+                      edge="end"
+                    >
+                      {showPasswordVerify ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                }
+                label="Confirm your password"
+              />
+              {errorData.passwordVerify.length > 0 && (
+                <FormHelperText error id="my-helper-text">
+                  {errorData.passwordVerify}
+                </FormHelperText>
+              )}
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Typography variant="body2" color="rgba(0, 0, 0, 0.6)">
+              Company Type:
+            </Typography>
+            <FormControl fullWidth size="small">
+              <Select
+                value={formData.vendorType}
+                onChange={handleMenuChange}
+                onOpen={handleVendorTypeErrorCheck}
+              >
+                <MenuItem disabled value="">
+                  <em>Select an option</em>
+                </MenuItem>
+                {Object.values(vendorTypes).map((value) => (
+                  <MenuItem key={value} value={value}>
+                    {value}
+                  </MenuItem>
+                ))}
+              </Select>
+              {errorData.vendorType && (
+                <FormHelperText error id="vendor-type-helper-text">
+                  {errorData.vendorType}
+                </FormHelperText>
+              )}
+            </FormControl>
+            {formData.vendorType === "Other" && (
+              <TextField
+                id="customCompanyType"
+                name="customCompanyType"
+                label="Other"
+                fullWidth
+                size="small"
+                onBlur={handleValidate}
+                onChange={handleVendorCustomTypeChange}
+                helperText={errorData.customCompanyType}
+                error={errorData.customCompanyType.length > 0}
                 sx={{ marginTop: "16px" }}
-              ></TextField>
-              {/*Company Email*/}
+              />
+            )}
+          </Grid>
+          <Grid item xs={24} md={12}>
+            {" "}
+            <Box>
+              <Typography variant="body2" color="rgba(0, 0, 0, 0.6)">
+                Brand Names
+              </Typography>
               <TextField
-                size="small"
-                autoComplete="on"
-                id="companyEmail"
-                required
-                name="companyEmail"
-                placeholder="Company Email"
-                label="Company Email"
-                onChange={handleChange}
-                onBlur={handleChange}
-                helperText={errorData.companyEmail}
-                error={errorData.companyEmail.length > 0}
-                sx={{ marginTop: "16px" }}
-              ></TextField>
-              <Box mt={2}>
-                <Typography variant="body2" color="rgba(0, 0, 0, 0.6)">
-                  Select an Option:
-                </Typography>
-                <FormControl fullWidth size="small">
-                  <Select value={selectedValue} onChange={handleMenuChange}>
-                    <MenuItem value="">Select an option</MenuItem>
-                    <MenuItem value="option1">Option 1</MenuItem>
-                    <MenuItem value="option2">Option 2</MenuItem>
-                    <MenuItem value="option3">Option 3</MenuItem>
-                    <MenuItem value="Other">Other</MenuItem>
-                  </Select>
-                </FormControl>
-                {selectedValue === "Other" && (
-                  <TextField
-                    label="Other"
-                    fullWidth
-                    size="small"
-                    value={customValue}
-                    onChange={handleCustomValueChange}
-                    sx={{ marginTop: "16px" }}
+                label="Add a brand name"
+                variant="outlined"
+                value={inputValue}
+                onChange={handleInputChange}
+                helperText={errorData.brandNames}
+                error={errorData.brandNames.length > 0}
+                onBlur={handleBrandNamesValidate}
+              />
+              <Button
+                onClick={handleAddChip}
+                variant="outlined"
+                style={{ marginLeft: "10px" }}
+              >
+                Add
+              </Button>
+              <Box>
+                {formData.brandNames.map((chip, index) => (
+                  <Chip
+                    key={index}
+                    label={chip}
+                    onDelete={() => handleDeleteChip(chip)}
+                    style={{ margin: "5px" }}
                   />
-                )}
+                ))}
               </Box>
             </Box>
-            <Box mr={3} display="flex" flexDirection="column">
-              {/*Company Phone Number*/}
-              <TextField
-                size="small"
-                autoComplete="on"
-                id="companyPhoneNumber"
-                required
-                name="companyPhoneNumber"
-                placeholder="Company Phone Number"
-                label="Company Phone Number"
-                defaultValue="65"
-                onChange={handleChange}
-                onBlur={handleChange}
-                helperText={errorData.companyPhoneNumber}
-                error={errorData.companyPhoneNumber.length > 0}
-                sx={{ marginTop: "24px" }}
-              />
-              {/* Company Address */}
-              <TextField
-                size="small"
-                multiline
-                autoComplete="on"
-                id="companyAddress"
-                required
-                name="companyAddress"
-                placeholder="Company Address"
-                label="Company Address"
-                onChange={handleChange}
-                onBlur={handleChange}
-                helperText={errorData.companyAddress}
-                error={errorData.companyAddress.length > 0}
-                sx={{ marginTop: "16px" }}
-              ></TextField>
-              {/*Company Postal Code*/}
-              <TextField
-                size="small"
-                autoComplete="on"
-                id="officePostalCode"
-                required
-                name="officePostalCode"
-                placeholder="Office Postal Code"
-                label="Office Postal Code"
-                value={formData.officePostalCode}
-                onChange={handleChange}
-                onBlur={handleChange}
-                helperText={errorData.officePostalCode}
-                error={errorData.officePostalCode.length > 0}
-                sx={{ marginTop: "16px" }}
-              ></TextField>
+          </Grid>
+          <Grid item xs={24} md={14}>
+            <Typography variant="body2" color="rgba(0, 0, 0, 0.6)">
+              Company Socials
+            </Typography>
+            {errorData.socialMedia.length > 0 && (
+              <Typography variant="body2" color="error">
+                {errorData.socialMedia}
+              </Typography>
+            )}
+            {errorData.url.length > 0 && (
+              <Typography variant="body2" color="error">
+                {errorData.url}
+              </Typography>
+            )}
+            <Box mt={2}>
+              {socialMediaFields.map((field, index) => (
+                <Grid container spacing={2} key={index}>
+                  <Grid item xs={4}>
+                    <TextField
+                      label="Social Media"
+                      size="small"
+                      id="socialMedia"
+                      name="socialMedia"
+                      fullWidth
+                      variant="outlined"
+                      value={field.platform}
+                      onChange={(e) =>
+                        handlePlatformChange(index, e.target.value)
+                      }
+                      onBlur={() => handleSocialMediaValidate(field.platform)}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      size="small"
+                      label="URL"
+                      id="url"
+                      multiline
+                      fullWidth
+                      variant="outlined"
+                      value={field.url}
+                      onChange={(e) => handleURLChange(index, e.target.value)}
+                      onBlur={() => handleURLValidate(field.url)}
+                    />
+                  </Grid>
+                  <Grid item xs={1}>
+                    <IconButton onClick={() => removeField(index)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              ))}
+              <Grid item xs={1}>
+                <IconButton onClick={addField}>
+                  <AddIcon />
+                </IconButton>
+              </Grid>
             </Box>
-            <Box mr={3} display="flex" flexDirection="column">
-              <FormControl
-                sx={{ marginTop: "24px" }}
-                size="small"
-                required
-                variant="outlined"
-              >
-                <InputLabel htmlFor="outlined-adornment-password">
-                  Password
-                </InputLabel>
-                <OutlinedInput
-                  id="password"
-                  name="password"
-                  onChange={handleChange}
-                  onBlur={handleChange}
-                  value={formData.password}
-                  type={showPassword ? "text" : "password"}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                        edge="end"
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                  label="Password"
-                />
-                {errorData.password.length > 0 && (
-                  <FormHelperText error id="my-helper-text">
-                    {errorData.password}
-                  </FormHelperText>
-                )}
-              </FormControl>
-              <FormControl
-                sx={{ marginTop: "24px" }}
-                size="small"
-                required
-                variant="outlined"
-              >
-                <InputLabel htmlFor="outlined-adornment-password">
-                  Confirm your password
-                </InputLabel>
-                <OutlinedInput
-                  id="passwordVerify"
-                  name="passwordVerify"
-                  onChange={handleChange}
-                  onBlur={handleChange}
-                  value={formData.passwordVerify}
-                  type={showPasswordVerify ? "text" : "password"}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPasswordVerify}
-                        onMouseDown={handleMouseDownPassword}
-                        edge="end"
-                      >
-                        {showPasswordVerify ? (
-                          <VisibilityOff />
-                        ) : (
-                          <Visibility />
-                        )}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                  label="Confirm your password"
-                />
-                {errorData.passwordVerify.length > 0 && (
-                  <FormHelperText error id="my-helper-text">
-                    {errorData.passwordVerify}
-                  </FormHelperText>
-                )}
-              </FormControl>
-            </Box>
-          </Box>
-          <Box>
-            {/*Vendor Details*/}
+          </Grid>
+          <Grid item xs={24} md={12}>
             <TextField
               size="large"
               multiline
@@ -492,36 +690,67 @@ const VendorRegisterPage = () => {
               placeholder="Vendor Details"
               label="Vendor Details"
               onChange={handleChange}
-              onBlur={handleChange}
+              onBlur={handleValidate}
               helperText={errorData.vendorDetails}
               error={errorData.vendorDetails.length > 0}
-              sx={{ marginTop: "24px", width: "100%" }}
+              sx={{ width: "100%" }}
             />
-          </Box>
-          <Button
-            sx={{ marginTop: "24px" }}
-            mt={4}
-            variant="contained"
-            type="submit"
-            disabled={!Object.values(errorData).every((error) => error === "")}
-            onClick={handleSubmit}
-          >
-            <Typography variant="body1">Register</Typography>
-          </Button>
-          <Button
-            sx={{ marginTop: "16px" }}
-            variant="text"
-            onClick={() => {
-              navigate("/vendor/login");
-            }}
-          >
-            <Typography fontWeight={700} color="secondary" variant="body2">
-              Already a Member? Login
-            </Typography>
-          </Button>
-        </Box>
-      </form>
-      <Box>IMAGE TO BE ADDED LATER</Box>
+          </Grid>
+          <Grid item xs={12} md={12}>
+            <Box display="flex" flexDirection="row">
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formData.acceptTermsAndConditions}
+                    onChange={handleAcceptTermsChange} // Update formData.acceptTermsAndConditions
+                    name="acceptTermsAndConditions"
+                    color="primary"
+                  />
+                }
+                label="I agree to the Terms & Conditions of Gleek."
+              />
+
+              <Button width="5rem" onClick={handleOpen}>
+                Open T&C
+              </Button>
+              <TermsAndConditionsModal open={open} handleClose={handleClose} />
+            </Box>
+          </Grid>
+        </Grid>
+
+        <Button
+          sx={{ marginTop: "24px" }}
+          mt={4}
+          variant="contained"
+          type="submit"
+          disabled={disableButton()}
+          onClick={handleSubmit}
+        >
+          <Typography variant="body1">Register</Typography>
+        </Button>
+        <Button
+          sx={{ marginTop: "16px" }}
+          variant="text"
+          onClick={() => {
+            navigate("/vendor/login");
+          }}
+        >
+          <Typography fontWeight={700} color="secondary" variant="body2">
+            Already a Member? Login
+          </Typography>
+        </Button>
+      </Box>
+
+      <Box
+        width={"30%"}
+        component="img"
+        sx={{
+          maxHeight: "auto",
+          maxWidth: "100%",
+        }}
+        alt="Communication illustrations by Storyset"
+        src={registerImage}
+      />
     </Box>
   );
 };

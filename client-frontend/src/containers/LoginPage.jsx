@@ -25,7 +25,6 @@ import loginImage from "../assets/login.png";
 
 const LoginPage = (props) => {
   const theme = useTheme();
-  const { isLoading, clientError, login } = useClientStore();
   const { openSnackbar, closeSnackbar } = useSnackbarStore();
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
@@ -133,7 +132,7 @@ const LoginPage = (props) => {
               <LockPersonIcon fontSize="large" color="accent" />
             </Box>
             <Typography color="secondary" variant="h3">
-              Login
+              {props.title}
             </Typography>
           </Box>
 
@@ -193,7 +192,7 @@ const LoginPage = (props) => {
               </FormHelperText>
             )}
           </FormControl>
-          {!isLoading && (
+          {!props.loading && (
             <Button
               sx={{ marginTop: "32px" }}
               mt={4}
@@ -203,14 +202,14 @@ const LoginPage = (props) => {
               <Typography variant="body1">Login</Typography>
             </Button>
           )}
-          {isLoading && (
+          {props.loading && (
             <CircularProgress sx={{ margin: "auto", marginTop: "32px" }} />
           )}
           <Button
             sx={{ marginTop: "16px" }}
             variant="text"
             onClick={() => {
-              navigate("/register");
+              navigate(props.registerLink);
             }}
           >
             <Typography fontWeight={700} color="secondary" variant="body2">

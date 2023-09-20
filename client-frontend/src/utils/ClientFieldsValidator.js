@@ -45,7 +45,7 @@ export const validator = (formData, fieldName) => {
         formData[fieldName],
         formData.password,
         errors,
-        fieldName
+        fieldName,
       );
       break;
     default:

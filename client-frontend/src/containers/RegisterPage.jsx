@@ -191,7 +191,7 @@ const RegisterPage = () => {
             <LockPersonIcon fontSize="large" color="accent" />
           </Box>
           <Typography color="secondary" variant="h3">
-            Register
+            Register as a Client
           </Typography>
         </Box>
 

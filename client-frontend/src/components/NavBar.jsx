@@ -76,14 +76,14 @@ function NavBar(props) {
   if (role === "Vendor") {
     loginLink = "/vendor/login";
   } else {
-    loginLink = "/client/login";
+    loginLink = "/login";
   }
 
   let registerLink;
   if (role === "Vendor") {
     registerLink = "/vendor/register";
   } else {
-    registerLink = "/client/register";
+    registerLink = "/register";
   }
 
   return (

@@ -6,7 +6,7 @@ import HomePage from "./containers/HomePage";
 import Layout from "./components/Layout";
 import LoginPage from "./containers/LoginPage";
 import RegisterPage from "./containers/RegisterPage";
-import ProtectedRoute from "./components/ProtectedRoute";
+import ClientProtectedRoute from "./components/ClientProtectedRoute";
 import SocketConnection from "./utils/SocketConnection";
 import AccountDetails from "./containers/Account/AccountDetails";
 import Privacy from "./containers/Account/Privacy";
@@ -27,85 +27,85 @@ function App() {
           <Route
             path="/settings"
             element={
-              <ProtectedRoute>
+              <ClientProtectedRoute>
                 <Navigate to="/settings/profile" />
-              </ProtectedRoute>
+              </ClientProtectedRoute>
             }
           />
           <Route
             path="/settings/profile"
             element={
-              <ProtectedRoute>
+              <ClientProtectedRoute>
                 <AccountDetails />
-              </ProtectedRoute>
+              </ClientProtectedRoute>
             }
           />
           <Route
             path="/settings/picture"
             element={
-              <ProtectedRoute>
+              <ClientProtectedRoute>
                 <ProfilePicture />
-              </ProtectedRoute>
+              </ClientProtectedRoute>
             }
           />
           <Route
             path="/settings/privacy"
             element={
-              <ProtectedRoute>
+              <ClientProtectedRoute>
                 <Privacy />
-              </ProtectedRoute>
+              </ClientProtectedRoute>
             }
           />
           <Route
             path="/settings/password"
             element={
-              <ProtectedRoute>
+              <ClientProtectedRoute>
                 <PasswordChange />
-              </ProtectedRoute>
+              </ClientProtectedRoute>
             }
           />
 
           <Route
             path="/cart"
             element={
-              <ProtectedRoute>
+              <ClientProtectedRoute>
                 <CartPage />
-              </ProtectedRoute>
+              </ClientProtectedRoute>
             }
           />
           <Route
             path="/shop"
             element={
-              <ProtectedRoute>
+              <ClientProtectedRoute>
                 <ShopPage />
-              </ProtectedRoute>
+              </ClientProtectedRoute>
             }
           />
           <Route
             path="/shop/activity/:id"
             element={
-              <ProtectedRoute>
+              <ClientProtectedRoute>
                 <ActivityDetailsPage />
-              </ProtectedRoute>
+              </ClientProtectedRoute>
             }
           />
           <Route
-            path="/client/login"
+            path="/login"
             element={
               <LoginPage
                 loading={isLoading}
                 error={clientError}
                 title="Client Login"
-                registerlink="/client/register"
+                registerLink="/register"
                 loginMethod={login}
               />
             }
           />
-          <Route path="/client/register" element={<RegisterPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route
             path="/vendor/login"
             element={
-              <LoginPage title="Vendor Login" registerlink="/vendor/register" />
+              <LoginPage title="Vendor Login" registerLink="/vendor/register" />
             }
           />
           <Route path="/vendor/register" element={<VendorRegisterPage />} />
