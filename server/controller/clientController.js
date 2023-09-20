@@ -78,6 +78,7 @@ export const postRegister = async (req, res) => {
     console.log(
       "clientController postRegister(): acceptTermsAndConditions",
       acceptTermsAndConditions,
+      acceptTermsAndConditions,
     );
 
     if (await clientExists(newClient.email)) {
@@ -95,6 +96,7 @@ export const postRegister = async (req, res) => {
     await createClientConsent(
       createdClient.id,
       acceptTermsAndConditions,
+      session,
       session,
     );
 
@@ -118,49 +120,31 @@ export const postLogin = async (req, res) => {
     // 422 status due to validation errors
     return res.status(422).json({ errors: errors.array() });
   }
+
   try {
     const { email, password } = req.body;
     const client = await Client.findOne({ email });
+    if (!client) return res.status(404).send({ msg: "Invalid Credentials." });
+    
+    const isSamePassword = await bcrypt.compare(password, client.password);
 
-    if (client && (await bcrypt.compare(password, client.password))) {
-      const payload = {
-        client: {
-          id: client.id,
-          email: client.email,
-        },
-      };
-      jwt.sign(payload, secret, { expiresIn: 360000 }, (err, token) => {
-        if (err) throw err;
-        // Set the JWT token as a cookie
-        try {
-          res.cookie("token", token, {
-            httpOnly: true,
-            maxAge: 3600000, // Expires in 1 hour (milliseconds)
-            sameSite: "None", // Adjust this based on your security requirements
-            secure: true, // Use secure cookies in production
-            path: "/", // Set the path to your application root
-          });
-          res.cookie("userRole", "Client", {
-            httpOnly: true,
-            maxAge: 3600000,
-            sameSite: "None",
-            secure: true,
-            path: "/",
-          });
-        } catch (cookieError) {
-          console.error(cookieError);
-          return res.status(500).send("Error setting cookie");
-        }
-        const { password, ...clientWithoutPassword } = client.toObject();
+    if (client && isSamePassword) {
+      // If client REJECTED, send error message.
+      if (client.status === "REJECTED") {
+        return res
+          .status(400)
+          .send({ msg: "Your registration has been rejected." });
+      }
 
-        // console.log(clientWithoutPassword)
-        res.status(200).json({ token, client: clientWithoutPassword });
-      });
+      const token = await generateJwtToken(client.id);
+      const { password, ...clientWithoutPassword } = client.toObject();
+
+      setCookieAndRespond(res, token, clientWithoutPassword);
     } else {
-      res.status(400).send("Invalid Credentials");
+      return res.status(400).send({ msg: "Invalid Credentials." });
     }
   } catch (err) {
-    return res.status(500).send("Server Error");
+    return res.status(500).send({ msg: "Server Error" });
   }
 };
 
@@ -219,6 +203,7 @@ export const postChangePassword = async (req, res) => {
       { _id: client.id },
       { password: hashed },
       { new: true },
+      { new: true },
     );
 
     return res.status(200).json("Password successfully changed.");
@@ -253,6 +238,7 @@ export const updateClientAccountDetails = async (req, res) => {
         select: {
           password: 0,
         },
+      },
       },
     );
 
@@ -300,7 +286,7 @@ export const updateConsentSettings = async (req, res) => {
 };
 
 /*
- * Change password
+ * Get consent settings
  */
 export const getConsentSettings = async (req, res) => {
   try {
