@@ -110,21 +110,6 @@ const ClientDetails = () => {
                 clientDetails.billingEmail,
               ]}
             />
-            <ProfileCard
-              title="Billing Details"
-              fieldNames={[
-                "Billing Party Name",
-                "Billing Address",
-                "Billing Office Postal Code",
-                "Billing Email",
-              ]}
-              fieldValues={[
-                clientDetails.billingPartyName,
-                clientDetails.billingAddress,
-                clientDetails.billingOfficePostalCode,
-                clientDetails.billingEmail,
-              ]}
-            />
             {clientDetails.status === "APPROVED" && (
               <ProfileCard
                 title="Account Details"
