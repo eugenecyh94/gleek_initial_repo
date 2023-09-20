@@ -125,7 +125,7 @@ export const postLogin = async (req, res) => {
     const { email, password } = req.body;
     const client = await Client.findOne({ email });
     if (!client) return res.status(404).send({ msg: "Invalid Credentials." });
-    
+
     const isSamePassword = await bcrypt.compare(password, client.password);
 
     if (client && isSamePassword) {
@@ -238,7 +238,6 @@ export const updateClientAccountDetails = async (req, res) => {
         select: {
           password: 0,
         },
-      },
       },
     );
 
