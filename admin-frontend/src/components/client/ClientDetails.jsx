@@ -19,13 +19,14 @@ import ProfileCard from "../common/ProfileCard";
 const ClientDetails = () => {
   const { clientId } = useParams();
   const theme = useTheme();
-  const { isLoading, updateClient, clientDetails, getClientDetails } = useClientStore();
-  const [isUpdated, setIsUpdated] = useState(false)
-  
+  const { isLoading, updateClient, clientDetails, getClientDetails } =
+    useClientStore();
+  const [isUpdated, setIsUpdated] = useState(false);
+
   const handleStatusUpdate = async (id, clientDetails, newStatus) => {
     const updatedProfile = { ...clientDetails, status: newStatus };
     await updateClient(id, updatedProfile);
-    setIsUpdated(true)
+    setIsUpdated(true);
   };
 
   useEffect(() => {
@@ -156,7 +157,11 @@ const ClientDetails = () => {
                 sx={{ margin: 1 }}
                 startIcon={<DoneIcon />}
                 onClick={async () =>
-                  await handleStatusUpdate(clientDetails._id, clientDetails, "APPROVED")
+                  await handleStatusUpdate(
+                    clientDetails._id,
+                    clientDetails,
+                    "APPROVED",
+                  )
                 }
               >
                 Approve
@@ -167,7 +172,11 @@ const ClientDetails = () => {
                 sx={{ margin: 1 }}
                 startIcon={<CloseIcon />}
                 onClick={async () =>
-                  await handleStatusUpdate(clientDetails._id, clientDetails, "REJECTED")
+                  await handleStatusUpdate(
+                    clientDetails._id,
+                    clientDetails,
+                    "REJECTED",
+                  )
                 }
               >
                 Reject
