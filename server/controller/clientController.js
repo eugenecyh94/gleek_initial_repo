@@ -115,19 +115,24 @@ export const postLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
     const client = await Client.findOne({ email });
-    if (!client)
-      return res
-        .status(404)
-        .send({ msg: "There is no account associated to this email!" });
+    if (!client) return res.status(404).send({ msg: "Invalid Credentials." });
+
     const isSamePassword = await bcrypt.compare(password, client.password);
 
     if (client && isSamePassword) {
+      // If client REJECTED, send error message.
+      if (client.status === "REJECTED") {
+        return res
+          .status(400)
+          .send({ msg: "Your registration has been rejected." });
+      }
+
       const token = await generateJwtToken(client.id);
       const { password, ...clientWithoutPassword } = client.toObject();
 
       setCookieAndRespond(res, token, clientWithoutPassword);
     } else {
-      res.status(400).send({ msg: "Invalid Credentials" });
+      return res.status(400).send({ msg: "Invalid Credentials." });
     }
   } catch (err) {
     return res.status(500).send({ msg: "Server Error" });

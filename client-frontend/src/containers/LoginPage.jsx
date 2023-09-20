@@ -62,12 +62,10 @@ const LoginPage = () => {
       }));
     } else if (name === "password") {
       setPassword(value);
-      if (value === "") {
-        setErrorData((prevData) => ({
-          ...prevData,
-          password: "Password is required" || "",
-        }));
-      }
+      setErrorData((prevData) => ({
+        ...prevData,
+        password: !value ? "Password is required" : "",
+      }));
     }
   };
 
@@ -86,7 +84,7 @@ const LoginPage = () => {
   };
 
   const disableButton = () => {
-    return !Object.values(errorData).every((error) => error === "") 
+    return !Object.values(errorData).every((error) => error === "");
   };
 
   return (
