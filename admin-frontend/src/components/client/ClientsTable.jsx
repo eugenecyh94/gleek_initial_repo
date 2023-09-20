@@ -9,6 +9,8 @@ import {
 } from "@mui/x-data-grid";
 import PropTypes from "prop-types";
 import { useState } from "react";
+import ClientDetails from "./ClientDetails";
+import { useNavigate } from "react-router-dom";
 
 const ClientsTable = ({ clients, updateClient }) => {
   const handleStatusUpdate = async (id, row, newStatus) => {
@@ -25,7 +27,7 @@ const ClientsTable = ({ clients, updateClient }) => {
   const [selectedTab, setSelectedTab] = useState("approvedTab");
   const [currentTabRows, setCurrentTabRows] = useState(() => {
     return clients.filter(
-      (client) => client.status === filterCriteria[selectedTab].status
+      (client) => client.status === filterCriteria[selectedTab].status,
     );
   });
 
@@ -33,9 +35,16 @@ const ClientsTable = ({ clients, updateClient }) => {
     setSelectedTab(newValue);
     setCurrentTabRows(
       clients.filter(
-        (client) => client.status === filterCriteria[newValue].status
-      )
+        (client) => client.status === filterCriteria[newValue].status,
+      ),
     );
+  };
+
+  const navigate = useNavigate();
+  // Handle row click to show client details
+  const handleRowClick = (client) => {
+    console.log("Row clicked", client);
+    navigate(`/viewClient/${client._id}`);
   };
 
   const columns = [
@@ -132,6 +141,7 @@ const ClientsTable = ({ clients, updateClient }) => {
           slots={{
             toolbar: GridToolbarFilterButton,
           }}
+          onRowClick={(params) => handleRowClick(params.row)}
         />
       </div>
     </Box>
