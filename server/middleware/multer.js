@@ -51,14 +51,13 @@ export const uploadS3ProfileImage = multer({
     contentType: multerS3.AUTO_CONTENT_TYPE,
     key: (request, file, cb) => {
       let fullPath = `profileImages/${
-        request.body.email
+        request.user.email
       }/${Date.now().toString()}-${uuidv4()}-${file.originalname}`;
       cb(null, fullPath);
     },
     limits: { fileSize: 2000000 }, // In bytes: 2000000 bytes = 2 MB
   }),
   fileFilter: (request, file, cb) => {
-    console.log("testing multer in file filer", request.user);
     if (
       file.mimetype === "image/png" ||
       file.mimetype === "image/jpeg" ||

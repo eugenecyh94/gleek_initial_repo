@@ -25,8 +25,8 @@ router.get("/consent", verifyToken, getConsentSettings);
 
 router.patch(
   "/updateProfilePicture",
-  uploadS3ProfileImage.single("image"),
   verifyToken,
+  uploadS3ProfileImage.single("image"),
   updateProfilePicture,
 );
 
