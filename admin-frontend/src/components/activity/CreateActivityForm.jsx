@@ -3,6 +3,7 @@ import styled from "@emotion/styled";
 import AddIcon from "@mui/icons-material/Add";
 import {
   Alert,
+  Avatar,
   Button,
   FormControl,
   FormHelperText,
@@ -92,6 +93,19 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
   const sdgList = Object.values(SustainableDevelopmentGoalsEnum);
   const columns = 4;
   const optionsPerColumn = 5;
+
+  const stringAvatar = (name, theme) => {
+    const initials = name
+      ?.split(" ")
+      ?.map((word) => word[0])
+      ?.join("");
+    return {
+      sx: {
+        bgcolor: theme.palette.light_purple.main,
+      },
+      children: initials,
+    };
+  };
 
   const columnsArray = [];
   for (let i = 0; i < columns; i++) {
@@ -271,6 +285,11 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
     ) {
       errors.popupitems = "Please fill in popup items sold!";
     }
+
+    if (!activityImages || activityImages?.length === 0) {
+      errors.activityImages =
+        "Please upload at least one photo of your activity!";
+    }
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -316,10 +335,16 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
     formData.append("clientMarkupPercentage", markup);
     formData.append("duration", duration);
     formData.append("theme", selectedTheme);
-    formData.append("subtheme", selectedSubTheme);
     formData.append("location", location);
-    formData.append("sdg", sdg);
-    formData.append("dayAvailabilities", dayAvailabilities);
+    dayAvailabilities.forEach((obj, index) => {
+      formData.append("dayAvailabilities", obj);
+    });
+    selectedSubTheme.forEach((obj, index) => {
+      formData.append("subtheme", obj);
+    });
+    sdg.forEach((obj, index) => {
+      formData.append("sdg", obj);
+    });
     activityPricingRuleList.forEach((pricingRuleObj, index) => {
       const pricingJSON = JSON.stringify(pricingRuleObj);
       formData.append("activityPricingRules", pricingJSON);
@@ -331,7 +356,9 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
           formData.append("isFoodCertPending", isFoodCertPending);
           if (isFoodCertPending) {
             formData.append("foodCertDate", foodCertDate?.toISOString());
-            formData.append("foodCategory", selectedFoodCat);
+            selectedFoodCat.forEach((obj, index) => {
+              formData.append("foodCategory", obj);
+            });
           }
         }
       }
@@ -474,9 +501,16 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
                   id="combo-box-demo"
                   options={vendors}
                   sx={{ width: 300 }}
-                  getOptionLabel={(vendor) =>
-                    `${vendor.companyName} - ${vendor.companyUEN}`
-                  }
+                  getOptionLabel={(vendor) => vendor.companyName}
+                  renderOption={(props, vendor) => (
+                    <div {...props}>
+                      <Avatar
+                        style={{ marginRight: 6 }}
+                        {...stringAvatar(vendor?.companyName, theme)}
+                      />
+                      {vendor?.companyName} - {vendor?.companyUEN}
+                    </div>
+                  )}
                   renderInput={(params) => (
                     <TextField {...params} label="Pick from existing vendor" />
                   )}
@@ -486,7 +520,7 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
                   }
                 />
               </Grid>
-              <Grid item xs={6} paddingTop={2}>
+              {/* <Grid item xs={6} paddingTop={2}>
                 <Typography fontSize={"0.75rem"}>
                   Cannot find vendor?
                 </Typography>
@@ -502,7 +536,7 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
                     Add vendor
                   </Typography>
                 </StyledButton>
-              </Grid>
+              </Grid> */}
             </Grid>
           </Grid>
         </StyledContainer>

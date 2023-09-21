@@ -52,9 +52,6 @@ export const addActivity = async (req, res) => {
         imagesPathArr.push(fileLocation);
       }
     }
-    for (let i = 0; i < imagesPathArr.length; i++) {
-      console.log(imagesPathArr[i]);
-    }
 
     await ActivityModel.findByIdAndUpdate(
       { _id: savedActivity._id },
