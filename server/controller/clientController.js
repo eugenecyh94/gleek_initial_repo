@@ -384,7 +384,7 @@ export const verifyEmail = async (req, res) => {
     });
   } catch (err) {
     if (err.name === "JsonWebTokenError") {
-      console.log("here");
+   
       return res.status(200).json({
         status: "token-expired",
         msg: "Token has expired. Please request a new verification email.",
@@ -416,6 +416,7 @@ export const resendVerifyEmail = async (req, res) => {
       msg: "Verification email resent.",
     });
   } catch (err) {
+    console.log(err)
     return res.status(500).json({ status: "error", msg: "Server Error" });
   }
 };

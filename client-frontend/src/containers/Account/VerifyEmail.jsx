@@ -24,8 +24,7 @@ function VerifyEmail() {
 
         setStatus(response.data.status);
       } catch (err) {
-  
-        console.log(err)
+        console.log(err);
         openSnackbar(err.response.data.msg, "error");
         setStatus("error");
       } finally {
@@ -35,6 +34,17 @@ function VerifyEmail() {
 
     getVerifyEmail();
   }, []);
+
+  const resendVerificationEmail = async () => {
+    try {
+      const response = await AxiosConnect.get(
+        "/gleek/client/resendVerifyEmail",
+      );
+      openSnackbar(response.data.msg, "success");
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   if (isLoading) return <CircularProgress />;
 
@@ -50,19 +60,21 @@ function VerifyEmail() {
         {status === "success" ||
           (status === "already-verified" && (
             <div>
-               <CheckCircleOutline sx={{ fontSize: 48 }} />
-              <Typography variant="h4" color="primary.dark">Email Verified!</Typography>
-           
+              <CheckCircleOutline sx={{ fontSize: 48 }} />
+              <Typography variant="h4" color="primary.dark">
+                Email Verified!
+              </Typography>
+
               <Typography variant="body1">
-                Start exploring our thoughtfully curated
-                collection of sustainability and employee wellness activities.
+                Start exploring our thoughtfully curated collection of
+                sustainability and employee wellness activities.
               </Typography>
               <Button
                 variant="contained"
                 color="tertiary"
                 component={Link}
                 to="/shop"
-                sx={{mt:3}}
+                sx={{ mt: 3 }}
               >
                 Shop
               </Button>
@@ -77,7 +89,7 @@ function VerifyEmail() {
               variant="contained"
               color="primary"
               component={Link}
-              to="/request-new-verification"
+              onClick={resendVerificationEmail}
             >
               Request New Verification
             </Button>
@@ -94,7 +106,7 @@ function VerifyEmail() {
               variant="contained"
               color="primary"
               component={Link}
-              to="/request-new-verification"
+              onClick={resendVerificationEmail}
             >
               Request New Verification
             </Button>

@@ -6,6 +6,7 @@ import {
   getConsentSettings,
   updateProfilePicture,
   verifyEmail,
+  resendVerifyEmail,
 } from "../../controller/clientController.js";
 import { verifyToken } from "../../middleware/clientAuth.js";
 import { uploadS3ProfileImage } from "../../middleware/multer.js";
@@ -31,7 +32,9 @@ router.patch(
   updateProfilePicture,
 );
 
-// Verify Email Route
+// Verify Email
 router.get("/verifyEmail/:token", verifyEmail);
+// Verify Email Resend
+router.get("/resendVerifyEmail", verifyToken, resendVerifyEmail);
 
 export default router;
