@@ -12,6 +12,7 @@ import AccountDetails from "./containers/Account/AccountDetails";
 import Privacy from "./containers/Account/Privacy";
 import PasswordChange from "./containers/Account/PasswordChange";
 import ProfilePicture from "./containers/Account/ProfilePicture";
+import VerifyEmail from "./containers/Account/VerifyEmail";
 import ActivityDetailsPage from "./containers/ActivityDetailsPage";
 import useClientStore from "./zustand/ClientStore";
 import VendorRegisterPage from "./containers/Vendor/VendorRegisterPage";
@@ -66,6 +67,15 @@ function App() {
             element={
               <ClientProtectedRoute>
                 <PasswordChange />
+              </ClientProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/client/verifyEmail/:token"
+            element={
+              <ClientProtectedRoute>
+                <VerifyEmail />
               </ClientProtectedRoute>
             }
           />

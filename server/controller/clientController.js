@@ -13,6 +13,7 @@ import {
   createClientConsent,
   updateConsent,
 } from "../service/consentService.js";
+import sendMail from "../util/sendMail.js";
 
 const secret = process.env.JWT_SECRET_ClIENT;
 
@@ -75,11 +76,6 @@ export const postRegister = async (req, res) => {
     }
 
     const { acceptTermsAndConditions, ...newClient } = req.body;
-    console.log(
-      "clientController postRegister(): acceptTermsAndConditions",
-      acceptTermsAndConditions,
-      acceptTermsAndConditions,
-    );
 
     if (await clientExists(newClient.email)) {
       return res.status(409).json({
@@ -101,8 +97,19 @@ export const postRegister = async (req, res) => {
     );
 
     const token = await generateJwtToken(createdClient.id);
+
+    const message = `Welcome to Gleek! You have registered with the email ${createdClient.email}.
+    Please verify your email by clicking on the link: http://localhost:3001/client/verifyEmail/${token}`;
+    const options = {
+      to: createdClient.email,
+      subject: "Verify your Email on Gleek",
+      text: message,
+    };
+
+    sendMail(options);
     await session.commitTransaction();
     session.endSession();
+
     const { password, ...clientWithoutPassword } = createdClient.toObject();
     setCookieAndRespond(res, token, clientWithoutPassword);
   } catch (err) {
@@ -337,5 +344,78 @@ export const updateProfilePicture = async (req, res) => {
   } catch (e) {
     console.error(e);
     res.status(500).json("Server Error");
+  }
+};
+
+/*
+ * Client clicks the link in their email to verify
+ */
+export const verifyEmail = async (req, res) => {
+  const token = req.params.token;
+
+  if (!token) {
+    return res
+      .status(403)
+      .json({ status: "error", message: "Token Not Found!" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, secret);
+    const requestorClient = await Client.findById(decoded.client.id);
+
+    // For debugging
+    // requestorClient.verified = false;
+    // await requestorClient.save();
+
+    if (requestorClient.verified) {
+      return res.status(200).json({
+        status: "already-verified",
+        msg: "Your email has already been verified!",
+      });
+    }
+
+    requestorClient.verified = true;
+    await requestorClient.save();
+
+    return res.status(200).json({
+      status: "success",
+      msg: "Client email has been verified. Welcome to Gleek!",
+      client: requestorClient,
+    });
+  } catch (err) {
+    if (err.name === "JsonWebTokenError") {
+      console.log("here");
+      return res.status(200).json({
+        status: "token-expired",
+        msg: "Token has expired. Please request a new verification email.",
+      });
+    }
+
+    console.error("Token verification error:", err);
+    return res.status(500).json({ status: "error", msg: "Server Error" });
+  }
+};
+
+export const resendVerifyEmail = async (req, res) => {
+  try {
+    const client = req.user;
+
+    const token = await generateJwtToken(client.id);
+
+    const message = `Hello ${client.email}, you have requested for the verification email to be resent.
+    Please verify your email by clicking on the link: http://localhost:3001/client/verifyEmail/${token}`;
+    const options = {
+      to: client.email,
+      subject: "Resend: Verify your Email on Gleek",
+      text: message,
+    };
+
+    sendMail(options);
+
+    return res.status(200).json({
+      msg: "Verification email resent.",
+    });
+  } catch (err) {
+    return res.status(500).json({ status: "error", msg: "Server Error" });
   }
 };
