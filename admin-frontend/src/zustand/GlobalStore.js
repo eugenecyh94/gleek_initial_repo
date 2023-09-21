@@ -112,7 +112,6 @@ export const useActivityStore = create((set) => ({
     }
   },
   createActivity: async (newActivityData) => {
-    console.log("newactivity being sent to backend");
     try {
       const response = await AxiosConnect.postMultiPart(
         "/activity/addActivity",

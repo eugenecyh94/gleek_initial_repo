@@ -63,7 +63,7 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isError, setError] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState(
-    themes?.[0]?.parent?._id || "",
+    themes?.[0]?.parent?._id || ""
   );
   const [selectedSubTheme, setSelectedSubTheme] = useState([]);
   const [subthemes, setSubthemes] = useState([]);
@@ -112,14 +112,13 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
     const themeId = event.target.value;
     setSelectedTheme(themeId);
     setSubthemes(
-      themes?.find((theme) => theme.parent?._id === themeId)?.children,
+      themes?.find((theme) => theme.parent?._id === themeId)?.children
     );
   };
 
   const handleSubThemeChange = (event) => {
     const themeId = event.target.value;
     setSelectedSubTheme(themeId);
-    console.log(selectedSubTheme);
   };
 
   const handleMaxParticipantsChange = (event) => {
@@ -211,7 +210,6 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
     } else {
       setSdg(sdg.filter((s) => s !== selectedSdg));
     }
-    console.log(sdg);
   };
 
   const handleDayAvailabilitiesChange = async (event) => {
@@ -273,7 +271,6 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
     ) {
       errors.popupitems = "Please fill in popup items sold!";
     }
-    console.log(errors);
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -313,7 +310,7 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
         ? isFood
           ? "Popups (Food)"
           : "Popups (Non-food)"
-        : activityType,
+        : activityType
     );
     formData.append("maxParticipants", maxParticipants);
     formData.append("clientMarkupPercentage", markup);
@@ -323,7 +320,10 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
     formData.append("location", location);
     formData.append("sdg", sdg);
     formData.append("dayAvailabilities", dayAvailabilities);
-    formData.append("activityPricingRules", activityPricingRuleList);
+    activityPricingRuleList.forEach((pricingRuleObj, index) => {
+      const pricingJSON = JSON.stringify(pricingRuleObj);
+      formData.append("activityPricingRules", pricingJSON);
+    });
     if (activityType === ActivityTypeEnum.POPUP) {
       {
         formData.append("popupItemsSold", popupitems);
@@ -345,7 +345,7 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
     if (validateForm()) {
       try {
         const responseStatus = await createActivity(formData);
-        // resetForm();
+        resetForm();
         setIsOpen(true);
       } catch (error) {
         setError(true);
@@ -414,7 +414,7 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
                         <MenuItem key={index} value={item.parent._id}>
                           {item.parent.name}
                         </MenuItem>
-                      ),
+                      )
                   )}
                 </Select>
               </FormControl>
@@ -691,7 +691,7 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
                       <MenuItem key={enumValue} value={enumValue}>
                         {enumValue}
                       </MenuItem>
-                    ),
+                    )
                   )}
                 </Select>
               </FormControl>
@@ -845,7 +845,7 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
                                 handleFieldChange(
                                   e,
                                   rowIndex,
-                                  "publicHolidayAddon",
+                                  "publicHolidayAddon"
                                 )
                               }
                               InputProps={{

@@ -19,7 +19,7 @@ export const getAllActivities = async (req, res) => {
 export const getActivity = async (req, res) => {
   try {
     const foundActivity = await ActivityModel.findById(req.params.id).populate(
-      "activityPricingRules",
+      "activityPricingRules"
     );
     res.status(200).json({
       data: foundActivity,
@@ -59,11 +59,30 @@ export const addActivity = async (req, res) => {
     await ActivityModel.findByIdAndUpdate(
       { _id: savedActivity._id },
       { images: imagesPathArr },
-      { new: true },
+      { new: true }
     );
 
-    //To update pricing rule in created activity
-    activityPricingRules.map(async (pricingRule) => {
+    const activitypriceobjects = [];
+    activityPricingRules.forEach((jsonString) => {
+      try {
+        const pricingObject = JSON.parse(jsonString);
+
+        const activitypriceobject = {
+          paxInterval: pricingObject.paxInterval,
+          pricePerPax: pricingObject.pricePerPax,
+          weekendAddon: pricingObject.weekendAddon,
+          publicHolidayAddon: pricingObject.publicHolidayAddon,
+          onlineAddon: pricingObject.onlineAddon,
+          offlineAddon: pricingObject.offlineAddon,
+        };
+
+        activitypriceobjects.push(activitypriceobject);
+      } catch (error) {
+        console.error(`Error parsing JSON: ${error}`);
+      }
+    });
+
+    activitypriceobjects.map(async (pricingRule) => {
       ActivityPricingRulesModel.create(pricingRule).then(
         async (newPricingRule) => {
           await ActivityModel.findByIdAndUpdate(
@@ -75,9 +94,9 @@ export const addActivity = async (req, res) => {
                 },
               },
             },
-            { new: true, useFindAndModify: false },
+            { new: true, useFindAndModify: false }
           );
-        },
+        }
       );
     });
     res.status(201).json({
