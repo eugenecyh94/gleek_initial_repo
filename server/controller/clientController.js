@@ -226,7 +226,7 @@ export const updateClientAccountDetails = async (req, res) => {
     const body = req.body;
     console.log("updateClientAccountDetails: body", body);
 
-    // remove passwword and email in case it is sent along in the body
+    // remove password and email in case it is sent along in the body
     const { password, email, ...updateData } = body;
 
     console.log("updateClientAccountDetails: UpdateData", updateData);
@@ -298,6 +298,41 @@ export const getConsentSettings = async (req, res) => {
     res.status(200).json({
       msg: "Retrieved consent settings.",
       consent: settings,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json("Server Error");
+  }
+};
+
+export const updateProfilePicture = async (req, res) => {
+  try {
+    const client = req.user;
+    const reqFile = req.file;
+    console.log("req client", client);
+    console.log("req file", reqFile);
+
+    let fileS3Location;
+
+    if (reqFile === undefined) {
+      console.log("No image files uploaded");
+    } else {
+      console.log("Retrieving uploaded images url");
+      fileS3Location = req.file.location;
+    }
+
+    console.log(fileS3Location);
+    console.log("client id", client._id);
+
+    const updatedClient = await Client.findOneAndUpdate(
+      { _id: client._id },
+      { photo: fileS3Location },
+      { new: true },
+    );
+    res.status(200).json({
+      success: true,
+      message: "Your profile picture is successfully updated!",
+      updatedProfilePicLink: updatedClient.photo,
     });
   } catch (e) {
     console.error(e);

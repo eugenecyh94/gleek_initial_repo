@@ -9,7 +9,7 @@ import {
   updateClientAccountDetails,
 } from "../../controller/clientController.js";
 import shopRoutes from "./shop.js";
-import verifyToken from "../../middleware/clientAuth.js";
+import { verifyToken } from "../../middleware/clientAuth.js";
 const router = express.Router();
 
 /*
