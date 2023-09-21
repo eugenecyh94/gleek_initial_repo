@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, TextField, Button, Typography, Grid } from "@mui/material";
+import { Box, TextField, Button, Typography, Grid, Alert } from "@mui/material";
 import AccountSidebar from "./AccountSidebar";
 import useClientStore from "../../zustand/ClientStore";
 import useSnackbarStore from "../../zustand/SnackbarStore";
@@ -77,6 +77,7 @@ function AccountDetails(props) {
         p={6}
         flexWrap={"wrap"}
       >
+
         <Box
           display="flex"
           flexDirection="column"

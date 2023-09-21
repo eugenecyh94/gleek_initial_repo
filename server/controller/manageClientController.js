@@ -24,3 +24,16 @@ export const updateClient = async (req, res) => {
     return res.status(500).send("Server Error");
   }
 };
+
+export const getClientDetails = async (req, res) => {
+  try {
+    const client = await Client.findById(req.params.clientId);
+    if (!client) {
+      return res.status(404).json({ message: "Client not found" });
+    }
+    return res.status(200).json(client);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("Server Error");
+  }
+};

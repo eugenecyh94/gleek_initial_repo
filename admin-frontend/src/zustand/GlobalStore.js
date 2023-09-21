@@ -151,6 +151,19 @@ export const useClientStore = create((set) => ({
       console.error(error);
     }
   },
+  clientDetails: {},
+  getClientDetails: async (clientId) => {
+    try {
+      set({ isLoading: true });
+      const response = await AxiosConnect.get(
+        `/client/getClientDetails/${clientId}`,
+      );
+      set({ clientDetails: response.data });
+      set({ isLoading: false });
+    } catch (error) {
+      console.error(error);
+    }
+  },
 }));
 
 export const useImageUploadTestStore = create((set) => ({
