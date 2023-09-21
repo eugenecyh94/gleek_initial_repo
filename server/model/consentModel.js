@@ -4,7 +4,10 @@ const consentSchema = new mongoose.Schema({
   client: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Client",
-    required: true,
+  },
+  vendor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Vendor",
   },
   receiveEmails: {
     type: Boolean,

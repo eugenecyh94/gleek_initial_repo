@@ -43,6 +43,13 @@ const setCookieAndRespond = (res, token, client) => {
       secure: true, // Use secure cookies in production
       path: "/", // Set the path to your application root
     });
+    res.cookie("userRole", "Client", {
+      httpOnly: true,
+      maxAge: 3600000,
+      sameSite: "None",
+      secure: true,
+      path: "/",
+    });
     console.log(client);
     res.status(200).json({ token, client: client });
   } catch (cookieError) {
@@ -71,6 +78,7 @@ export const postRegister = async (req, res) => {
     console.log(
       "clientController postRegister(): acceptTermsAndConditions",
       acceptTermsAndConditions,
+      acceptTermsAndConditions,
     );
 
     if (await clientExists(newClient.email)) {
@@ -88,6 +96,7 @@ export const postRegister = async (req, res) => {
     await createClientConsent(
       createdClient.id,
       acceptTermsAndConditions,
+      session,
       session,
     );
 
@@ -141,7 +150,6 @@ export const postLogin = async (req, res) => {
 
 export const validateToken = async (req, res) => {
   const token = req.cookies.token;
-
   if (!token) {
     return res.status(403).send("A token is required for authentication");
   }
@@ -150,12 +158,11 @@ export const validateToken = async (req, res) => {
     const decoded = jwt.verify(token, secret);
 
     const client = await Client.findById(decoded.client.id);
-
     if (!client) {
       return res.status(401).send("Client not found");
     }
     const { password, ...clientWithoutPassword } = client.toObject();
-    res.status(200).json({ token, client: clientWithoutPassword });
+    return res.status(200).json({ token, client: clientWithoutPassword });
   } catch (err) {
     // If verification fails (e.g., due to an invalid or expired token), send an error response
     return res.status(401).send("Invalid Token");
@@ -164,6 +171,7 @@ export const validateToken = async (req, res) => {
 
 export const clearCookies = async (req, res) => {
   res.clearCookie("token");
+  res.clearCookie("userRole");
   res.status(200).end();
 };
 
@@ -194,6 +202,7 @@ export const postChangePassword = async (req, res) => {
     const updatedClient = await Client.findOneAndUpdate(
       { _id: client.id },
       { password: hashed },
+      { new: true },
       { new: true },
     );
 
