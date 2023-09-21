@@ -77,7 +77,6 @@ function AccountDetails(props) {
         p={6}
         flexWrap={"wrap"}
       >
-
         <Box
           display="flex"
           flexDirection="column"

@@ -14,11 +14,11 @@ const vendorSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  companyNumber: {
+  companyPhoneNumber: {
     type: Number,
     required: true,
   },
-  companyType: {
+  vendorType: {
     type: String,
     enum: Object.values(VendorTypeEnum),
     required: true,
@@ -30,6 +30,11 @@ const vendorSchema = new mongoose.Schema({
   companyEmail: {
     type: String,
     required: true,
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 8,
   },
   brandNames: [
     {
@@ -50,6 +55,7 @@ const vendorSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+
   approvedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Admin",
@@ -64,6 +70,11 @@ const vendorSchema = new mongoose.Schema({
   disabled: {
     type: Boolean,
     default: false,
+  },
+  status: {
+    type: String,
+    enum: ["PENDING", "APPROVED", "REJECTED"],
+    required: false,
   },
 });
 

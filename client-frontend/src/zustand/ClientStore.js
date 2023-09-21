@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import AxiosConnect from "../utils/AxiosConnect";
-
+import useVendorStore from "./VendorStore";
 const useClientStore = create((set) => ({
   authenticated: false,
   client: null,
@@ -9,15 +9,16 @@ const useClientStore = create((set) => ({
   setClient: (client) => set({ client }),
   setAuthenticated: (authenticated) => set({ authenticated }), // Use the argument
   login: async (email, password) => {
+    const setVendorAuthenticated =
+      useVendorStore.getState().setVendorAuthenticated;
     set({ isLoading: true, clientError: null });
     try {
-      console.log("IS THIS RAN?");
       const response = await AxiosConnect.post("/gleek/auth/login", {
         email: email,
         password: password,
       });
-      console.log(response);
       const data = response.data;
+      setVendorAuthenticated(false);
       set({ client: data.client, authenticated: true });
       setTimeout(() => {
         set({ isLoading: false });
@@ -33,12 +34,17 @@ const useClientStore = create((set) => ({
       throw error;
     }
   },
-  logout: () => {
-    // Implement your logout logic and update authenticated state
-    set({
-      client: null, // Clear client data
-      authenticated: false, // Set authenticated to false
-    });
+  logoutClient: async () => {
+    try {
+      await AxiosConnect.get("/gleek/auth/logout");
+      set({
+        client: null, // Clear client data
+        authenticated: false, // Set authenticated to false
+      });
+    } catch (error) {
+      // Handle errors here
+      console.error(error);
+    }
   },
   changePassword: async (oldPassword, newPassword) => {
     try {

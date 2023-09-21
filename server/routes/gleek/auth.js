@@ -12,7 +12,9 @@ import shopRoutes from "./shop.js";
 import verifyToken from "../../middleware/clientAuth.js";
 const router = express.Router();
 
-// /gleek/register => POST
+/*
+Note: This file contains the /auth router
+*/
 
 router.post(
   "/register",
@@ -34,7 +36,7 @@ router.post(
   postLogin,
 );
 
-router.post("/validate-token", validateToken);
+router.post("/validateToken", validateToken);
 
 router.get("/logout", clearCookies);
 

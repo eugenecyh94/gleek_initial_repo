@@ -5,8 +5,12 @@ import {
   updateConsentSettings,
   getConsentSettings,
 } from "../../controller/clientController.js";
-
 import verifyToken from "../../middleware/clientAuth.js";
+
+/*
+Note: This file contains the /client router
+*/
+
 const router = express.Router();
 
 router.post("/changePassword", verifyToken, postChangePassword);
