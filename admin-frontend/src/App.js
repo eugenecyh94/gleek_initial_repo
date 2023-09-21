@@ -12,6 +12,7 @@ import ViewAllClients from "./components/client/ViewAllClients";
 import ClientDetails from "./components/client/ClientDetails";
 import CreateActivityPage from "./components/activity/CreateActivityPage";
 import ImageAndFileUpload from "./components/activityCreation/ImageAndFileUpload";
+import CreateVendorPage from "./components/vendor/CreateVendorPage";
 
 function App() {
   return (
@@ -43,6 +44,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <ViewAllVendors />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/addVendor"
+            element={
+              <ProtectedRoute>
+                <CreateVendorPage />
               </ProtectedRoute>
             }
           />

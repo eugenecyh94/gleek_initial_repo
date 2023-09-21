@@ -10,7 +10,7 @@ export const updateCurrentActivity = (selectedActivity) => {
   }));
   console.log(
     "activity store current activity updated::",
-    useActivityStore.getState(),
+    useActivityStore.getState()
   );
 };
 
@@ -21,7 +21,7 @@ export const updateAllActivity = (newAllActivities) => {
   }));
   console.log(
     "activity store all activity updated::",
-    useActivityStore.getState(),
+    useActivityStore.getState()
   );
 };
 
@@ -115,7 +115,7 @@ export const useActivityStore = create((set) => ({
     try {
       const response = await AxiosConnect.postMultiPart(
         "/activity/addActivity",
-        newActivityData,
+        newActivityData
       );
       set({ newActivity: response.data.activity });
     } catch (error) {
@@ -141,13 +141,36 @@ export const useThemeStore = create((set) => ({
 
 export const useVendorStore = create((set) => ({
   vendors: [],
+  vendor: null,
   isLoading: false,
+  vendorTypes: {},
   getVendors: async () => {
     try {
       set({ isLoading: true });
       const response = await AxiosConnect.get("/vendor/viewAllVendors");
       set({ vendors: response.data });
       set({ isLoading: false });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  createVendor: async (vendorData) => {
+    try {
+      set({ isLoading: true });
+      const response = await AxiosConnect.post("/vendor/addVendor", vendorData);
+      set({ vendor: response.data });
+      set({ isLoading: false });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  vendorTypesFetcher: async () => {
+    try {
+      const response = await AxiosConnect.get(
+        "/gleek/vendor/getAllVendorTypes"
+      );
+      const data = response.data;
+      set({ vendorTypes: data.VendorTypeEnum });
     } catch (error) {
       console.error(error);
     }
@@ -183,7 +206,7 @@ export const useClientStore = create((set) => ({
     try {
       set({ isLoading: true });
       const response = await AxiosConnect.get(
-        `/client/getClientDetails/${clientId}`,
+        `/client/getClientDetails/${clientId}`
       );
       set({ clientDetails: response.data });
       set({ isLoading: false });
