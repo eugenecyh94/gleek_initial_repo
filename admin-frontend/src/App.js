@@ -10,6 +10,7 @@ import ResetPassword from "./components/ResetPassword";
 import ViewAllVendors from "./components/vendor/ViewAllVendors";
 import ViewAllClients from "./components/client/ViewAllClients";
 import ClientDetails from "./components/client/ClientDetails";
+import CreateActivityPage from "./components/activity/CreateActivityPage";
 import ImageAndFileUpload from "./components/activityCreation/ImageAndFileUpload";
 
 function App() {
@@ -18,6 +19,15 @@ function App() {
       <Layout>
         <Routes>
           <Route exact path="/" element={<Home />} />
+          <Route
+            exact
+            path="/createActivity"
+            element={
+              <ProtectedRoute>
+                <CreateActivityPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             exact
             path="/viewPublishedActivities"

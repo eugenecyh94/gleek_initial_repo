@@ -185,7 +185,9 @@ export const validateToken = async (req, res) => {
     if (!admin) {
       return res.status(401).send("Admin not found");
     }
-    res.status(200).json({ token, admin: { email: admin.email } });
+    res
+      .status(200)
+      .json({ token, admin: { email: admin.email, id: admin._id } });
   } catch (err) {
     console.log(err.message);
     // If verification fails (e.g., due to an invalid or expired token), send an error response

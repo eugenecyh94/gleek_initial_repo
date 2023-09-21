@@ -14,6 +14,7 @@ const ProtectedRoute = ({ children }) => {
       .then((response) => {
         console.log(response);
         setAuthenticated(true);
+        setAdmin(response.data.admin);
         setIsLoading(false); // Mark loading as complete
       })
       .catch((error) => {
