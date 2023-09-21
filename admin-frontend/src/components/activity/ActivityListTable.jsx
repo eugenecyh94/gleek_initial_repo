@@ -99,8 +99,8 @@ const columns = [
     },
     valueGetter: (params) => {
       const p = params.value;
-      p.sort((a, b) => a.pricePerPax - b.pricePerPax);
-      return p[0].pricePerPax;
+      p.sort((a, b) => a?.pricePerPax - b?.pricePerPax);
+      return p[0]?.pricePerPax;
     },
   },
   {
@@ -112,8 +112,8 @@ const columns = [
     },
     valueGetter: (params) => {
       const p = params.row.activityPricingRules;
-      p.sort((a, b) => b.pricePerPax - a.pricePerPax);
-      return p[0].pricePerPax;
+      p.sort((a, b) => b?.pricePerPax - a?.pricePerPax);
+      return p[0]?.pricePerPax;
     },
   },
   {

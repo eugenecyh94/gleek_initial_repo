@@ -23,9 +23,6 @@ export const uploadS3ActivityImages = multer({
       let fullPath = `activityImages/${
         request.body.title
       }-${Date.now().toString()}-${uuidv4()}-${file.originalname}`;
-      let fullPath = `activityImages/${
-        request.body.title
-      }-${Date.now().toString()}-${uuidv4()}-${file.originalname}`;
       cb(null, fullPath);
     },
     limits: { fileSize: 2000000 }, // In bytes: 2000000 bytes = 2 MB
