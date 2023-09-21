@@ -51,7 +51,7 @@ const StyledContainer = styled(Paper)`
   padding: 20px;
   padding-top: 6px;
   border-radius: 10px;
-  box-shadow: 2px 2px 0px 0px rgb(159 145 204 / 40%);
+  box-shadow: 4px 4px 0px 0px rgb(159 145 204 / 40%);
 `;
 const StyledSubmitButton = styled(Button)`
   && {
@@ -326,7 +326,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData();
-    console.log("adminidis", admin.id);
     formData.append("adminCreated", admin.id);
     formData.append("title", title);
     formData.append("description", description);
