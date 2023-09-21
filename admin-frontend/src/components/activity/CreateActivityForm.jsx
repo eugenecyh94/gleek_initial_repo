@@ -329,10 +329,8 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
         formData.append("popupItemsSold", popupitems);
         if (isFood) {
           formData.append("isFoodCertPending", isFoodCertPending);
-          if (isFoodCertPending) {
-            formData.append("foodCertDate", foodCertDate?.toISOString());
-            formData.append("foodCategory", selectedFoodCat);
-          }
+          formData.append("foodCertDate", foodCertDate?.toISOString());
+          formData.append("foodCategory", selectedFoodCat);
         }
       }
     }
