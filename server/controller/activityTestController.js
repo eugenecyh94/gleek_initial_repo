@@ -1,11 +1,21 @@
 import TestActivityModel from "../model/testactivityModel.js";
 import express from "express";
 import { uploadS3ActivityImages } from "../middleware/multer.js";
+import { s3ImageGetService } from "../service/s3ImageGetService.js";
+
 const router = express.Router();
 
 router.get("/all", async (req, res) => {
   try {
-    const activities = await TestActivityModel.find().exec();
+    let activities = await TestActivityModel.find().exec();
+
+    for (let i = 0; i < activities.length; i++) {
+      let preSignedUrlArr = await s3ImageGetService(activities[i].images);
+      activities[i].preSignedImages = preSignedUrlArr;
+      console.log("each push:", activities[i].preSignedImages);
+    }
+    console.log("res activity info all:", activities);
+
     res.status(200).json({
       data: activities,
     });

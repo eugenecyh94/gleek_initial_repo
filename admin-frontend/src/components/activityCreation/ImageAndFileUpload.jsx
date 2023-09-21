@@ -21,6 +21,7 @@ import {
   useImageUploadTestStore,
 } from "../../zustand/GlobalStore";
 import AxiosConnect from "../../utils/AxiosConnect";
+import axiosConnect from "../../utils/AxiosConnect";
 
 //custom styles for boxed components
 export const CustomBox = styled(Box)({
@@ -41,6 +42,7 @@ const ImageAndFileUpload = (ImageUploadProps) => {
   //local state
   const [fileList, setFileList] = useState([]);
   const [activityName, setActivityName] = useState("");
+  const [allActivities, setAllActivities] = useState([]);
   //example to update state from zustand store instead of local state
   const { setImageList } = useImageUploadTestStore();
   // for confirmation dialog
@@ -77,6 +79,12 @@ const ImageAndFileUpload = (ImageUploadProps) => {
     },
     [fileList, limit],
   );
+
+  const handleRefresh = () => {
+    AxiosConnect.get("/testActivity/all").then((body) => {
+      console.log(body);
+    });
+  };
 
   const fileRemove = (file) => {
     const updatedList = [...fileList];
@@ -121,8 +129,13 @@ const ImageAndFileUpload = (ImageUploadProps) => {
     console.log(activityName);
   }, [activityName]);
 
+  useEffect(() => {
+    handleRefresh();
+  }, []);
+
   return (
     <Fragment>
+      <Button onClick={handleRefresh}>Refresh</Button>
       <CustomBox>
         <InputLabel htmlFor="outlined-adornment-password">
           Enter Activity Name
