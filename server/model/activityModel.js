@@ -27,7 +27,9 @@ const activitySchema = new mongoose.Schema({
   activityPricingRules: [
     { type: mongoose.Schema.Types.ObjectId, ref: "ActivityPricingRules" },
   ],
-  activityImages: [String],
+  images: {
+    type: Array,
+  },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Vendor",

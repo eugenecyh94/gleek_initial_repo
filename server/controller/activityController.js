@@ -19,7 +19,7 @@ export const getAllActivities = async (req, res) => {
 export const getActivity = async (req, res) => {
   try {
     const foundActivity = await ActivityModel.findById(req.params.id).populate(
-      "activityPricingRules",
+      "activityPricingRules"
     );
     res.status(200).json({
       data: foundActivity,
@@ -31,7 +31,7 @@ export const getActivity = async (req, res) => {
 
 export const addActivity = async (req, res) => {
   try {
-    const { activityPricingRules, ...activity } = req.body;
+    const { images, activityPricingRules, ...activity } = req.body;
     const newActivity = new ActivityModel({ ...activity });
     const savedActivity = await newActivity.save();
     activityPricingRules.map(async (pricingRule) => {
@@ -46,9 +46,9 @@ export const addActivity = async (req, res) => {
                 },
               },
             },
-            { new: true, useFindAndModify: false },
+            { new: true, useFindAndModify: false }
           );
-        },
+        }
       );
     });
     res.status(201).json({
@@ -125,7 +125,6 @@ export const getAllThemes = async (req, res) => {
       parentThemesWithChildren[parentId].children.push(theme);
     });
     const parentThemes = Object.values(parentThemesWithChildren);
-    console.log(parentThemesWithChildren);
     res.status(200).json({
       data: parentThemes,
     });

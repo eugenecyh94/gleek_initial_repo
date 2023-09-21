@@ -113,7 +113,7 @@ export const useActivityStore = create((set) => ({
   },
   createActivity: async (newActivityData) => {
     try {
-      const response = await AxiosConnect.post(
+      const response = await AxiosConnect.postMultiPart(
         "/activity/addActivity",
         newActivityData
       );

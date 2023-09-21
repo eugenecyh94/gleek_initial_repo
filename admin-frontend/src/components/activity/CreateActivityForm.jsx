@@ -1,4 +1,6 @@
 /* eslint-disable react/prop-types */
+import styled from "@emotion/styled";
+import AddIcon from "@mui/icons-material/Add";
 import {
   Alert,
   Button,
@@ -11,6 +13,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import Autocomplete from "@mui/material/Autocomplete";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
@@ -38,8 +41,24 @@ import {
   SustainableDevelopmentGoalsEnum,
 } from "../../utils/TypeEnum";
 import { useActivityStore } from "../../zustand/GlobalStore";
+import ImageAndFileUpload from "./ImageAndFileUpload";
 
-const CreateActivityForm = ({ themes, theme }) => {
+const StyledButton = styled(Button)`
+  padding-left: 6px;
+`;
+const StyledContainer = styled(Paper)`
+  padding: 20px;
+  padding-top: 6px;
+  border-radius: 10px;
+  box-shadow: 2px 2px 0px 0px rgb(159 145 204 / 40%);
+`;
+const StyledSubmitButton = styled(Button)`
+  && {
+    background-color: ${({ theme }) => theme.palette.light_purple.main};
+  }
+`;
+
+const CreateActivityForm = ({ themes, theme, vendors }) => {
   const { createActivity } = useActivityStore();
   const [isOpen, setIsOpen] = useState(false);
   const [isError, setError] = useState(false);
@@ -66,6 +85,8 @@ const CreateActivityForm = ({ themes, theme }) => {
   const [dayAvailabilities, setDayAvailabilities] = useState([]);
   const [duration, setDuration] = useState();
   const [formErrors, setFormErrors] = useState();
+  const [activityImages, setActivityImages] = useState([]);
+  const [selectedVendor, setSelectedVendor] = useState();
 
   const foodCategories = Object.values(FoodCategoryEnum);
   const sdgList = Object.values(SustainableDevelopmentGoalsEnum);
@@ -81,10 +102,10 @@ const CreateActivityForm = ({ themes, theme }) => {
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
+      setIsOpen(false);
+      setError(false);
       return;
     }
-    setIsOpen(false);
-    setError(false);
   };
 
   const handleThemeChange = (event) => {
@@ -102,7 +123,7 @@ const CreateActivityForm = ({ themes, theme }) => {
   };
 
   const handleMaxParticipantsChange = (event) => {
-    const newMaxParticipants = parseInt(event.target.value, 10) || 0;
+    const newMaxParticipants = parseInt(event.target.value, 10) || null;
     setMaxParticipants(newMaxParticipants);
 
     const newData = [];
@@ -195,11 +216,18 @@ const CreateActivityForm = ({ themes, theme }) => {
 
   const handleDayAvailabilitiesChange = async (event) => {
     setDayAvailabilities(event.target.value);
-    console.log(dayAvailabilities);
   };
 
   const handleDurationChange = async (event) => {
     setDuration(event.target.value);
+  };
+
+  const handleVendorChange = (event, newValue) => {
+    if (newValue) {
+      setSelectedVendor(newValue._id);
+    } else {
+      setSelectedVendor(null);
+    }
   };
 
   const validateForm = () => {
@@ -270,6 +298,8 @@ const CreateActivityForm = ({ themes, theme }) => {
     setDayAvailabilities([]);
     setDuration();
     setFormErrors({});
+    setActivityImages([]);
+    setSelectedVendor();
   };
 
   const handleSubmit = async (event) => {
@@ -303,7 +333,12 @@ const CreateActivityForm = ({ themes, theme }) => {
       foodCategory: foodCategories,
       popupItemsSold:
         activityType === ActivityTypeEnum.POPUP ? popupitems : null,
+      images: activityImages,
+      createdBy: selectedVendor,
     };
+    // for (let i = 0; i < activityImages.length; i++) {
+    //   payload.append("images", activityImages[i]);
+    // }
     console.log(payload);
     if (validateForm()) {
       try {
@@ -326,138 +361,287 @@ const CreateActivityForm = ({ themes, theme }) => {
 
   return (
     <form>
-      <Grid container spacing={2} alignItems="left" justifyContent="left">
-        <Grid item xs={12}>
-          <Typography
-            color={theme.palette.primary.main}
-            paddingTop={2}
-            component="div"
-          >
-            Basic Information
-          </Typography>
-        </Grid>
-        <Grid item xs={4}>
-          <TextField
-            required
-            variant="standard"
-            id="title"
-            name="title"
-            placeholder="Title"
-            label="Title"
-            disabled={false}
-            fullWidth
-            value={title ?? ""}
-            onChange={handleTitleChange}
-            error={title !== null && title?.length === 0}
-          />
-        </Grid>
-        <Grid item xs={4}>
-          <FormControl fullWidth>
-            <InputLabel id="themeLabel" required>
-              Theme
-            </InputLabel>
-            <Select
-              labelId="themeLabel"
-              label="Theme"
-              placeholder="Theme"
-              onChange={handleThemeChange}
-              value={selectedTheme || ""}
-            >
-              {themes?.map(
-                (item, index) =>
-                  item.parent && (
-                    <MenuItem key={index} value={item.parent._id}>
-                      {item.parent.name}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "16px",
+        }}
+      >
+        <StyledContainer elevation={3}>
+          <Grid container spacing={2} alignItems="left" justifyContent="left">
+            <Grid item xs={12}>
+              <Typography
+                color={theme.palette.primary.main}
+                paddingTop={2}
+                component="div"
+              >
+                Basic Information
+              </Typography>
+            </Grid>
+            <Grid item xs={4}>
+              <TextField
+                required
+                variant="standard"
+                id="title"
+                name="title"
+                placeholder="Title"
+                label="Title"
+                disabled={false}
+                fullWidth
+                value={title ?? ""}
+                onChange={handleTitleChange}
+                error={title !== null && title?.length === 0}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <FormControl fullWidth>
+                <InputLabel id="themeLabel" required>
+                  Theme
+                </InputLabel>
+                <Select
+                  labelId="themeLabel"
+                  label="Theme"
+                  placeholder="Theme"
+                  onChange={handleThemeChange}
+                  value={selectedTheme || ""}
+                >
+                  {themes?.map(
+                    (item, index) =>
+                      item.parent && (
+                        <MenuItem key={index} value={item.parent._id}>
+                          {item.parent.name}
+                        </MenuItem>
+                      )
+                  )}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={4}>
+              <FormControl fullWidth>
+                <InputLabel id="subThemeLabel">Learning Points</InputLabel>
+                <Select
+                  labelId="subThemeLabel"
+                  label="Sub-Theme"
+                  placeholder="Theme"
+                  multiple
+                  onChange={handleSubThemeChange}
+                  value={selectedSubTheme || ""}
+                >
+                  {subthemes.map((subtheme, index) => (
+                    <MenuItem key={index} value={subtheme._id}>
+                      {subtheme.name}
                     </MenuItem>
-                  )
-              )}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={4}>
-          <FormControl fullWidth>
-            <InputLabel id="subThemeLabel">Learning Points</InputLabel>
-            <Select
-              labelId="subThemeLabel"
-              label="Sub-Theme"
-              placeholder="Theme"
-              multiple
-              onChange={handleSubThemeChange}
-              value={selectedSubTheme || ""}
-            >
-              {subthemes.map((subtheme, index) => (
-                <MenuItem key={index} value={subtheme._id}>
-                  {subtheme.name}
-                </MenuItem>
-              ))}
-            </Select>
-            <FormHelperText>
-              Select one or more learning points based on theme
-            </FormHelperText>
-          </FormControl>
-        </Grid>
-        <Grid item xs={12}>
-          <TextField
-            id="filled-textarea"
-            label="Description"
-            placeholder="Write details about your activity here..."
-            multiline
-            rows={4}
-            fullWidth
-            onChange={handleDescriptionChange}
-            value={description ?? ""}
-            required
-            error={description !== null && description?.length === 0}
-          />
-        </Grid>
-      </Grid>
-      <Grid container spacing={2} alignItems="left" justifyContent="left">
-        <Grid item xs={12}>
-          <Typography
-            color={theme.palette.primary.main}
-            paddingTop={2}
-            component="div"
-          >
-            More details on activity
-          </Typography>
-        </Grid>
-        <Grid item xs={6} paddingTop={2}>
-          <FormControl fullWidth>
-            <InputLabel id="activityType" required>
-              Activity Type
-            </InputLabel>
-            <Select
-              labelId="activityTypeLabel"
-              label="Activity Type"
-              placeholder="Activity Type"
-              onChange={handleActivityTypeChange}
-              value={activityType}
-            >
-              {Object.values(ActivityTypeEnum).map((enumValue) => (
-                <MenuItem key={enumValue} value={enumValue}>
-                  {enumValue}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+                  ))}
+                </Select>
+                <FormHelperText>
+                  Select one or more learning points based on theme
+                </FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                id="filled-textarea"
+                label="Description"
+                placeholder="Write details about your activity here..."
+                multiline
+                rows={4}
+                fullWidth
+                onChange={handleDescriptionChange}
+                value={description ?? ""}
+                required
+                error={description !== null && description?.length === 0}
+              />
+            </Grid>
+          </Grid>
+        </StyledContainer>
+        <StyledContainer elevation={3}>
+          <Grid container spacing={2} alignItems="left" justifyContent="left">
+            <Grid item xs={12}>
+              <Typography
+                color={theme.palette.primary.main}
+                paddingTop={2}
+                component="div"
+              >
+                Vendor Details
+              </Typography>
+              <Grid item xs={6} paddingTop={2}>
+                <Autocomplete
+                  onChange={handleVendorChange}
+                  disablePortal
+                  id="combo-box-demo"
+                  options={vendors}
+                  sx={{ width: 300 }}
+                  getOptionLabel={(vendor) =>
+                    `${vendor.companyName} - ${vendor.companyUEN}`
+                  }
+                  renderInput={(params) => (
+                    <TextField {...params} label="Pick from existing vendor" />
+                  )}
+                  value={
+                    vendors.find((vendor) => vendor._id === selectedVendor) ||
+                    null
+                  }
+                />
+              </Grid>
+              <Grid item xs={6} paddingTop={2}>
+                <Typography fontSize={"0.75rem"}>
+                  Cannot find vendor?
+                </Typography>
+                <StyledButton variant="contained" color="light_purple">
+                  <Typography
+                    style={{
+                      display: "flex",
+                    }}
+                    component="div"
+                    color="white"
+                  >
+                    <AddIcon />
+                    Add vendor
+                  </Typography>
+                </StyledButton>
+              </Grid>
+            </Grid>
+          </Grid>
+        </StyledContainer>
+        <StyledContainer elevation={3}>
+          <Grid container spacing={2} alignItems="left" justifyContent="left">
+            <Grid item xs={12}>
+              <Typography
+                color={theme.palette.primary.main}
+                paddingTop={2}
+                component="div"
+              >
+                More details on activity
+              </Typography>
+            </Grid>
+            <Grid item xs={6} paddingTop={2}>
+              <FormControl fullWidth>
+                <InputLabel id="activityType" required>
+                  Activity Type
+                </InputLabel>
+                <Select
+                  labelId="activityTypeLabel"
+                  label="Activity Type"
+                  placeholder="Activity Type"
+                  onChange={handleActivityTypeChange}
+                  value={activityType}
+                >
+                  {Object.values(ActivityTypeEnum).map((enumValue) => (
+                    <MenuItem key={enumValue} value={enumValue}>
+                      {enumValue}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
-          {activityType === ActivityTypeEnum.POPUP && (
-            <Grid paddingBottom={2} paddingTop={2}>
-              <Grid item xs={6}>
+              {activityType === ActivityTypeEnum.POPUP && (
+                <Grid paddingBottom={2} paddingTop={2}>
+                  <Grid item xs={6}>
+                    <FormControl>
+                      <FormLabel id="popupIsFood">
+                        Selling food items?
+                      </FormLabel>
+                      <RadioGroup
+                        aria-labelledby="demo-radio-buttons-group-label"
+                        defaultValue="yes"
+                        name="radio-buttons-group"
+                        value={isFood.toString()}
+                        onChange={handleIsFoodChange}
+                      >
+                        <FormControlLabel
+                          value="true"
+                          control={<Radio />}
+                          label="Yes"
+                        />
+                        <FormControlLabel
+                          value="false"
+                          control={<Radio />}
+                          label="No"
+                        />
+                      </RadioGroup>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      required
+                      variant="standard"
+                      id="popupItems"
+                      name="popupItems"
+                      placeholder="Popup items sold"
+                      label="Popup items sold"
+                      disabled={false}
+                      fullWidth
+                      onChange={handlePopupItemsChange}
+                      error={popupitems !== null && popupitems?.length === 0}
+                    />
+                  </Grid>
+                </Grid>
+              )}
+            </Grid>
+
+            <Grid item xs={3} paddingTop={2}>
+              {activityType === ActivityTypeEnum.POPUP && isFood && (
+                <FormGroup>
+                  <InputLabel id="foodCategory">Food Category</InputLabel>
+                  {foodCategories.map((label) => (
+                    <FormControlLabel
+                      key={label}
+                      control={
+                        <Checkbox
+                          checked={selectedFoodCat.includes(label)}
+                          onChange={handleFoodCatChange}
+                          name={label}
+                        />
+                      }
+                      label={label}
+                    />
+                  ))}
+                </FormGroup>
+              )}
+            </Grid>
+            <Grid item xs={3} paddingTop={2}>
+              {activityType === ActivityTypeEnum.POPUP && isFood === true && (
                 <FormControl>
-                  <FormLabel id="popupIsFood">Selling food items?</FormLabel>
+                  <FormLabel id="popupIsFood">
+                    Is my food cert pending?
+                  </FormLabel>
                   <RadioGroup
                     aria-labelledby="demo-radio-buttons-group-label"
                     defaultValue="yes"
                     name="radio-buttons-group"
-                    value={isFood.toString()}
-                    onChange={handleIsFoodChange}
+                    value={isFoodCertPending.toString()}
+                    onChange={handleIsFoodCertPendingChange}
                   >
                     <FormControlLabel
                       value="true"
                       control={<Radio />}
                       label="Yes"
                     />
+                    {isFoodCertPending && (
+                      <Grid>
+                        <Grid item>
+                          <TextField
+                            required
+                            variant="standard"
+                            id="pendingCertType"
+                            name="pendingCertType"
+                            placeholder="Pending cert type"
+                            label="Pending cert type"
+                            disabled={false}
+                            fullWidth
+                          />
+                        </Grid>
+                        <Grid item paddingTop={2}>
+                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                              label="Expected certified date"
+                              onChange={handleFoodCertDateChange}
+                            />
+                          </LocalizationProvider>
+                        </Grid>
+                      </Grid>
+                    )}
                     <FormControlLabel
                       value="false"
                       control={<Radio />}
@@ -465,324 +649,276 @@ const CreateActivityForm = ({ themes, theme }) => {
                     />
                   </RadioGroup>
                 </FormControl>
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  variant="standard"
-                  id="popupItems"
-                  name="popupItems"
-                  placeholder="Popup items sold"
-                  label="Popup items sold"
-                  disabled={false}
-                  fullWidth
-                  onChange={handlePopupItemsChange}
-                  error={popupitems !== null && popupitems?.length === 0}
-                />
-              </Grid>
+              )}
             </Grid>
-          )}
-        </Grid>
-
-        <Grid item xs={3} paddingTop={2}>
-          {activityType === ActivityTypeEnum.POPUP && isFood && (
-            <FormGroup>
-              <InputLabel id="foodCategory">Food Category</InputLabel>
-              {foodCategories.map((label) => (
-                <FormControlLabel
-                  key={label}
-                  control={
-                    <Checkbox
-                      checked={selectedFoodCat.includes(label)}
-                      onChange={handleFoodCatChange}
-                      name={label}
-                    />
-                  }
-                  label={label}
-                />
-              ))}
-            </FormGroup>
-          )}
-        </Grid>
-        <Grid item xs={3} paddingTop={2}>
-          {activityType === ActivityTypeEnum.POPUP && isFood === true && (
-            <FormControl>
-              <FormLabel id="popupIsFood">Is my food cert pending?</FormLabel>
-              <RadioGroup
-                aria-labelledby="demo-radio-buttons-group-label"
-                defaultValue="yes"
-                name="radio-buttons-group"
-                value={isFoodCertPending.toString()}
-                onChange={handleIsFoodCertPendingChange}
-              >
-                <FormControlLabel
-                  value="true"
-                  control={<Radio />}
-                  label="Yes"
-                />
-                {isFoodCertPending && (
-                  <Grid>
-                    <Grid item>
-                      <TextField
-                        required
-                        variant="standard"
-                        id="pendingCertType"
-                        name="pendingCertType"
-                        placeholder="Pending cert type"
-                        label="Pending cert type"
-                        disabled={false}
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item paddingTop={2}>
-                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DatePicker
-                          label="Expected certified date"
-                          onChange={handleFoodCertDateChange}
-                        />
-                      </LocalizationProvider>
-                    </Grid>
-                  </Grid>
-                )}
-                <FormControlLabel
-                  value="false"
-                  control={<Radio />}
-                  label="No"
-                />
-              </RadioGroup>
-            </FormControl>
-          )}
-        </Grid>
-        <Grid item xs={6}>
-          <FormControl fullWidth>
-            <InputLabel id="activityType" required>
-              Location
-            </InputLabel>
-            <Select
-              labelId="locationLabel"
-              label="Location"
-              placeholder="Location"
-              onChange={handleLocationTypeChange}
-              value={location}
-            >
-              {Object.values(LocationEnum).map((enumValue) => (
-                <MenuItem key={enumValue} value={enumValue}>
-                  {enumValue}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={3}>
-          <FormControl fullWidth>
-            <InputLabel id="dayAvailabilities" required>
-              Day Availabilities
-            </InputLabel>
-            <Select
-              labelId="locationLabel"
-              label="Day Availabilities"
-              placeholder="Day Availabilities"
-              onChange={handleDayAvailabilitiesChange}
-              value={dayAvailabilities}
-              multiple
-            >
-              {Object.values(ActivityDayAvailabilityEnum).map((enumValue) => (
-                <MenuItem key={enumValue} value={enumValue}>
-                  {enumValue}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={3}>
-          <TextField
-            id="duration"
-            label="Duration"
-            placeholder="Duration"
-            type="number"
-            fullWidth
-            onChange={handleDurationChange}
-            required
-            InputProps={{
-              endAdornment: <InputAdornment position="end">min</InputAdornment>,
-            }}
-            value={duration ?? ""}
-            error={duration !== null && duration?.length === 0}
-          />
-        </Grid>
-      </Grid>
-      <Grid
-        container
-        spacing={2}
-        alignItems="left"
-        justifyContent="left"
-        paddingTop={2}
-      >
-        <Grid item xs={12}>
-          <InputLabel id="sdg">Sustainability Development Goals</InputLabel>
-        </Grid>
-        {columnsArray.map((column, columnIndex) => (
-          <Grid item xs={3} key={columnIndex}>
-            {column.map((option) => (
-              <FormControlLabel
-                key={option}
-                control={
-                  <Checkbox
-                    onChange={handleSdgChange}
-                    checked={sdg.includes(option)}
-                    name={option}
-                  />
-                }
-                label={option}
-                sx={{ width: "100%" }}
+            <Grid item xs={6}>
+              <FormControl fullWidth>
+                <InputLabel id="activityType" required>
+                  Location
+                </InputLabel>
+                <Select
+                  labelId="locationLabel"
+                  label="Location"
+                  placeholder="Location"
+                  onChange={handleLocationTypeChange}
+                  value={location}
+                >
+                  {Object.values(LocationEnum).map((enumValue) => (
+                    <MenuItem key={enumValue} value={enumValue}>
+                      {enumValue}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={3}>
+              <FormControl fullWidth>
+                <InputLabel id="dayAvailabilities" required>
+                  Day Availabilities
+                </InputLabel>
+                <Select
+                  labelId="locationLabel"
+                  label="Day Availabilities"
+                  placeholder="Day Availabilities"
+                  onChange={handleDayAvailabilitiesChange}
+                  value={dayAvailabilities}
+                  multiple
+                >
+                  {Object.values(ActivityDayAvailabilityEnum).map(
+                    (enumValue) => (
+                      <MenuItem key={enumValue} value={enumValue}>
+                        {enumValue}
+                      </MenuItem>
+                    )
+                  )}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={3}>
+              <TextField
+                id="duration"
+                label="Duration"
+                placeholder="Duration"
+                type="number"
+                fullWidth
+                onChange={handleDurationChange}
+                required
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">min</InputAdornment>
+                  ),
+                }}
+                value={duration ?? ""}
+                error={duration !== null && duration?.length === 0}
               />
-            ))}
+            </Grid>
           </Grid>
-        ))}
-      </Grid>
 
-      <Grid container spacing={1} alignItems="left" justifyContent="left">
-        <Grid item xs={12}>
-          <Typography
-            color={theme.palette.primary.main}
-            component="div"
+          <Grid
+            container
+            spacing={2}
+            alignItems="left"
+            justifyContent="left"
             paddingTop={2}
           >
-            Participants and Pricing
-          </Typography>
-        </Grid>
-        <Grid item xs={4}>
-          <TextField
-            required
-            id="maxParticipants"
-            name="maxParticipants"
-            label="Max. participants"
-            disabled={false}
-            fullWidth
-            type="number"
-            value={maxParticipants ?? ""}
-            onChange={handleMaxParticipantsChange}
-            error={maxParticipants !== null && maxParticipants === 0}
-          />
-        </Grid>
-        <Grid item xs={4}>
-          <TextField
-            required
-            id="markup"
-            name="markup"
-            label="Markup Percentage"
-            disabled={false}
-            fullWidth
-            type="number"
-            value={markup ?? ""}
-            InputProps={{
-              endAdornment: <InputAdornment position="start">%</InputAdornment>,
-            }}
-            onChange={handleMarkupChange}
-            error={markup !== null && markup?.length === 0}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          {maxParticipants > 0 && (
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Pax Interval</TableCell>
-                    <TableCell>Price Per Pax</TableCell>
-                    <TableCell>Weekend Addon</TableCell>
-                    <TableCell>Public Holiday Addon</TableCell>
-                    <TableCell>Online Addon</TableCell>
-                    <TableCell>Offline Addon</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {activityPricingRuleList.map((row, rowIndex) => (
-                    <TableRow key={rowIndex}>
-                      <TableCell>{row.paxInterval}</TableCell>
-                      <TableCell>
-                        <TextField
-                          value={row.pricePerPax}
-                          onChange={(e) =>
-                            handleFieldChange(e, rowIndex, "pricePerPax")
-                          }
-                          InputProps={{
-                            startAdornment: (
-                              <InputAdornment position="start">
-                                $
-                              </InputAdornment>
-                            ),
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <TextField
-                          value={row.weekendAddon}
-                          onChange={(e) =>
-                            handleFieldChange(e, rowIndex, "weekendAddon")
-                          }
-                          InputProps={{
-                            startAdornment: (
-                              <InputAdornment position="start">
-                                $
-                              </InputAdornment>
-                            ),
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <TextField
-                          value={row.publicHolidayAddon}
-                          onChange={(e) =>
-                            handleFieldChange(e, rowIndex, "publicHolidayAddon")
-                          }
-                          InputProps={{
-                            startAdornment: (
-                              <InputAdornment position="start">
-                                $
-                              </InputAdornment>
-                            ),
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <TextField
-                          value={row.onlineAddon}
-                          onChange={(e) =>
-                            handleFieldChange(e, rowIndex, "onlineAddon")
-                          }
-                          InputProps={{
-                            startAdornment: (
-                              <InputAdornment position="start">
-                                $
-                              </InputAdornment>
-                            ),
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <TextField
-                          value={row.offlineAddon}
-                          onChange={(e) =>
-                            handleFieldChange(e, rowIndex, "offlineAddon")
-                          }
-                          InputProps={{
-                            startAdornment: (
-                              <InputAdornment position="start">
-                                $
-                              </InputAdornment>
-                            ),
-                          }}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </Grid>
-      </Grid>
+            <Grid item xs={12}>
+              <InputLabel id="sdg">Sustainability Development Goals</InputLabel>
+            </Grid>
+            {columnsArray.map((column, columnIndex) => (
+              <Grid item xs={3} key={columnIndex}>
+                {column.map((option) => (
+                  <FormControlLabel
+                    key={option}
+                    control={
+                      <Checkbox
+                        onChange={handleSdgChange}
+                        checked={sdg.includes(option)}
+                        name={option}
+                      />
+                    }
+                    label={option}
+                    sx={{ width: "100%" }}
+                  />
+                ))}
+              </Grid>
+            ))}
+          </Grid>
+        </StyledContainer>
+        <StyledContainer elevation={3}>
+          <Grid container spacing={1} alignItems="left" justifyContent="left">
+            <Grid item xs={12}>
+              <Typography
+                color={theme.palette.primary.main}
+                component="div"
+                paddingTop={2}
+              >
+                Participants and Pricing
+              </Typography>
+            </Grid>
+            <Grid item xs={4}>
+              <TextField
+                required
+                id="maxParticipants"
+                name="maxParticipants"
+                label="Max. participants"
+                disabled={false}
+                fullWidth
+                type="number"
+                value={maxParticipants ?? ""}
+                onChange={handleMaxParticipantsChange}
+                error={maxParticipants !== null && maxParticipants === 0}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <TextField
+                required
+                id="markup"
+                name="markup"
+                label="Markup Percentage"
+                disabled={false}
+                fullWidth
+                type="number"
+                value={markup ?? ""}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="start">%</InputAdornment>
+                  ),
+                }}
+                onChange={handleMarkupChange}
+                error={markup !== null && markup?.length === 0}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              {maxParticipants > 0 && (
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Pax Interval</TableCell>
+                        <TableCell>Price Per Pax</TableCell>
+                        <TableCell>Weekend Addon</TableCell>
+                        <TableCell>Public Holiday Addon</TableCell>
+                        <TableCell>Online Addon</TableCell>
+                        <TableCell>Offline Addon</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {activityPricingRuleList.map((row, rowIndex) => (
+                        <TableRow key={rowIndex}>
+                          <TableCell>{row.paxInterval}</TableCell>
+                          <TableCell>
+                            <TextField
+                              value={row.pricePerPax}
+                              onChange={(e) =>
+                                handleFieldChange(e, rowIndex, "pricePerPax")
+                              }
+                              InputProps={{
+                                startAdornment: (
+                                  <InputAdornment position="start">
+                                    $
+                                  </InputAdornment>
+                                ),
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              value={row.weekendAddon}
+                              onChange={(e) =>
+                                handleFieldChange(e, rowIndex, "weekendAddon")
+                              }
+                              InputProps={{
+                                startAdornment: (
+                                  <InputAdornment position="start">
+                                    $
+                                  </InputAdornment>
+                                ),
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              value={row.publicHolidayAddon}
+                              onChange={(e) =>
+                                handleFieldChange(
+                                  e,
+                                  rowIndex,
+                                  "publicHolidayAddon"
+                                )
+                              }
+                              InputProps={{
+                                startAdornment: (
+                                  <InputAdornment position="start">
+                                    $
+                                  </InputAdornment>
+                                ),
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              value={row.onlineAddon}
+                              onChange={(e) =>
+                                handleFieldChange(e, rowIndex, "onlineAddon")
+                              }
+                              InputProps={{
+                                startAdornment: (
+                                  <InputAdornment position="start">
+                                    $
+                                  </InputAdornment>
+                                ),
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              value={row.offlineAddon}
+                              onChange={(e) =>
+                                handleFieldChange(e, rowIndex, "offlineAddon")
+                              }
+                              InputProps={{
+                                startAdornment: (
+                                  <InputAdornment position="start">
+                                    $
+                                  </InputAdornment>
+                                ),
+                              }}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
+            </Grid>
+          </Grid>
+
+          <Grid
+            container
+            spacing={1}
+            alignItems="left"
+            justifyContent="left"
+          ></Grid>
+          <Grid item xs={12}>
+            <Typography
+              color={theme.palette.primary.main}
+              component="div"
+              paddingTop={2}
+            >
+              Upload activity images
+            </Typography>
+            <ImageAndFileUpload
+              limit={4}
+              name={"idk"}
+              size={5000000}
+              setActivityImages={setActivityImages}
+              activityImages={activityImages}
+            />
+          </Grid>
+        </StyledContainer>
+      </div>
+
       <Grid
         container
         paddingTop={2}
@@ -791,11 +927,17 @@ const CreateActivityForm = ({ themes, theme }) => {
         justifyContent="left"
       >
         <Grid item xs={12}>
-          <Button onClick={handleSubmit} type="submit" variant="contained">
+          <StyledSubmitButton
+            onClick={handleSubmit}
+            type="submit"
+            variant="contained"
+            fullWidth
+          >
             <Typography component="div">Submit</Typography>
-          </Button>
+          </StyledSubmitButton>
         </Grid>
       </Grid>
+
       <Snackbar open={isOpen} autoHideDuration={6000} onClose={handleClose}>
         <Alert severity="success" sx={{ width: "100%" }}>
           Activity Created Successfully!
