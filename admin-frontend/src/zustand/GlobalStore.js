@@ -10,7 +10,7 @@ export const updateCurrentActivity = (selectedActivity) => {
   }));
   console.log(
     "activity store current activity updated::",
-    useActivityStore.getState()
+    useActivityStore.getState(),
   );
 };
 
@@ -21,7 +21,7 @@ export const updateAllActivity = (newAllActivities) => {
   }));
   console.log(
     "activity store all activity updated::",
-    useActivityStore.getState()
+    useActivityStore.getState(),
   );
 };
 
@@ -112,10 +112,11 @@ export const useActivityStore = create((set) => ({
     }
   },
   createActivity: async (newActivityData) => {
+    console.log("newactivity being sent to backend");
     try {
       const response = await AxiosConnect.postMultiPart(
         "/activity/addActivity",
-        newActivityData
+        newActivityData,
       );
       set({ newActivity: response.data.activity });
     } catch (error) {

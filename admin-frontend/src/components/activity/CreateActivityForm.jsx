@@ -63,7 +63,7 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isError, setError] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState(
-    themes?.[0]?.parent?._id || ""
+    themes?.[0]?.parent?._id || "",
   );
   const [selectedSubTheme, setSelectedSubTheme] = useState([]);
   const [subthemes, setSubthemes] = useState([]);
@@ -112,7 +112,7 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
     const themeId = event.target.value;
     setSelectedTheme(themeId);
     setSubthemes(
-      themes?.find((theme) => theme.parent?._id === themeId)?.children
+      themes?.find((theme) => theme.parent?._id === themeId)?.children,
     );
   };
 
@@ -304,46 +304,48 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const payload = {
-      title: title,
-      description: description,
-      activityType:
-        activityType === ActivityTypeEnum.POPUP
-          ? isFood
-            ? "Popups (Food)"
-            : "Popups (Non-food)"
-          : activityType,
-      maxParticipants: maxParticipants,
-      clientMarkupPercentage: markup,
-      duration: duration,
-      theme: selectedTheme,
-      subtheme: selectedSubTheme,
-      location: location,
-      sdg: sdg,
-      dayAvailabilities: dayAvailabilities,
-      activityPricingRules: activityPricingRuleList,
-      isFoodCertPending:
-        activityType === ActivityTypeEnum.POPUP && isFood
-          ? isFoodCertPending
-          : null,
-      foodCertDate:
-        activityType === ActivityTypeEnum.POPUP && isFood
-          ? foodCertDate?.toISOString()
-          : null,
-      foodCategory: foodCategories,
-      popupItemsSold:
-        activityType === ActivityTypeEnum.POPUP ? popupitems : null,
-      images: activityImages,
-      createdBy: selectedVendor,
-    };
-    // for (let i = 0; i < activityImages.length; i++) {
-    //   payload.append("images", activityImages[i]);
-    // }
-    console.log(payload);
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append(
+      "activityType",
+      activityType === ActivityTypeEnum.POPUP
+        ? isFood
+          ? "Popups (Food)"
+          : "Popups (Non-food)"
+        : activityType,
+    );
+    formData.append("maxParticipants", maxParticipants);
+    formData.append("clientMarkupPercentage", markup);
+    formData.append("duration", duration);
+    formData.append("theme", selectedTheme);
+    formData.append("subtheme", selectedSubTheme);
+    formData.append("location", location);
+    formData.append("sdg", sdg);
+    formData.append("dayAvailabilities", dayAvailabilities);
+    formData.append("activityPricingRules", activityPricingRuleList);
+    if (activityType === ActivityTypeEnum.POPUP) {
+      {
+        formData.append("popupItemsSold", popupitems);
+        if (isFood) {
+          formData.append("isFoodCertPending", isFoodCertPending);
+          if (isFoodCertPending) {
+            formData.append("foodCertDate", foodCertDate?.toISOString());
+            formData.append("foodCategory", selectedFoodCat);
+          }
+        }
+      }
+    }
+    formData.append("createdBy", selectedVendor);
+
+    for (let i = 0; i < activityImages.length; i++) {
+      formData.append("images", activityImages[i]);
+    }
+
     if (validateForm()) {
       try {
-        const responseStatus = await createActivity(payload);
-        resetForm();
+        const responseStatus = await createActivity(formData);
+        // resetForm();
         setIsOpen(true);
       } catch (error) {
         setError(true);
@@ -412,7 +414,7 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
                         <MenuItem key={index} value={item.parent._id}>
                           {item.parent.name}
                         </MenuItem>
-                      )
+                      ),
                   )}
                 </Select>
               </FormControl>
@@ -689,7 +691,7 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
                       <MenuItem key={enumValue} value={enumValue}>
                         {enumValue}
                       </MenuItem>
-                    )
+                    ),
                   )}
                 </Select>
               </FormControl>
@@ -843,7 +845,7 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
                                 handleFieldChange(
                                   e,
                                   rowIndex,
-                                  "publicHolidayAddon"
+                                  "publicHolidayAddon",
                                 )
                               }
                               InputProps={{

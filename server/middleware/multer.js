@@ -20,9 +20,9 @@ export const uploadS3ActivityImages = multer({
     bucket: process.env.AWS_S3_BUCKET,
     contentType: multerS3.AUTO_CONTENT_TYPE,
     key: (request, file, cb) => {
-      let fullPath = `activityPictures/${uuidv4()}-${Date.now().toString()}-${
-        file.originalname
-      }`;
+      let fullPath = `activityImages/${
+        request.body.title
+      }-${Date.now().toString()}-${uuidv4()}-${file.originalname}`;
       cb(null, fullPath);
     },
     limits: { fileSize: 2000000 }, // In bytes: 2000000 bytes = 2 MB
@@ -42,4 +42,4 @@ export const uploadS3ActivityImages = multer({
       return cb(err);
     }
   },
-}).array("images", 5);
+});

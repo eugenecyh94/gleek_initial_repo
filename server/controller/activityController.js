@@ -19,7 +19,7 @@ export const getAllActivities = async (req, res) => {
 export const getActivity = async (req, res) => {
   try {
     const foundActivity = await ActivityModel.findById(req.params.id).populate(
-      "activityPricingRules"
+      "activityPricingRules",
     );
     res.status(200).json({
       data: foundActivity,
@@ -31,9 +31,38 @@ export const getActivity = async (req, res) => {
 
 export const addActivity = async (req, res) => {
   try {
-    const { images, activityPricingRules, ...activity } = req.body;
+    console.log("add activity body:", req.body);
+    const { activityPricingRules, ...activity } = req.body;
     const newActivity = new ActivityModel({ ...activity });
     const savedActivity = await newActivity.save();
+    const imageFiles = req.files;
+
+    //To update url of uploaded images path to s3 in created activity
+    const imagesPathArr = [];
+
+    if (imageFiles.length === 0 || imageFiles.length === undefined) {
+      console.log("No image files uploaded");
+    } else {
+      console.log("Retrieving uploaded images url");
+      let fileArray = req.files,
+        fileLocation;
+      for (let i = 0; i < fileArray.length; i++) {
+        fileLocation = fileArray[i].location;
+        console.log("file location:", fileLocation);
+        imagesPathArr.push(fileLocation);
+      }
+    }
+    for (let i = 0; i < imagesPathArr.length; i++) {
+      console.log(imagesPathArr[i]);
+    }
+
+    await ActivityModel.findByIdAndUpdate(
+      { _id: savedActivity._id },
+      { images: imagesPathArr },
+      { new: true },
+    );
+
+    //To update pricing rule in created activity
     activityPricingRules.map(async (pricingRule) => {
       ActivityPricingRulesModel.create(pricingRule).then(
         async (newPricingRule) => {
@@ -46,9 +75,9 @@ export const addActivity = async (req, res) => {
                 },
               },
             },
-            { new: true, useFindAndModify: false }
+            { new: true, useFindAndModify: false },
           );
-        }
+        },
       );
     });
     res.status(201).json({

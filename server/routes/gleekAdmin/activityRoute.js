@@ -9,7 +9,11 @@ import {
 import { uploadS3ActivityImages } from "../../middleware/multer.js";
 
 const router = express.Router();
-router.post("/addActivity", uploadS3ActivityImages, addActivity);
+router.post(
+  "/addActivity",
+  uploadS3ActivityImages.array("images", 5),
+  addActivity,
+);
 router.get("/all", getAllActivities);
 router.get("/viewActivity/:id", getActivity);
 router.post("/addThemes", bulkAddThemes);
