@@ -59,7 +59,7 @@ const StyledSubmitButton = styled(Button)`
   }
 `;
 
-const CreateActivityForm = ({ themes, theme, vendors }) => {
+const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
   const { createActivity } = useActivityStore();
   const [isOpen, setIsOpen] = useState(false);
   const [isError, setError] = useState(false);
@@ -286,10 +286,15 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
       errors.popupitems = "Please fill in popup items sold!";
     }
 
+    if (!selectedVendor || selectedVendor === "") {
+      errors.selectedVendor = "Please select a vendor";
+    }
+
     if (!activityImages || activityImages?.length === 0) {
       errors.activityImages =
         "Please upload at least one photo of your activity!";
     }
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -321,6 +326,8 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData();
+    console.log("adminidis", admin.id);
+    formData.append("adminCreated", admin.id);
     formData.append("title", title);
     formData.append("description", description);
     formData.append(
@@ -363,7 +370,7 @@ const CreateActivityForm = ({ themes, theme, vendors }) => {
         }
       }
     }
-    formData.append("createdBy", selectedVendor);
+    formData.append("linkedVendor", selectedVendor);
 
     for (let i = 0; i < activityImages.length; i++) {
       formData.append("images", activityImages[i]);

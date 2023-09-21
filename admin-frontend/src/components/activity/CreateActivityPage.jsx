@@ -1,7 +1,11 @@
 import styled from "@emotion/styled";
 import { CircularProgress, Toolbar, Typography, useTheme } from "@mui/material";
 import { useEffect } from "react";
-import { useThemeStore, useVendorStore } from "../../zustand/GlobalStore";
+import {
+  useAdminStore,
+  useThemeStore,
+  useVendorStore,
+} from "../../zustand/GlobalStore";
 import Layout from "../Layout";
 import CreateActivityForm from "./CreateActivityForm";
 import CreateIcon from "@mui/icons-material/Create";
@@ -14,6 +18,7 @@ const CreateActivityPage = () => {
   const theme = useTheme();
   const { themes, getThemes, isLoading } = useThemeStore();
   const { vendors, getVendors } = useVendorStore();
+  const { admin } = useAdminStore();
 
   const themesList = themes.data;
 
@@ -52,6 +57,7 @@ const CreateActivityPage = () => {
             themes={themesList}
             theme={theme}
             vendors={vendors}
+            admin={admin}
           ></CreateActivityForm>
         )}
       </Layout>

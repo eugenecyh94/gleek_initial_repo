@@ -30,7 +30,7 @@ const activitySchema = new mongoose.Schema({
   images: {
     type: Array,
   },
-  createdBy: {
+  linkedVendor: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Vendor",
   },
@@ -53,6 +53,10 @@ const activitySchema = new mongoose.Schema({
     enum: Object.values(ActivityApprovalStatusEnum),
     required: true,
     default: ActivityApprovalStatusEnum.PUBLISHED,
+  },
+  adminCreated: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Admin",
   },
   // attributes for activity type "popup"
   isFoodCertPending: { type: Boolean },
