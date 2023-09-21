@@ -11,32 +11,32 @@ import {
   OutlinedInput,
   FormHelperText,
   CircularProgress,
-  Snackbar,
-  Alert,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import LockPersonIcon from "@mui/icons-material/LockPerson";
 import { useNavigate } from "react-router-dom";
-import useClientStore from "../zustand/ClientStore.js";
 import useSnackbarStore from "../zustand/SnackbarStore.js";
 
 import loginImage from "../assets/login.png";
+import { validator } from "../utils/ClientFieldsValidator.js";
 
-const LoginPage = () => {
+const LoginPage = (props) => {
   const theme = useTheme();
-  const { isLoading, clientError, login } = useClientStore();
   const { openSnackbar, closeSnackbar } = useSnackbarStore();
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
+
   const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
+
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
-  const [passwordError, setPasswordError] = useState("");
+  const [errorData, setErrorData] = useState({
+    password: "",
+    email: "",
+  });
+
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const [openError, setOpenError] = useState(false);
 
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
@@ -48,54 +48,40 @@ const LoginPage = () => {
   // Client validator for email and password
   const handleChange = (event) => {
     const { name, value } = event.target;
+
     if (name === "email") {
       setEmail(value);
-      if (value.trim() === "") {
-        setError("Email is required");
-      } else {
-        const re =
-          /^(([^<>()\]\\.,;:\s@"]+(\.[^<>()\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        const result = re.test(String(value).toLowerCase());
-        if (!result) {
-          setError("Invalid Email address format!");
-        } else {
-          setError("");
-        }
-      }
+      const errors = validator({ [name]: value }, name);
+      setErrorData((prevData) => ({
+        ...prevData,
+        [name]: errors[name] || "",
+      }));
     } else if (name === "password") {
       setPassword(value);
-      if (value.trim() === "") {
-        setPasswordError("Password is required");
-      } else {
-        setPasswordError("");
-      }
+      setErrorData((prevData) => ({
+        ...prevData,
+        password: !value ? "Password is required" : "",
+      }));
     }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const responseStatus = await login(email, password);
+      const responseStatus = await props.loginMethod(email, password);
 
       if (responseStatus) {
         openSnackbar("Logged in!", "success");
         navigate("/");
-      } else {
-        setOpenError(true);
       }
     } catch (err) {
       console.error(err);
-      openSnackbar("Invalid login.", "error");
+      openSnackbar(err.response.data.msg, "error");
     }
   };
 
-  const handleClose = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
-    }
-
-    setOpen(false);
-    setOpenError(false);
+  const disableButton = () => {
+    return !Object.values(errorData).every((error) => error === "");
   };
 
   return (
@@ -133,7 +119,7 @@ const LoginPage = () => {
               <LockPersonIcon fontSize="large" color="accent" />
             </Box>
             <Typography color="secondary" variant="h3">
-              Login
+              {props.title}
             </Typography>
           </Box>
 
@@ -149,8 +135,8 @@ const LoginPage = () => {
             onBlur={handleChange}
             label="Email"
             value={email}
-            helperText={error}
-            error={error.length > 0}
+            helperText={errorData.email}
+            error={!!errorData.email}
             sx={{ marginTop: "32px" }}
           ></TextField>
           <FormControl
@@ -160,7 +146,7 @@ const LoginPage = () => {
             variant="outlined"
           >
             <InputLabel
-              error={passwordError.length > 0}
+              error={!!errorData.password}
               htmlFor="outlined-adornment-password"
             >
               Password
@@ -171,7 +157,8 @@ const LoginPage = () => {
               onBlur={handleChange}
               name="password"
               value={password}
-              error={passwordError.length > 0}
+              error={!!errorData.password}
+              helperText={errorData.password}
               type={showPassword ? "text" : "password"}
               endAdornment={
                 <InputAdornment position="end">
@@ -187,30 +174,31 @@ const LoginPage = () => {
               }
               label="Password"
             />
-            {passwordError.length > 0 && (
+            {errorData.password.length > 0 && (
               <FormHelperText error id="my-helper-text">
-                {passwordError}
+                {errorData.password}
               </FormHelperText>
             )}
           </FormControl>
-          {!isLoading && (
+          {!props.loading && (
             <Button
               sx={{ marginTop: "32px" }}
               mt={4}
               variant="contained"
               type="submit"
+              disabled={disableButton()}
             >
               <Typography variant="body1">Login</Typography>
             </Button>
           )}
-          {isLoading && (
+          {props.loading && (
             <CircularProgress sx={{ margin: "auto", marginTop: "32px" }} />
           )}
           <Button
             sx={{ marginTop: "16px" }}
             variant="text"
             onClick={() => {
-              navigate("/register");
+              navigate(props.registerLink);
             }}
           >
             <Typography fontWeight={700} color="secondary" variant="body2">

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   TextField,
@@ -9,9 +9,14 @@ import {
 } from "@mui/material";
 import AccountSidebar from "./AccountSidebar";
 import { useTheme } from "@emotion/react";
+import AxiosConnect from "../../utils/AxiosConnect";
 
 function AccountDetails(props) {
   const [formData, setFormData] = useState();
+  const [newProfilePictureData, setNewProfilePictureData] = useState({
+    file: null,
+    preview: null,
+  });
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -27,14 +32,9 @@ function AccountDetails(props) {
     // }))
   };
 
-  const [newProfilePictureData, setNewProfilePictureData] = useState({
-    file: null,
-    preview: null,
-  });
-
   const handleSelectProfilePicture = (e) => {
-    const allowedTypes = ["image/jpeg", "image/png"];
-
+    const allowedTypes = ["image/jpeg", "image/png", "image/jpeg"];
+    //Can consider implementing file size limit check
     const selectedFile = e.target.files && e.target.files[0];
     if (allowedTypes.includes(selectedFile.type)) {
       console.log("Valid file selected:", selectedFile);
@@ -43,7 +43,7 @@ function AccountDetails(props) {
         preview: URL.createObjectURL(selectedFile),
       });
     } else {
-      alert("Please select a valid PNG or JPEG image.");
+      alert("Please select a valid PNG, JPG or JPEG image.");
       e.target.value = "";
     }
   };
@@ -53,7 +53,9 @@ function AccountDetails(props) {
       console.error("No file has been attached");
       return;
     }
-
+    const formData = new FormData();
+    formData.append("image", newProfilePictureData.file);
+    AxiosConnect.patchMultipart("/gleek/client/updateProfilePicture", formData);
     // TODO: Send image to backen
     console.log(newProfilePictureData.file);
   };

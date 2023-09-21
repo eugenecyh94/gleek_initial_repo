@@ -5,6 +5,7 @@ import {
   ListItemText,
   Link,
   ListItemButton,
+  Alert,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -12,6 +13,7 @@ import Avatar from "@mui/material/Avatar";
 
 import { NavLink } from "react-router-dom";
 import { styled } from "@mui/system";
+import useClientStore from "../../zustand/ClientStore";
 const CustomNavLink = styled(NavLink)(({ theme }) => ({
   "&.active": {
     color: theme.palette.primary.main,
@@ -40,6 +42,9 @@ function AccountSidebar(props) {
   const theme = useTheme();
   const primary = theme.palette.primary.main;
   const tertiary = theme.palette.tertiary.main;
+
+  const { client } = useClientStore();
+
   return (
     <div style={{ width: "100%", height: "100vh" }}>
       <div
@@ -54,11 +59,18 @@ function AccountSidebar(props) {
           sx={{ bgcolor: primary, width: 200, height: 200 }}
           src="https://i.imgur.com/ZTevUo0.png"
         ></Avatar>
-        {/* 
-        <Typography align="center" variant="h6">
-          Account Settings
-        </Typography> */}
       </div>
+      {client?.status === "PENDING" && (
+        <>
+          <Alert severity="warning">
+            Your account is pending review.
+            <p>
+              Booking functionality will be limited, but you can still browse
+              activities.
+            </p>
+          </Alert>
+        </>
+      )}
       <List>
         <CustomListItemButton
           route="/settings/profile"

@@ -3,7 +3,9 @@ import { check } from "express-validator";
 import { postRegister, postLogin } from "../../controller/clientController.js";
 const router = express.Router();
 
-// /gleek/register => POST
+/*
+Note: This file contains the /shop router
+*/
 
 router.post(
   "/register",

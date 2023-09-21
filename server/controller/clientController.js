@@ -43,6 +43,13 @@ const setCookieAndRespond = (res, token, client) => {
       secure: true, // Use secure cookies in production
       path: "/", // Set the path to your application root
     });
+    res.cookie("userRole", "Client", {
+      httpOnly: true,
+      maxAge: 3600000,
+      sameSite: "None",
+      secure: true,
+      path: "/",
+    });
     console.log(client);
     res.status(200).json({ token, client: client });
   } catch (cookieError) {
@@ -71,6 +78,7 @@ export const postRegister = async (req, res) => {
     console.log(
       "clientController postRegister(): acceptTermsAndConditions",
       acceptTermsAndConditions,
+      acceptTermsAndConditions,
     );
 
     if (await clientExists(newClient.email)) {
@@ -88,6 +96,7 @@ export const postRegister = async (req, res) => {
     await createClientConsent(
       createdClient.id,
       acceptTermsAndConditions,
+      session,
       session,
     );
 
@@ -111,48 +120,36 @@ export const postLogin = async (req, res) => {
     // 422 status due to validation errors
     return res.status(422).json({ errors: errors.array() });
   }
+
   try {
     const { email, password } = req.body;
     const client = await Client.findOne({ email });
+    if (!client) return res.status(404).send({ msg: "Invalid Credentials." });
 
-    if (client && (await bcrypt.compare(password, client.password))) {
-      const payload = {
-        client: {
-          id: client.id,
-          email: client.email,
-        },
-      };
-      jwt.sign(payload, secret, { expiresIn: 360000 }, (err, token) => {
-        if (err) throw err;
-        // Set the JWT token as a cookie
-        try {
-          res.cookie("token", token, {
-            httpOnly: true,
-            maxAge: 3600000, // Expires in 1 hour (milliseconds)
-            sameSite: "None", // Adjust this based on your security requirements
-            secure: true, // Use secure cookies in production
-            path: "/", // Set the path to your application root
-          });
-        } catch (cookieError) {
-          console.error(cookieError);
-          return res.status(500).send("Error setting cookie");
-        }
-        const { password, ...clientWithoutPassword } = client.toObject();
+    const isSamePassword = await bcrypt.compare(password, client.password);
 
-        // console.log(clientWithoutPassword)
-        res.status(200).json({ token, client: clientWithoutPassword });
-      });
+    if (client && isSamePassword) {
+      // If client REJECTED, send error message.
+      if (client.status === "REJECTED") {
+        return res
+          .status(400)
+          .send({ msg: "Your registration has been rejected." });
+      }
+
+      const token = await generateJwtToken(client.id);
+      const { password, ...clientWithoutPassword } = client.toObject();
+
+      setCookieAndRespond(res, token, clientWithoutPassword);
     } else {
-      res.status(400).send("Invalid Credentials");
+      return res.status(400).send({ msg: "Invalid Credentials." });
     }
   } catch (err) {
-    return res.status(500).send("Server Error");
+    return res.status(500).send({ msg: "Server Error" });
   }
 };
 
 export const validateToken = async (req, res) => {
   const token = req.cookies.token;
-
   if (!token) {
     return res.status(403).send("A token is required for authentication");
   }
@@ -161,12 +158,11 @@ export const validateToken = async (req, res) => {
     const decoded = jwt.verify(token, secret);
 
     const client = await Client.findById(decoded.client.id);
-
     if (!client) {
       return res.status(401).send("Client not found");
     }
     const { password, ...clientWithoutPassword } = client.toObject();
-    res.status(200).json({ token, client: clientWithoutPassword });
+    return res.status(200).json({ token, client: clientWithoutPassword });
   } catch (err) {
     // If verification fails (e.g., due to an invalid or expired token), send an error response
     return res.status(401).send("Invalid Token");
@@ -175,6 +171,7 @@ export const validateToken = async (req, res) => {
 
 export const clearCookies = async (req, res) => {
   res.clearCookie("token");
+  res.clearCookie("userRole");
   res.status(200).end();
 };
 
@@ -206,6 +203,7 @@ export const postChangePassword = async (req, res) => {
       { _id: client.id },
       { password: hashed },
       { new: true },
+      { new: true },
     );
 
     return res.status(200).json("Password successfully changed.");
@@ -228,7 +226,7 @@ export const updateClientAccountDetails = async (req, res) => {
     const body = req.body;
     console.log("updateClientAccountDetails: body", body);
 
-    // remove passwword and email in case it is sent along in the body
+    // remove password and email in case it is sent along in the body
     const { password, email, ...updateData } = body;
 
     console.log("updateClientAccountDetails: UpdateData", updateData);
@@ -287,7 +285,7 @@ export const updateConsentSettings = async (req, res) => {
 };
 
 /*
- * Change password
+ * Get consent settings
  */
 export const getConsentSettings = async (req, res) => {
   try {
@@ -300,6 +298,41 @@ export const getConsentSettings = async (req, res) => {
     res.status(200).json({
       msg: "Retrieved consent settings.",
       consent: settings,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json("Server Error");
+  }
+};
+
+export const updateProfilePicture = async (req, res) => {
+  try {
+    const client = req.user;
+    const reqFile = req.file;
+    console.log("req client", client);
+    console.log("req file", reqFile);
+
+    let fileS3Location;
+
+    if (reqFile === undefined) {
+      console.log("No image files uploaded");
+    } else {
+      console.log("Retrieving uploaded images url");
+      fileS3Location = req.file.location;
+    }
+
+    console.log(fileS3Location);
+    console.log("client id", client._id);
+
+    const updatedClient = await Client.findOneAndUpdate(
+      { _id: client._id },
+      { photo: fileS3Location },
+      { new: true },
+    );
+    res.status(200).json({
+      success: true,
+      message: "Your profile picture is successfully updated!",
+      updatedProfilePicLink: updatedClient.photo,
     });
   } catch (e) {
     console.error(e);

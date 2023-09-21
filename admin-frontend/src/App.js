@@ -9,6 +9,7 @@ import ChangePassword from "./components/ChangePassword.jsx";
 import ResetPassword from "./components/ResetPassword";
 import ViewAllVendors from "./components/vendor/ViewAllVendors";
 import ViewAllClients from "./components/client/ViewAllClients";
+import ClientDetails from "./components/client/ClientDetails";
 import CreateActivityPage from "./components/activity/CreateActivityPage";
 import ImageAndFileUpload from "./components/activityCreation/ImageAndFileUpload";
 
@@ -69,6 +70,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <ViewAllClients />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewClient/:clientId"
+            element={
+              <ProtectedRoute>
+                <ClientDetails />
               </ProtectedRoute>
             }
           />
