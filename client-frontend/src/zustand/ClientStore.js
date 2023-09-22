@@ -55,7 +55,7 @@ const useClientStore = create((set) => ({
       return response;
     } catch (error) {
       console.error(error);
-      alert(error.response.data);
+      throw error;
     }
   },
   resetPassword: async (newPassword) => {
@@ -119,13 +119,12 @@ const useClientStore = create((set) => ({
     }
   },
   recoverPassword: async (email) => {
-   
     try {
       const response = await AxiosConnect.post("/gleek/auth/recoverPassword", {
         email: email,
       });
-      console.log(response)
-      return response
+      console.log(response);
+      return response;
     } catch (error) {
       console.log(error);
       throw error;

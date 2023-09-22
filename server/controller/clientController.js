@@ -212,7 +212,7 @@ export const validateToken = async (req, res) => {
   } catch (err) {
     console.error(err);
     // If verification fails (e.g., due to an invalid or expired token), send an error response
-    return res.status(401).send("Invalid Token???");
+    return res.status(401).send("Invalid Token");
   }
 };
 
@@ -241,7 +241,9 @@ export const postChangePassword = async (req, res) => {
     const isSame = await bcrypt.compare(oldPassword, client.password);
 
     if (!isSame)
-      return res.status(401).json("Old password entered is incorrect.");
+      return res
+        .status(401)
+        .json({ msg: "Old password entered is incorrect." });
 
     const salt = await bcrypt.genSalt(10);
     const hashed = await bcrypt.hash(newPassword, salt);
@@ -252,10 +254,10 @@ export const postChangePassword = async (req, res) => {
       { new: true },
     );
 
-    return res.status(200).json("Password successfully changed.");
+    return res.status(200).json({ msg: "Password successfully changed." });
   } catch (err) {
     console.error(err); // Log the error
-    return res.status(500).send("Server Error");
+    return res.status(500).send({ msg: "Server Error" });
   }
 };
 

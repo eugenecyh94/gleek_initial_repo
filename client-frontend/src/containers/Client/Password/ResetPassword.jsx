@@ -1,42 +1,34 @@
-import React, { useState } from "react";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import {
   Box,
-  TextField,
   Button,
-  Typography,
-  InputAdornment,
-  IconButton,
   FormControl,
+  FormHelperText,
+  IconButton,
+  InputAdornment,
   InputLabel,
   OutlinedInput,
-  FormHelperText,
-  Toolbar,
+  Typography
 } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { useTheme } from "@mui/material/styles";
-import LockPersonIcon from "@mui/icons-material/LockPerson";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useClientStore from "../../../zustand/ClientStore";
+import useSnackbarStore from "../../../zustand/SnackbarStore";
 
 const ResetPassword = () => {
-  // themes
-  const theme = useTheme();
-  const secondary = theme.palette.secondary.main;
-  const primary = theme.palette.primary.main;
-  // states
-  // user input
+  const { openSnackbar } = useSnackbarStore();
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordVerify, setShowPasswordVerify] = useState(false);
   const [formData, setFormData] = useState({
     password: "",
     passwordVerify: "",
   });
-  // error
+
   const [errorData, setErrorData] = useState({
     password: "",
     passwordVerify: "",
   });
-  // functions
+
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const handleClickShowPasswordVerify = () =>
     setShowPasswordVerify((show) => !show);
@@ -63,24 +55,28 @@ const ResetPassword = () => {
   };
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
-    for (const fieldName in formData) {
-      let errors = validator(formData, fieldName);
-      setErrorData((prevData) => ({
-        ...prevData,
-        [fieldName]: errors[fieldName] || "",
-      }));
-    }
+    try {
+      event.preventDefault();
 
-    if (!Object.values(errorData).every((error) => error === "")) {
-      return;
-    }
+      for (const fieldName in formData) {
+        let errors = validator(formData, fieldName);
+        setErrorData((prevData) => ({
+          ...prevData,
+          [fieldName]: errors[fieldName] || "",
+        }));
+      }
 
-    const responseStatus = await resetPassword(formData.password);
-    if (responseStatus) {
-      navigate("/");
-    } else {
-      console.log(responseStatus);
+      if (!Object.values(errorData).every((error) => error === "")) {
+        return;
+      }
+
+      const response = await resetPassword(formData.password);
+      if (response) {
+        openSnackbar(response.data.msg, "success");
+        navigate("/");
+      }
+    } catch (err) {
+      openSnackbar(err.response.data.msg, "error");
     }
   };
 

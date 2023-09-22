@@ -1,10 +1,12 @@
+import { Box, Button, Grid, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
-import { Box, TextField, Button, Typography, Grid } from "@mui/material";
-import AccountSidebar from "./AccountSidebar";
 import useClientStore from "../../../zustand/ClientStore";
+import useSnackbarStore from "../../../zustand/SnackbarStore";
+import AccountSidebar from "./AccountSidebar";
 
 function PasswordChange(props) {
   const { changePassword } = useClientStore();
+  const { openSnackbar } = useSnackbarStore();
   const mockedData = {
     oldPassword: "",
     newPassword: "",
@@ -31,9 +33,18 @@ function PasswordChange(props) {
   const isFormValid =
     formData.oldPassword.trim() !== "" && formData.newPassword.trim() !== "";
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    changePassword(formData.oldPassword, formData.newPassword);
+  const handleSubmit = async (e) => {
+    try {
+      e.preventDefault();
+      const response = await changePassword(
+        formData.oldPassword,
+        formData.newPassword,
+      );
+
+      openSnackbar(response.data.msg);
+    } catch (err) {
+      openSnackbar(err.response.data.msg, "error");
+    }
   };
 
   const validatePassword = (data, errors, fieldName) => {
