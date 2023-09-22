@@ -12,6 +12,7 @@ import { useTheme } from "@emotion/react";
 import AxiosConnect from "../../utils/AxiosConnect";
 import useVendorStore from "../../zustand/VendorStore";
 import useSnackbarStore from "../../zustand/SnackbarStore";
+
 function AccountDetails(props) {
   const { setVendor } = useVendorStore();
   const [formData, setFormData] = useState();
@@ -51,6 +52,7 @@ function AccountDetails(props) {
   };
 
   const handleUploadProfilePicture = async (event) => {
+    event.preventDefault()
     if (!newProfilePictureData.file) {
       console.error("No file has been attached");
       return;
