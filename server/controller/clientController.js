@@ -11,6 +11,7 @@ import {
 } from "../service/clientService.js";
 import {
   createClientConsent,
+  getClientConsent,
   updateConsent,
 } from "../service/consentService.js";
 import sendMail from "../util/sendMail.js";
@@ -338,14 +339,10 @@ export const updateConsentSettings = async (req, res) => {
     }
 
     const body = req.body;
-    console.log("updatePrivacySettings: body", body);
 
     const updateData = body;
 
     const updatedConsent = await updateConsent(client, updateData);
-
-    console.log("updatePrivacySettings: Updated consent", updatedConsent);
-
     res.status(200).json({
       msg: "Your privacy settings has been successfully updated!",
       consent: updatedConsent,
