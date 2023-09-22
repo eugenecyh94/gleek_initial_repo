@@ -18,13 +18,13 @@ import AccountDetails from "./components/profile/AccountDetails";
 import AddAdminPage from "./components/admin/AddAdminPage";
 
 function App() {
-   return (
-      <div>
-        <SocketConnection />
-         <Layout>
-            <Routes>
-               <Route exact path="/" element={<Home />} />
-               <Route
+  return (
+    <div>
+      <SocketConnection />
+      <Layout>
+        <Routes>
+          <Route exact path="/" element={<Home />} />
+          <Route
             exact
             path="/createActivity"
             element={
@@ -61,33 +61,42 @@ function App() {
             }
           />
           <Route
-                  exact
-                  path="/manageProfile/changePassword"
-                  element={
-                     <ProtectedRoute>
-                        <ChangePassword />
-                     </ProtectedRoute>
-                  }
-               />
-               <Route
-                  exact
-                  path="/manageProfile"
-                  element={
-                     <ProtectedRoute>
-                        <AccountDetails />
-                     </ProtectedRoute>
-                  }
-               />
-               <Route
-                  exact
-                  path="/adminTeam/addAdmin"
-                  element={
-                     <ProtectedRoute>
-                        <AddAdminPage />
-                     </ProtectedRoute>
-                  }
-               />
-               <Route
+            exact
+            path="/manageProfile/changePassword"
+            element={
+              <ProtectedRoute>
+                <ChangePassword />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/manageProfile"
+            element={
+              <ProtectedRoute>
+                <AccountDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/adminTeam/addAdmin"
+            element={
+              <ProtectedRoute>
+                <AddAdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewAllClients"
+            element={
+              <ProtectedRoute>
+                <ViewAllClients />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             exact
             path="/viewClient/:clientId"
             element={
@@ -104,10 +113,10 @@ function App() {
               <ImageAndFileUpload limit={5} name="test" size={2000000} />
             }
           />
-            </Routes>
-         </Layout>
-      </div>
-   );
+        </Routes>
+      </Layout>
+    </div>
+  );
 }
 
 export default App;
