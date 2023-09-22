@@ -20,6 +20,8 @@ import ErrorPage from "./containers/ErrorPage";
 import useVendorStore from "./zustand/VendorStore";
 import VendorProtectedRoute from "./components/Routes/VendorProtectedRoute";
 import ActivitiesPage from "./containers/Vendor/ActivitiesPage";
+import ResetPassword from "./containers/Client/Password/ResetPassword";
+import ForgotPassword from "./containers/Client/Password/ClientForgotPassword";
 
 function App() {
   const { isLoading, clientError, login } = useClientStore();
@@ -119,11 +121,20 @@ function App() {
                 error={clientError}
                 title="Client Login"
                 registerLink="/register"
+                forgotPasswordLink="/client/forgotPassword"
                 loginMethod={login}
               />
             }
           />
           <Route path="/register" element={<RegisterPage />} />
+          <Route exact path="client/resetPassword" element={<ResetPassword />} />
+          <Route
+            exact
+            path="/client/forgotPassword"
+            element={<ForgotPassword />}
+          />
+
+          {/* Vendor routes */}
           <Route
             path="/vendor/login"
             element={
