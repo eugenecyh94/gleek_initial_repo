@@ -1,10 +1,15 @@
 import express from "express";
 import { check } from "express-validator";
-import { getAllVendorTypes } from "../../controller/vendorController.js";
+import {
+  getAllVendorTypes,
+  updateCompanyLogo,
+} from "../../controller/vendorController.js";
 import { postRegister } from "../../controller/vendorController.js";
 import { validateToken } from "../../controller/vendorController.js";
 import { postLogin } from "../../controller/vendorController.js";
 import { clearCookies } from "../../controller/vendorController.js";
+import verifyToken from "../../middleware/vendorAuth.js";
+import { uploadS3CompanyLogo } from "../../middleware/multer.js";
 const router = express.Router();
 
 /*
@@ -33,4 +38,10 @@ router.post(
 );
 router.post("/validateToken", validateToken);
 router.get("/logout", clearCookies);
+router.patch(
+  "/updateCompanyLogo",
+  verifyToken,
+  uploadS3CompanyLogo.single("image"),
+  updateCompanyLogo,
+);
 export default router;

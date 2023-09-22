@@ -18,7 +18,6 @@ import { useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 import useClientStore from "../zustand/ClientStore.js";
-import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import SearchBar from "./SearchBar/SearchBar.jsx";
 import SearchIcon from "@mui/icons-material/Search";
 import useGlobalStore from "../zustand/GlobalStore.js";
@@ -256,7 +255,11 @@ function NavBar(props) {
                 color="accent"
                 sx={{ marginRight: "16px" }}
               >
-                <Avatar alt={client.name} src={client.preSignedPhoto} />
+                {client ? (
+                  <Avatar alt={client.name} src={client.preSignedPhoto} />
+                ) : (
+                  <Avatar alt="Empty Avatar" />
+                )}
               </IconButton>
               <Menu
                 id="authenticated-menu"
@@ -327,7 +330,11 @@ function NavBar(props) {
                 color="accent"
                 sx={{ marginRight: "16px" }}
               >
-                <AccountBoxIcon />
+                {vendor ? (
+                  <Avatar alt={vendor.name} src={vendor.preSignedPhoto} />
+                ) : (
+                  <Avatar alt="Empty Avatar" />
+                )}
               </IconButton>
               <Menu
                 id="vendor-authenticated-menu"

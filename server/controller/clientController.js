@@ -134,7 +134,7 @@ export const postLogin = async (req, res) => {
       if (client.status === "REJECTED") {
         return res
           .status(400)
-          .send({ msg: "Your registration has been rejected." });
+          .send({ msg: "Your Client registration has been rejected." });
       }
 
       if (client.photo) {

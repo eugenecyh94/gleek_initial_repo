@@ -19,7 +19,8 @@ import ErrorPage from "./containers/ErrorPage";
 import useVendorStore from "./zustand/VendorStore";
 import VendorProtectedRoute from "./components/Routes/VendorProtectedRoute";
 import ActivitiesPage from "./containers/Vendor/ActivitiesPage";
-
+import AccountDetailsVendor from "./containers/Vendor/AccountDetailsVendor";
+import ProfilePictureVendor from "./containers/Vendor/ProfilePictureVendor";
 function App() {
   const { isLoading, clientError, login } = useClientStore();
   const { isLoadingVendor, vendorError, loginVendor } = useVendorStore();
@@ -126,6 +127,30 @@ function App() {
             element={
               <VendorProtectedRoute>
                 <ActivitiesPage />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/settings"
+            element={
+              <VendorProtectedRoute>
+                <Navigate to="/vendor/settings/profile" />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/settings/profile"
+            element={
+              <VendorProtectedRoute>
+                <AccountDetailsVendor />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/settings/picture"
+            element={
+              <VendorProtectedRoute>
+                <ProfilePictureVendor />
               </VendorProtectedRoute>
             }
           />
