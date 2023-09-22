@@ -19,6 +19,7 @@ export const updateConsent = async (clientId, updateData) => {
     { client: clientId },
     {
       receiveMarketing: updateData.receiveMarketing,
+      receiveEmails: updateData.receiveEmails,
       lastUpdated: Date.now(),
     },
     {

@@ -23,7 +23,7 @@ function Privacy(props) {
   useEffect(() => {
     const subscribeConsent = async () => {
       try {
-        const response = await AxiosConnect.patch("/gleek/client/consent");
+        const response = await AxiosConnect.get("/gleek/client/consent");
 
         setSettings(response.data.consent || {}); // Provide an initial value here
       } catch (err) {
@@ -110,7 +110,7 @@ function Privacy(props) {
                 />
               }
               label="I agree to receive email updates from Gleek."
-              disabled
+              
             />
             <FormControlLabel
               control={
