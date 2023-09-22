@@ -15,6 +15,9 @@ const theme = createTheme({
     dark_purple: {
       main: "#3D246C",
     },
+    grey: {
+      pale_grey: "#FAFAFA",
+    },
   },
   typography: {
     fontFamily: "Fredoka",

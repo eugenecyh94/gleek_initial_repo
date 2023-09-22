@@ -1,9 +1,27 @@
 import styled from "@emotion/styled";
+import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
-import { InputBase, alpha } from "@mui/material";
+import { Button, InputBase, Typography, alpha } from "@mui/material";
 import Box from "@mui/material/Box";
 import { DataGrid, GridToolbarFilterButton } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+const StyledButton = styled(Button)`
+  padding-left: 6px;
+`;
+
+const StyledDiv = styled("div")(({ theme }) => ({
+  position: "relative",
+  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.light_purple.main, 0.15),
+  },
+  marginRight: theme.spacing(2),
+  marginLeft: 0,
+  marginTop: 16,
+  marginBottom: 16,
+}));
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -43,6 +61,10 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
+const WrappedTextCell = (params) => {
+  return <div style={{ whiteSpace: "normal" }}>{params.value}</div>;
+};
+
 const columns = [
   {
     field: "title",
@@ -53,14 +75,22 @@ const columns = [
     field: "activityType",
     headerName: "Activity Type",
     flex: 1,
+    renderCell: (params) => <WrappedTextCell {...params} />,
   },
   {
     field: "theme",
     headerName: "Theme",
     flex: 1,
     valueGetter: (params) => {
-      const p = params.value;
-      return p.name;
+      return params.value?.name;
+    },
+  },
+  {
+    field: "subtheme",
+    headerName: "Learning Topics",
+    flex: 1,
+    valueGetter: (params) => {
+      return params.value.map((x) => x.name);
     },
   },
   {
@@ -87,8 +117,8 @@ const columns = [
     },
     valueGetter: (params) => {
       const p = params.value;
-      p.sort((a, b) => a.pricePerPax - b.pricePerPax);
-      return p[0].pricePerPax;
+      p.sort((a, b) => a?.pricePerPax - b?.pricePerPax);
+      return p[0]?.pricePerPax;
     },
   },
   {
@@ -100,8 +130,8 @@ const columns = [
     },
     valueGetter: (params) => {
       const p = params.row.activityPricingRules;
-      p.sort((a, b) => b.pricePerPax - a.pricePerPax);
-      return p[0].pricePerPax;
+      p.sort((a, b) => b?.pricePerPax - a?.pricePerPax);
+      return p[0]?.pricePerPax;
     },
   },
   {
@@ -121,6 +151,7 @@ const columns = [
 ];
 
 const ActivityListTable = (allActivities) => {
+  const navigate = useNavigate();
   const [searchedRows, setSearchedRows] = useState([]);
   useEffect(() => {
     setSearchedRows(allActivities.allActivities.data);
@@ -133,18 +164,42 @@ const ActivityListTable = (allActivities) => {
     setSearchedRows(filteredRows);
   };
 
+  const handleCreateButtonClick = () => {
+    navigate("/createActivity");
+  };
+
   return (
     <Box>
-      <Search>
-        <SearchIconWrapper>
-          <SearchIcon />
-        </SearchIconWrapper>
-        <StyledInputBase
-          placeholder="Find an activity…"
-          inputProps={{ "aria-label": "search" }}
-          onChange={(event) => requestSearch(event.target.value)}
-        />
-      </Search>
+      <div style={{ display: "flex" }}>
+        <Search>
+          <SearchIconWrapper>
+            <SearchIcon />
+          </SearchIconWrapper>
+          <StyledInputBase
+            placeholder="Find an activity…"
+            inputProps={{ "aria-label": "search" }}
+            onChange={(event) => requestSearch(event.target.value)}
+          />
+        </Search>
+        <StyledDiv>
+          <StyledButton
+            variant="contained"
+            color="light_purple"
+            onClick={handleCreateButtonClick}
+          >
+            <Typography
+              style={{
+                display: "flex",
+              }}
+              component="div"
+              color="white"
+            >
+              <AddIcon />
+              Create
+            </Typography>
+          </StyledButton>
+        </StyledDiv>
+      </div>
       <div style={{ height: 500, width: "100%" }}>
         <DataGrid
           initialState={{
@@ -158,6 +213,7 @@ const ActivityListTable = (allActivities) => {
           slots={{
             toolbar: GridToolbarFilterButton,
           }}
+          getRowHeight={() => "auto"}
         />
       </div>
     </Box>
