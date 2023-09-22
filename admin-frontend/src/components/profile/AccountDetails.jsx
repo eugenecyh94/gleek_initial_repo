@@ -13,7 +13,6 @@ import dayjs from "dayjs";
 import MainBodyContainer from "../common/MainBodyContainer";
 
 function AccountDetails(props) {
-<<<<<<< HEAD
    const { admin } = useAdminStore();
    return (
       <MainBodyContainer hasBackButton={false} breadcrumbNames={[]} currentBreadcrumbName={"Account Details"}>
