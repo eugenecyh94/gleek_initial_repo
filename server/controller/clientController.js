@@ -15,6 +15,7 @@ import {
 } from "../service/consentService.js";
 import sendMail from "../util/sendMail.js";
 import { s3ImageGetService } from "../service/s3ImageGetService.js";
+import { createClientWelcomeMailOptions } from "../util/sendMailOptions.js";
 
 const secret = process.env.JWT_SECRET_ClIENT;
 
@@ -63,6 +64,8 @@ const setCookieAndRespond = (res, token, client) => {
 /**
  * Handles user registration by creating a new client and associated consent.
  * If an error occurs during the process, the transaction will be rolled back.
+ * Sends welcome to Gleek email.
+ * Sends verify email email.
  */
 export const postRegister = async (req, res) => {
   console.log("clientController postRegister(): req.body", req.body);
@@ -86,7 +89,6 @@ export const postRegister = async (req, res) => {
 
     const createdClient = await createClient(newClient, session);
 
-    // Encrypt the user's password and save it to the database
     await encryptUserPassword(createdClient, newClient.password);
 
     // Create the Consent model and link to Client
@@ -107,7 +109,9 @@ export const postRegister = async (req, res) => {
       text: message,
     };
 
+    sendMail(createClientWelcomeMailOptions(createdClient));
     sendMail(options);
+
     await session.commitTransaction();
     session.endSession();
 
@@ -397,7 +401,6 @@ export const verifyEmail = async (req, res) => {
     });
   } catch (err) {
     if (err.name === "JsonWebTokenError") {
-   
       return res.status(200).json({
         status: "token-expired",
         msg: "Token has expired. Please request a new verification email.",
@@ -429,7 +432,7 @@ export const resendVerifyEmail = async (req, res) => {
       msg: "Verification email resent.",
     });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     return res.status(500).json({ status: "error", msg: "Server Error" });
   }
 };
