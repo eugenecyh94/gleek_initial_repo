@@ -15,7 +15,7 @@ const Layout = ({ children }) => {
       <Grid xs={12}>
         <HomePageNavBar />
       </Grid>
-      {authenticated && <Grid xs={navBarColumn}>{/*<SideNavBar />*/}</Grid>}
+      {authenticated && <Grid xs={navBarColumn}><SideNavBar /></Grid>}
       <Grid xs={mainContentColumn}>
         <Box
           flex={1}
