@@ -12,6 +12,7 @@ import ViewAllClients from "./components/client/ViewAllClients";
 import ClientDetails from "./components/client/ClientDetails";
 import CreateActivityPage from "./components/activity/CreateActivityPage";
 import ImageAndFileUpload from "./components/activityCreation/ImageAndFileUpload";
+import CreateVendorPage from "./components/vendor/CreateVendorPage";
 import SocketConnection from "./utils/SocketConnection";
 import ForgotPassword from "./components/ForgotPassword";
 import AccountDetails from "./components/profile/AccountDetails";
@@ -107,6 +108,15 @@ function App() {
                         <ViewAllAdmins />
                      </ProtectedRoute>
                   }
+               />
+              <Route
+                exact
+                path="/viewAllClients"
+                element={
+                <ProtectedRoute>
+                  <ViewAllClients />
+                </ProtectedRoute>
+                }
                />
                {/*for testing image upload component*/}
                <Route

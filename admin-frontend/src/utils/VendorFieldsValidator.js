@@ -5,7 +5,7 @@ import {
   validatePhoneNumber,
   validatePassword,
   validatePasswordVerify,
-} from "./ClientFieldsValidator";
+} from "./FieldsValidator";
 export const validator = (formData, fieldName) => {
   let errors = {};
   switch (fieldName) {
@@ -17,7 +17,7 @@ export const validator = (formData, fieldName) => {
       break;
     case "customCompanyType":
       validateIfCustomCompanyTypeIsRequired(
-        formData["vendorType"],
+        formData["companyUEN"],
         formData[fieldName],
         errors,
         fieldName,
@@ -44,12 +44,6 @@ export const validator = (formData, fieldName) => {
     case "password":
       validatePassword(formData[fieldName], errors, fieldName);
       break;
-    case "oldPassword":
-      validateIsRequired(formData[fieldName], errors, fieldName);
-      break;
-    case "newPassword":
-      validatePassword(formData[fieldName], errors, fieldName);
-      break;
     case "passwordVerify":
       validatePasswordVerify(
         formData[fieldName],
@@ -64,12 +58,12 @@ export const validator = (formData, fieldName) => {
 };
 
 export const validateIfCustomCompanyTypeIsRequired = (
-  vendorType,
+  uen,
   data,
   errors,
   fieldName,
 ) => {
-  if (vendorType === "Other") {
+  if (uen === "Other") {
     if (data === "") {
       errors[fieldName] = `${fieldName} is required`;
     }

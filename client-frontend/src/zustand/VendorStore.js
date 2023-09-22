@@ -76,6 +76,17 @@ const useVendorStore = create((set) => ({
       console.error(error);
     }
   },
+  changePassword: async (oldPassword, newPassword) => {
+    try {
+      await AxiosConnect.post("/gleek/vendor/changePassword", {
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+      });
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  },
 }));
 
 export default useVendorStore;

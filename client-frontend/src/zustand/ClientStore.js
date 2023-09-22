@@ -52,10 +52,9 @@ const useClientStore = create((set) => ({
         oldPassword: oldPassword,
         newPassword: newPassword,
       });
-      alert("Password changed successfully.");
+      return true;
     } catch (error) {
-      console.error(error);
-      alert(error.response.data);
+      throw error;
     }
   },
 
@@ -89,6 +88,21 @@ const useClientStore = create((set) => ({
       }, 500);
       return true;
     } catch (error) {
+      throw error;
+    }
+  },
+  verifyEmail: async (token) => {
+    try {
+      const response = await AxiosConnect.get(
+        `/gleek/client/verifyEmail/${token}`,
+      );
+
+      if (response.data.status === "success") {
+        set({ client: response.data.client });
+      }
+      return response;
+    } catch (error) {
+      console.log(error);
       throw error;
     }
   },

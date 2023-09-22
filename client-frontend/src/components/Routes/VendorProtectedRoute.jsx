@@ -28,7 +28,7 @@ const VendorProtectedRoute = ({ children }) => {
     };
 
     validateToken();
-  }, [vendor]);
+  }, []);
 
   if (isLoading) {
     return null;

@@ -13,7 +13,13 @@ import {
   createClientConsent,
   updateConsent,
 } from "../service/consentService.js";
+import sendMail from "../util/sendMail.js";
 import { s3ImageGetService } from "../service/s3ImageGetService.js";
+import {
+  createClientWelcomeMailOptions,
+  createResendVerifyEmailOptions,
+  createVerifyEmailOptions,
+} from "../util/sendMailOptions.js";
 
 const secret = process.env.JWT_SECRET_ClIENT;
 
@@ -62,6 +68,8 @@ const setCookieAndRespond = (res, token, client) => {
 /**
  * Handles user registration by creating a new client and associated consent.
  * If an error occurs during the process, the transaction will be rolled back.
+ * Sends welcome to Gleek email.
+ * Sends verify email email.
  */
 export const postRegister = async (req, res) => {
   console.log("clientController postRegister(): req.body", req.body);
@@ -76,11 +84,6 @@ export const postRegister = async (req, res) => {
     }
 
     const { acceptTermsAndConditions, ...newClient } = req.body;
-    console.log(
-      "clientController postRegister(): acceptTermsAndConditions",
-      acceptTermsAndConditions,
-      acceptTermsAndConditions,
-    );
 
     if (await clientExists(newClient.email)) {
       return res.status(409).json({
@@ -90,7 +93,6 @@ export const postRegister = async (req, res) => {
 
     const createdClient = await createClient(newClient, session);
 
-    // Encrypt the user's password and save it to the database
     await encryptUserPassword(createdClient, newClient.password);
 
     // Create the Consent model and link to Client
@@ -102,8 +104,13 @@ export const postRegister = async (req, res) => {
     );
 
     const token = await generateJwtToken(createdClient.id);
+
     await session.commitTransaction();
+
+    sendMail(createClientWelcomeMailOptions(createdClient));
+    sendMail(createVerifyEmailOptions(createdClient, token));
     session.endSession();
+
     const { password, ...clientWithoutPassword } = createdClient.toObject();
     setCookieAndRespond(res, token, clientWithoutPassword);
   } catch (err) {
@@ -134,7 +141,7 @@ export const postLogin = async (req, res) => {
       if (client.status === "REJECTED") {
         return res
           .status(400)
-          .send({ msg: "Your registration has been rejected." });
+          .send({ msg: "Your Client registration has been rejected." });
       }
 
       if (client.photo) {
@@ -163,7 +170,6 @@ export const validateToken = async (req, res) => {
   try {
     const decoded = jwt.verify(token, secret);
     const client = await Client.findById(decoded.client.id);
-
     if (!client) {
       return res.status(401).send("Client not found");
     }
@@ -215,7 +221,6 @@ export const postChangePassword = async (req, res) => {
     const updatedClient = await Client.findOneAndUpdate(
       { _id: client.id },
       { password: hashed },
-      { new: true },
       { new: true },
     );
 
@@ -342,13 +347,82 @@ export const updateProfilePicture = async (req, res) => {
       { photo: fileS3Location },
       { new: true },
     );
-    res.status(200).json({
+
+    if (updatedClient.photo) {
+      const preSignedUrl = await s3ImageGetService(updatedClient.photo);
+      updatedClient.preSignedPhoto = preSignedUrl;
+    }
+
+    console.log(updatedClient);
+
+    return res.status(200).json({
       success: true,
       message: "Your profile picture is successfully updated!",
-      updatedProfilePicLink: updatedClient.photo,
+      client: updatedClient,
     });
   } catch (e) {
     console.error(e);
     res.status(500).json("Server Error");
+  }
+};
+
+/*
+ * Client clicks the link in their email to verify
+ */
+export const verifyEmail = async (req, res) => {
+  const token = req.params.token;
+
+  if (!token) {
+    return res
+      .status(403)
+      .json({ status: "error", message: "Token Not Found!" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, secret);
+    const requestorClient = await Client.findById(decoded.client.id);
+
+    if (requestorClient.verified) {
+      return res.status(200).json({
+        status: "already-verified",
+        msg: "Your email has already been verified!",
+      });
+    }
+
+    requestorClient.verified = true;
+    await requestorClient.save();
+
+    return res.status(200).json({
+      status: "success",
+      msg: "Client email has been verified. Welcome to Gleek!",
+      client: requestorClient,
+    });
+  } catch (err) {
+    if (err.name === "JsonWebTokenError") {
+      return res.status(200).json({
+        status: "token-expired",
+        msg: "Token has expired. Please request a new verification email.",
+      });
+    }
+
+    console.error("Token verification error:", err);
+    return res.status(500).json({ status: "error", msg: "Server Error" });
+  }
+};
+
+export const resendVerifyEmail = async (req, res) => {
+  try {
+    const client = req.user;
+
+    const token = await generateJwtToken(client.id);
+
+    sendMail(createResendVerifyEmailOptions(client, token));
+
+    return res.status(200).json({
+      msg: "Verification email resent.",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ status: "error", msg: "Server Error" });
   }
 };

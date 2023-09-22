@@ -10,7 +10,7 @@ import {
 import { validationResult } from "express-validator";
 import { createVendorConsent } from "../service/consentService.js";
 import bcrypt from "bcryptjs";
-
+import { s3ImageGetService } from "../service/s3ImageGetService.js";
 const secret = process.env.JWT_SECRET_VENDOR;
 // sample account: companyEmail = "test@gmail.com", password = "7655Th#123"
 
@@ -111,6 +111,9 @@ export const postRegister = async (req, res) => {
   }
 };
 
+/*
+Login
+*/
 export const postLogin = async (req, res) => {
   const errors = validationResult(req);
 
@@ -120,52 +123,28 @@ export const postLogin = async (req, res) => {
   }
   try {
     const { companyEmail, password } = req.body;
-
     const vendor = await VendorModel.findOne({ companyEmail });
-    const response = await bcrypt.compare(password, vendor.password);
-    console.log(response);
-    if (vendor && (await bcrypt.compare(password, vendor.password))) {
-      const payload = {
-        vendor: {
-          id: vendor.id,
-          companyEmail: vendor.companyEmail,
-        },
-      };
-      jwt.sign(payload, secret, { expiresIn: 360000 }, (err, token) => {
-        if (err) throw err;
-        // Set the JWT token as a cookie
-        try {
-          res.cookie("token", token, {
-            httpOnly: true,
-            maxAge: 3600000, // Expires in 1 hour (milliseconds)
-            sameSite: "None", // Adjust this based on your security requirements
-            secure: true, // Use secure cookies in production
-            path: "/", // Set the path to your application root
-          });
-          res.cookie("userRole", "Vendor", {
-            httpOnly: true,
-            maxAge: 3600000,
-            sameSite: "None",
-            secure: true,
-            path: "/",
-          });
-        } catch (cookieError) {
-          console.error(cookieError);
-          return res.status(500).send("Error setting cookie");
-        }
-        const { password, ...vendorWithoutPassword } = vendor.toObject();
+    const isSamePassword = await bcrypt.compare(password, vendor.password);
 
-        res.status(200).json({
-          msg: "Vendor Login Successful",
-          token,
-          vendor: vendorWithoutPassword,
-        });
-      });
+    if (vendor && isSamePassword) {
+      // If vendor REJECTED, send error message.
+      if (vendor.status === "REJECTED") {
+        return res
+          .status(400)
+          .send({ msg: "Your Vendor registration has been rejected." });
+      }
+      if (vendor.companyLogo) {
+        const preSignedUrl = await s3ImageGetService(vendor.companyLogo);
+        vendor.preSignedPhoto = preSignedUrl;
+      }
+      const token = await generateJwtToken(vendor.id);
+      const { password, ...vendorWithoutPassword } = vendor.toObject();
+      setCookieAndRespond(res, token, vendorWithoutPassword);
     } else {
-      res.status(400).send("Invalid Credentials");
+      res.status(400).send({ msg: "Invalid Credentials." });
     }
   } catch (err) {
-    return res.status(500).send("Server Error");
+    return res.status(500).send({ msg: "Server Error" });
   }
 };
 
@@ -184,6 +163,12 @@ export const validateToken = async (req, res) => {
     if (!vendor) {
       return res.status(401).send("Vendor not found");
     }
+
+    if (vendor.companyLogo) {
+      const preSignedUrl = await s3ImageGetService(vendor.companyLogo);
+      vendor.preSignedPhoto = preSignedUrl;
+    }
+
     const { password, ...vendorWithoutPassword } = vendor.toObject();
     return res.status(200).json({
       msg: "Vendor Validation Success",
@@ -214,7 +199,8 @@ export const clearCookies = async (req, res) => {
 
 export const addVendor = async (req, res) => {
   try {
-    const newVendor = new VendorModel({ ...req.body });
+    const password = "adminpassword";
+    const newVendor = new VendorModel({ ...req.body, password });
     await newVendor.save();
 
     return res.status(201).json(newVendor);
@@ -267,5 +253,77 @@ export const updateVendor = async (req, res) => {
   } catch (e) {
     console.log(e);
     res.status(500).json("Server Error");
+  }
+};
+
+export const updateCompanyLogo = async (req, res) => {
+  try {
+    const vendor = req.user;
+    const reqFile = req.file;
+
+    let fileS3Location;
+    console.log(reqFile);
+    if (reqFile === undefined) {
+      console.log("No image files uploaded");
+    } else {
+      console.log("Retrieving uploaded images url");
+      fileS3Location = req.file.location;
+    }
+
+    const updatedVendor = await VendorModel.findOneAndUpdate(
+      { _id: vendor._id },
+      { companyLogo: fileS3Location },
+      { new: true },
+    );
+
+    if (updatedVendor.companyLogo) {
+      const preSignedUrl = await s3ImageGetService(updatedVendor.companyLogo);
+      updatedVendor.preSignedPhoto = preSignedUrl;
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Your company logo is successfully updated!",
+      vendor: updatedVendor,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json("Server Error");
+  }
+};
+
+/*
+ * Change password
+ */
+export const postChangePassword = async (req, res) => {
+  const errors = validationResult(req);
+
+  const vendor = req.user;
+
+  if (!errors.isEmpty()) {
+    // 422 status due to validation errors
+    return res.status(422).json({ errors: errors.array() });
+  }
+  try {
+    const { oldPassword, newPassword } = req.body;
+
+    const isSame = await bcrypt.compare(oldPassword, vendor.password);
+
+    if (!isSame)
+      return res.status(401).json("Old password entered is incorrect.");
+
+    const salt = await bcrypt.genSalt(10);
+    const hashed = await bcrypt.hash(newPassword, salt);
+
+    const updatedVendor = await VendorModel.findOneAndUpdate(
+      { _id: vendor.id },
+      { password: hashed },
+      { new: true },
+    );
+
+    return res.status(200).json("Password successfully changed.");
+  } catch (err) {
+    console.error(err); // Log the error
+    return res.status(500).send("Server Error");
   }
 };

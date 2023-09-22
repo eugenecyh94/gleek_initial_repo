@@ -34,6 +34,11 @@ const clientSchema = new mongoose.Schema({
     enum: ["PENDING", "APPROVED", "REJECTED"],
     required: false,
   },
+  verified: {
+    type: Boolean,
+    default: false,
+    required: true,
+  },
 });
 
 const ClientModel = mongoose.model("Client", clientSchema, "clients");

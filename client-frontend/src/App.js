@@ -12,6 +12,7 @@ import AccountDetails from "./containers/Account/AccountDetails";
 import Privacy from "./containers/Account/Privacy";
 import PasswordChange from "./containers/Account/PasswordChange";
 import ProfilePicture from "./containers/Account/ProfilePicture";
+import VerifyEmail from "./containers/Account/VerifyEmail";
 import ActivityDetailsPage from "./containers/ActivityDetailsPage";
 import useClientStore from "./zustand/ClientStore";
 import VendorRegisterPage from "./containers/Vendor/VendorRegisterPage";
@@ -19,6 +20,9 @@ import ErrorPage from "./containers/ErrorPage";
 import useVendorStore from "./zustand/VendorStore";
 import VendorProtectedRoute from "./components/Routes/VendorProtectedRoute";
 import ActivitiesPage from "./containers/Vendor/ActivitiesPage";
+import AccountDetailsVendor from "./containers/Vendor/AccountDetailsVendor";
+import ProfilePictureVendor from "./containers/Vendor/ProfilePictureVendor";
+import PasswordChangeVendor from "./containers/Vendor/PasswordChangeVendor";
 
 function App() {
   const { isLoading, clientError, login } = useClientStore();
@@ -66,6 +70,22 @@ function App() {
             element={
               <ClientProtectedRoute>
                 <PasswordChange />
+              </ClientProtectedRoute>
+            }
+          />
+          <Route
+            path="/client/verifyEmail"
+            element={
+              <ClientProtectedRoute>
+                <VerifyEmail />
+              </ClientProtectedRoute>
+            }
+          />
+          <Route
+            path="/client/verifyEmail/:token"
+            element={
+              <ClientProtectedRoute>
+                <VerifyEmail />
               </ClientProtectedRoute>
             }
           />
@@ -126,6 +146,38 @@ function App() {
             element={
               <VendorProtectedRoute>
                 <ActivitiesPage />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/settings"
+            element={
+              <VendorProtectedRoute>
+                <Navigate to="/vendor/settings/profile" />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/settings/profile"
+            element={
+              <VendorProtectedRoute>
+                <AccountDetailsVendor />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/settings/picture"
+            element={
+              <VendorProtectedRoute>
+                <ProfilePictureVendor />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/settings/password"
+            element={
+              <VendorProtectedRoute>
+                <PasswordChangeVendor />
               </VendorProtectedRoute>
             }
           />

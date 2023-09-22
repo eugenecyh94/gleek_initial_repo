@@ -55,7 +55,7 @@ const vendorSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-
+  preSignedPhoto: { type: String, required: false },
   approvedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Admin",
@@ -75,6 +75,10 @@ const vendorSchema = new mongoose.Schema({
     type: String,
     enum: ["PENDING", "APPROVED", "REJECTED"],
     required: false,
+  },
+  adminCreated: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Admin",
   },
 });
 
