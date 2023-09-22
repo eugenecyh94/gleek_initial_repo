@@ -23,7 +23,8 @@ import ActivitiesPage from "./containers/Vendor/ActivitiesPage";
 import AccountDetailsVendor from "./containers/Vendor/AccountDetailsVendor";
 import ProfilePictureVendor from "./containers/Vendor/ProfilePictureVendor";
 import PasswordChangeVendor from "./containers/Vendor/PasswordChangeVendor";
-
+import VerifyEmailVendor from "./containers/Vendor/VerifyEmailVendor";
+import PrivacyVendor from "./containers/Vendor/PrivacyVendor";
 function App() {
   const { isLoading, clientError, login } = useClientStore();
   const { isLoadingVendor, vendorError, loginVendor } = useVendorStore();
@@ -178,6 +179,30 @@ function App() {
             element={
               <VendorProtectedRoute>
                 <PasswordChangeVendor />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/verifyEmail/:token"
+            element={
+              <VendorProtectedRoute>
+                <VerifyEmailVendor />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/verifyEmail"
+            element={
+              <VendorProtectedRoute>
+                <VerifyEmailVendor />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/settings/termsAndConditons"
+            element={
+              <VendorProtectedRoute>
+                <PrivacyVendor />
               </VendorProtectedRoute>
             }
           />

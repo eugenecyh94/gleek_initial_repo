@@ -245,44 +245,37 @@ const VendorRegisterPage = () => {
     { platform: "", url: "" },
   ]);
 
-  const updateCompanySocials = () => {
-    const updatedCompanySocials = socialMediaFields.reduce(
-      (acc, { platform, url }) => {
-        acc[platform] = url;
-        return acc;
-      },
-      {},
-    );
-
+  useEffect(() => {
+    const updatedCompanySocials = {};
+    for (const socialMedia of socialMediaFields) {
+      updatedCompanySocials[socialMedia.platform] = socialMedia.url;
+    }
     setFormData((prevData) => ({
       ...prevData,
       companySocials: updatedCompanySocials,
     }));
-  };
+  }, [socialMediaFields]);
+
   const addField = () => {
     setSocialMediaFields([...socialMediaFields, { platform: "", url: "" }]);
-    updateCompanySocials();
   };
 
   const removeField = (index) => {
     const updatedFields = [...socialMediaFields];
     updatedFields.splice(index, 1);
     setSocialMediaFields(updatedFields);
-    updateCompanySocials();
   };
 
   const handlePlatformChange = (index, value) => {
     const updatedFields = [...socialMediaFields];
     updatedFields[index].platform = value;
     setSocialMediaFields(updatedFields);
-    updateCompanySocials();
   };
 
   const handleURLChange = (index, value) => {
     const updatedFields = [...socialMediaFields];
     updatedFields[index].url = value;
     setSocialMediaFields(updatedFields);
-    updateCompanySocials();
   };
 
   const handleSocialMediaValidate = (platform) => {
@@ -461,7 +454,6 @@ const VendorRegisterPage = () => {
               name="companyPostalCode"
               placeholder="Company Postal Code"
               label="Company Postal Code"
-              value={formData.companyPostalCode}
               onChange={handleChange}
               onBlur={handleValidate}
               helperText={errorData.companyPostalCode}
@@ -666,9 +658,11 @@ const VendorRegisterPage = () => {
                     />
                   </Grid>
                   <Grid item xs={1}>
-                    <IconButton onClick={() => removeField(index)}>
-                      <DeleteIcon />
-                    </IconButton>
+                    {index > 0 && (
+                      <IconButton onClick={() => removeField(index)}>
+                        <DeleteIcon />
+                      </IconButton>
+                    )}
                   </Grid>
                 </Grid>
               ))}

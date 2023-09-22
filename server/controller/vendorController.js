@@ -12,6 +12,12 @@ import { createVendorConsent } from "../service/consentService.js";
 import bcrypt from "bcryptjs";
 import { s3ImageGetService } from "../service/s3ImageGetService.js";
 const secret = process.env.JWT_SECRET_VENDOR;
+import {
+  createVendorWelcomeMailOptions,
+  createResendVerifyEmailOptionsVendor,
+  createVerifyEmailOptionsVendor,
+} from "../util/sendMailOptions.js";
+import sendMail from "../util/sendMail.js";
 // sample account: companyEmail = "test@gmail.com", password = "7655Th#123"
 
 /*
@@ -100,6 +106,9 @@ export const postRegister = async (req, res) => {
 
     const token = await generateJwtToken(createdVendor.id);
     await session.commitTransaction();
+    sendMail(createVendorWelcomeMailOptions(createdVendor));
+    sendMail(createVerifyEmailOptionsVendor(createdVendor, token));
+
     session.endSession();
     const { password, ...vendorWithoutPassword } = createdVendor.toObject();
     vendorWithoutPassword.companySocials = Object.fromEntries(
@@ -111,6 +120,91 @@ export const postRegister = async (req, res) => {
     await session.abortTransaction();
     session.endSession();
     return res.status(500).send("Server Error");
+  }
+};
+
+/*
+ * Vendor clicks the link in their email to verify
+ */
+export const verifyEmail = async (req, res) => {
+  const token = req.params.token;
+
+  if (!token) {
+    return res
+      .status(403)
+      .json({ status: "error", message: "Token Not Found!" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, secret);
+    const requestorVendor = await VendorModel.findById(decoded.vendor.id);
+
+    if (requestorVendor.verified) {
+      return res.status(200).json({
+        status: "already-verified",
+        msg: "Your email has already been verified!",
+      });
+    }
+
+    requestorVendor.verified = true;
+    await requestorVendor.save();
+
+    return res.status(200).json({
+      status: "success",
+      msg: "Vendor email has been verified. Welcome to Gleek!",
+      vendor: requestorVendor,
+    });
+  } catch (err) {
+    if (err.name === "JsonWebTokenError") {
+      return res.status(200).json({
+        status: "token-expired",
+        msg: "Token has expired. Please request a new verification email.",
+      });
+    }
+
+    console.error("Token verification error:", err);
+    return res.status(500).json({ status: "error", msg: "Server Error" });
+  }
+};
+
+/*
+ * Update the client account details (except for email and password)
+ */
+export const updateClientAccountDetails = async (req, res) => {
+  try {
+    const client = req.user;
+    if (!client) {
+      return res.status(404).send("Client not found. Token may have expired.");
+    }
+
+    const body = req.body;
+    console.log("updateClientAccountDetails: body", body);
+
+    // remove password and email in case it is sent along in the body
+    const { password, email, ...updateData } = body;
+
+    console.log("updateClientAccountDetails: UpdateData", updateData);
+    const updatedClient = await Client.findOneAndUpdate(
+      { _id: client.id },
+      { ...updateData },
+      {
+        new: true,
+        select: {
+          password: 0,
+        },
+      },
+    );
+
+    console.log("updateClientAccountDetails: Updated client", updatedClient);
+
+    res.status(200).json({
+      success: true,
+      message: "Your profile is successfully updated!",
+      client: updatedClient,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ status: "error", msg: "Server Error" });
   }
 };
 
@@ -148,10 +242,10 @@ export const postLogin = async (req, res) => {
       );
       setCookieAndRespond(res, token, vendorWithoutPassword);
     } else {
-      res.status(400).send({ msg: "Invalid Credentials." });
+      res.status(400).send({ status: "error", msg: "Invalid Credentials." });
     }
   } catch (err) {
-    return res.status(500).send({ msg: "Server Error" });
+    return res.status(500).send({ status: "error", msg: "Server Error" });
   }
 };
 
@@ -187,7 +281,7 @@ export const validateToken = async (req, res) => {
     });
   } catch (err) {
     // If verification fails (e.g., due to an invalid or expired token), send an error response
-    return res.status(401).send("Invalid Token");
+    return res.status(401).send({ status: "error", msg: "INvalid Token" });
   }
 };
 export const getAllVendorTypes = async (req, res) => {
@@ -201,10 +295,30 @@ export const getAllVendorTypes = async (req, res) => {
   }
 };
 
+/**
+ Log out
+ */
 export const clearCookies = async (req, res) => {
   res.clearCookie("token");
   res.clearCookie("userRole");
   res.status(200).end();
+};
+
+export const resendVerifyEmail = async (req, res) => {
+  try {
+    const vendor = req.user;
+
+    const token = await generateJwtToken(vendor.id);
+
+    sendMail(createResendVerifyEmailOptionsVendor(vendor, token));
+
+    return res.status(200).json({
+      msg: "Verification email resent.",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ status: "error", msg: "Server Error" });
+  }
 };
 
 export const addVendor = async (req, res) => {
@@ -344,9 +458,6 @@ export const postChangePassword = async (req, res) => {
 export const updateVendorAccountDetails = async (req, res) => {
   try {
     const vendor = req.user;
-    if (!vendor) {
-      return res.status(404).send("Vendor not found. Token may have expired.");
-    }
 
     const body = req.body;
     console.log("updateVendorAccountDetails: body", body);

@@ -104,6 +104,21 @@ const useVendorStore = create((set) => ({
       throw error;
     }
   },
+  verifyEmail: async (token) => {
+    try {
+      const response = await AxiosConnect.get(
+        `/gleek/vendor/verifyEmail/${token}`,
+      );
+
+      if (response.data.status === "success") {
+        set({ vendor: response.data.vendor });
+      }
+      return response;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
 }));
 
 export default useVendorStore;

@@ -12,6 +12,8 @@ import verifyToken from "../../middleware/vendorAuth.js";
 import { uploadS3CompanyLogo } from "../../middleware/multer.js";
 import { postChangePassword } from "../../controller/vendorController.js";
 import { updateVendorAccountDetails } from "../../controller/vendorController.js";
+import { verifyEmail } from "../../controller/vendorController.js";
+import { resendVerifyEmail } from "../../controller/vendorController.js";
 const router = express.Router();
 
 /*
@@ -46,6 +48,10 @@ router.patch(
   uploadS3CompanyLogo.single("image"),
   updateCompanyLogo,
 );
+// Verify Email
+router.get("/verifyEmail/:token", verifyEmail);
+// Verify Email Resend
+router.get("/resendVerifyEmail", verifyToken, resendVerifyEmail);
 router.post("/changePassword", verifyToken, postChangePassword);
 router.patch("/updateAccount", verifyToken, updateVendorAccountDetails);
 export default router;

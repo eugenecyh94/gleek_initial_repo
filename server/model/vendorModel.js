@@ -31,6 +31,7 @@ const vendorSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  companyPostalCode: { type: Number, required: false },
   password: {
     type: String,
     required: true,
@@ -54,6 +55,11 @@ const vendorSchema = new mongoose.Schema({
   signupDate: {
     type: Date,
     default: Date.now,
+  },
+  verified: {
+    type: Boolean,
+    default: false,
+    required: true,
   },
   preSignedPhoto: { type: String, required: false },
   approvedBy: {
