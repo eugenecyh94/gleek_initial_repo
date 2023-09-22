@@ -102,21 +102,6 @@ function VerifyEmail() {
           </div>
         )}
 
-        {status === "token-expired" && (
-          <div>
-            <Typography variant="h4">Expired Link</Typography>
-            <Typography variant="body1">Your email link has expired</Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              component={Link}
-              onClick={resendVerificationEmail}
-            >
-              Request New Verification
-            </Button>
-          </div>
-        )}
-
         {!token && (
           <div>
             <Typography variant="h4">Verification Email Sent</Typography>
