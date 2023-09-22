@@ -9,8 +9,6 @@ import {
 } from "../../zustand/GlobalStore";
 import MainBodyContainer from "../common/MainBodyContainer";
 import CreateActivityForm from "./CreateActivityForm";
-import CreateIcon from "@mui/icons-material/Create";
-import MainBodyContainer from "../common/MainBodyContainer";
 
 const StyledPage = styled("div")(({ theme }) => ({
   backgroundColor: theme.palette.grey.pale_grey,
@@ -34,8 +32,13 @@ const CreateActivityPage = () => {
   }, [getThemes]);
 
   return (
-    <MainBodyContainer hasBackButton={true} breadcrumbNames={["View Published Activities"]} breadcrumbLinks={["/viewPublishedActivities"]} currentBreadcrumbName={"Create Activity"}>
-    <StyledPage>
+    <MainBodyContainer
+      hasBackButton={true}
+      breadcrumbNames={["View Published Activities"]}
+      breadcrumbLinks={["/viewPublishedActivities"]}
+      currentBreadcrumbName={"Create Activity"}
+    >
+      <StyledPage>
         <Typography
           alignItems={"center"}
           fontSize={25}
@@ -61,7 +64,7 @@ const CreateActivityPage = () => {
             admin={admin}
           ></CreateActivityForm>
         )}
-    </StyledPage>
+      </StyledPage>
     </MainBodyContainer>
   );
 };
