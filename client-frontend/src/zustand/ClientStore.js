@@ -92,6 +92,21 @@ const useClientStore = create((set) => ({
       throw error;
     }
   },
+  verifyEmail: async (token) => {
+    try {
+      const response = await AxiosConnect.get(
+        `/gleek/client/verifyEmail/${token}`,
+      );
+
+      if (response.data.status === "success") {
+        set({ client: response.data.client });
+      }
+      return response;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
 }));
 
 export default useClientStore;
