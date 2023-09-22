@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Box, TextField, Button, Typography, Grid } from "@mui/material";
-import AccountSidebar from "./AccountSidebar";
-import useClientStore from "../../zustand/ClientStore";
-import { validator } from "../../utils/ClientFieldsValidator";
+import AccountSidebarVendor from "./AccountSidebarVendor";
+import useVendorStore from "../../zustand/VendorStore";
+import { validator } from "../../utils/VendorFieldsValidator";
 import useSnackbarStore from "../../zustand/SnackbarStore";
-function PasswordChange(props) {
-  const { changePassword } = useClientStore();
+function PasswordChangeVendor(props) {
+  const { changePassword } = useVendorStore();
   const { openSnackbar } = useSnackbarStore();
   const mockedData = {
     oldPassword: "",
@@ -87,7 +87,7 @@ function PasswordChange(props) {
       width={"100%"}
     >
       <Box width={"30%"}>
-        <AccountSidebar />
+        <AccountSidebarVendor />
       </Box>
 
       <Box
@@ -164,4 +164,4 @@ function PasswordChange(props) {
   );
 }
 
-export default PasswordChange;
+export default PasswordChangeVendor;

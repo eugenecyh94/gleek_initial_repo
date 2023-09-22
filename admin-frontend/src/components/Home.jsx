@@ -3,6 +3,7 @@ import Layout from "./Layout";
 import MainBodyContainer from "./common/MainBodyContainer";
 
 const Home = () => {
+<<<<<<< HEAD
   return (
     <MainBodyContainer
       hasBackButton={false}
@@ -12,6 +13,15 @@ const Home = () => {
     >
       Home
     </MainBodyContainer>
+=======
+  const { authenticated } = useAdminStore();
+  return (
+    <Layout>
+      <Toolbar />
+      {authenticated ? <SideNavBar /> : <></>}
+      Home
+    </Layout>
+>>>>>>> develop
   );
 };
 export default Home;

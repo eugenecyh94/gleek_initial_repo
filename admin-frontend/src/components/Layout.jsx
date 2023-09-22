@@ -6,6 +6,7 @@ import Grid from "@mui/material/Grid";
 
 const Layout = ({ children }) => {
   const { authenticated, admin } = useAdminStore();
+<<<<<<< HEAD
   const mainContentColumn = authenticated ? 9.5 : 12;
   const navBarColumn = authenticated ? 2.5 : 0;
   console.log(mainContentColumn);
@@ -32,6 +33,37 @@ const Layout = ({ children }) => {
           <Box flex={1}>{children}</Box>
         </Box>
       </Grid>
+=======
+  return authenticated ? (
+    <Box sx={{ display: "flex" }}>
+      <HomePageNavBar />
+      <SideNavBar />
+      <Box
+        component="main"
+        display="flex"
+        flexDirection="row"
+        justifyContent="space-evenly"
+        alignItems="center"
+        sx={{ flexGrow: 1, p: 3 }}
+      >
+        <Box flex={1}>{children}</Box>
+      </Box>
+    </Box>
+  ) : (
+    <Box minHeight="100vh" flexDirection="column" display="flex">
+      <HomePageNavBar />
+      <Box
+        flex={1}
+        display="flex"
+        flexDirection="row"
+        justifyContent="space-evenly"
+        alignItems="center"
+      >
+        <Box flex={1} mt={8}>
+          {children}
+        </Box>
+      </Box>
+>>>>>>> develop
     </Box>
   );
 };

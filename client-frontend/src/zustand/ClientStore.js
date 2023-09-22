@@ -52,10 +52,9 @@ const useClientStore = create((set) => ({
         oldPassword: oldPassword,
         newPassword: newPassword,
       });
-      alert("Password changed successfully.");
+      return true;
     } catch (error) {
-      console.error(error);
-      alert(error.response.data);
+      throw error;
     }
   },
 
