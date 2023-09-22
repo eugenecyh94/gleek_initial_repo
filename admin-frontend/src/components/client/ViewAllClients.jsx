@@ -18,7 +18,12 @@ const ViewAllClients = () => {
   }, [getClients]);
 
   return (
-    <MainBodyContainer hasBackButton={false} breadcrumbNames={[]} breadcrumbLinks={[]} currentBreadcrumbName={"View All Clients"}>
+    // <MainBodyContainer hasBackButton={false} breadcrumbNames={[]} breadcrumbLinks={[]} currentBreadcrumbName={"View All Clients"}>
+    <Box
+    display="flex"
+    flexDirection="column"
+    justifyContent="space-evenly"
+    alignItems="center">
       <Typography
         fontSize={25}
         fontWeight={700}
@@ -36,7 +41,8 @@ const ViewAllClients = () => {
           updateClient={updateClient}
         ></ClientsTable>
       )}
-      </MainBodyContainer>
+      </Box>
+      // </MainBodyContainer>
   );
 };
 

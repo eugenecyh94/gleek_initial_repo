@@ -42,7 +42,8 @@ const Layout = ({ children }) => {
         display="flex"
         flexDirection="row"
         justifyContent="space-evenly"
-        alignItems="flex-start"
+      //   alignItems="flex-start"
+      alignItems="center"
       >
         <Box flex={1}>{children}</Box>
       </Box>
