@@ -16,15 +16,22 @@ function VerifyEmail() {
   const { token } = useParams();
   const [isLoading, setIsLoading] = useState(true);
   const [status, setStatus] = useState("");
-  const { verifyEmail } = useClientStore();
+  const { verifyEmail, client } = useClientStore();
+
   const { openSnackbar } = useSnackbarStore();
 
   useEffect(() => {
     const getVerifyEmail = async () => {
+      if (client.verified) {
+        setIsLoading(false);
+        setStatus("success");
+        return;
+      }
       if (!token) {
         setIsLoading(false);
         return;
       }
+
       try {
         const response = await verifyEmail(token);
 
@@ -52,7 +59,12 @@ function VerifyEmail() {
     }
   };
 
-  if (isLoading) return <CircularProgress />;
+  if (isLoading)
+    return (
+      <Box display="flex" alignItems="center" justifyContent="center">
+        <CircularProgress />
+      </Box>
+    );
 
   return (
     <Box display="flex" alignItems="center" justifyContent="center">
@@ -63,29 +75,28 @@ function VerifyEmail() {
         borderRadius={4}
         textAlign="center"
       >
-        {status === "success" ||
-          (status === "already-verified" && (
-            <div>
-              <CheckCircleOutline sx={{ fontSize: 48 }} />
-              <Typography variant="h4" color="primary.dark">
-                Email Verified!
-              </Typography>
+        {(status === "success" || status === "already-verified") && (
+          <div>
+            <CheckCircleOutline sx={{ fontSize: 48 }} />
+            <Typography variant="h4" color="primary.dark">
+              Email Verified!
+            </Typography>
 
-              <Typography variant="body1">
-                Start exploring our thoughtfully curated collection of
-                sustainability and employee wellness activities.
-              </Typography>
-              <Button
-                variant="contained"
-                color="tertiary"
-                component={Link}
-                to="/shop"
-                sx={{ mt: 3 }}
-              >
-                Shop
-              </Button>
-            </div>
-          ))}
+            <Typography variant="body1">
+              Start exploring our thoughtfully curated collection of
+              sustainability and employee wellness activities.
+            </Typography>
+            <Button
+              variant="contained"
+              color="tertiary"
+              component={Link}
+              to="/shop"
+              sx={{ mt: 3 }}
+            >
+              Shop
+            </Button>
+          </div>
+        )}
 
         {status === "token-expired" && (
           <div>
@@ -102,7 +113,7 @@ function VerifyEmail() {
           </div>
         )}
 
-        {!token && (
+        {!token && status !== "success" && (
           <div>
             <Typography variant="h4">Verification Email Sent</Typography>
             <Typography variant="body1">

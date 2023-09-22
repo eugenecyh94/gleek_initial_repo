@@ -376,10 +376,6 @@ export const verifyEmail = async (req, res) => {
     const decoded = jwt.verify(token, secret);
     const requestorClient = await Client.findById(decoded.client.id);
 
-    // For debugging
-    // requestorClient.verified = false;
-    // await requestorClient.save();
-
     if (requestorClient.verified) {
       return res.status(200).json({
         status: "already-verified",
