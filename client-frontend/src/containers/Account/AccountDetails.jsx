@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, TextField, Button, Typography, Grid, Alert } from "@mui/material";
 import AccountSidebar from "./AccountSidebar";
 import useClientStore from "../../zustand/ClientStore";
@@ -56,6 +56,10 @@ function AccountDetails(props) {
       openSnackbar(errorMessage, "error");
     }
   };
+
+  useEffect(() => {
+    console.log(client);
+  }, []);
 
   return (
     <Box

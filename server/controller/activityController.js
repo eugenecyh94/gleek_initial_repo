@@ -19,7 +19,7 @@ export const getAllActivities = async (req, res) => {
 export const getActivity = async (req, res) => {
   try {
     const foundActivity = await ActivityModel.findById(req.params.id).populate(
-      "activityPricingRules"
+      "activityPricingRules",
     );
     res.status(200).json({
       data: foundActivity,
@@ -56,7 +56,7 @@ export const addActivity = async (req, res) => {
     await ActivityModel.findByIdAndUpdate(
       { _id: savedActivity._id },
       { images: imagesPathArr },
-      { new: true }
+      { new: true },
     );
 
     const activitypriceobjects = [];
@@ -91,9 +91,9 @@ export const addActivity = async (req, res) => {
                 },
               },
             },
-            { new: true, useFindAndModify: false }
+            { new: true, useFindAndModify: false },
           );
-        }
+        },
       );
     });
     res.status(201).json({
