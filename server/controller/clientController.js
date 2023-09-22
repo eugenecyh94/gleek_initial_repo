@@ -15,7 +15,11 @@ import {
 } from "../service/consentService.js";
 import sendMail from "../util/sendMail.js";
 import { s3ImageGetService } from "../service/s3ImageGetService.js";
-import { createClientWelcomeMailOptions } from "../util/sendMailOptions.js";
+import {
+  createClientWelcomeMailOptions,
+  createResendVerifyEmailOptions,
+  createVerifyEmailOptions,
+} from "../util/sendMailOptions.js";
 
 const secret = process.env.JWT_SECRET_ClIENT;
 
@@ -101,18 +105,10 @@ export const postRegister = async (req, res) => {
 
     const token = await generateJwtToken(createdClient.id);
 
-    const message = `Welcome to Gleek! You have registered with the email ${createdClient.email}.
-    Please verify your email by clicking on the link: http://localhost:3001/client/verifyEmail/${token}`;
-    const options = {
-      to: createdClient.email,
-      subject: "Verify your Email on Gleek",
-      text: message,
-    };
+    await session.commitTransaction();
 
     sendMail(createClientWelcomeMailOptions(createdClient));
-    sendMail(options);
-
-    await session.commitTransaction();
+    sendMail(createVerifyEmailOptions(createdClient, token));
     session.endSession();
 
     const { password, ...clientWithoutPassword } = createdClient.toObject();
@@ -418,15 +414,7 @@ export const resendVerifyEmail = async (req, res) => {
 
     const token = await generateJwtToken(client.id);
 
-    const message = `Hello ${client.email}, you have requested for the verification email to be resent.
-    Please verify your email by clicking on the link: http://localhost:3001/client/verifyEmail/${token}`;
-    const options = {
-      to: client.email,
-      subject: "Resend: Verify your Email on Gleek",
-      text: message,
-    };
-
-    sendMail(options);
+    sendMail(createResendVerifyEmailOptions(client, token));
 
     return res.status(200).json({
       msg: "Verification email resent.",

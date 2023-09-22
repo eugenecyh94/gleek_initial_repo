@@ -1,11 +1,10 @@
 export const createClientWelcomeMailOptions = (client) => {
-  const text = `Hello, ${client.name}!`;
-  const subject = `${client.name}, welcome to Gleek!`;
-  const to = client.email;
-  if (!to) {
-    throw new Error();
-  }
-  const htmlContent = `
+  try {
+    const text = `Hello, ${client.name}!`;
+    const subject = `${client.name}, welcome to Gleek!`;
+    const to = client.email;
+
+    const htmlContent = `
     <html>
     <head>
       <style>
@@ -61,17 +60,52 @@ export const createClientWelcomeMailOptions = (client) => {
 
   `;
 
-  const options = {
-    subject,
-    html: htmlContent,
-    attachments: [
-      {
-        filename: "ClientWelcome.png",
-        path: "../server/assets/email/ClientWelcome.png",
-        cid: "welcome-client-image",
-      },
-    ],
-    to,
-  };
-  return options;
+    const options = {
+      subject,
+      html: htmlContent,
+      attachments: [
+        {
+          filename: "ClientWelcome.png",
+          path: "../server/assets/email/ClientWelcome.png",
+          cid: "welcome-client-image",
+        },
+      ],
+      to,
+    };
+    return options;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const createVerifyEmailOptions = (client, token) => {
+  try {
+    const to = client.email;
+    const message = `You have registered with the email ${client.email} on Gleek.
+  Please verify your email by clicking on the link: http://localhost:3001/client/verifyEmail/${token}`;
+    const options = {
+      to: to,
+      subject: "Verify your Email on Gleek",
+      text: message,
+    };
+    return options;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const createResendVerifyEmailOptions = (client, token) => {
+  try {
+    const message = `Hello ${client.email}, you have requested for the verification email to be resent.
+    Please verify your email by clicking on the link: http://localhost:3001/client/verifyEmail/${token}`;
+    const options = {
+      to: client.email,
+      subject: "Resend: Verify your Email on Gleek",
+      text: message,
+    };
+
+    return options;
+  } catch (err) {
+    console.log(err);
+  }
 };
