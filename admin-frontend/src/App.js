@@ -17,143 +17,118 @@ import SocketConnection from "./utils/SocketConnection";
 import ForgotPassword from "./components/ForgotPassword";
 import AccountDetails from "./components/profile/AccountDetails";
 import AddAdminPage from "./components/admin/AddAdminPage";
+import ViewAllAdmins from "./components/admin/ViewAllAdmins";
 
 function App() {
-  return (
-    <div>
-      <SocketConnection />
-      <Layout>
-        <Routes>
-          <Route exact path="/" element={<Home />} />
-          <Route
-            exact
-            path="/createActivity"
-            element={
-              <ProtectedRoute>
-                <CreateActivityPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/viewPublishedActivities"
-            element={
-              <ProtectedRoute>
-                <ViewPublishedActivities />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/viewAllVendors"
-            element={
-              <ProtectedRoute>
-                <ViewAllVendors />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/addVendor"
-            element={
-              <ProtectedRoute>
-                <CreateVendorPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/resetPassword"
-            element={
-              <ProtectedRoute>
-                <ResetPassword />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/manageProfile/changePassword"
-            element={
-              <ProtectedRoute>
-                <ChangePassword />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/manageProfile"
-            element={
-              <ProtectedRoute>
-                <AccountDetails />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/adminTeam/addAdmin"
-            element={
-              <ProtectedRoute>
-                <AddAdminPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/manageProfile/changePassword"
-            element={
-              <ProtectedRoute>
-                <ChangePassword />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/manageProfile"
-            element={
-              <ProtectedRoute>
-                <AccountDetails />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/adminTeam/addAdmin"
-            element={
-              <ProtectedRoute>
-                <AddAdminPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/viewAllClients"
-            element={
-              <ProtectedRoute>
-                <ViewAllClients />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/viewClient/:clientId"
-            element={
-              <ProtectedRoute>
-                <ClientDetails />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/login" element={<LoginPage />} />
-          {/*for testing image upload component*/}
-          <Route
-            path="/uploadTest"
-            element={
-              <ImageAndFileUpload limit={5} name="test" size={2000000} />
-            }
-          />
-        </Routes>
-      </Layout>
-    </div>
-  );
+   return (
+      <div>
+         <SocketConnection />
+         <Layout>
+            <Routes>
+               <Route exact path="/" element={<Home />} />
+               <Route
+                  exact
+                  path="/createActivity"
+                  element={
+                     <ProtectedRoute>
+                        <CreateActivityPage />
+                     </ProtectedRoute>
+                  }
+               />
+               <Route
+                  exact
+                  path="/viewPublishedActivities"
+                  element={
+                     <ProtectedRoute>
+                        <ViewPublishedActivities />
+                     </ProtectedRoute>
+                  }
+               />
+               <Route
+                  exact
+                  path="/viewAllVendors"
+                  element={
+                     <ProtectedRoute>
+                        <ViewAllVendors />
+                     </ProtectedRoute>
+                  }
+               />
+               <Route
+                  exact
+                  path="/resetPassword"
+                  element={
+                     <ProtectedRoute>
+                        <ResetPassword />
+                     </ProtectedRoute>
+                  }
+               />
+               <Route
+                  exact
+                  path="/manageProfile/changePassword"
+                  element={
+                     <ProtectedRoute>
+                        <ChangePassword />
+                     </ProtectedRoute>
+                  }
+               />
+               <Route
+                  exact
+                  path="/manageProfile"
+                  element={
+                     <ProtectedRoute>
+                        <AccountDetails />
+                     </ProtectedRoute>
+                  }
+               />
+               <Route
+                  exact
+                  path="/adminTeam/addAdmin"
+                  element={
+                     <ProtectedRoute>
+                        <AddAdminPage />
+                     </ProtectedRoute>
+                  }
+               />
+               <Route
+                  exact
+                  path="/viewClient/:clientId"
+                  element={
+                     <ProtectedRoute>
+                        <ClientDetails />
+                     </ProtectedRoute>
+                  }
+               />
+               <Route path="/login" element={<LoginPage />} />
+               <Route path="/forgotPassword" element={<ForgotPassword />} />
+               <Route
+                  exact
+                  path="/adminTeam"
+                  element={
+                     <ProtectedRoute>
+                        <ViewAllAdmins />
+                     </ProtectedRoute>
+                  }
+               />
+              <Route
+                exact
+                path="/viewAllClients"
+                element={
+                <ProtectedRoute>
+                  <ViewAllClients />
+                </ProtectedRoute>
+                }
+               />
+               {/*for testing image upload component*/}
+               <Route
+                  path="/uploadTest"
+                  element={
+                     <ImageAndFileUpload limit={5} name="test" size={2000000} />
+                  }
+               />
+            </Routes>
+         </Layout>
+      </div>
+   );
 }
 
 export default App;
