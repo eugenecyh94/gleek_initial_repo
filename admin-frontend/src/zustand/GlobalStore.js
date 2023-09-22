@@ -211,6 +211,14 @@ export const useVendorStore = create((set) => ({
   },
 }));
 
+export const useImageUploadTestStore = create((set) => ({
+  imageList: [],
+  setImageList: (newImageList) => {
+    set({ imageList: newImageList });
+    console.log(useImageUploadTestStore.getState());
+  },
+}));
+
 export const useClientStore = create((set) => ({
   clients: [],
   isLoading: false,
@@ -247,13 +255,5 @@ export const useClientStore = create((set) => ({
     } catch (error) {
       console.error(error);
     }
-  },
-}));
-
-export const useImageUploadTestStore = create((set) => ({
-  imageList: [],
-  setImageList: (newImageList) => {
-    set({ imageList: newImageList });
-    console.log(useImageUploadTestStore.getState());
   },
 }));
