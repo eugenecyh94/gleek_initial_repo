@@ -114,6 +114,11 @@ const VendorsTable = (allVendors) => {
     setSearchedRows(filteredRows);
   };
 
+  const handleRowClick = (vendor) => {
+    console.log(vendor)
+    navigate(`/viewVendor/${vendor._id}`);
+  };
+
   const handleCreateButtonClick = () => {
     navigate("/addVendor");
   };
@@ -163,6 +168,7 @@ const VendorsTable = (allVendors) => {
           slots={{
             toolbar: GridToolbarFilterButton,
           }}
+          onRowClick={(params) => handleRowClick(params.row)}
         />
       </div>
     </Box>

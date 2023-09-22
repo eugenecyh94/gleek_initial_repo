@@ -18,6 +18,7 @@ import ForgotPassword from "./components/ForgotPassword";
 import AccountDetails from "./components/profile/AccountDetails";
 import AddAdminPage from "./components/admin/AddAdminPage";
 import ViewAllAdmins from "./components/admin/ViewAllAdmins";
+import VendorDetails from "./components/vendor/VendorDetails";
 
 function App() {
   return (
@@ -50,6 +51,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <ViewAllVendors />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewVendor/:vendorId"
+            element={
+              <ProtectedRoute>
+                <VendorDetails />
               </ProtectedRoute>
             }
           />

@@ -29,7 +29,7 @@ const ProfileCard = ({ title, icon, fieldNames, fieldValues }) => {
           {title}
         </Typography>
       </Box>
-      {fieldNames.map((fieldName, index) => (
+      {fieldNames ? fieldNames.map((fieldName, index) => (
         <Typography
           key={index}
           fontSize={15}
@@ -37,7 +37,18 @@ const ProfileCard = ({ title, icon, fieldNames, fieldValues }) => {
         >
           <strong>{fieldName}</strong>: {fieldValues[index]}
         </Typography>
+      )) :
+      fieldValues.map((fieldValue, index) => (
+        <Typography
+          key={index}
+          fontSize={15}
+          color={theme.palette.dark_purple.main}
+          paddingLeft={4}
+        >
+          {fieldValue}
+        </Typography>
       ))}
+
     </Box>
   );
 };
