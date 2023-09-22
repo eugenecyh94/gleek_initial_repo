@@ -15,7 +15,7 @@ import MailOutlineIcon from "@mui/icons-material/MailOutline";
 
 import { NavLink } from "react-router-dom";
 import { styled } from "@mui/system";
-import useClientStore from "../../zustand/ClientStore";
+import useClientStore from "../../../zustand/ClientStore";
 const CustomNavLink = styled(NavLink)(({ theme }) => ({
   "&.active": {
     color: theme.palette.primary.main,

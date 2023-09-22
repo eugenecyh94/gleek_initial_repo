@@ -9,9 +9,9 @@ import {
 } from "@mui/material";
 
 import AccountSidebar from "./AccountSidebar";
-import TermsAndConditionsModal from "../../components/Modals/TermsAndConditionsModal";
-import AxiosConnect from "../../utils/AxiosConnect";
-import useSnackbarStore from "../../zustand/SnackbarStore";
+import TermsAndConditionsModal from "../../../components/Modals/TermsAndConditionsModal";
+import AxiosConnect from "../../../utils/AxiosConnect";
+import useSnackbarStore from "../../../zustand/SnackbarStore";
 
 function Privacy(props) {
   // Modal

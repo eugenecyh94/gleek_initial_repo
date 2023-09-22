@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import AccountSidebar from "./AccountSidebar";
 import { useTheme } from "@emotion/react";
-import AxiosConnect from "../../utils/AxiosConnect";
+import AxiosConnect from "../../../utils/AxiosConnect";
 
 function AccountDetails(props) {
   const [formData, setFormData] = useState();
