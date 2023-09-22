@@ -10,15 +10,8 @@ const activitySchema = new mongoose.Schema({
   description: { type: String, required: true },
   clientMarkupPercentage: { type: Number, required: true },
   maxParticipants: { type: Number },
-  theme: {
-    name: {
-      type: String,
-      required: true,
-    },
-    subthemes: {
-      type: [String],
-    },
-  },
+  theme: { type: mongoose.Schema.Types.ObjectId, ref: "Theme" },
+  subtheme: [{ type: mongoose.Schema.Types.ObjectId, ref: "Theme" }],
   activityType: { type: String, enum: TYPE, required: true },
   duration: { type: Number, required: true },
   location: { type: String, enum: LOCATION, required: true },
@@ -34,8 +27,10 @@ const activitySchema = new mongoose.Schema({
   activityPricingRules: [
     { type: mongoose.Schema.Types.ObjectId, ref: "ActivityPricingRules" },
   ],
-  activityImages: [String],
-  createdBy: {
+  images: {
+    type: Array,
+  },
+  linkedVendor: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Vendor",
   },
@@ -58,6 +53,10 @@ const activitySchema = new mongoose.Schema({
     enum: Object.values(ActivityApprovalStatusEnum),
     required: true,
     default: ActivityApprovalStatusEnum.PUBLISHED,
+  },
+  adminCreated: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Admin",
   },
   // attributes for activity type "popup"
   isFoodCertPending: { type: Boolean },

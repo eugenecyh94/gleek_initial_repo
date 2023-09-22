@@ -56,8 +56,6 @@ function AccountDetails(props) {
     const formData = new FormData();
     formData.append("image", newProfilePictureData.file);
     AxiosConnect.patchMultipart("/gleek/client/updateProfilePicture", formData);
-    // TODO: Send image to backen
-    console.log(newProfilePictureData.file);
   };
 
   const theme = useTheme();

@@ -28,6 +28,7 @@ const clientSchema = new mongoose.Schema({
   emergencyContactName: { type: String, required: false },
   emergencyContactNumber: { type: String, required: false },
   photo: { type: String, required: false },
+  preSignedPhoto: { type: String, required: false },
   status: {
     type: String,
     enum: ["PENDING", "APPROVED", "REJECTED"],
