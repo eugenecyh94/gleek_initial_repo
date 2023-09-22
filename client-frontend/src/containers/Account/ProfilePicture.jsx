@@ -11,8 +11,10 @@ import AccountSidebar from "./AccountSidebar";
 import { useTheme } from "@emotion/react";
 import AxiosConnect from "../../utils/AxiosConnect";
 import useClientStore from "../../zustand/ClientStore";
+import useSnackbarStore from "../../zustand/SnackbarStore";
 function AccountDetails(props) {
   const [formData, setFormData] = useState();
+  const { openSnackbar } = useSnackbarStore();
   const { setClient } = useClientStore();
   const [newProfilePictureData, setNewProfilePictureData] = useState({
     file: null,
@@ -50,6 +52,7 @@ function AccountDetails(props) {
   };
 
   const handleUploadProfilePicture = async (event) => {
+    event.preventDefault();
     if (!newProfilePictureData.file) {
       console.error("No file has been attached");
       return;
@@ -65,6 +68,7 @@ function AccountDetails(props) {
       console.log(response);
 
       setClient(response.data.client);
+      openSnackbar("Uploaded image!", "success");
     } catch (error) {
       console.error("Error uploading file:", error);
       // Handle the error as needed (e.g., show a message to the user)
