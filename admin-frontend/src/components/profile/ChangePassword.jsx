@@ -120,135 +120,6 @@ const ChangePassword = () => {
         errors[fieldName] = "Your password has less than 8 characters.";
         result = false;
       }
-<<<<<<< HEAD
-   };
-   const validatePasswordVerify = (data, password, errors, fieldName) => {
-      if (password !== data) {
-         errors[fieldName] = `Password does not match!`;
-      }
-   };
-   return (
-      <MainBodyContainer hasBackButton={true} breadcrumbNames={["Account Details"]} breadcrumbLinks = {["/manageProfile"]} currentBreadcrumbName={"Change Password"}>
-      <Box
-         display="flex"
-         flexDirection="row"
-         justifyContent="space-evenly"
-         alignItems="top"
-         p={8}
-         width={"100%"}>
-         <Box width={"20%"}>
-            <ManageProfileSidebar />
-         </Box>
-         <form>
-            <Box
-               display="flex"
-               flexDirection="column"
-               p={4}
-               bgcolor={secondary}
-               borderRadius={10}
-               sx={{ minWidth: "25rem" }}
-               boxShadow={2}>
-               <Box display="flex" flexDirection="column" alignItems="center">
-                  <Box borderRadius="50%" bgcolor={primary} p={1}>
-                     <LockPersonIcon fontSize="large" color="accent" />
-                  </Box>
-               </Box>
-               <Typography variant="h5">Change Password</Typography>
-               <Box display="flex" flexDirection="row">
-                  <FormControl
-                     sx={{ marginTop: "24px" }}
-                     size="small"
-                     required
-                     variant="outlined">
-                     <InputLabel htmlFor="outlined-adornment-password">
-                        New Password
-                     </InputLabel>
-                     <OutlinedInput
-                        id="password"
-                        name="password"
-                        onChange={handleChange}
-                        onBlur={handleChange}
-                        value={formData.password}
-                        type={showPassword ? "text" : "password"}
-                        endAdornment={
-                           <InputAdornment position="end">
-                              <IconButton
-                                 aria-label="toggle password visibility"
-                                 onClick={handleClickShowPassword}
-                                 onMouseDown={handleMouseDownPassword}
-                                 edge="end">
-                                 {showPassword ? (
-                                    <VisibilityOff />
-                                 ) : (
-                                    <Visibility />
-                                 )}
-                              </IconButton>
-                           </InputAdornment>
-                        }
-                        label="Password"
-                     />
-                     {errorData.password.length > 0 && (
-                        <FormHelperText error id="my-helper-text">
-                           {errorData.password}
-                        </FormHelperText>
-                     )}
-                  </FormControl>
-                  <FormControl
-                     sx={{ marginTop: "24px", marginLeft: "16px" }}
-                     size="small"
-                     required
-                     variant="outlined">
-                     <InputLabel htmlFor="outlined-adornment-password">
-                        Confirm your password
-                     </InputLabel>
-                     <OutlinedInput
-                        id="passwordVerify"
-                        name="passwordVerify"
-                        onChange={handleChange}
-                        onBlur={handleChange}
-                        value={formData.passwordVerify}
-                        type={showPasswordVerify ? "text" : "password"}
-                        endAdornment={
-                           <InputAdornment position="end">
-                              <IconButton
-                                 aria-label="toggle password visibility"
-                                 onClick={handleClickShowPasswordVerify}
-                                 onMouseDown={handleMouseDownPassword}
-                                 edge="end">
-                                 {showPasswordVerify ? (
-                                    <VisibilityOff />
-                                 ) : (
-                                    <Visibility />
-                                 )}
-                              </IconButton>
-                           </InputAdornment>
-                        }
-                        label="Confirm your password"
-                     />
-                     {errorData.passwordVerify.length > 0 && (
-                        <FormHelperText error id="my-helper-text">
-                           {errorData.passwordVerify}
-                        </FormHelperText>
-                     )}
-                  </FormControl>
-               </Box>
-               <Button
-                  sx={{ marginTop: "24px" }}
-                  mt={4}
-                  variant="contained"
-                  type="submit"
-                  disabled={
-                     !Object.values(errorData).every((error) => error === "")
-                  }
-                  onClick={handleSubmit}>
-                  <Typography variant="body1">Change Password</Typography>
-               </Button>
-            </Box>
-         </form>
-      </Box>
-      </MainBodyContainer>
-   );
-=======
     }
   };
   const validatePasswordVerify = (data, password, errors, fieldName) => {
@@ -257,122 +128,134 @@ const ChangePassword = () => {
     }
   };
   return (
-    <Box
-      display="flex"
-      flexDirection="row"
-      justifyContent="space-evenly"
-      alignItems="top"
-      p={8}
-      width={"100%"}
+    <MainBodyContainer
+      hasBackButton={true}
+      breadcrumbNames={["Account Details"]}
+      breadcrumbLinks={["/manageProfile"]}
+      currentBreadcrumbName={"Change Password"}
     >
-      <Box width={"20%"}>
-        <ManageProfileSidebar />
-      </Box>
-      <form>
-        <Box
-          display="flex"
-          flexDirection="column"
-          p={4}
-          bgcolor={secondary}
-          borderRadius={10}
-          sx={{ minWidth: "25rem" }}
-          boxShadow={2}
-        >
-          <Box display="flex" flexDirection="column" alignItems="center">
-            <Box borderRadius="50%" bgcolor={primary} p={1}>
-              <LockPersonIcon fontSize="large" color="accent" />
-            </Box>
-          </Box>
-          <Typography variant="h5">Change Password</Typography>
-          <Box display="flex" flexDirection="row">
-            <FormControl
-              sx={{ marginTop: "24px" }}
-              size="small"
-              required
-              variant="outlined"
-            >
-              <InputLabel htmlFor="outlined-adornment-password">
-                New Password
-              </InputLabel>
-              <OutlinedInput
-                id="password"
-                name="password"
-                onChange={handleChange}
-                onBlur={handleChange}
-                value={formData.password}
-                type={showPassword ? "text" : "password"}
-                endAdornment={
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      onMouseDown={handleMouseDownPassword}
-                      edge="end"
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                }
-                label="Password"
-              />
-              {errorData.password.length > 0 && (
-                <FormHelperText error id="my-helper-text">
-                  {errorData.password}
-                </FormHelperText>
-              )}
-            </FormControl>
-            <FormControl
-              sx={{ marginTop: "24px", marginLeft: "16px" }}
-              size="small"
-              required
-              variant="outlined"
-            >
-              <InputLabel htmlFor="outlined-adornment-password">
-                Confirm your password
-              </InputLabel>
-              <OutlinedInput
-                id="passwordVerify"
-                name="passwordVerify"
-                onChange={handleChange}
-                onBlur={handleChange}
-                value={formData.passwordVerify}
-                type={showPasswordVerify ? "text" : "password"}
-                endAdornment={
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPasswordVerify}
-                      onMouseDown={handleMouseDownPassword}
-                      edge="end"
-                    >
-                      {showPasswordVerify ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                }
-                label="Confirm your password"
-              />
-              {errorData.passwordVerify.length > 0 && (
-                <FormHelperText error id="my-helper-text">
-                  {errorData.passwordVerify}
-                </FormHelperText>
-              )}
-            </FormControl>
-          </Box>
-          <Button
-            sx={{ marginTop: "24px" }}
-            mt={4}
-            variant="contained"
-            type="submit"
-            disabled={!Object.values(errorData).every((error) => error === "")}
-            onClick={handleSubmit}
-          >
-            <Typography variant="body1">Change Password</Typography>
-          </Button>
+      <Box
+        display="flex"
+        flexDirection="row"
+        justifyContent="space-evenly"
+        alignItems="top"
+        p={8}
+        width={"100%"}
+      >
+        <Box width={"20%"}>
+          <ManageProfileSidebar />
         </Box>
-      </form>
-    </Box>
+        <form>
+          <Box
+            display="flex"
+            flexDirection="column"
+            p={4}
+            bgcolor={secondary}
+            borderRadius={10}
+            sx={{ minWidth: "25rem" }}
+            boxShadow={2}
+          >
+            <Box display="flex" flexDirection="column" alignItems="center">
+              <Box borderRadius="50%" bgcolor={primary} p={1}>
+                <LockPersonIcon fontSize="large" color="accent" />
+              </Box>
+            </Box>
+            <Typography variant="h5">Change Password</Typography>
+            <Box display="flex" flexDirection="row">
+              <FormControl
+                sx={{ marginTop: "24px" }}
+                size="small"
+                required
+                variant="outlined"
+              >
+                <InputLabel htmlFor="outlined-adornment-password">
+                  New Password
+                </InputLabel>
+                <OutlinedInput
+                  id="password"
+                  name="password"
+                  onChange={handleChange}
+                  onBlur={handleChange}
+                  value={formData.password}
+                  type={showPassword ? "text" : "password"}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPassword}
+                        onMouseDown={handleMouseDownPassword}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                  label="Password"
+                />
+                {errorData.password.length > 0 && (
+                  <FormHelperText error id="my-helper-text">
+                    {errorData.password}
+                  </FormHelperText>
+                )}
+              </FormControl>
+              <FormControl
+                sx={{ marginTop: "24px", marginLeft: "16px" }}
+                size="small"
+                required
+                variant="outlined"
+              >
+                <InputLabel htmlFor="outlined-adornment-password">
+                  Confirm your password
+                </InputLabel>
+                <OutlinedInput
+                  id="passwordVerify"
+                  name="passwordVerify"
+                  onChange={handleChange}
+                  onBlur={handleChange}
+                  value={formData.passwordVerify}
+                  type={showPasswordVerify ? "text" : "password"}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPasswordVerify}
+                        onMouseDown={handleMouseDownPassword}
+                        edge="end"
+                      >
+                        {showPasswordVerify ? (
+                          <VisibilityOff />
+                        ) : (
+                          <Visibility />
+                        )}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                  label="Confirm your password"
+                />
+                {errorData.passwordVerify.length > 0 && (
+                  <FormHelperText error id="my-helper-text">
+                    {errorData.passwordVerify}
+                  </FormHelperText>
+                )}
+              </FormControl>
+            </Box>
+            <Button
+              sx={{ marginTop: "24px" }}
+              mt={4}
+              variant="contained"
+              type="submit"
+              disabled={
+                !Object.values(errorData).every((error) => error === "")
+              }
+              onClick={handleSubmit}
+            >
+              <Typography variant="body1">Change Password</Typography>
+            </Button>
+          </Box>
+        </form>
+      </Box>
+    </MainBodyContainer>
   );
->>>>>>> develop
 };
 
 export default ChangePassword;
