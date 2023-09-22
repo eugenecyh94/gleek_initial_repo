@@ -232,7 +232,7 @@ const ResetPassword = () => {
             </Button>
           </Box>
         </form>
-        <Box>IMAGE TO BE ADDED LATER</Box>
+        {/* <Box></Box> */}
       </Box>
     </div>
   );
