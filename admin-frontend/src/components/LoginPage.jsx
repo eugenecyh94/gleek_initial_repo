@@ -88,7 +88,7 @@ function LoginPage(props) {
   };
 
   return (
-    <div>
+    <Box marginTop={"64px"}>
       {!isLoading && authenticated ? (
         <Navigate to="/" replace="true" />
       ) : (
@@ -97,6 +97,7 @@ function LoginPage(props) {
           flexDirection="row"
           justifyContent="space-evenly"
           alignItems="center"
+          p={5}
         >
           <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
             <Alert
@@ -219,7 +220,7 @@ function LoginPage(props) {
           <Box>IMAGE TO BE ADDED LATER</Box>
         </Box>
       )}
-    </div>
+    </Box>
   );
 }
 

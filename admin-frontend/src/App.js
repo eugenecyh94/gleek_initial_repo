@@ -17,6 +17,7 @@ import SocketConnection from "./utils/SocketConnection";
 import ForgotPassword from "./components/ForgotPassword";
 import AccountDetails from "./components/profile/AccountDetails";
 import AddAdminPage from "./components/admin/AddAdminPage";
+import ViewAllAdmins from "./components/admin/ViewAllAdmins";
 
 function App() {
   return (
@@ -49,15 +50,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <ViewAllVendors />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/addVendor"
-            element={
-              <ProtectedRoute>
-                <CreateVendorPage />
               </ProtectedRoute>
             }
           />
@@ -99,28 +91,21 @@ function App() {
           />
           <Route
             exact
-            path="/manageProfile/changePassword"
+            path="/viewClient/:clientId"
             element={
               <ProtectedRoute>
-                <ChangePassword />
+                <ClientDetails />
               </ProtectedRoute>
             }
           />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route
             exact
-            path="/manageProfile"
+            path="/adminTeam"
             element={
               <ProtectedRoute>
-                <AccountDetails />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/adminTeam/addAdmin"
-            element={
-              <ProtectedRoute>
-                <AddAdminPage />
+                <ViewAllAdmins />
               </ProtectedRoute>
             }
           />
@@ -133,16 +118,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            exact
-            path="/viewClient/:clientId"
-            element={
-              <ProtectedRoute>
-                <ClientDetails />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/login" element={<LoginPage />} />
           {/*for testing image upload component*/}
           <Route
             path="/uploadTest"

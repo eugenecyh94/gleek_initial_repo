@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 const ProtectedRoute = ({ children }) => {
   const navigate = useNavigate();
-  const { setAdmin, setAuthenticated, authenticated } = useAdminStore();
+  const { setAdmin, setAuthenticated, authenticated, admin } = useAdminStore();
 
   const [isLoading, setIsLoading] = useState(true); // Initial loading state
 
@@ -31,7 +31,18 @@ const ProtectedRoute = ({ children }) => {
     return null;
   }
 
-  return authenticated ? <div>{children}</div> : <div></div>;
+  console.log(children);
+
+  if (children.type.name === "AddAdminPage" && admin.role === "MANAGERIAL") {
+    return <div>{children}</div>;
+  } else if (
+    children.type.name === "AddAdminPage" &&
+    admin.role != "MANAGERIAL"
+  ) {
+    return navigate("/adminTeam");
+  } else {
+    return authenticated ? <div>{children}</div> : <div></div>;
+  }
 };
 
 export default ProtectedRoute;

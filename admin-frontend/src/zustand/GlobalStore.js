@@ -36,6 +36,7 @@ export const useAdminStore = create((set) => ({
   adminError: null,
   isLoading: false,
   token: null,
+  admins: null,
   setAdmin: (admin) => set({ admin }),
   setAuthenticated: (authenticated) => set({ authenticated }), // Use the argument
   login: async (email, password) => {
@@ -152,6 +153,21 @@ export const useAdminStore = create((set) => ({
       return false;
     }
   },
+  getAllAdmins: async () => {
+    set({ isLoading: true, adminError: null });
+    try {
+      const response = await AxiosConnect.get("/gleekAdmin");
+      const data = response.data;
+      console.log(data);
+      setTimeout(() => {
+        set({ isLoading: false, admins: response.data });
+      }, 500);
+      return data;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  },
 }));
 
 export const useActivityStore = create((set) => ({
@@ -211,26 +227,6 @@ export const useThemeStore = create((set) => ({
 }));
 
 export const useVendorStore = create((set) => ({
-  vendors: [],
-  isLoading: false,
-  getVendors: async () => {
-    try {
-      set({ isLoading: true });
-      const response = await AxiosConnect.get("/vendor/viewAllVendors");
-      set({ vendors: response.data });
-      set({ isLoading: false });
-    } catch (error) {
-      console.error(error);
-    }
-  },
-}));
-
-export const useImageUploadTestStore = create((set) => ({
-  imageList: [],
-  setImageList: (newImageList) => {
-    set({ imageList: newImageList });
-    console.log(useImageUploadTestStore.getState());
-  },
   vendors: [],
   vendor: null,
   isLoading: false,
@@ -313,4 +309,5 @@ export const useImageUploadTestStore = create((set) => ({
     set({ imageList: newImageList });
     console.log(useImageUploadTestStore.getState());
   },
+  vendors: [],
 }));

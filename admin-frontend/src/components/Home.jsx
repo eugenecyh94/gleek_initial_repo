@@ -1,16 +1,17 @@
 import { Toolbar } from "@mui/material";
 import Layout from "./Layout";
-import SideNavBar from "./navbar/SideNavBar";
-import { useAdminStore } from "../zustand/GlobalStore";
+import MainBodyContainer from "./common/MainBodyContainer";
 
 const Home = () => {
-  const { authenticated } = useAdminStore();
   return (
-    <Layout>
-      <Toolbar />
-      {authenticated ? <SideNavBar /> : <></>}
+    <MainBodyContainer
+      hasBackButton={false}
+      breadcrumbNames={[]}
+      breadcrumbLinks={[]}
+      currentBreadcrumbName={"Home"}
+    >
       Home
-    </Layout>
+    </MainBodyContainer>
   );
 };
 export default Home;

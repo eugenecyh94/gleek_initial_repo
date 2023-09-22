@@ -45,6 +45,7 @@ const HomePageNavBar = () => {
   return (
     <AppBar
       position="fixed"
+      elevation={0}
       sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
     >
       <Toolbar style={{ paddingLeft: 16, justifyContent: "space-between" }}>
