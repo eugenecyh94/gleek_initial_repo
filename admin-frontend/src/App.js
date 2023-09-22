@@ -99,6 +99,33 @@ function App() {
           />
           <Route
             exact
+            path="/manageProfile/changePassword"
+            element={
+              <ProtectedRoute>
+                <ChangePassword />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/manageProfile"
+            element={
+              <ProtectedRoute>
+                <AccountDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/adminTeam/addAdmin"
+            element={
+              <ProtectedRoute>
+                <AddAdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
             path="/viewAllClients"
             element={
               <ProtectedRoute>

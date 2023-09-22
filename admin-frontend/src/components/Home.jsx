@@ -4,13 +4,13 @@ import SideNavBar from "./navbar/SideNavBar";
 import { useAdminStore } from "../zustand/GlobalStore";
 
 const Home = () => {
-   const { authenticated } = useAdminStore();
-   return (
-      <Layout>
-         <Toolbar />
-         {authenticated ? <SideNavBar /> : <></>}
-         Home
-      </Layout>
-   );
+  const { authenticated } = useAdminStore();
+  return (
+    <Layout>
+      <Toolbar />
+      {authenticated ? <SideNavBar /> : <></>}
+      Home
+    </Layout>
+  );
 };
 export default Home;

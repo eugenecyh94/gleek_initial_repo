@@ -7,20 +7,20 @@ import {
   Grid,
   Avatar,
 } from "@mui/material";
-import AccountSidebar from "./AccountSidebar";
+import AccountSidebarVendor from "./AccountSidebarVendor";
 import { useTheme } from "@emotion/react";
 import AxiosConnect from "../../utils/AxiosConnect";
-import useClientStore from "../../zustand/ClientStore";
+import useVendorStore from "../../zustand/VendorStore";
 import useSnackbarStore from "../../zustand/SnackbarStore";
+
 function AccountDetails(props) {
+  const { setVendor } = useVendorStore();
   const [formData, setFormData] = useState();
-  const { openSnackbar } = useSnackbarStore();
-  const { setClient } = useClientStore();
   const [newProfilePictureData, setNewProfilePictureData] = useState({
     file: null,
     preview: null,
   });
-
+  const { openSnackbar, closeSnackbar } = useSnackbarStore();
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((prevData) => ({
@@ -52,26 +52,27 @@ function AccountDetails(props) {
   };
 
   const handleUploadProfilePicture = async (event) => {
-    event.preventDefault();
+    event.preventDefault()
     if (!newProfilePictureData.file) {
       console.error("No file has been attached");
       return;
     }
+
     const formData = new FormData();
     formData.append("image", newProfilePictureData.file);
     try {
       // Send the multipart form data using Axios
-      const response = await AxiosConnect.patchMultipart(
-        "/gleek/client/updateProfilePicture",
+      const responseStatus = await AxiosConnect.patchMultipart(
+        "/gleek/vendor/updateCompanyLogo",
         formData,
       );
-      console.log(response);
-
-      setClient(response.data.client);
-      openSnackbar("Uploaded image!", "success");
+      if (responseStatus) {
+        openSnackbar("Company Logo Updated!", "success");
+      }
+      setVendor(responseStatus.data.vendor);
     } catch (error) {
       console.error("Error uploading file:", error);
-      // Handle the error as needed (e.g., show a message to the user)
+      openSnackbar(error.response.data.msg, "error");
     }
   };
 
@@ -91,7 +92,7 @@ function AccountDetails(props) {
       width={"100%"}
     >
       <Box width={"30%"}>
-        <AccountSidebar />
+        <AccountSidebarVendor />
       </Box>
 
       <Box
@@ -123,7 +124,7 @@ function AccountDetails(props) {
                   : newProfilePictureData.preview
               }
             >
-              Gleek Client
+              Gleek Vendor
             </Avatar>
           </Grid>
           <Grid item xs={6}>

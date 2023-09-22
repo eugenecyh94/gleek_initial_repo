@@ -1,14 +1,10 @@
 import jwt from "jsonwebtoken";
-import VendorModel from "../model/vendorModel";
+import VendorModel from "../model/vendorModel.js";
 
 const secret = process.env.JWT_SECRET_VENDOR;
 
 export const verifyToken = async (req, res, next) => {
-  const token =
-    req.cookies.token ||
-    req.body.token ||
-    req.query.token ||
-    req.headers["x-access-token"];
+  const token = req.cookies.token;
 
   if (!token) {
     return res.status(403).send("A token is required for authentication");

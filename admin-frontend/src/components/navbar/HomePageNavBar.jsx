@@ -1,114 +1,108 @@
 import {
-   AppBar,
-   Avatar,
-   Box,
-   IconButton,
-   Menu,
-   MenuItem,
-   Toolbar,
-   Tooltip,
-   Typography,
-   useTheme,
+  AppBar,
+  Avatar,
+  Box,
+  IconButton,
+  Menu,
+  MenuItem,
+  Toolbar,
+  Tooltip,
+  Typography,
+  useTheme,
 } from "@mui/material";
 import { useState } from "react";
 import { useAdminStore } from "../../zustand/GlobalStore";
 import { Link, useNavigate } from "react-router-dom";
 
 const HomePageNavBar = () => {
-   const theme = useTheme();
-   const navigate = useNavigate();
-   const settings = ["Profile", "Account", "Dashboard", "Logout"];
-   const [anchorElUser, setAnchorElUser] = useState(null);
-   const { authenticated, admin, logout, login } = useAdminStore();
+  const theme = useTheme();
+  const navigate = useNavigate();
+  const settings = ["Profile", "Account", "Dashboard", "Logout"];
+  const [anchorElUser, setAnchorElUser] = useState(null);
+  const { authenticated, admin, logout, login } = useAdminStore();
 
-   const handleOpenUserMenu = (event) => {
-      setAnchorElUser(event.currentTarget);
-   };
+  const handleOpenUserMenu = (event) => {
+    setAnchorElUser(event.currentTarget);
+  };
 
-   const handleLogout = async (event) => {
-      navigate("/");
-      const response = await logout();
-   };
+  const handleLogout = async (event) => {
+    navigate("/");
+    const response = await logout();
+  };
 
-   const handleCloseUserMenu = () => {
-      setAnchorElUser(null);
-   };
-   const stringAvatar = () => {
-      const initials = admin.name[0].toUpperCase();
-      return {
-         sx: {
-            bgcolor: theme.palette.light_purple.main,
-         },
-         children: initials,
-      };
-   };
-   return (
-      <AppBar
-         position="fixed"
-         sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-         <Toolbar style={{ paddingLeft: 16, justifyContent: "space-between" }}>
-            <Link to="/" style={{ all: "unset", cursor: "pointer" }}>
-               <Typography
-                  fontSize={25}
-                  fontWeight={700}
-                  noWrap
-                  component="div">
-                  Gleek Admin
-               </Typography>
-            </Link>
-            {authenticated ? (
-               <Box sx={{ flexGrow: 0 }}>
-                  <Tooltip title="Open settings">
-                     <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                        <Avatar {...stringAvatar()} />
-                     </IconButton>
-                  </Tooltip>
-                  <Menu
-                     sx={{ mt: "45px" }}
-                     id="menu-appbar"
-                     anchorEl={anchorElUser}
-                     anchorOrigin={{
-                        vertical: "top",
-                        horizontal: "right",
-                     }}
-                     keepMounted
-                     transformOrigin={{
-                        vertical: "top",
-                        horizontal: "right",
-                     }}
-                     open={Boolean(anchorElUser)}
-                     onClose={handleCloseUserMenu}>
-                     <MenuItem key="Logout" onClick={handleCloseUserMenu}>
-                        <Link
-                           onClick={handleLogout}
-                           style={{ all: "unset", cursor: "pointer" }}>
-                           <Typography
-                              textAlign="center"
-                              onClick={handleLogout}>
-                              Logout
-                           </Typography>
-                        </Link>
-                     </MenuItem>
-                     <MenuItem
-                        key="manageProfile"
-                        onClick={handleCloseUserMenu}>
-                        <Link
-                           to="/manageProfile"
-                           style={{ all: "unset", cursor: "pointer" }}>
-                           <Typography textAlign="center">
-                              Manage Profile
-                           </Typography>
-                        </Link>
-                     </MenuItem>
-                  </Menu>
-               </Box>
-            ) : (
-               <Link to="/login" style={{ all: "unset", cursor: "pointer" }}>
-                  <Typography textAlign="center">Login</Typography>
-               </Link>
-            )}
-         </Toolbar>
-      </AppBar>
-   );
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
+  const stringAvatar = () => {
+    const initials = admin.name[0].toUpperCase();
+    return {
+      sx: {
+        bgcolor: theme.palette.light_purple.main,
+      },
+      children: initials,
+    };
+  };
+  return (
+    <AppBar
+      position="fixed"
+      sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+    >
+      <Toolbar style={{ paddingLeft: 16, justifyContent: "space-between" }}>
+        <Link to="/" style={{ all: "unset", cursor: "pointer" }}>
+          <Typography fontSize={25} fontWeight={700} noWrap component="div">
+            Gleek Admin
+          </Typography>
+        </Link>
+        {authenticated ? (
+          <Box sx={{ flexGrow: 0 }}>
+            <Tooltip title="Open settings">
+              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                <Avatar {...stringAvatar()} />
+              </IconButton>
+            </Tooltip>
+            <Menu
+              sx={{ mt: "45px" }}
+              id="menu-appbar"
+              anchorEl={anchorElUser}
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              open={Boolean(anchorElUser)}
+              onClose={handleCloseUserMenu}
+            >
+              <MenuItem key="Logout" onClick={handleCloseUserMenu}>
+                <Link
+                  onClick={handleLogout}
+                  style={{ all: "unset", cursor: "pointer" }}
+                >
+                  <Typography textAlign="center" onClick={handleLogout}>
+                    Logout
+                  </Typography>
+                </Link>
+              </MenuItem>
+              <MenuItem key="manageProfile" onClick={handleCloseUserMenu}>
+                <Link
+                  to="/manageProfile"
+                  style={{ all: "unset", cursor: "pointer" }}
+                >
+                  <Typography textAlign="center">Manage Profile</Typography>
+                </Link>
+              </MenuItem>
+            </Menu>
+          </Box>
+        ) : (
+          <Link to="/login" style={{ all: "unset", cursor: "pointer" }}>
+            <Typography textAlign="center">Login</Typography>
+          </Link>
+        )}
+      </Toolbar>
+    </AppBar>
+  );
 };
 export default HomePageNavBar;
