@@ -148,7 +148,7 @@ const CreateVendorForm = ({ vendorTypes, addVendor, admin }) => {
         acc[platform] = url;
         return acc;
       },
-      {}
+      {},
     );
 
     setFormData((prevData) => ({
