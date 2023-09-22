@@ -33,4 +33,16 @@ AxiosConnect.patch = (command, req) => {
   return axios(options);
 };
 
+AxiosConnect.patchMultipart = (command, req) => {
+  console.log(uri + command);
+  const options = {
+    method: "PATCH",
+    url: uri + command,
+    data: req,
+    withCredentials: true,
+    headers: { "Content-Type": "multipart/form-data" },
+  };
+  return axios(options);
+};
+
 export default AxiosConnect;

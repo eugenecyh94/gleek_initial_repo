@@ -10,22 +10,6 @@ const Layout = ({ children }) => {
   const navBarColumn = authenticated ? 2.5 : 0;
   console.log(mainContentColumn);
   console.log(navBarColumn);
-  // return authenticated ? (
-  //   <Box sx={{ display: "flex" }}>
-  //     <HomePageNavBar />
-  //     <SideNavBar />
-  //     <Box
-  //       component="main"
-  //       display="flex"
-  //       flexDirection="row"
-  //       justifyContent="space-evenly"
-  //       alignItems="center"
-  //       sx={{ flexGrow: 1, p: 3 }}
-  //     >
-  //       <Box flex={1}>{children}</Box>
-  //     </Box>
-  //   </Box>
-  // ) : (
   return (
     <Box minHeight="100vh" flexDirection="column" display="flex">
       <Grid xs={12}>

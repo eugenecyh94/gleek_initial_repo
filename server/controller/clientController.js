@@ -13,6 +13,13 @@ import {
   createClientConsent,
   updateConsent,
 } from "../service/consentService.js";
+import sendMail from "../util/sendMail.js";
+import { s3ImageGetService } from "../service/s3ImageGetService.js";
+import {
+  createClientWelcomeMailOptions,
+  createResendVerifyEmailOptions,
+  createVerifyEmailOptions,
+} from "../util/sendMailOptions.js";
 
 const secret = process.env.JWT_SECRET_ClIENT;
 
@@ -43,6 +50,13 @@ const setCookieAndRespond = (res, token, client) => {
       secure: true, // Use secure cookies in production
       path: "/", // Set the path to your application root
     });
+    res.cookie("userRole", "Client", {
+      httpOnly: true,
+      maxAge: 3600000,
+      sameSite: "None",
+      secure: true,
+      path: "/",
+    });
     console.log(client);
     res.status(200).json({ token, client: client });
   } catch (cookieError) {
@@ -54,6 +68,8 @@ const setCookieAndRespond = (res, token, client) => {
 /**
  * Handles user registration by creating a new client and associated consent.
  * If an error occurs during the process, the transaction will be rolled back.
+ * Sends welcome to Gleek email.
+ * Sends verify email email.
  */
 export const postRegister = async (req, res) => {
   console.log("clientController postRegister(): req.body", req.body);
@@ -68,20 +84,15 @@ export const postRegister = async (req, res) => {
     }
 
     const { acceptTermsAndConditions, ...newClient } = req.body;
-    console.log(
-      "clientController postRegister(): acceptTermsAndConditions",
-      acceptTermsAndConditions,
-    );
 
     if (await clientExists(newClient.email)) {
       return res.status(409).json({
-        errors: [{ msg: "Client already exists! Please Login instead." }],
+        errors: [{ msg: "Email already exists!" }],
       });
     }
 
     const createdClient = await createClient(newClient, session);
 
-    // Encrypt the user's password and save it to the database
     await encryptUserPassword(createdClient, newClient.password);
 
     // Create the Consent model and link to Client
@@ -89,11 +100,17 @@ export const postRegister = async (req, res) => {
       createdClient.id,
       acceptTermsAndConditions,
       session,
+      session,
     );
 
     const token = await generateJwtToken(createdClient.id);
+
     await session.commitTransaction();
+
+    sendMail(createClientWelcomeMailOptions(createdClient));
+    sendMail(createVerifyEmailOptions(createdClient, token));
     session.endSession();
+
     const { password, ...clientWithoutPassword } = createdClient.toObject();
     setCookieAndRespond(res, token, clientWithoutPassword);
   } catch (err) {
@@ -127,6 +144,11 @@ export const postLogin = async (req, res) => {
           .send({ msg: "Your registration has been rejected." });
       }
 
+      if (client.photo) {
+        const preSignedUrl = await s3ImageGetService(client.photo);
+        client.preSignedPhoto = preSignedUrl;
+      }
+
       const token = await generateJwtToken(client.id);
       const { password, ...clientWithoutPassword } = client.toObject();
 
@@ -141,21 +163,26 @@ export const postLogin = async (req, res) => {
 
 export const validateToken = async (req, res) => {
   const token = req.cookies.token;
-
   if (!token) {
     return res.status(403).send("A token is required for authentication");
   }
 
   try {
     const decoded = jwt.verify(token, secret);
-
     const client = await Client.findById(decoded.client.id);
 
     if (!client) {
       return res.status(401).send("Client not found");
     }
+
+    if (client.photo) {
+      const preSignedUrl = await s3ImageGetService(client.photo);
+      client.preSignedPhoto = preSignedUrl;
+    }
+
     const { password, ...clientWithoutPassword } = client.toObject();
-    res.status(200).json({ token, client: clientWithoutPassword });
+
+    return res.status(200).json({ token, client: clientWithoutPassword });
   } catch (err) {
     // If verification fails (e.g., due to an invalid or expired token), send an error response
     return res.status(401).send("Invalid Token");
@@ -164,6 +191,7 @@ export const validateToken = async (req, res) => {
 
 export const clearCookies = async (req, res) => {
   res.clearCookie("token");
+  res.clearCookie("userRole");
   res.status(200).end();
 };
 
@@ -195,6 +223,7 @@ export const postChangePassword = async (req, res) => {
       { _id: client.id },
       { password: hashed },
       { new: true },
+      { new: true },
     );
 
     return res.status(200).json("Password successfully changed.");
@@ -217,7 +246,7 @@ export const updateClientAccountDetails = async (req, res) => {
     const body = req.body;
     console.log("updateClientAccountDetails: body", body);
 
-    // remove passwword and email in case it is sent along in the body
+    // remove password and email in case it is sent along in the body
     const { password, email, ...updateData } = body;
 
     console.log("updateClientAccountDetails: UpdateData", updateData);
@@ -293,5 +322,101 @@ export const getConsentSettings = async (req, res) => {
   } catch (e) {
     console.error(e);
     res.status(500).json("Server Error");
+  }
+};
+
+export const updateProfilePicture = async (req, res) => {
+  try {
+    const client = req.user;
+    const reqFile = req.file;
+    console.log("req client", client);
+    console.log("req file", reqFile);
+
+    let fileS3Location;
+
+    if (reqFile === undefined) {
+      console.log("No image files uploaded");
+    } else {
+      console.log("Retrieving uploaded images url");
+      fileS3Location = req.file.location;
+    }
+
+    console.log(fileS3Location);
+    console.log("client id", client._id);
+
+    const updatedClient = await Client.findOneAndUpdate(
+      { _id: client._id },
+      { photo: fileS3Location },
+      { new: true },
+    );
+    res.status(200).json({
+      success: true,
+      message: "Your profile picture is successfully updated!",
+      updatedProfilePicLink: updatedClient.photo,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json("Server Error");
+  }
+};
+
+/*
+ * Client clicks the link in their email to verify
+ */
+export const verifyEmail = async (req, res) => {
+  const token = req.params.token;
+
+  if (!token) {
+    return res
+      .status(403)
+      .json({ status: "error", message: "Token Not Found!" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, secret);
+    const requestorClient = await Client.findById(decoded.client.id);
+
+    if (requestorClient.verified) {
+      return res.status(200).json({
+        status: "already-verified",
+        msg: "Your email has already been verified!",
+      });
+    }
+
+    requestorClient.verified = true;
+    await requestorClient.save();
+
+    return res.status(200).json({
+      status: "success",
+      msg: "Client email has been verified. Welcome to Gleek!",
+      client: requestorClient,
+    });
+  } catch (err) {
+    if (err.name === "JsonWebTokenError") {
+      return res.status(200).json({
+        status: "token-expired",
+        msg: "Token has expired. Please request a new verification email.",
+      });
+    }
+
+    console.error("Token verification error:", err);
+    return res.status(500).json({ status: "error", msg: "Server Error" });
+  }
+};
+
+export const resendVerifyEmail = async (req, res) => {
+  try {
+    const client = req.user;
+
+    const token = await generateJwtToken(client.id);
+
+    sendMail(createResendVerifyEmailOptions(client, token));
+
+    return res.status(200).json({
+      msg: "Verification email resent.",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ status: "error", msg: "Server Error" });
   }
 };

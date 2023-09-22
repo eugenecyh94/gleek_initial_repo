@@ -21,7 +21,7 @@ export const verifyToken = async (req, res, next) => {
     const user = await Client.findById(decoded.client.id);
 
     if (!user) {
-      return res.status(401).send("User not found");
+      return res.status(401).send("Client not found");
     }
 
     // Attach user data to the request
@@ -33,5 +33,3 @@ export const verifyToken = async (req, res, next) => {
     return res.status(401).send("Invalid Token");
   }
 };
-
-export default verifyToken;

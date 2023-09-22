@@ -33,3 +33,22 @@ export const getClientConsent = async (clientId) => {
   const clientConsent = await Consent.findOne({ client: clientId });
   return clientConsent;
 };
+
+export const createVendorConsent = async (
+  vendorId,
+  acceptTermsAndConditions,
+  session,
+) => {
+  const consentData = {
+    vendor: vendorId,
+    acceptTermsAndConditions,
+    lastUpdated: Date.now(),
+  };
+  const create = await Consent.create([consentData], session);
+  return create[0];
+};
+
+export const getVendorConsent = async (vendorId) => {
+  const vendorConsent = await Consent.findOne({ vendor: vendorId });
+  return vendorConsent;
+};

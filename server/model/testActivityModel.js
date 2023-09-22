@@ -5,6 +5,9 @@ const activityTestSchema = mongoose.Schema({
   images: {
     type: Array,
   },
+  preSignedImages: {
+    type: Array,
+  },
 });
 
 const TestActivityModel = mongoose.model(

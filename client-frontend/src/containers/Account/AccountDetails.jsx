@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, TextField, Button, Typography, Grid, Alert } from "@mui/material";
 import AccountSidebar from "./AccountSidebar";
 import useClientStore from "../../zustand/ClientStore";
@@ -57,6 +57,10 @@ function AccountDetails(props) {
     }
   };
 
+  useEffect(() => {
+    console.log(client);
+  }, []);
+
   return (
     <Box
       display="flex"
@@ -77,7 +81,6 @@ function AccountDetails(props) {
         p={6}
         flexWrap={"wrap"}
       >
-
         <Box
           display="flex"
           flexDirection="column"
