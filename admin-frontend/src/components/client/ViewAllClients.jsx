@@ -5,7 +5,6 @@ import { useEffect } from "react";
 import { useClientStore } from "../../zustand/GlobalStore";
 import MainBodyContainer from "../common/MainBodyContainer";
 import ClientsTable from "./ClientsTable";
-import BreadCrumbsBar from "../common/BreadCrumbsBar";
 
 const ViewAllClients = () => {
   const theme = useTheme();
@@ -18,12 +17,7 @@ const ViewAllClients = () => {
   }, [getClients]);
 
   return (
-    // <MainBodyContainer hasBackButton={false} breadcrumbNames={[]} breadcrumbLinks={[]} currentBreadcrumbName={"View All Clients"}>
-    <Box
-    display="flex"
-    flexDirection="column"
-    justifyContent="space-evenly"
-    alignItems="center">
+    <MainBodyContainer hasBackButton={false} breadcrumbNames={[]} breadcrumbLinks={[]} currentBreadcrumbName={"View All Clients"}>
       <Typography
         fontSize={25}
         fontWeight={700}
@@ -41,8 +35,7 @@ const ViewAllClients = () => {
           updateClient={updateClient}
         ></ClientsTable>
       )}
-      </Box>
-      // </MainBodyContainer>
+      </MainBodyContainer>
   );
 };
 

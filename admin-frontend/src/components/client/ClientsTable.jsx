@@ -121,13 +121,14 @@ const ClientsTable = ({ clients, updateClient }) => {
   }
 
   return (
-    <Box>
+    <Box overflow="hidden">
       <Tabs value={selectedTab} onChange={handleTabChange} centered>
         <Tab label="Approved" value="approvedTab" />
         <Tab label="To be Approved" value="pendingTab" />
         <Tab label="Rejected" value="rejectedTab" />
       </Tabs>
-      <div style={{ height: 500, width: "100%" }}>
+      {/* <div style={{ height: 500, width: "100%" }}> */}
+      <div style = {{ flex:1 }}>
       {/* <Box flexDirection="column" justifyItems = "center" display="flex" width={"50%"} height={500}> */}
         <DataGrid
           initialState={{
