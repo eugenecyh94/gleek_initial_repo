@@ -26,75 +26,138 @@ export const updateAllActivity = (newAllActivities) => {
 };
 
 export const useSelectedNavItemStore = create((set) => ({
-  selectedItem: "Home",
-  setSelectedItem: (item) => set({ selectedItem: item }),
+   selectedItem: "Home",
+   setSelectedItem: (item) => set({ selectedItem: item }),
 }));
 
 export const useAdminStore = create((set) => ({
-  authenticated: false,
-  admin: null,
-  adminError: null,
-  isLoading: false,
-  token: null,
-  setAdmin: (admin) => set({ admin }),
-  setAuthenticated: (authenticated) => set({ authenticated }), // Use the argument
-  login: async (email, password) => {
-    set({ isLoading: true, adminError: null });
-    try {
-      const response = await AxiosConnect.post("/gleekAdmin/login", {
-        email: email,
-        password: password,
-      });
-      const data = response.data;
+   authenticated: false,
+   admin: null,
+   adminError: null,
+   isLoading: false,
+   token: null,
+   setAdmin: (admin) => set({ admin }),
+   setAuthenticated: (authenticated) => set({ authenticated }), // Use the argument
+   login: async (email, password) => {
+      set({ isLoading: true, adminError: null });
+      try {
+         const response = await AxiosConnect.post("/gleekAdmin/login", {
+            email: email,
+            password: password,
+         });
+         const data = response.data;
+         set({
+            admin: data.admin,
+            authenticated: true,
+            token: data.token,
+         });
+         setTimeout(() => {
+            set({ isLoading: false });
+         }, 500);
+         return true;
+      } catch (error) {
+         console.log(error);
+         setTimeout(() => {
+            set({
+               adminError: error,
+               isLoading: false,
+            });
+         }, 500);
+         return false;
+      }
+   },
+   logout: async () => {
+      // Implement your logout logic and update authenticated state
       set({
-        admin: data.admin,
-        authenticated: true,
-        token: data.token,
+         admin: null, // Clear admin data
+         authenticated: false, // Set authenticated to false
       });
-      setTimeout(() => {
-        set({ isLoading: false });
-      }, 500);
-      return true;
-    } catch (error) {
-      console.log(error);
-      setTimeout(() => {
-        set({
-          adminError: error,
-          isLoading: false,
-        });
-      }, 500);
-      return false;
-    }
-  },
-  logout: () => {
-    // Implement your logout logic and update authenticated state
-    set({
-      admin: null, // Clear admin data
-      authenticated: false, // Set authenticated to false
-    });
-  },
-  changePassword: async (password) => {
-    try {
-      const response = await AxiosConnect.post("/gleekAdmin/changePassword", {
-        password: password,
-      });
-      const data = response.data;
-      set({ admin: data.admin, authenticated: true });
-      setTimeout(() => {
-        set({ isLoading: false });
-      }, 500);
-      return true;
-    } catch (error) {
-      console.log(error);
-      setTimeout(() => {
-        set({
-          adminError: error,
-          isLoading: false,
-        });
-      }, 500);
-      return false;
-    }
-  },
+      try {
+         const response = await AxiosConnect.get("/gleekAdmin/logout");
+         setTimeout(() => {
+            set({
+               isLoading: false,
+               admin: null,
+               authenticated: false,
+               adminError: null,
+               token: null,
+            });
+         }, 500);
+      } catch (err) {
+         console.log("ERROR: ", err.message);
+      }
+   },
+   changePassword: async (password) => {
+      try {
+         const response = await AxiosConnect.post(
+            "/gleekAdmin/changePassword",
+            {
+               password: password,
+            }
+         );
+         const data = response.data;
+         set({ admin: data.admin, authenticated: true });
+         setTimeout(() => {
+            set({ isLoading: false });
+         }, 500);
+         return true;
+      } catch (error) {
+         console.log(error);
+         setTimeout(() => {
+            set({
+               adminError: error,
+               isLoading: false,
+            });
+         }, 500);
+         return false;
+      }
+   },
+   recoverPassword: async (email) => {
+      try {
+         const response = await AxiosConnect.post(
+            "/gleekAdmin/recoverPassword",
+            {
+               email: email,
+            }
+         );
+         const data = response.data;
+         setTimeout(() => {
+            set({ isLoading: false });
+         }, 500);
+         return data;
+      } catch (error) {
+         console.log(error);
+         setTimeout(() => {
+            set({
+               isLoading: false,
+            });
+         }, 500);
+         return false;
+      }
+   },
+   register: async (newAdmin) => {
+      set({ isLoading: true, adminError: null });
+      try {
+         const response = await AxiosConnect.post(
+            "/gleekAdmin/register",
+            newAdmin
+         );
+         const data = response.data;
+         console.log(data);
+         setTimeout(() => {
+            set({ isLoading: false });
+         }, 500);
+         return true;
+      } catch (error) {
+         console.log(error);
+         setTimeout(() => {
+            set({
+               isLoading: false,
+            });
+         }, 500);
+         return false;
+      }
+   },
 }));
 
 export const useActivityStore = create((set) => ({
@@ -140,17 +203,64 @@ export const useThemeStore = create((set) => ({
 }));
 
 export const useVendorStore = create((set) => ({
-  vendors: [],
+   vendors: [],
+   isLoading: false,
+   getVendors: async () => {
+      try {
+         set({ isLoading: true });
+         const response = await AxiosConnect.get("/vendor/viewAllVendors");
+         set({ vendors: response.data });
+         set({ isLoading: false });
+      } catch (error) {
+         console.error(error);
+      }
+   },
+}));
+
+export const useClientStore = create((set) => ({
+  clients: [],
   isLoading: false,
-  getVendors: async () => {
+  getClients: async () => {
     try {
       set({ isLoading: true });
-      const response = await AxiosConnect.get("/vendor/viewAllVendors");
-      set({ vendors: response.data });
+      const response = await AxiosConnect.get("/client/getAllClients");
+      set({ clients: response.data });
       set({ isLoading: false });
     } catch (error) {
       console.error(error);
     }
+  },
+  updateClient: async (id, payload) => {
+    try {
+      set(() => ({ isLoading: true }));
+      await AxiosConnect.patch("client/update", id, payload);
+      const response = await AxiosConnect.get("/client/getAllClients");
+      set({ clients: response.data });
+      set(() => ({ isLoading: false }));
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  clientDetails: {},
+  getClientDetails: async (clientId) => {
+    try {
+      set({ isLoading: true });
+      const response = await AxiosConnect.get(
+        `/client/getClientDetails/${clientId}`,
+      );
+      set({ clientDetails: response.data });
+      set({ isLoading: false });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+}));
+
+export const useImageUploadTestStore = create((set) => ({
+  imageList: [],
+  setImageList: (newImageList) => {
+    set({ imageList: newImageList });
+    console.log(useImageUploadTestStore.getState());
   },
 }));
 
