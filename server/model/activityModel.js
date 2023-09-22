@@ -68,6 +68,9 @@ const activitySchema = new mongoose.Schema({
   },
   isPowerpointRequired: { type: String, enum: Object.values(PPT_REQUIRED) },
   popupItemsSold: { type: String },
+  preSignedImages: {
+    type: Array,
+  },
 });
 
 const ActivityModel = mongoose.model("Activity", activitySchema, "activities");

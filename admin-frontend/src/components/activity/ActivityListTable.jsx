@@ -167,6 +167,10 @@ const ActivityListTable = (allActivities) => {
   const handleCreateButtonClick = () => {
     navigate("/createActivity");
   };
+  const handleRowClick = (activity) => {
+    console.log("clicked", activity._id);
+    navigate(`/viewActivity/${activity._id}`);
+  };
 
   return (
     <Box>
@@ -214,6 +218,7 @@ const ActivityListTable = (allActivities) => {
             toolbar: GridToolbarFilterButton,
           }}
           getRowHeight={() => "auto"}
+          onRowClick={(params) => handleRowClick(params.row)}
         />
       </div>
     </Box>
