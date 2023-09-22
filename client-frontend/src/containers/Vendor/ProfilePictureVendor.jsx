@@ -52,7 +52,7 @@ function AccountDetails(props) {
   };
 
   const handleUploadProfilePicture = async (event) => {
-    event.preventDefault()
+    event.preventDefault();
     if (!newProfilePictureData.file) {
       console.error("No file has been attached");
       return;
