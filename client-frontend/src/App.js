@@ -70,7 +70,14 @@ function App() {
               </ClientProtectedRoute>
             }
           />
-
+          <Route
+            path="/client/verifyEmail"
+            element={
+              <ClientProtectedRoute>
+                <VerifyEmail />
+              </ClientProtectedRoute>
+            }
+          />
           <Route
             path="/client/verifyEmail/:token"
             element={

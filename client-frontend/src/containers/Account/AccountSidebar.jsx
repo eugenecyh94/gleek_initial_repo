@@ -69,7 +69,7 @@ function AccountSidebar(props) {
         flexDirection="column"
         alignItems="center"
         justifyContent="center"
-        padding={2} 
+        padding={2}
       >
         {client?.status === "PENDING" && (
           <Alert severity="warning">
@@ -82,10 +82,18 @@ function AccountSidebar(props) {
         )}
 
         <Box marginTop={2}>
-          <Chip
-            icon={<MailOutlineIcon />}
-            label={client?.verified ? "Verified" : "Unverified"}
-          />
+          {client?.verified ? (
+            <Chip icon={<MailOutlineIcon />} label="Verified" />
+          ) : (
+            <Chip
+              component="a"
+              href="/client/verifyEmail"
+              icon={<MailOutlineIcon />}
+              label="Unverified"
+              variant="outlined"
+              clickable
+            />
+          )}
         </Box>
       </Box>
       <List>

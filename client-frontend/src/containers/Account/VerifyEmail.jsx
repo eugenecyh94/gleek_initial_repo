@@ -10,6 +10,8 @@ import useClientStore from "../../zustand/ClientStore";
 import useSnackbarStore from "../../zustand/SnackbarStore";
 import { CheckCircleOutline } from "@mui/icons-material";
 
+// TODO: Look into: Verification will not work if the user is signed out of their account.
+
 function VerifyEmail() {
   const { token } = useParams();
   const [isLoading, setIsLoading] = useState(true);
@@ -19,6 +21,10 @@ function VerifyEmail() {
 
   useEffect(() => {
     const getVerifyEmail = async () => {
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
       try {
         const response = await verifyEmail(token);
 
@@ -96,11 +102,26 @@ function VerifyEmail() {
           </div>
         )}
 
-        {status === "error" && (
+        {status === "token-expired" && (
           <div>
-            <Typography variant="h4">Error</Typography>
+            <Typography variant="h4">Expired Link</Typography>
+            <Typography variant="body1">Your email link has expired</Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              component={Link}
+              onClick={resendVerificationEmail}
+            >
+              Request New Verification
+            </Button>
+          </div>
+        )}
+
+        {!token && (
+          <div>
+            <Typography variant="h4">Verification Email Sent</Typography>
             <Typography variant="body1">
-              There was an error verifying your email.
+              An email has been sent to verify your account.
             </Typography>
             <Button
               variant="contained"
