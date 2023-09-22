@@ -13,6 +13,7 @@ import {
   createClientConsent,
   updateConsent,
 } from "../service/consentService.js";
+import { s3ImageGetService } from "../service/s3ImageGetService.js";
 
 const secret = process.env.JWT_SECRET_ClIENT;
 
@@ -83,7 +84,7 @@ export const postRegister = async (req, res) => {
 
     if (await clientExists(newClient.email)) {
       return res.status(409).json({
-        errors: [{ msg: "Client already exists! Please Login instead." }],
+        errors: [{ msg: "Email already exists!" }],
       });
     }
 
@@ -136,6 +137,11 @@ export const postLogin = async (req, res) => {
           .send({ msg: "Your registration has been rejected." });
       }
 
+      if (client.photo) {
+        const preSignedUrl = await s3ImageGetService(client.photo);
+        client.preSignedPhoto = preSignedUrl;
+      }
+
       const token = await generateJwtToken(client.id);
       const { password, ...clientWithoutPassword } = client.toObject();
 
@@ -156,12 +162,19 @@ export const validateToken = async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, secret);
-
     const client = await Client.findById(decoded.client.id);
+
     if (!client) {
       return res.status(401).send("Client not found");
     }
+
+    if (client.photo) {
+      const preSignedUrl = await s3ImageGetService(client.photo);
+      client.preSignedPhoto = preSignedUrl;
+    }
+
     const { password, ...clientWithoutPassword } = client.toObject();
+
     return res.status(200).json({ token, client: clientWithoutPassword });
   } catch (err) {
     // If verification fails (e.g., due to an invalid or expired token), send an error response
