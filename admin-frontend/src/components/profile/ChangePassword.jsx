@@ -19,6 +19,7 @@ import { useNavigate } from "react-router-dom";
 import { useAdminStore } from "../../zustand/GlobalStore";
 import Layout from "../Layout";
 import ManageProfileSidebar from "./ManageProfileSidebar";
+import MainBodyContainer from "../common/MainBodyContainer";
 
 const ChangePassword = () => {
    // themes
@@ -127,6 +128,7 @@ const ChangePassword = () => {
       }
    };
    return (
+      <MainBodyContainer hasBackButton={true} breadcrumbNames={["Account Details"]} breadcrumbLinks = {["/manageProfile"]} currentBreadcrumbName={"Change Password"}>
       <Box
          display="flex"
          flexDirection="row"
@@ -244,6 +246,7 @@ const ChangePassword = () => {
             </Box>
          </form>
       </Box>
+      </MainBodyContainer>
    );
 };
 

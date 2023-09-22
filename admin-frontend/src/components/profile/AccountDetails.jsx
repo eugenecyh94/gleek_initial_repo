@@ -10,10 +10,12 @@ import {
 import useClientStore, { useAdminStore } from "../../zustand/GlobalStore";
 import ManageProfileSidebar from "./ManageProfileSidebar";
 import dayjs from "dayjs";
+import MainBodyContainer from "../common/MainBodyContainer";
 
 function AccountDetails(props) {
    const { admin } = useAdminStore();
    return (
+      <MainBodyContainer hasBackButton={false} breadcrumbNames={[]} currentBreadcrumbName={"Account Details"}>
       <Box
          display="flex"
          flexDirection="row"
@@ -104,6 +106,7 @@ function AccountDetails(props) {
             </Grid>
          </Box>
       </Box>
+      </MainBodyContainer>
    );
 }
 
