@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import axios from "axios";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
-import AxiosConnect from "../../utils/AxiosConnect";
+import AxiosConnect from "../../../utils/AxiosConnect";
 import { Box } from "@mui/material";
-import useClientStore from "../../zustand/ClientStore";
-import useSnackbarStore from "../../zustand/SnackbarStore";
+import useClientStore from "../../../zustand/ClientStore";
+import useSnackbarStore from "../../../zustand/SnackbarStore";
 import { CheckCircleOutline } from "@mui/icons-material";
 
 // TODO: Look into: Verification will not work if the user is signed out of their account.

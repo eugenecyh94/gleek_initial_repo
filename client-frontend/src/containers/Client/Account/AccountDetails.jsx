@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Box, TextField, Button, Typography, Grid, Alert } from "@mui/material";
 import AccountSidebar from "./AccountSidebar";
-import useClientStore from "../../zustand/ClientStore";
-import useSnackbarStore from "../../zustand/SnackbarStore";
-import { validator } from "../../utils/ClientFieldsValidator";
+import useClientStore from "../../../zustand/ClientStore";
+import useSnackbarStore from "../../../zustand/SnackbarStore";
+import { validator } from "../../../utils/ClientFieldsValidator";
 
 function AccountDetails(props) {
   const { client, updateAccount, clientError } = useClientStore();

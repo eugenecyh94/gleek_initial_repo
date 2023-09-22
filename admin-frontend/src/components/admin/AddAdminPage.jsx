@@ -19,6 +19,7 @@ import { useTheme } from "@mui/material/styles";
 import LockPersonIcon from "@mui/icons-material/LockPerson";
 import { useNavigate } from "react-router-dom";
 import { useAdminStore } from "../../zustand/GlobalStore";
+import MainBodyContainer from "../common/MainBodyContainer";
 
 const AddAdminPage = () => {
   // themes
@@ -119,8 +120,8 @@ const AddAdminPage = () => {
   };
 
   return (
-    <Box>
-      <Toolbar />
+    <MainBodyContainer hasBackButton={true} breadcrumbNames={["View All Admin"]} breadcrumbLinks={["/adminTeam"]} currentBreadcrumbName={"Add Admin"}> 
+      
       <Box
         display="flex"
         width={"80%"}
@@ -198,7 +199,7 @@ const AddAdminPage = () => {
           </Button>
         </form>
       </Box>
-    </Box>
+    </MainBodyContainer>
   );
 };
 

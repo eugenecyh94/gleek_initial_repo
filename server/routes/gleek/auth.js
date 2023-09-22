@@ -1,15 +1,13 @@
 import express from "express";
 import { check } from "express-validator";
 import {
-  postRegister,
-  postLogin,
-  validateToken,
   clearCookies,
-  postChangePassword,
-  updateClientAccountDetails,
+  postLogin,
+  postRegister,
+  recoverPasswordMail,
+  resetPasswordRedirect,
+  validateToken,
 } from "../../controller/clientController.js";
-import shopRoutes from "./shop.js";
-import { verifyToken } from "../../middleware/clientAuth.js";
 const router = express.Router();
 
 /*
@@ -39,5 +37,8 @@ router.post(
 router.post("/validateToken", validateToken);
 
 router.get("/logout", clearCookies);
+
+router.post("/recoverPassword", recoverPasswordMail);
+router.get("/resetPassword/:token", resetPasswordRedirect);
 
 export default router;

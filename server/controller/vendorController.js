@@ -102,6 +102,9 @@ export const postRegister = async (req, res) => {
     await session.commitTransaction();
     session.endSession();
     const { password, ...vendorWithoutPassword } = createdVendor.toObject();
+    vendorWithoutPassword.companySocials = Object.fromEntries(
+      vendorWithoutPassword.companySocials,
+    );
     setCookieAndRespond(res, token, vendorWithoutPassword);
   } catch (err) {
     console.error(err);
@@ -137,8 +140,12 @@ export const postLogin = async (req, res) => {
         const preSignedUrl = await s3ImageGetService(vendor.companyLogo);
         vendor.preSignedPhoto = preSignedUrl;
       }
+      // Convert the Map to a plain JavaScript object
       const token = await generateJwtToken(vendor.id);
       const { password, ...vendorWithoutPassword } = vendor.toObject();
+      vendorWithoutPassword.companySocials = Object.fromEntries(
+        vendorWithoutPassword.companySocials,
+      );
       setCookieAndRespond(res, token, vendorWithoutPassword);
     } else {
       res.status(400).send({ msg: "Invalid Credentials." });
@@ -170,6 +177,9 @@ export const validateToken = async (req, res) => {
     }
 
     const { password, ...vendorWithoutPassword } = vendor.toObject();
+    vendorWithoutPassword.companySocials = Object.fromEntries(
+      vendorWithoutPassword.companySocials,
+    );
     return res.status(200).json({
       msg: "Vendor Validation Success",
       token,
@@ -325,5 +335,46 @@ export const postChangePassword = async (req, res) => {
   } catch (err) {
     console.error(err); // Log the error
     return res.status(500).send("Server Error");
+  }
+};
+
+/*
+ * Update the vendor account details (except for email and password)
+ */
+export const updateVendorAccountDetails = async (req, res) => {
+  try {
+    const vendor = req.user;
+    if (!vendor) {
+      return res.status(404).send("Vendor not found. Token may have expired.");
+    }
+
+    const body = req.body;
+    console.log("updateVendorAccountDetails: body", body);
+
+    // remove password and email in case it is sent along in the body
+    const { password, companyEmail, ...updateData } = body;
+
+    console.log("updateVendorAccountDetails: UpdateData", updateData);
+    const updatedVendor = await VendorModel.findOneAndUpdate(
+      { _id: vendor.id },
+      { ...updateData },
+      {
+        new: true,
+        select: {
+          password: 0,
+        },
+      },
+    );
+
+    console.log("updateVendorAccountDetails: Updated vendor", updatedVendor);
+
+    res.status(200).json({
+      success: true,
+      message: "Your profile is successfully updated!",
+      vendor: updatedVendor,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json("Server Error");
   }
 };

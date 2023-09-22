@@ -9,8 +9,9 @@ const SocketConnection = () => {
   const { setVendor, setVendorAuthenticated } = useVendorStore();
   const { setRole } = useGlobalStore();
   const initialiseData = async () => {
+   
     try {
-      const response = await AxiosConnect.post("/gleek/validateToken");
+      const response = await AxiosConnect.post("/gleek/auth/validateToken");
       const data = response.data;
 
       if (data.hasOwnProperty("client")) {
@@ -27,6 +28,7 @@ const SocketConnection = () => {
         setClient(null);
       }
     } catch (error) {
+      console.error(error)
       setVendor(null);
       setVendorAuthenticated(null);
       setAuthenticated(false);

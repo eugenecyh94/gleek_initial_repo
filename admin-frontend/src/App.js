@@ -65,6 +65,15 @@ function App() {
           />
           <Route
             exact
+            path="/addVendor"
+            element={
+              <ProtectedRoute>
+                <CreateVendorPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
             path="/resetPassword"
             element={
               <ProtectedRoute>
@@ -92,10 +101,28 @@ function App() {
           />
           <Route
             exact
+            path="/adminTeam"
+            element={
+              <ProtectedRoute>
+                <ViewAllAdmins />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
             path="/adminTeam/addAdmin"
             element={
               <ProtectedRoute>
                 <AddAdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewAllClients"
+            element={
+              <ProtectedRoute>
+                <ViewAllClients />
               </ProtectedRoute>
             }
           />
@@ -110,24 +137,7 @@ function App() {
           />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
-          <Route
-            exact
-            path="/adminTeam"
-            element={
-              <ProtectedRoute>
-                <ViewAllAdmins />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/viewAllClients"
-            element={
-              <ProtectedRoute>
-                <ViewAllClients />
-              </ProtectedRoute>
-            }
-          />
+
           {/*for testing image upload component*/}
           <Route
             path="/uploadTest"
