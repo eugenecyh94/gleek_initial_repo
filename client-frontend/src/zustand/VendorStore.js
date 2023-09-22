@@ -49,6 +49,7 @@ const useVendorStore = create((set) => ({
         password: password,
       });
       const data = response.data;
+      console.log(data);
       set({ vendor: data.vendor, vendorAuthenticated: true });
       setAuthenticated(false);
       setTimeout(() => {
@@ -82,6 +83,22 @@ const useVendorStore = create((set) => ({
         oldPassword: oldPassword,
         newPassword: newPassword,
       });
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  },
+  updateAccount: async (userData) => {
+    try {
+      const response = await AxiosConnect.patch(
+        "/gleek/vendor/updateAccount",
+        userData,
+      );
+      const data = response.data;
+      set({ vendor: data.vendor });
+      setTimeout(() => {
+        set({ isLoading: false });
+      }, 500);
       return true;
     } catch (error) {
       throw error;

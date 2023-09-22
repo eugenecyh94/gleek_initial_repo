@@ -11,6 +11,7 @@ import { clearCookies } from "../../controller/vendorController.js";
 import verifyToken from "../../middleware/vendorAuth.js";
 import { uploadS3CompanyLogo } from "../../middleware/multer.js";
 import { postChangePassword } from "../../controller/vendorController.js";
+import { updateVendorAccountDetails } from "../../controller/vendorController.js";
 const router = express.Router();
 
 /*
@@ -46,4 +47,5 @@ router.patch(
   updateCompanyLogo,
 );
 router.post("/changePassword", verifyToken, postChangePassword);
+router.patch("/updateAccount", verifyToken, updateVendorAccountDetails);
 export default router;
