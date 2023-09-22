@@ -12,6 +12,7 @@ import ViewAllClients from "./components/client/ViewAllClients";
 import ClientDetails from "./components/client/ClientDetails";
 import CreateActivityPage from "./components/activity/CreateActivityPage";
 import ImageAndFileUpload from "./components/activityCreation/ImageAndFileUpload";
+import CreateVendorPage from "./components/vendor/CreateVendorPage";
 import SocketConnection from "./utils/SocketConnection";
 import ForgotPassword from "./components/ForgotPassword";
 import AccountDetails from "./components/profile/AccountDetails";
@@ -53,6 +54,15 @@ function App() {
           />
           <Route
             exact
+            path="/addVendor"
+            element={
+              <ProtectedRoute>
+                <CreateVendorPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
             path="/resetPassword"
             element={
               <ProtectedRoute>
@@ -84,6 +94,42 @@ function App() {
             element={
               <ProtectedRoute>
                 <AddAdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/manageProfile/changePassword"
+            element={
+              <ProtectedRoute>
+                <ChangePassword />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/manageProfile"
+            element={
+              <ProtectedRoute>
+                <AccountDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/adminTeam/addAdmin"
+            element={
+              <ProtectedRoute>
+                <AddAdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewAllClients"
+            element={
+              <ProtectedRoute>
+                <ViewAllClients />
               </ProtectedRoute>
             }
           />

@@ -6,9 +6,12 @@ import {
   Link,
   ListItemButton,
   Alert,
+  Chip,
+  Box,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import Avatar from "@mui/material/Avatar";
+import MailOutlineIcon from "@mui/icons-material/MailOutline";
 
 import { NavLink } from "react-router-dom";
 import { styled } from "@mui/system";
@@ -51,6 +54,8 @@ function AccountSidebar(props) {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          justifyItems: "center",
+          justifyContent: "center",
           padding: "16px",
         }}
       >
@@ -59,8 +64,14 @@ function AccountSidebar(props) {
           src={client?.preSignedPhoto || "https://i.imgur.com/ZTevUo0.png"}
         ></Avatar>
       </div>
-      {client?.status === "PENDING" && (
-        <>
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        padding={2}
+      >
+        {client?.status === "PENDING" && (
           <Alert severity="warning">
             Your account is pending review.
             <p>
@@ -68,8 +79,23 @@ function AccountSidebar(props) {
               activities.
             </p>
           </Alert>
-        </>
-      )}
+        )}
+
+        <Box marginTop={2}>
+          {client?.verified ? (
+            <Chip icon={<MailOutlineIcon />} label="Verified" />
+          ) : (
+            <Chip
+              component="a"
+              href="/client/verifyEmail"
+              icon={<MailOutlineIcon />}
+              label="Unverified"
+              variant="outlined"
+              clickable
+            />
+          )}
+        </Box>
+      </Box>
       <List>
         <CustomListItemButton
           route="/settings/profile"

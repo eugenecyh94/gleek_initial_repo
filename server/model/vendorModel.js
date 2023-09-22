@@ -76,6 +76,10 @@ const vendorSchema = new mongoose.Schema({
     enum: ["PENDING", "APPROVED", "REJECTED"],
     required: false,
   },
+  adminCreated: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Admin",
+  },
 });
 
 const VendorModel = mongoose.model("Vendor", vendorSchema);
