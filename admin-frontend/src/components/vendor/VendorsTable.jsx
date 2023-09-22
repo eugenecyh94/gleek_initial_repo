@@ -107,7 +107,8 @@ const VendorsTable = (allVendors) => {
           onChange={(event) => requestSearch(event.target.value)}
         />
       </Search>
-      <div style={{ height: 500, width: "100%" }}>
+      {/* <div style={{ height: 500, width: "100%" }}> */}
+      <div style={{ flex: 1 }}>
         <DataGrid
           initialState={{
             pagination: {

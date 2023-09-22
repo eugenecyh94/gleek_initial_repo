@@ -44,7 +44,12 @@ const ClientDetails = () => {
   }, [getClientDetails, clientId, isUpdated]);
 
   return (
-    <MainBodyContainer hasBackButton={true} breadcrumbNames={["View All Clients"]} breadcrumbLinks={["/viewAllClients"]} currentBreadcrumbName={"View Client Profile"}>
+    <MainBodyContainer
+      hasBackButton={true}
+      breadcrumbNames={["View All Clients"]}
+      breadcrumbLinks={["/viewAllClients"]}
+      currentBreadcrumbName={"View Client Profile"}
+    >
       {isLoading ? (
         <CircularProgress sx={{ margin: "auto", marginTop: "32px" }} />
       ) : (
@@ -197,7 +202,7 @@ const ClientDetails = () => {
           )}
         </React.Fragment>
       )}
-</MainBodyContainer>
+    </MainBodyContainer>
   );
 };
 

@@ -17,7 +17,12 @@ const ViewPublishedActivities = () => {
   }, [getActivity]);
 
   return (
-    <MainBodyContainer hasBackButton={false} breadcrumbNames={[]} breadcrumbLinks={[]} currentBreadcrumbName={"View Published Activities"}>
+    <MainBodyContainer
+      hasBackButton={false}
+      breadcrumbNames={[]}
+      breadcrumbLinks={[]}
+      currentBreadcrumbName={"View Published Activities"}
+    >
       <Typography
         fontSize={25}
         fontWeight={700}

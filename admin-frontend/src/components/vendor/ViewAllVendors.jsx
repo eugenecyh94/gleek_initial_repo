@@ -17,7 +17,12 @@ const ViewAllVendors = () => {
   }, [getVendors]);
 
   return (
-    <MainBodyContainer hasBackButton={false} breadcrumbNames={[]} breadcrumbLinks={[]} currentBreadcrumbName={"View All Vendors"}>
+    <MainBodyContainer
+      hasBackButton={false}
+      breadcrumbNames={[]}
+      breadcrumbLinks={[]}
+      currentBreadcrumbName={"View All Vendors"}
+    >
       <Typography
         fontSize={25}
         fontWeight={700}
