@@ -8,6 +8,7 @@ const Layout = ({ children }) => {
    return authenticated ? (
       <Box sx={{ display: "flex" }}>
          <HomePageNavBar />
+         <SideNavBar />
          <Box
             component="main"
             display="flex"
