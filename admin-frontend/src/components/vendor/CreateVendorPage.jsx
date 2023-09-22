@@ -5,6 +5,7 @@ import { useAdminStore, useVendorStore } from "../../zustand/GlobalStore";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import CreateVendorForm from "./CreateVendorForm";
 import { useEffect } from "react";
+import MainBodyContainer from "../common/MainBodyContainer";
 
 const StyledPage = styled("div")(({ theme }) => ({
   backgroundColor: theme.palette.grey.pale_grey,
@@ -19,9 +20,8 @@ const CreateVendorPage = () => {
     vendorTypesFetcher();
   }, []);
   return (
+    <MainBodyContainer hasBackButton={true} breadcrumbNames={["View All Vendors"]} breadcrumbLinks={["/viewAllVendors"]} currentBreadcrumbName={"Add Vendor"}>
     <StyledPage>
-      <Layout>
-        <Toolbar />
         <Typography
           alignItems={"center"}
           fontSize={25}
@@ -46,8 +46,8 @@ const CreateVendorPage = () => {
             admin={admin}
           ></CreateVendorForm>
         )}
-      </Layout>
     </StyledPage>
+    </MainBodyContainer>
   );
 };
 
