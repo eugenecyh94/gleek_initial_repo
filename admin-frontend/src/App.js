@@ -18,6 +18,7 @@ import ForgotPassword from "./components/ForgotPassword";
 import AccountDetails from "./components/profile/AccountDetails";
 import AddAdminPage from "./components/admin/AddAdminPage";
 import ViewAllAdmins from "./components/admin/ViewAllAdmins";
+import ActivityDetails from "./components/activity/ActivityDetails";
 
 function App() {
   return (
@@ -41,6 +42,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <ViewPublishedActivities />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewActivity/:activityId"
+            element={
+              <ProtectedRoute>
+                <ActivityDetails />
               </ProtectedRoute>
             }
           />

@@ -1,6 +1,7 @@
 import ActivityModel from "../model/activityModel.js";
 import ActivityPricingRulesModel from "../model/activityPricingRules.js";
 import ThemeModel from "../model/themeModel.js";
+import { s3ImageGetService } from "../service/s3ImageGetService.js";
 
 export const getAllActivities = async (req, res) => {
   try {
@@ -18,9 +19,14 @@ export const getAllActivities = async (req, res) => {
 
 export const getActivity = async (req, res) => {
   try {
-    const foundActivity = await ActivityModel.findById(req.params.id).populate(
-      "activityPricingRules",
-    );
+    const foundActivity = await ActivityModel.findById(req.params.id)
+      .populate("activityPricingRules")
+      .populate("linkedVendor")
+      .populate("theme")
+      .populate("subtheme");
+    let preSignedUrlArr = await s3ImageGetService(foundActivity.images);
+    foundActivity.preSignedImages = preSignedUrlArr;
+    console.log("each push:", foundActivity.preSignedImages);
     res.status(200).json({
       data: foundActivity,
     });
@@ -56,7 +62,7 @@ export const addActivity = async (req, res) => {
     await ActivityModel.findByIdAndUpdate(
       { _id: savedActivity._id },
       { images: imagesPathArr },
-      { new: true },
+      { new: true }
     );
 
     const activitypriceobjects = [];
@@ -91,9 +97,9 @@ export const addActivity = async (req, res) => {
                 },
               },
             },
-            { new: true, useFindAndModify: false },
+            { new: true, useFindAndModify: false }
           );
-        },
+        }
       );
     });
     res.status(201).json({
