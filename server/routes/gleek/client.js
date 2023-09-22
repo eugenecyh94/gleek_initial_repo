@@ -1,12 +1,13 @@
 import express from "express";
 import {
+  getConsentSettings,
   postChangePassword,
+  postResetPassword,
+  resendVerifyEmail,
   updateClientAccountDetails,
   updateConsentSettings,
-  getConsentSettings,
   updateProfilePicture,
   verifyEmail,
-  resendVerifyEmail,
 } from "../../controller/clientController.js";
 import { verifyToken } from "../../middleware/clientAuth.js";
 import { uploadS3ProfileImage } from "../../middleware/multer.js";
@@ -36,5 +37,6 @@ router.patch(
 router.get("/verifyEmail/:token", verifyEmail);
 // Verify Email Resend
 router.get("/resendVerifyEmail", verifyToken, resendVerifyEmail);
+router.post("/resetPassword", verifyToken, postResetPassword);
 
 export default router;

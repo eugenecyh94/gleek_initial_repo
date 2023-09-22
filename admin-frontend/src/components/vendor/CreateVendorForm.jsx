@@ -272,7 +272,7 @@ const CreateVendorForm = ({ vendorTypes, addVendor, admin }) => {
       flexDirection="row"
       justifyContent="space-evenly"
       alignItems="center"
-      minHeight="90vh"
+      // minHeight="90vh"
     >
       <Grid container spacing={3}>
         <Grid item p={0} xs={12} md={6}>

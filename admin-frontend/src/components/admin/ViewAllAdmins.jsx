@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useAdminStore } from "../../zustand/GlobalStore";
 import Layout from "../Layout";
 import ViewAllAdminsTable from "./ViewAllAdminsTable";
+import MainBodyContainer from "../common/MainBodyContainer";
 
 const ViewAllAdmins = () => {
   const theme = useTheme();
@@ -18,8 +19,7 @@ const ViewAllAdmins = () => {
   }, [getAllAdmins]);
 
   return (
-    <Layout>
-      <Toolbar />
+    <MainBodyContainer hasBackButton={false} breadcrumbNames={[]} breadcrumbLinks={[]} currentBreadcrumbName={"View All Admins"}>
       <Typography
         fontSize={25}
         fontWeight={700}
@@ -34,7 +34,7 @@ const ViewAllAdmins = () => {
       ) : (
         <ViewAllAdminsTable admins={admins} />
       )}
-    </Layout>
+      </ MainBodyContainer>
   );
 };
 

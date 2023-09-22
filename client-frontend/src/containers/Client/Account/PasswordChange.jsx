@@ -1,9 +1,9 @@
+import { Box, Button, Grid, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
-import { Box, TextField, Button, Typography, Grid } from "@mui/material";
+import useClientStore from "../../../zustand/ClientStore";
+import useSnackbarStore from "../../../zustand/SnackbarStore";
 import AccountSidebar from "./AccountSidebar";
-import useClientStore from "../../zustand/ClientStore";
-import { validator } from "../../utils/ClientFieldsValidator";
-import useSnackbarStore from "../../zustand/SnackbarStore";
+
 function PasswordChange(props) {
   const { changePassword } = useClientStore();
   const { openSnackbar } = useSnackbarStore();
@@ -17,63 +17,53 @@ function PasswordChange(props) {
     newPassword: "",
   });
 
-  const disableButton = () => {
-    return !Object.values(errorData).every((error) => error === "");
-  };
-
-  // When a field loses focus, validate the field.
-  const handleValidate = (event) => {
-    const { name, value } = event.target;
-    const errors = validator(formData, name);
-    setErrorData((prevData) => ({
-      ...prevData,
-      [name]: errors[name] || "", // Replace the error with an empty string if it's empty
-    }));
-  };
-
   const handleChange = (event) => {
     const { name, value } = event.target;
+    const newErrorData = { ...errorData };
+
+    //validatePassword(value, newErrorData, name);
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
+    setErrorData(newErrorData);
   };
 
+  const isFormValid =
+    formData.oldPassword.trim() !== "" && formData.newPassword.trim() !== "";
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
-
     try {
-      for (const fieldName in formData) {
-        let errors = validator(formData, fieldName);
-        setErrorData((prevData) => ({
-          ...prevData,
-          [fieldName]: errors[fieldName] || "",
-        }));
-      }
-
-      if (!Object.values(errorData).every((error) => error === "")) {
-        openSnackbar(
-          "There are errors in your password reset details.",
-          "error",
-        );
-        return;
-      }
-
-      // Assuming changePassword is an asynchronous function
-      const responseStatus = await changePassword(
+      e.preventDefault();
+      const response = await changePassword(
         formData.oldPassword,
         formData.newPassword,
       );
-      if (responseStatus) {
-        openSnackbar("Password reset was successful!", "success");
+
+      openSnackbar(response.data.msg);
+    } catch (err) {
+      openSnackbar(err.response.data.msg, "error");
+    }
+  };
+
+  const validatePassword = (data, errors, fieldName) => {
+    if (data === "") {
+      errors[fieldName] = `${fieldName} is required!`;
+    } else {
+      const re = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).*/;
+      let result = re.test(String(data));
+      if (!result) {
+        errors[fieldName] =
+          "New password must contain at least one lower case letter, one upper case letter, number and special character.";
+        result = false;
+      } else if (data.length < 8) {
+        errors[fieldName] = "Your password has less than 8 characters.";
+        result = false;
+      } else {
+        // Valid password
+        errors[fieldName] = "";
       }
-      // Handle success after changing the password
-    } catch (error) {
-      const errorMessage =
-        error?.response?.data?.errors?.[0]?.msg ||
-        error?.response?.data ||
-        null;
-      openSnackbar(errorMessage, "error");
     }
   };
 
@@ -118,9 +108,9 @@ function PasswordChange(props) {
           </Grid>
           <Grid item xs={6}>
             <TextField
+              error={formData.oldPassword.trim() === ""}
               id="oldPassword"
               onChange={handleChange}
-              onBlur={handleValidate}
               name="oldPassword"
               placeholder=""
               label="Old Password"
@@ -128,15 +118,18 @@ function PasswordChange(props) {
               disabled={false}
               sx={{ width: "100%" }}
               required
-              helperText={errorData.oldPassword}
-              error={errorData.oldPassword.length > 0}
+              helperText={
+                formData.oldPassword.trim() === ""
+                  ? "Old Password is required"
+                  : ""
+              }
             />
           </Grid>
           <Grid item xs={6}>
             <TextField
+              error={Boolean(errorData.newPassword)}
               id="newPassword"
               onChange={handleChange}
-              onBlur={handleValidate}
               name="newPassword"
               placeholder=""
               label="New Password"
@@ -145,7 +138,6 @@ function PasswordChange(props) {
               sx={{ width: "100%" }}
               required
               helperText={errorData.newPassword}
-              error={errorData.newPassword.length > 0}
             />
           </Grid>
         </Grid>
@@ -155,7 +147,7 @@ function PasswordChange(props) {
           mt={4}
           variant="contained"
           type="submit"
-          disabled={disableButton()}
+          disabled={!isFormValid}
         >
           <Typography variant="body1">Reset</Typography>
         </Button>
