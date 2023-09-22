@@ -17,7 +17,7 @@ export const validator = (formData, fieldName) => {
       break;
     case "customCompanyType":
       validateIfCustomCompanyTypeIsRequired(
-        formData["companyUEN"],
+        formData["vendorType"],
         formData[fieldName],
         errors,
         fieldName,
@@ -58,12 +58,12 @@ export const validator = (formData, fieldName) => {
 };
 
 export const validateIfCustomCompanyTypeIsRequired = (
-  uen,
+  vendorType,
   data,
   errors,
   fieldName,
 ) => {
-  if (uen === "Other") {
+  if (vendorType === "Other") {
     if (data === "") {
       errors[fieldName] = `${fieldName} is required`;
     }

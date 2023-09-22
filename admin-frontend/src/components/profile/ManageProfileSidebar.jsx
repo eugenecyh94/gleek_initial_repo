@@ -5,7 +5,6 @@ import {
   ListItemText,
   Link,
   ListItemButton,
-  Alert,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -13,7 +12,6 @@ import Avatar from "@mui/material/Avatar";
 
 import { NavLink } from "react-router-dom";
 import { styled } from "@mui/system";
-import useClientStore from "../../zustand/ClientStore";
 const CustomNavLink = styled(NavLink)(({ theme }) => ({
   "&.active": {
     color: theme.palette.primary.main,
@@ -38,13 +36,10 @@ const CustomListItemButton = ({ route, text }) => {
   );
 };
 
-function AccountSidebar(props) {
+function ManageProfileSidebar(props) {
   const theme = useTheme();
   const primary = theme.palette.primary.main;
-  const tertiary = theme.palette.tertiary.main;
-
-  const { client } = useClientStore();
-
+  const tertiary = theme.palette.secondary.main;
   return (
     <div style={{ width: "100%", height: "100vh" }}>
       <div
@@ -57,37 +52,18 @@ function AccountSidebar(props) {
       >
         <Avatar
           sx={{ bgcolor: primary, width: 200, height: 200 }}
-          src={client.preSignedPhoto || "https://i.imgur.com/ZTevUo0.png"}
+          src="https://i.imgur.com/ZTevUo0.png"
         ></Avatar>
       </div>
-      {client?.status === "PENDING" && (
-        <>
-          <Alert severity="warning">
-            Your account is pending review.
-            <p>
-              Booking functionality will be limited, but you can still browse
-              activities.
-            </p>
-          </Alert>
-        </>
-      )}
       <List>
+        <CustomListItemButton route="/manageProfile" text="Account Details" />
         <CustomListItemButton
-          route="/settings/profile"
-          text="Account Details"
-        />
-        <CustomListItemButton route="/settings/picture" text="Change Picture" />
-        <CustomListItemButton
-          route="/settings/privacy"
-          text="Privacy Settings"
-        />
-        <CustomListItemButton
-          route="/settings/password"
-          text="Manage Password"
+          route="/manageProfile/changePassword"
+          text="Change Password"
         />
       </List>
     </div>
   );
 }
 
-export default AccountSidebar;
+export default ManageProfileSidebar;

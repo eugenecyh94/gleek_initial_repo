@@ -66,12 +66,26 @@ export const useAdminStore = create((set) => ({
       return false;
     }
   },
-  logout: () => {
+  logout: async () => {
     // Implement your logout logic and update authenticated state
     set({
       admin: null, // Clear admin data
       authenticated: false, // Set authenticated to false
     });
+    try {
+      const response = await AxiosConnect.get("/gleekAdmin/logout");
+      setTimeout(() => {
+        set({
+          isLoading: false,
+          admin: null,
+          authenticated: false,
+          adminError: null,
+          token: null,
+        });
+      }, 500);
+    } catch (err) {
+      console.log("ERROR: ", err.message);
+    }
   },
   changePassword: async (password) => {
     try {
@@ -95,16 +109,86 @@ export const useAdminStore = create((set) => ({
       return false;
     }
   },
+  recoverPassword: async (email) => {
+    try {
+      const response = await AxiosConnect.post("/gleekAdmin/recoverPassword", {
+        email: email,
+      });
+      const data = response.data;
+      setTimeout(() => {
+        set({ isLoading: false });
+      }, 500);
+      return data;
+    } catch (error) {
+      console.log(error);
+      setTimeout(() => {
+        set({
+          isLoading: false,
+        });
+      }, 500);
+      return false;
+    }
+  },
+  register: async (newAdmin) => {
+    set({ isLoading: true, adminError: null });
+    try {
+      const response = await AxiosConnect.post(
+        "/gleekAdmin/register",
+        newAdmin,
+      );
+      const data = response.data;
+      console.log(data);
+      setTimeout(() => {
+        set({ isLoading: false });
+      }, 500);
+      return true;
+    } catch (error) {
+      console.log(error);
+      setTimeout(() => {
+        set({
+          isLoading: false,
+        });
+      }, 500);
+      return false;
+    }
+  },
 }));
 
 export const useActivityStore = create((set) => ({
   activities: [],
   isLoading: false,
+  newActivity: null,
   getActivity: async () => {
     try {
       set({ isLoading: true });
       const response = await AxiosConnect.get("/activity/all");
       set({ activities: response.data });
+      set({ isLoading: false });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  createActivity: async (newActivityData) => {
+    try {
+      const response = await AxiosConnect.postMultiPart(
+        "/activity/addActivity",
+        newActivityData,
+      );
+      set({ newActivity: response.data.activity });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+}));
+
+export const useThemeStore = create((set) => ({
+  themes: [],
+  isLoading: false,
+  getThemes: async () => {
+    try {
+      set({ isLoading: true });
+      const response = await AxiosConnect.get("/activity/getThemes");
+      set({ themes: response.data });
       set({ isLoading: false });
     } catch (error) {
       console.error(error);

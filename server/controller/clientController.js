@@ -13,6 +13,7 @@ import {
   createClientConsent,
   updateConsent,
 } from "../service/consentService.js";
+import { s3ImageGetService } from "../service/s3ImageGetService.js";
 
 const secret = process.env.JWT_SECRET_ClIENT;
 
@@ -83,7 +84,7 @@ export const postRegister = async (req, res) => {
 
     if (await clientExists(newClient.email)) {
       return res.status(409).json({
-        errors: [{ msg: "Client already exists! Please Login instead." }],
+        errors: [{ msg: "Email already exists!" }],
       });
     }
 
@@ -136,6 +137,11 @@ export const postLogin = async (req, res) => {
           .send({ msg: "Your registration has been rejected." });
       }
 
+      if (client.photo) {
+        const preSignedUrl = await s3ImageGetService(client.photo);
+        client.preSignedPhoto = preSignedUrl;
+      }
+
       const token = await generateJwtToken(client.id);
       const { password, ...clientWithoutPassword } = client.toObject();
 
@@ -156,12 +162,18 @@ export const validateToken = async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, secret);
-
     const client = await Client.findById(decoded.client.id);
     if (!client) {
       return res.status(401).send("Client not found");
     }
+
+    if (client.photo) {
+      const preSignedUrl = await s3ImageGetService(client.photo);
+      client.preSignedPhoto = preSignedUrl;
+    }
+
     const { password, ...clientWithoutPassword } = client.toObject();
+
     return res.status(200).json({ token, client: clientWithoutPassword });
   } catch (err) {
     // If verification fails (e.g., due to an invalid or expired token), send an error response
@@ -226,7 +238,7 @@ export const updateClientAccountDetails = async (req, res) => {
     const body = req.body;
     console.log("updateClientAccountDetails: body", body);
 
-    // remove passwword and email in case it is sent along in the body
+    // remove password and email in case it is sent along in the body
     const { password, email, ...updateData } = body;
 
     console.log("updateClientAccountDetails: UpdateData", updateData);
@@ -298,6 +310,41 @@ export const getConsentSettings = async (req, res) => {
     res.status(200).json({
       msg: "Retrieved consent settings.",
       consent: settings,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json("Server Error");
+  }
+};
+
+export const updateProfilePicture = async (req, res) => {
+  try {
+    const client = req.user;
+    const reqFile = req.file;
+    console.log("req client", client);
+    console.log("req file", reqFile);
+
+    let fileS3Location;
+
+    if (reqFile === undefined) {
+      console.log("No image files uploaded");
+    } else {
+      console.log("Retrieving uploaded images url");
+      fileS3Location = req.file.location;
+    }
+
+    console.log(fileS3Location);
+    console.log("client id", client._id);
+
+    const updatedClient = await Client.findOneAndUpdate(
+      { _id: client._id },
+      { photo: fileS3Location },
+      { new: true },
+    );
+    res.status(200).json({
+      success: true,
+      message: "Your profile picture is successfully updated!",
+      updatedProfilePicLink: updatedClient.photo,
     });
   } catch (e) {
     console.error(e);

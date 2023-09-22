@@ -14,7 +14,7 @@ const useVendorStore = create((set) => ({
   vendorTypesFetcher: async () => {
     try {
       const response = await AxiosConnect.get(
-        "/gleek/vendor/getAllVendorTypes"
+        "/gleek/vendor/getAllVendorTypes",
       );
       const data = response.data;
       set({ vendorTypes: data.VendorTypeEnum });
@@ -27,7 +27,7 @@ const useVendorStore = create((set) => ({
     try {
       const response = await AxiosConnect.post(
         "/gleek/vendor/register",
-        userData
+        userData,
       );
       const data = response.data;
       console.log("VENDOR DATA AFTER REGISTER", data.vendor);

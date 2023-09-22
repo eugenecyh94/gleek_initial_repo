@@ -46,7 +46,7 @@ export const register = async (req, res) => {
   }
 
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, role } = req.body;
     let admin = await Admin.findOne({ email }); //returns a promise
 
     if (admin) {
@@ -54,7 +54,7 @@ export const register = async (req, res) => {
         .status(400)
         .json({ errors: [{ msg: "Admin already exists!" }] });
     }
-
+    const password = "ThisIsTheDefaultPassword";
     admin = new Admin({
       //creates a new admin instance but not saved in db until the admin.save() is called
       name,
@@ -77,24 +77,14 @@ export const register = async (req, res) => {
     const payload = {
       admin: {
         id: admin.id,
+        email: admin.email,
+        name: admin.name,
       },
     };
 
     jwt.sign(payload, secret, { expiresIn: 360000 }, (err, token) => {
       if (err) throw err;
       // Set the JWT token as a cookie
-      try {
-        res.cookie("token", token, {
-          httpOnly: true,
-          maxAge: 3600000, // Expires in 1 hour (milliseconds)
-          sameSite: "None", // Adjust this based on your security requirements
-          secure: true, // Use secure cookies in production
-          path: "/", // Set the path to your application root
-        });
-      } catch (cookieError) {
-        console.error(cookieError);
-        return res.status(500).send("Error setting cookie");
-      }
       const message = `Please verify your account by clicking on the link: http://localhost:5000/gleekAdmin/verify/${token}`;
       const options = {
         to: email,
@@ -103,7 +93,7 @@ export const register = async (req, res) => {
       };
 
       sendMail(options);
-      res.status(200).json({ token, admin: { email: admin.email } });
+      res.status(200).json({ token, admin: payload.admin });
     });
   } catch (err) {
     console.log(err.message);
@@ -147,6 +137,8 @@ export const login = async (req, res) => {
     const payload = {
       admin: {
         id: admin.id,
+        email: admin.email,
+        name: admin.name,
       },
     };
 
@@ -162,7 +154,7 @@ export const login = async (req, res) => {
             path: "/", // Set the path to your application root
           })
           .status(200)
-          .json({ token, admin: { email: admin.email } });
+          .json({ token, admin: payload.admin });
       } catch (cookieError) {
         return res.status(500).send("Error setting cookie");
       }
@@ -185,7 +177,7 @@ export const validateToken = async (req, res) => {
     if (!admin) {
       return res.status(401).send("Admin not found");
     }
-    res.status(200).json({ token, admin: { email: admin.email } });
+    res.status(200).json({ token, admin: admin });
   } catch (err) {
     console.log(err.message);
     // If verification fails (e.g., due to an invalid or expired token), send an error response
@@ -207,6 +199,8 @@ export const changePassword = async (req, res) => {
     const payload = {
       admin: {
         id: admin.id,
+        email: admin.email,
+        name: admin.name,
       },
     };
 
@@ -227,7 +221,7 @@ export const changePassword = async (req, res) => {
             path: "/", // Set the path to your application root
           })
           .status(200)
-          .json({ token, admin: { email: admin.email } });
+          .json({ token, admin: payload.admin });
       } catch (cookieError) {
         return res.status(500).send("Error setting cookie");
       }
@@ -281,6 +275,8 @@ export const recoverPassword = async (req, res) => {
     const payload = {
       admin: {
         id: admin.id,
+        email: admin.email,
+        name: admin.name,
       },
     };
 
@@ -294,7 +290,7 @@ export const recoverPassword = async (req, res) => {
         text: message,
       };
       sendMail(options);
-      return res.status(200).json(`Recovery email sent!: ${token}`);
+      return res.status(200).json(`Recovery email sent!`);
     });
   } catch (err) {
     return res.status(500).send("Server Error " + err.message);
@@ -303,7 +299,6 @@ export const recoverPassword = async (req, res) => {
 
 export const resetPassword = async (req, res) => {
   const token = req.params.token;
-  console.log(token);
   if (!token) {
     return res.status(403).send("Token Not Found!");
   }

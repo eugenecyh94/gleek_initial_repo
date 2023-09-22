@@ -1,29 +1,10 @@
-import {
-  Box,
-  Button,
-  IconButton,
-  InputLabel,
-  Stack,
-  TextField,
-  Typography,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-} from "@mui/material";
-import { styled } from "@mui/material/styles";
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+/* eslint-disable react/prop-types */
 import DeleteIcon from "@mui/icons-material/Delete";
+import { Box, IconButton, Stack, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import { Fragment, useCallback, useRef } from "react";
 import { ImageConfig } from "../../utils/ImageConfig";
-import {
-  updateAllActivity,
-  useImageUploadTestStore,
-} from "../../zustand/GlobalStore";
-import AxiosConnect from "../../utils/AxiosConnect";
-import axiosConnect from "../../utils/AxiosConnect";
 
-//custom styles for boxed components
 export const CustomBox = styled(Box)({
   "&.MuiBox-root": {
     backgroundColor: "#fff",
@@ -36,26 +17,15 @@ export const CustomBox = styled(Box)({
   },
 });
 
-const ImageAndFileUpload = (ImageUploadProps) => {
-  //can always pass down methods from parent to uplift fileList changes to parent.
-  const { limit, name, size } = ImageUploadProps;
-  //local state
-  const [fileList, setFileList] = useState([]);
-  const [activityName, setActivityName] = useState("");
-  const [allActivities, setAllActivities] = useState([]);
-  //example to update state from zustand store instead of local state
-  const { setImageList } = useImageUploadTestStore();
-  // for confirmation dialog
-  const [open, setOpen] = useState(false);
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-  const handleClose = () => {
-    setOpen(false);
-  };
+const ImageAndFileUpload = ({
+  limit,
+  name,
+  size,
+  setActivityImages,
+  activityImages,
+}) => {
   const wrapperRef = useRef(null);
 
-  //Toggle the dragover class
   const onDragEnter = () => wrapperRef.current?.classList.add("dragover");
   const onDragLeave = () => wrapperRef.current?.classList.remove("dragover");
 
@@ -63,33 +33,28 @@ const ImageAndFileUpload = (ImageUploadProps) => {
     (e) => {
       const target = e.target;
       if (!target.files) return;
-      console.log(target.files);
+      console.log("problem", target.files);
       if (target.files[0].size > size) {
+        console.log("too big");
         return alert(`Image size must be smaller than ${size / 1000000} MB`);
       }
       const newFiles = Object.values(target.files).map((file) => file);
       if (newFiles) {
-        const updatedList = [...fileList, ...newFiles];
+        const updatedList = [...activityImages, ...newFiles];
         if (updatedList.length > limit) {
           return alert(`Image must not be more than ${limit}`);
         }
-        setFileList(updatedList);
-        setImageList(fileList);
+        console.log("filelist added");
+        setActivityImages(updatedList);
       }
     },
-    [fileList, limit],
+    [activityImages, limit],
   );
 
-  const handleRefresh = () => {
-    AxiosConnect.get("/testActivity/all").then((body) => {
-      console.log(body);
-    });
-  };
-
   const fileRemove = (file) => {
-    const updatedList = [...fileList];
-    updatedList.splice(fileList.indexOf(file), 1);
-    setFileList(updatedList);
+    const updatedList = [...activityImages];
+    updatedList.splice(activityImages.indexOf(file), 1);
+    setActivityImages(updatedList);
   };
 
   const calcSize = (size) => {
@@ -98,57 +63,9 @@ const ImageAndFileUpload = (ImageUploadProps) => {
       : `${Math.floor(size / 1000000)} MB`;
   };
 
-  const onClickSubmit = () => {
-    handleClickOpen();
-  };
-
-  const handleSubmit = () => {
-    const formData = new FormData();
-    formData.append("activityName", activityName);
-    for (let i = 0; i < fileList.length; i++) {
-      formData.append("images", fileList[i]);
-    }
-    // formData.append("images", fileList);s
-    console.log(formData.get("activityName"));
-    console.log(formData.get("images"));
-    AxiosConnect.postMultiPart("/testActivity/create", formData)
-      .then((body) => {
-        console.log("activity successfully created", body);
-      })
-      .catch((e) => {
-        console.error(e.error);
-      });
-    handleClose();
-  };
-
-  useEffect(() => {
-    console.log(fileList);
-  }, [fileList]);
-
-  useEffect(() => {
-    console.log(activityName);
-  }, [activityName]);
-
-  useEffect(() => {
-    handleRefresh();
-  }, []);
-
   return (
     <Fragment>
-      <Button onClick={handleRefresh}>Refresh</Button>
       <CustomBox>
-        <InputLabel htmlFor="outlined-adornment-password">
-          Enter Activity Name
-        </InputLabel>
-        <TextField
-          label="Activity Name"
-          name="name"
-          onChange={(event) => {
-            setActivityName(event.target.value);
-          }}
-          fullWidth
-          margin="normal"
-        />
         <Box
           display="flex"
           justifyContent="center"
@@ -203,9 +120,9 @@ const ImageAndFileUpload = (ImageUploadProps) => {
           />
         </Box>
       </CustomBox>
-      {fileList.length > 0 ? (
+      {activityImages.length > 0 ? (
         <Stack spacing={2} sx={{ my: 2 }}>
-          {fileList.map((item, index) => {
+          {activityImages.map((item, index) => {
             console.log("item type is::", item.type);
             const imageType = item.type.split("/")[1];
             console.log("image type is::", imageType);
@@ -252,38 +169,6 @@ const ImageAndFileUpload = (ImageUploadProps) => {
           })}
         </Stack>
       ) : null}
-      <Button
-        variant="contained"
-        type="submit"
-        fullWidth
-        sx={{ py: "0.8rem", my: 2 }}
-        onClick={() => {
-          onClickSubmit();
-        }}
-      >
-        Create Activity
-      </Button>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          {"Confirm activity creation"}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            Activity called {activityName} will be created.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleSubmit} autoFocus>
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Fragment>
   );
 };
