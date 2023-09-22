@@ -4,25 +4,25 @@ import AxiosConnect from "../utils/AxiosConnect.js";
 // import { devtools } from "zustand/middleware";
 
 export const updateCurrentActivity = (selectedActivity) => {
-   useActivityStore.setState((prevState) => ({
-      ...prevState,
-      currentActivity: selectedActivity,
-   }));
-   console.log(
-      "activity store current activity updated::",
-      useActivityStore.getState()
-   );
+  useActivityStore.setState((prevState) => ({
+    ...prevState,
+    currentActivity: selectedActivity,
+  }));
+  console.log(
+    "activity store current activity updated::",
+    useActivityStore.getState()
+  );
 };
 
 export const updateAllActivity = (newAllActivities) => {
-   useActivityStore.setState((prevState) => ({
-      ...prevState,
-      allActivities: newAllActivities,
-   }));
-   console.log(
-      "activity store all activity updated::",
-      useActivityStore.getState()
-   );
+  useActivityStore.setState((prevState) => ({
+    ...prevState,
+    allActivities: newAllActivities,
+  }));
+  console.log(
+    "activity store all activity updated::",
+    useActivityStore.getState()
+  );
 };
 
 export const useSelectedNavItemStore = create((set) => ({
@@ -161,30 +161,30 @@ export const useAdminStore = create((set) => ({
 }));
 
 export const useActivityStore = create((set) => ({
-   activities: [],
-   isLoading: false,
-   newActivity: null,
-   getActivity: async () => {
-      try {
-         set({ isLoading: true });
-         const response = await AxiosConnect.get("/activity/all");
-         set({ activities: response.data });
-         set({ isLoading: false });
-      } catch (error) {
-         console.error(error);
-      }
-   },
-   createActivity: async (newActivityData) => {
-      try {
-         const response = await AxiosConnect.postMultiPart(
-            "/activity/addActivity",
-            newActivityData
-         );
-         set({ newActivity: response.data.activity });
-      } catch (error) {
-         console.log(error);
-      }
-   },
+  activities: [],
+  isLoading: false,
+  newActivity: null,
+  getActivity: async () => {
+    try {
+      set({ isLoading: true });
+      const response = await AxiosConnect.get("/activity/all");
+      set({ activities: response.data });
+      set({ isLoading: false });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  createActivity: async (newActivityData) => {
+    try {
+      const response = await AxiosConnect.postMultiPart(
+        "/activity/addActivity",
+        newActivityData
+      );
+      set({ newActivity: response.data.activity });
+    } catch (error) {
+      console.log(error);
+    }
+  },
 }));
 
 export const useThemeStore = create((set) => ({
@@ -203,18 +203,80 @@ export const useThemeStore = create((set) => ({
 }));
 
 export const useVendorStore = create((set) => ({
-   vendors: [],
-   isLoading: false,
-   getVendors: async () => {
-      try {
-         set({ isLoading: true });
-         const response = await AxiosConnect.get("/vendor/viewAllVendors");
-         set({ vendors: response.data });
-         set({ isLoading: false });
-      } catch (error) {
-         console.error(error);
-      }
-   },
+  vendors: [],
+  vendor: null,
+  isLoading: false,
+  vendorTypes: {},
+  getVendors: async () => {
+    try {
+      set({ isLoading: true });
+      const response = await AxiosConnect.get("/vendor/viewAllVendors");
+      set({ vendors: response.data });
+      set({ isLoading: false });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  createVendor: async (vendorData) => {
+    try {
+      set({ isLoading: true });
+      const response = await AxiosConnect.post("/vendor/addVendor", vendorData);
+      set({ vendor: response.data });
+      set({ isLoading: false });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  vendorTypesFetcher: async () => {
+    try {
+      const response = await AxiosConnect.get(
+        "/gleek/vendor/getAllVendorTypes"
+      );
+      const data = response.data;
+      set({ vendorTypes: data.VendorTypeEnum });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+}));
+
+export const useClientStore = create((set) => ({
+  clients: [],
+  isLoading: false,
+  getClients: async () => {
+    try {
+      set({ isLoading: true });
+      const response = await AxiosConnect.get("/client/getAllClients");
+      set({ clients: response.data });
+      set({ isLoading: false });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  updateClient: async (id, payload) => {
+    try {
+      set(() => ({ isLoading: true }));
+      await AxiosConnect.patch("client/update", id, payload);
+      const response = await AxiosConnect.get("/client/getAllClients");
+      set({ clients: response.data });
+      set(() => ({ isLoading: false }));
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  clientDetails: {},
+  getClientDetails: async (clientId) => {
+    try {
+      set({ isLoading: true });
+      const response = await AxiosConnect.get(
+        `/client/getClientDetails/${clientId}`
+      );
+      set({ clientDetails: response.data });
+      set({ isLoading: false });
+    } catch (error) {
+      console.error(error);
+    }
+  }
 }));
 
 export const useImageUploadTestStore = create((set) => ({
