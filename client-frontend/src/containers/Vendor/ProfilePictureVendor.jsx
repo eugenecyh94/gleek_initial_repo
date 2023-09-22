@@ -7,17 +7,19 @@ import {
   Grid,
   Avatar,
 } from "@mui/material";
-import AccountSidebar from "./AccountSidebarVendor";
+import AccountSidebarVendor from "./AccountSidebarVendor";
 import { useTheme } from "@emotion/react";
 import AxiosConnect from "../../utils/AxiosConnect";
-
+import useVendorStore from "../../zustand/VendorStore";
+import useSnackbarStore from "../../zustand/SnackbarStore";
 function AccountDetails(props) {
+  const { setVendor } = useVendorStore();
   const [formData, setFormData] = useState();
   const [newProfilePictureData, setNewProfilePictureData] = useState({
     file: null,
     preview: null,
   });
-
+  const { openSnackbar, closeSnackbar } = useSnackbarStore();
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((prevData) => ({
@@ -36,7 +38,7 @@ function AccountDetails(props) {
     const allowedTypes = ["image/jpeg", "image/png", "image/jpeg"];
     //Can consider implementing file size limit check
     const selectedFile = e.target.files && e.target.files[0];
-    if (allowedTypes.includes(selectedFile.type)) {
+    if (allowedTypes.includes(selectedFile?.type)) {
       console.log("Valid file selected:", selectedFile);
       setNewProfilePictureData({
         file: selectedFile,
@@ -48,14 +50,28 @@ function AccountDetails(props) {
     }
   };
 
-  const handleUploadProfilePicture = (e) => {
+  const handleUploadProfilePicture = async (event) => {
     if (!newProfilePictureData.file) {
       console.error("No file has been attached");
       return;
     }
+
     const formData = new FormData();
     formData.append("image", newProfilePictureData.file);
-    AxiosConnect.patchMultipart("/gleek/vendor/updateCompanyLogo", formData);
+    try {
+      // Send the multipart form data using Axios
+      const responseStatus = await AxiosConnect.patchMultipart(
+        "/gleek/vendor/updateCompanyLogo",
+        formData,
+      );
+      if (responseStatus) {
+        openSnackbar("Company Logo Updated!", "success");
+      }
+      setVendor(responseStatus.data.vendor);
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      openSnackbar(error.response.data.msg, "error");
+    }
   };
 
   const theme = useTheme();
@@ -74,7 +90,7 @@ function AccountDetails(props) {
       width={"100%"}
     >
       <Box width={"30%"}>
-        <AccountSidebar />
+        <AccountSidebarVendor />
       </Box>
 
       <Box
@@ -106,7 +122,7 @@ function AccountDetails(props) {
                   : newProfilePictureData.preview
               }
             >
-              Gleek Client
+              Gleek Vendor
             </Avatar>
           </Grid>
           <Grid item xs={6}>

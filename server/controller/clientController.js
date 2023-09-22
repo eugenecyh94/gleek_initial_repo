@@ -341,10 +341,18 @@ export const updateProfilePicture = async (req, res) => {
       { photo: fileS3Location },
       { new: true },
     );
-    res.status(200).json({
+
+    if (updatedClient.photo) {
+      const preSignedUrl = await s3ImageGetService(updatedClient.photo);
+      updatedClient.preSignedPhoto = preSignedUrl;
+    }
+
+    console.log(updatedClient);
+
+    return res.status(200).json({
       success: true,
       message: "Your profile picture is successfully updated!",
-      updatedProfilePicLink: updatedClient.photo,
+      client: updatedClient,
     });
   } catch (e) {
     console.error(e);

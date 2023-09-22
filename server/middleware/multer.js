@@ -80,7 +80,7 @@ export const uploadS3CompanyLogo = multer({
     contentType: multerS3.AUTO_CONTENT_TYPE,
     key: (request, file, cb) => {
       let fullPath = `companyLogos/${
-        request.user.email
+        request.user.companyEmail
       }/${Date.now().toString()}-${uuidv4()}-${file.originalname}`;
       cb(null, fullPath);
     },

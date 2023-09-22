@@ -31,7 +31,7 @@ function NavBar(props) {
 
   const open = Boolean(anchorEl);
   const open2 = Boolean(anchorE2);
-
+  console.log("is this render?");
   const boxLivesForeverElement = document.getElementById("boxLivesForever");
   const handleClick = (event) => {
     setAnchorEl(boxLivesForeverElement);

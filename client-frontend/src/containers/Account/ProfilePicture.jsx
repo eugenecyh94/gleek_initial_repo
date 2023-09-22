@@ -10,9 +10,10 @@ import {
 import AccountSidebar from "./AccountSidebar";
 import { useTheme } from "@emotion/react";
 import AxiosConnect from "../../utils/AxiosConnect";
-
+import useClientStore from "../../zustand/ClientStore";
 function AccountDetails(props) {
   const [formData, setFormData] = useState();
+  const { setClient } = useClientStore();
   const [newProfilePictureData, setNewProfilePictureData] = useState({
     file: null,
     preview: null,
@@ -36,7 +37,7 @@ function AccountDetails(props) {
     const allowedTypes = ["image/jpeg", "image/png", "image/jpeg"];
     //Can consider implementing file size limit check
     const selectedFile = e.target.files && e.target.files[0];
-    if (allowedTypes.includes(selectedFile.type)) {
+    if (allowedTypes.includes(selectedFile?.type)) {
       console.log("Valid file selected:", selectedFile);
       setNewProfilePictureData({
         file: selectedFile,
@@ -48,14 +49,26 @@ function AccountDetails(props) {
     }
   };
 
-  const handleUploadProfilePicture = (e) => {
+  const handleUploadProfilePicture = async (event) => {
     if (!newProfilePictureData.file) {
       console.error("No file has been attached");
       return;
     }
     const formData = new FormData();
     formData.append("image", newProfilePictureData.file);
-    AxiosConnect.patchMultipart("/gleek/client/updateProfilePicture", formData);
+    try {
+      // Send the multipart form data using Axios
+      const response = await AxiosConnect.patchMultipart(
+        "/gleek/client/updateProfilePicture",
+        formData,
+      );
+      console.log(response);
+
+      setClient(response.data.client);
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      // Handle the error as needed (e.g., show a message to the user)
+    }
   };
 
   const theme = useTheme();

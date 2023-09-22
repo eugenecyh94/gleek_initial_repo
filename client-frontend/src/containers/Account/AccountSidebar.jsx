@@ -8,7 +8,6 @@ import {
   Alert,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import Avatar from "@mui/material/Avatar";
 
 import { NavLink } from "react-router-dom";
@@ -57,7 +56,7 @@ function AccountSidebar(props) {
       >
         <Avatar
           sx={{ bgcolor: primary, width: 200, height: 200 }}
-          src={client.preSignedPhoto || "https://i.imgur.com/ZTevUo0.png"}
+          src={client?.preSignedPhoto || "https://i.imgur.com/ZTevUo0.png"}
         ></Avatar>
       </div>
       {client?.status === "PENDING" && (

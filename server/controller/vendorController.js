@@ -271,10 +271,16 @@ export const updateCompanyLogo = async (req, res) => {
       { companyLogo: fileS3Location },
       { new: true },
     );
-    res.status(200).json({
+
+    if (updatedVendor.companyLogo) {
+      const preSignedUrl = await s3ImageGetService(updatedVendor.companyLogo);
+      updatedVendor.preSignedPhoto = preSignedUrl;
+    }
+
+    return res.status(200).json({
       success: true,
-      message: "Your profile picture is successfully updated!",
-      updatedCompanyLogoLink: updatedVendor.companyLogo,
+      message: "Your company logo is successfully updated!",
+      vendor: updatedVendor,
     });
   } catch (e) {
     console.error(e);
