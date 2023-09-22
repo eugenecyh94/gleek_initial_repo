@@ -12,6 +12,7 @@ import {
   InputLabel,
   Select,
   Grid,
+  Avatar,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
@@ -255,7 +256,7 @@ function NavBar(props) {
                 color="accent"
                 sx={{ marginRight: "16px" }}
               >
-                <AccountBoxIcon />
+                <Avatar alt={client.name} src={client.preSignedPhoto} />
               </IconButton>
               <Menu
                 id="authenticated-menu"

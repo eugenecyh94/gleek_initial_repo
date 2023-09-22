@@ -137,6 +137,11 @@ export const postLogin = async (req, res) => {
           .send({ msg: "Your registration has been rejected." });
       }
 
+      if (client.photo) {
+        const preSignedUrl = await s3ImageGetService(client.photo);
+        client.preSignedPhoto = preSignedUrl;
+      }
+
       const token = await generateJwtToken(client.id);
       const { password, ...clientWithoutPassword } = client.toObject();
 
