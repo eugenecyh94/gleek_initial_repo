@@ -17,6 +17,7 @@ import SocketConnection from "./utils/SocketConnection";
 import ForgotPassword from "./components/ForgotPassword";
 import AccountDetails from "./components/profile/AccountDetails";
 import AddAdminPage from "./components/admin/AddAdminPage";
+import ViewAllAdmins from "./components/admin/ViewAllAdmins";
 
 function App() {
   return (
@@ -49,15 +50,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <ViewAllVendors />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/addVendor"
-            element={
-              <ProtectedRoute>
-                <CreateVendorPage />
               </ProtectedRoute>
             }
           />
@@ -99,15 +91,6 @@ function App() {
           />
           <Route
             exact
-            path="/viewAllClients"
-            element={
-              <ProtectedRoute>
-                <ViewAllClients />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
             path="/viewClient/:clientId"
             element={
               <ProtectedRoute>
@@ -116,6 +99,25 @@ function App() {
             }
           />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgotPassword" element={<ForgotPassword />} />
+          <Route
+            exact
+            path="/adminTeam"
+            element={
+              <ProtectedRoute>
+                <ViewAllAdmins />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewAllClients"
+            element={
+              <ProtectedRoute>
+                <ViewAllClients />
+              </ProtectedRoute>
+            }
+          />
           {/*for testing image upload component*/}
           <Route
             path="/uploadTest"

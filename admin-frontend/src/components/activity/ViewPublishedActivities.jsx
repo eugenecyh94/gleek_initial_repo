@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useActivityStore } from "../../zustand/GlobalStore";
 import Layout from "../Layout";
 import ActivityListTable from "./ActivityListTable";
+import MainBodyContainer from "../common/MainBodyContainer";
 
 const ViewPublishedActivities = () => {
   const theme = useTheme();
@@ -16,8 +17,12 @@ const ViewPublishedActivities = () => {
   }, [getActivity]);
 
   return (
-    <Layout>
-      <Toolbar />
+    <MainBodyContainer
+      hasBackButton={false}
+      breadcrumbNames={[]}
+      breadcrumbLinks={[]}
+      currentBreadcrumbName={"View Published Activities"}
+    >
       <Typography
         fontSize={25}
         fontWeight={700}
@@ -32,7 +37,7 @@ const ViewPublishedActivities = () => {
       ) : (
         <ActivityListTable allActivities={activities} />
       )}
-    </Layout>
+    </MainBodyContainer>
   );
 };
 

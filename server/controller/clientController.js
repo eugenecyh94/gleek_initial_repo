@@ -167,7 +167,7 @@ export const postLogin = async (req, res) => {
       if (client.status === "REJECTED") {
         return res
           .status(400)
-          .send({ msg: "Your registration has been rejected." });
+          .send({ msg: "Your Client registration has been rejected." });
       }
 
       if (client.photo) {
@@ -196,7 +196,6 @@ export const validateToken = async (req, res) => {
   try {
     const decoded = jwt.verify(token, secret);
     const client = await Client.findById(decoded.client.id);
-
     if (!client) {
       return res.status(401).send("Client not found");
     }
@@ -402,10 +401,18 @@ export const updateProfilePicture = async (req, res) => {
       { photo: fileS3Location },
       { new: true },
     );
-    res.status(200).json({
+
+    if (updatedClient.photo) {
+      const preSignedUrl = await s3ImageGetService(updatedClient.photo);
+      updatedClient.preSignedPhoto = preSignedUrl;
+    }
+
+    console.log(updatedClient);
+
+    return res.status(200).json({
       success: true,
       message: "Your profile picture is successfully updated!",
-      updatedProfilePicLink: updatedClient.photo,
+      client: updatedClient,
     });
   } catch (e) {
     console.error(e);

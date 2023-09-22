@@ -66,7 +66,7 @@ const useClientStore = create((set) => ({
       return response;
     } catch (error) {
       console.error(error);
-      throw error;
+      alert(error.response.data);
     }
   },
 

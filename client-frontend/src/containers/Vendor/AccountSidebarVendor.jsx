@@ -1,21 +1,10 @@
 import React from "react";
-import {
-  Typography,
-  List,
-  ListItemText,
-  Link,
-  ListItemButton,
-  Alert,
-  Chip,
-  Box,
-} from "@mui/material";
+import { List, ListItemText, ListItemButton, Alert } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import Avatar from "@mui/material/Avatar";
-import MailOutlineIcon from "@mui/icons-material/MailOutline";
-
 import { NavLink } from "react-router-dom";
 import { styled } from "@mui/system";
-import useClientStore from "../../../zustand/ClientStore";
+import useVendorStore from "../../zustand/VendorStore";
 const CustomNavLink = styled(NavLink)(({ theme }) => ({
   "&.active": {
     color: theme.palette.primary.main,
@@ -40,12 +29,12 @@ const CustomListItemButton = ({ route, text }) => {
   );
 };
 
-function AccountSidebar(props) {
+function AccountSidebarVendor(props) {
   const theme = useTheme();
   const primary = theme.palette.primary.main;
   const tertiary = theme.palette.tertiary.main;
 
-  const { client } = useClientStore();
+  const { vendor } = useVendorStore();
 
   return (
     <div style={{ width: "100%", height: "100vh" }}>
@@ -54,60 +43,33 @@ function AccountSidebar(props) {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyItems: "center",
-          justifyContent: "center",
           padding: "16px",
         }}
       >
         <Avatar
           sx={{ bgcolor: primary, width: 200, height: 200 }}
-          src={client?.preSignedPhoto || "https://i.imgur.com/ZTevUo0.png"}
+          src={vendor?.preSignedPhoto || "https://i.imgur.com/ZTevUo0.png"}
         ></Avatar>
       </div>
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        padding={2}
-      >
-        {client?.status === "PENDING" && (
+      {vendor?.status === "PENDING" && (
+        <>
           <Alert severity="warning">
             Your account is pending review.
-            <p>
-              Booking functionality will be limited, but you can still browse
-              activities.
-            </p>
+            <p>Activity creation functionality will be limited.</p>
           </Alert>
-        )}
-
-        <Box marginTop={2}>
-          {client?.verified ? (
-            <Chip icon={<MailOutlineIcon />} label="Verified" />
-          ) : (
-            <Chip
-              component="a"
-              href="/client/verifyEmail"
-              icon={<MailOutlineIcon />}
-              label="Unverified"
-              variant="outlined"
-              clickable
-            />
-          )}
-        </Box>
-      </Box>
+        </>
+      )}
       <List>
         <CustomListItemButton
-          route="/settings/profile"
+          route="/vendor/settings/profile"
           text="Account Details"
         />
-        <CustomListItemButton route="/settings/picture" text="Change Picture" />
         <CustomListItemButton
-          route="/settings/privacy"
-          text="Privacy Settings"
+          route="/vendor/settings/picture"
+          text="Change Picture"
         />
         <CustomListItemButton
-          route="/settings/password"
+          route="/vendor/settings/password"
           text="Manage Password"
         />
       </List>
@@ -115,4 +77,4 @@ function AccountSidebar(props) {
   );
 }
 
-export default AccountSidebar;
+export default AccountSidebarVendor;

@@ -20,6 +20,9 @@ import ErrorPage from "./containers/ErrorPage";
 import useVendorStore from "./zustand/VendorStore";
 import VendorProtectedRoute from "./components/Routes/VendorProtectedRoute";
 import ActivitiesPage from "./containers/Vendor/ActivitiesPage";
+import AccountDetailsVendor from "./containers/Vendor/AccountDetailsVendor";
+import ProfilePictureVendor from "./containers/Vendor/ProfilePictureVendor";
+import PasswordChangeVendor from "./containers/Vendor/PasswordChangeVendor";
 import ResetPassword from "./containers/Client/Password/ResetPassword";
 import ForgotPassword from "./containers/Client/Password/ClientForgotPassword";
 
@@ -154,6 +157,38 @@ function App() {
             element={
               <VendorProtectedRoute>
                 <ActivitiesPage />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/settings"
+            element={
+              <VendorProtectedRoute>
+                <Navigate to="/vendor/settings/profile" />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/settings/profile"
+            element={
+              <VendorProtectedRoute>
+                <AccountDetailsVendor />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/settings/picture"
+            element={
+              <VendorProtectedRoute>
+                <ProfilePictureVendor />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/settings/password"
+            element={
+              <VendorProtectedRoute>
+                <PasswordChangeVendor />
               </VendorProtectedRoute>
             }
           />
