@@ -38,35 +38,35 @@ export const getAllAdmin = async (req, res) => {
 //@access Public
 //@desc Register Admin
 export const register = async (req, res) => {
-   //the slash is the default route when the api endpoint hits the resource
-   const errors = validationResult(req);
-   const token = req.cookies.token;
+  //the slash is the default route when the api endpoint hits the resource
+  const errors = validationResult(req);
+  const token = req.cookies.token;
 
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
 
-   try {
-      const decoded = jwt.verify(token, secret);
-      const admin = await Admin.findById(decoded.admin.id);
+  try {
+    const decoded = jwt.verify(token, secret);
+    const admin = await Admin.findById(decoded.admin.id);
 
-      if (!admin) {
-         return res.status(401).send("Admin not found");
-      }
+    if (!admin) {
+      return res.status(401).send("Admin not found");
+    }
 
-      if (admin.role != "MANAGERIAL") {
-         return res.status(403).send("Access Denied");
-      }
-      res.status(200).json({ token, admin: admin });
-   } catch (err) {
-      console.log(err.message);
-      // If verification fails (e.g., due to an invalid or expired token), send an error response
-      return res.status(401).send("Invalid Token");
-   }
+    if (admin.role != "MANAGERIAL") {
+      return res.status(403).send("Access Denied");
+    }
+    res.status(200).json({ token, admin: admin });
+  } catch (err) {
+    console.log(err.message);
+    // If verification fails (e.g., due to an invalid or expired token), send an error response
+    return res.status(401).send("Invalid Token");
+  }
 
-   try {
-      const { name, email, role } = req.body;
-      let admin = await Admin.findOne({ email }); //returns a promise
+  try {
+    const { name, email, role } = req.body;
+    let admin = await Admin.findOne({ email }); //returns a promise
 
     if (admin) {
       return res

@@ -10,7 +10,7 @@ export const updateCurrentActivity = (selectedActivity) => {
   }));
   console.log(
     "activity store current activity updated::",
-    useActivityStore.getState()
+    useActivityStore.getState(),
   );
 };
 
@@ -21,7 +21,7 @@ export const updateAllActivity = (newAllActivities) => {
   }));
   console.log(
     "activity store all activity updated::",
-    useActivityStore.getState()
+    useActivityStore.getState(),
   );
 };
 
@@ -31,44 +31,22 @@ export const useSelectedNavItemStore = create((set) => ({
 }));
 
 export const useAdminStore = create((set) => ({
-   authenticated: false,
-   admin: null,
-   adminError: null,
-   isLoading: false,
-   token: null,
-   admins: null,
-   setAdmin: (admin) => set({ admin }),
-   setAuthenticated: (authenticated) => set({ authenticated }), // Use the argument
-   login: async (email, password) => {
-      set({ isLoading: true, adminError: null });
-      try {
-         const response = await AxiosConnect.post("/gleekAdmin/login", {
-            email: email,
-            password: password,
-         });
-         const data = response.data;
-         set({
-            admin: data.admin,
-            authenticated: true,
-            token: data.token,
-         });
-         setTimeout(() => {
-            set({ isLoading: false });
-         }, 500);
-         return true;
-      } catch (error) {
-         console.log(error);
-         setTimeout(() => {
-            set({
-               adminError: error,
-               isLoading: false,
-            });
-         }, 500);
-         return false;
-      }
-   },
-   logout: async () => {
-      // Implement your logout logic and update authenticated state
+  authenticated: false,
+  admin: null,
+  adminError: null,
+  isLoading: false,
+  token: null,
+  admins: null,
+  setAdmin: (admin) => set({ admin }),
+  setAuthenticated: (authenticated) => set({ authenticated }), // Use the argument
+  login: async (email, password) => {
+    set({ isLoading: true, adminError: null });
+    try {
+      const response = await AxiosConnect.post("/gleekAdmin/login", {
+        email: email,
+        password: password,
+      });
+      const data = response.data;
       set({
         admin: data.admin,
         authenticated: true,
@@ -137,107 +115,59 @@ export const useAdminStore = create((set) => ({
       const response = await AxiosConnect.post("/gleekAdmin/recoverPassword", {
         email: email,
       });
-      try {
-         const response = await AxiosConnect.get("/gleekAdmin/logout");
-         setTimeout(() => {
-            set({
-               isLoading: false,
-               admin: null,
-               authenticated: false,
-               adminError: null,
-               token: null,
-            });
-         }, 500);
-      } catch (err) {
-         console.log("ERROR: ", err.message);
-      }
-   },
-   changePassword: async (password) => {
-      try {
-         const response = await AxiosConnect.post(
-            "/gleekAdmin/changePassword",
-            {
-               password: password,
-            }
-         );
-         const data = response.data;
-         set({ admin: data.admin, authenticated: true });
-         setTimeout(() => {
-            set({ isLoading: false });
-         }, 500);
-         return true;
-      } catch (error) {
-         console.log(error);
-         setTimeout(() => {
-            set({
-               adminError: error,
-               isLoading: false,
-            });
-         }, 500);
-         return false;
-      }
-   },
-   recoverPassword: async (email) => {
-      try {
-         const response = await AxiosConnect.post(
-            "/gleekAdmin/recoverPassword",
-            {
-               email: email,
-            }
-         );
-         const data = response.data;
-         setTimeout(() => {
-            set({ isLoading: false });
-         }, 500);
-         return data;
-      } catch (error) {
-         console.log(error);
-         setTimeout(() => {
-            set({
-               isLoading: false,
-            });
-         }, 500);
-         return false;
-      }
-   },
-   register: async (newAdmin) => {
-      set({ isLoading: true, adminError: null });
-      try {
-         const response = await AxiosConnect.post(
-            "/gleekAdmin/register",
-            newAdmin
-         );
-         const data = response.data;
-         console.log(data);
-         setTimeout(() => {
-            set({ isLoading: false });
-         }, 500);
-         return true;
-      } catch (error) {
-         console.log(error);
-         setTimeout(() => {
-            set({
-               isLoading: false,
-            });
-         }, 500);
-         return false;
-      }
-   },
-   getAllAdmins: async () => {
-      set({ isLoading: true, adminError: null });
-      try {
-         const response = await AxiosConnect.get("/gleekAdmin");
-         const data = response.data;
-         console.log(data);
-         setTimeout(() => {
-            set({ isLoading: false, admins: response.data });
-         }, 500);
-         return data;
-      } catch (error) {
-         console.log(error);
-         return false;
-      }
-   },
+      const data = response.data;
+      setTimeout(() => {
+        set({ isLoading: false });
+      }, 500);
+      return data;
+    } catch (error) {
+      console.log(error);
+      setTimeout(() => {
+        set({
+          isLoading: false,
+        });
+      }, 500);
+      return false;
+    }
+  },
+  register: async (newAdmin) => {
+    set({ isLoading: true, adminError: null });
+    try {
+      const response = await AxiosConnect.post(
+        "/gleekAdmin/register",
+        newAdmin,
+      );
+      const data = response.data;
+      console.log(data);
+      setTimeout(() => {
+        set({ isLoading: false });
+      }, 500);
+      return true;
+    } catch (error) {
+      console.log(error);
+      setTimeout(() => {
+        set({
+          isLoading: false,
+        });
+      }, 500);
+      return false;
+    }
+  },
+  getAllAdmins: async () => {
+    set({ isLoading: true, adminError: null });
+    try {
+      const response = await AxiosConnect.get("/gleekAdmin");
+      const data = response.data;
+      console.log(data);
+      setTimeout(() => {
+        set({ isLoading: false, admins: response.data });
+      }, 500);
+      return data;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  },
 }));
 
 export const useActivityStore = create((set) => ({
@@ -259,7 +189,7 @@ export const useActivityStore = create((set) => ({
     try {
       const response = await AxiosConnect.postMultiPart(
         "/activity/addActivity",
-        newActivityData
+        newActivityData,
       );
       set({ newActivity: response.data.activity });
     } catch (error) {
@@ -270,7 +200,7 @@ export const useActivityStore = create((set) => ({
     try {
       set({ isLoading: true });
       const response = await AxiosConnect.get(
-        `/activity/viewActivity/${activityId}`
+        `/activity/viewActivity/${activityId}`,
       );
       console.log("HUEHUE", response);
       set({ activityDetails: response.data.data });
@@ -324,7 +254,7 @@ export const useVendorStore = create((set) => ({
   vendorTypesFetcher: async () => {
     try {
       const response = await AxiosConnect.get(
-        "/gleek/vendor/getAllVendorTypes"
+        "/gleek/vendor/getAllVendorTypes",
       );
       const data = response.data;
       set({ vendorTypes: data.VendorTypeEnum });
@@ -363,7 +293,7 @@ export const useClientStore = create((set) => ({
     try {
       set({ isLoading: true });
       const response = await AxiosConnect.get(
-        `/client/getClientDetails/${clientId}`
+        `/client/getClientDetails/${clientId}`,
       );
       set({ clientDetails: response.data });
       set({ isLoading: false });
