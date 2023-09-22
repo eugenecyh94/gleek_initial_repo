@@ -111,6 +111,9 @@ export const postRegister = async (req, res) => {
   }
 };
 
+/*
+Login
+*/
 export const postLogin = async (req, res) => {
   const errors = validationResult(req);
 
@@ -285,5 +288,41 @@ export const updateCompanyLogo = async (req, res) => {
   } catch (e) {
     console.error(e);
     res.status(500).json("Server Error");
+  }
+};
+
+/*
+ * Change password
+ */
+export const postChangePassword = async (req, res) => {
+  const errors = validationResult(req);
+
+  const vendor = req.user;
+
+  if (!errors.isEmpty()) {
+    // 422 status due to validation errors
+    return res.status(422).json({ errors: errors.array() });
+  }
+  try {
+    const { oldPassword, newPassword } = req.body;
+
+    const isSame = await bcrypt.compare(oldPassword, vendor.password);
+
+    if (!isSame)
+      return res.status(401).json("Old password entered is incorrect.");
+
+    const salt = await bcrypt.genSalt(10);
+    const hashed = await bcrypt.hash(newPassword, salt);
+
+    const updatedVendor = await VendorModel.findOneAndUpdate(
+      { _id: vendor.id },
+      { password: hashed },
+      { new: true },
+    );
+
+    return res.status(200).json("Password successfully changed.");
+  } catch (err) {
+    console.error(err); // Log the error
+    return res.status(500).send("Server Error");
   }
 };

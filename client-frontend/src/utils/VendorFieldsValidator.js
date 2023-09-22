@@ -44,6 +44,12 @@ export const validator = (formData, fieldName) => {
     case "password":
       validatePassword(formData[fieldName], errors, fieldName);
       break;
+    case "oldPassword":
+      validateIsRequired(formData[fieldName], errors, fieldName);
+      break;
+    case "newPassword":
+      validatePassword(formData[fieldName], errors, fieldName);
+      break;
     case "passwordVerify":
       validatePasswordVerify(
         formData[fieldName],

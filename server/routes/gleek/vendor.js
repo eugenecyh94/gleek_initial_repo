@@ -10,6 +10,7 @@ import { postLogin } from "../../controller/vendorController.js";
 import { clearCookies } from "../../controller/vendorController.js";
 import verifyToken from "../../middleware/vendorAuth.js";
 import { uploadS3CompanyLogo } from "../../middleware/multer.js";
+import { postChangePassword } from "../../controller/vendorController.js";
 const router = express.Router();
 
 /*
@@ -44,4 +45,5 @@ router.patch(
   uploadS3CompanyLogo.single("image"),
   updateCompanyLogo,
 );
+router.post("/changePassword", verifyToken, postChangePassword);
 export default router;

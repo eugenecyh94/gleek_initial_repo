@@ -215,7 +215,6 @@ export const postChangePassword = async (req, res) => {
       { _id: client.id },
       { password: hashed },
       { new: true },
-      { new: true },
     );
 
     return res.status(200).json("Password successfully changed.");
