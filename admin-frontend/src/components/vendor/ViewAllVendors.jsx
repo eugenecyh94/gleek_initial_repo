@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useVendorStore } from "../../zustand/GlobalStore";
 import Layout from "../Layout";
 import VendorsTable from "./VendorsTable";
+import MainBodyContainer from "../common/MainBodyContainer";
 
 const ViewAllVendors = () => {
   const theme = useTheme();
@@ -16,8 +17,7 @@ const ViewAllVendors = () => {
   }, [getVendors]);
 
   return (
-    <Layout>
-      <Toolbar />
+    <MainBodyContainer hasBackButton={false} breadcrumbNames={[]} breadcrumbLinks={[]} currentBreadcrumbName={"View All Vendors"}>
       <Typography
         fontSize={25}
         fontWeight={700}
@@ -32,7 +32,7 @@ const ViewAllVendors = () => {
       ) : (
         <VendorsTable vendors={vendors}></VendorsTable>
       )}
-    </Layout>
+    </MainBodyContainer>
   );
 };
 

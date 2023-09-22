@@ -43,7 +43,6 @@ const ClientsTable = ({ clients, updateClient }) => {
   const navigate = useNavigate();
   // Handle row click to show client details
   const handleRowClick = (client) => {
-    console.log("Row clicked", client);
     navigate(`/viewClient/${client._id}`);
   };
 
@@ -129,6 +128,7 @@ const ClientsTable = ({ clients, updateClient }) => {
         <Tab label="Rejected" value="rejectedTab" />
       </Tabs>
       <div style={{ height: 500, width: "100%" }}>
+      {/* <Box flexDirection="column" justifyItems = "center" display="flex" width={"50%"} height={500}> */}
         <DataGrid
           initialState={{
             pagination: {
@@ -144,6 +144,7 @@ const ClientsTable = ({ clients, updateClient }) => {
           onRowClick={(params) => handleRowClick(params.row)}
         />
       </div>
+      {/* </Box> */}
     </Box>
   );
 };

@@ -1,12 +1,12 @@
 import { Toolbar } from "@mui/material";
 import Layout from "./Layout";
+import MainBodyContainer from "./common/MainBodyContainer";
 
 const Home = () => {
   return (
-    <Layout>
-      <Toolbar />
+    <MainBodyContainer hasBackButton={false} breadcrumbNames={[]} breadcrumbLinks={[]} currentBreadcrumbName={"Home"}>
       Home
-    </Layout>
+    </MainBodyContainer>
   );
 };
 export default Home;

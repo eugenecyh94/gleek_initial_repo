@@ -1,9 +1,10 @@
 import React from "react";
+import BreadCrumbsBar from "../common/BreadCrumbsBar";
 import { useClientStore } from "../../zustand/GlobalStore";
 import Layout from "../Layout";
 import { useTheme } from "@emotion/react";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   CircularProgress,
   Toolbar,
@@ -15,13 +16,12 @@ import {
 import DoneIcon from "@mui/icons-material/Done";
 import CloseIcon from "@mui/icons-material/Close";
 import ProfileCard from "../common/ProfileCard";
-<<<<<<< HEAD
-import PersonIcon from '@mui/icons-material/Person';
-import BusinessIcon from '@mui/icons-material/Business';
-import PaidIcon from '@mui/icons-material/Paid';
-import BadgeIcon from '@mui/icons-material/Badge';
-=======
->>>>>>> develop
+import PersonIcon from "@mui/icons-material/Person";
+import BusinessIcon from "@mui/icons-material/Business";
+import PaidIcon from "@mui/icons-material/Paid";
+import BadgeIcon from "@mui/icons-material/Badge";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import MainBodyContainer from "../common/MainBodyContainer";
 
 const ClientDetails = () => {
   const { clientId } = useParams();
@@ -44,8 +44,7 @@ const ClientDetails = () => {
   }, [getClientDetails, clientId, isUpdated]);
 
   return (
-    <Layout>
-      <Toolbar />
+    <MainBodyContainer hasBackButton={true} breadcrumbNames={["View All Clients"]} breadcrumbLinks={["/viewAllClients"]} currentBreadcrumbName={"View Client Profile"}>
       {isLoading ? (
         <CircularProgress sx={{ margin: "auto", marginTop: "32px" }} />
       ) : (
@@ -74,10 +73,9 @@ const ClientDetails = () => {
           <Box display="flex" flexDirection="row" flexWrap="wrap">
             <ProfileCard
               title="Point of Contact"
-<<<<<<< HEAD
-              icon={<PersonIcon style= {{ color: theme.palette.dark_purple.main}}/>}
-=======
->>>>>>> develop
+              icon={
+                <PersonIcon style={{ color: theme.palette.dark_purple.main }} />
+              }
               fieldNames={[
                 "Name",
                 "Email",
@@ -95,10 +93,11 @@ const ClientDetails = () => {
             />
             <ProfileCard
               title="Company"
-<<<<<<< HEAD
-              icon={<BusinessIcon style= {{ color: theme.palette.dark_purple.main}}/>}  
-=======
->>>>>>> develop
+              icon={
+                <BusinessIcon
+                  style={{ color: theme.palette.dark_purple.main }}
+                />
+              }
               fieldNames={[
                 "Company Name",
                 "Office Address",
@@ -112,25 +111,9 @@ const ClientDetails = () => {
             />
             <ProfileCard
               title="Billing Details"
-<<<<<<< HEAD
-              icon={<PaidIcon style= {{ color: theme.palette.dark_purple.main}}/>}  
-=======
-              fieldNames={[
-                "Billing Party Name",
-                "Billing Address",
-                "Billing Office Postal Code",
-                "Billing Email",
-              ]}
-              fieldValues={[
-                clientDetails.billingPartyName,
-                clientDetails.billingAddress,
-                clientDetails.billingOfficePostalCode,
-                clientDetails.billingEmail,
-              ]}
-            />
-            <ProfileCard
-              title="Billing Details"
->>>>>>> develop
+              icon={
+                <PaidIcon style={{ color: theme.palette.dark_purple.main }} />
+              }
               fieldNames={[
                 "Billing Party Name",
                 "Billing Address",
@@ -147,10 +130,11 @@ const ClientDetails = () => {
             {clientDetails.status === "APPROVED" && (
               <ProfileCard
                 title="Account Details"
-<<<<<<< HEAD
-                icon={<BadgeIcon style= {{ color: theme.palette.dark_purple.main}}/>  }
-=======
->>>>>>> develop
+                icon={
+                  <BadgeIcon
+                    style={{ color: theme.palette.dark_purple.main }}
+                  />
+                }
                 fieldNames={["Signup Date", "Status", "Approved Date"]}
                 fieldValues={[
                   clientDetails.signupDate,
@@ -162,10 +146,11 @@ const ClientDetails = () => {
             {clientDetails.status !== "APPROVED" && (
               <ProfileCard
                 title="Account Details"
-<<<<<<< HEAD
-                icon={<BadgeIcon style= {{ color: theme.palette.dark_purple.main}}/>  }
-=======
->>>>>>> develop
+                icon={
+                  <BadgeIcon
+                    style={{ color: theme.palette.dark_purple.main }}
+                  />
+                }
                 fieldNames={["Signup Date", "Status"]}
                 fieldValues={[clientDetails.signupDate, clientDetails.status]}
               />
@@ -212,7 +197,7 @@ const ClientDetails = () => {
           )}
         </React.Fragment>
       )}
-    </Layout>
+</MainBodyContainer>
   );
 };
 

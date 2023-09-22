@@ -1,9 +1,11 @@
 import { useTheme } from "@emotion/react";
-import { CircularProgress, Toolbar, Typography } from "@mui/material";
+import React from "react";
+import { CircularProgress, Toolbar, Typography, Box } from "@mui/material";
 import { useEffect } from "react";
 import { useClientStore } from "../../zustand/GlobalStore";
-import Layout from "../Layout";
+import MainBodyContainer from "../common/MainBodyContainer";
 import ClientsTable from "./ClientsTable";
+import BreadCrumbsBar from "../common/BreadCrumbsBar";
 
 const ViewAllClients = () => {
   const theme = useTheme();
@@ -16,8 +18,7 @@ const ViewAllClients = () => {
   }, [getClients]);
 
   return (
-    <Layout>
-      <Toolbar />
+    <MainBodyContainer hasBackButton={false} breadcrumbNames={[]} breadcrumbLinks={[]} currentBreadcrumbName={"View All Clients"}>
       <Typography
         fontSize={25}
         fontWeight={700}
@@ -35,7 +36,7 @@ const ViewAllClients = () => {
           updateClient={updateClient}
         ></ClientsTable>
       )}
-    </Layout>
+      </MainBodyContainer>
   );
 };
 
