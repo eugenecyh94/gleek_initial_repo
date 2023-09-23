@@ -37,17 +37,6 @@ export const validator = (formData, fieldName) => {
     case "phoneNumber":
       validatePhoneNumber(formData[fieldName], errors, fieldName);
       break;
-    case "password":
-      validatePassword(formData[fieldName], errors, fieldName);
-      break;
-    case "passwordVerify":
-      validatePasswordVerify(
-        formData[fieldName],
-        formData.password,
-        errors,
-        fieldName,
-      );
-      break;
     default:
   }
   return errors;
@@ -87,29 +76,5 @@ export const validatePhoneNumber = (data, errors, fieldName) => {
     const re = /^65\d{8}$/;
     const result = re.test(String(data).toLowerCase());
     if (!result) errors[fieldName] = "Invalid Phone Number!";
-  }
-};
-
-export const validatePassword = (data, errors, fieldName) => {
-  if (data === "") {
-    errors[fieldName] = `${fieldName} is required`;
-  } else {
-    const re = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).*/;
-    let result = re.test(String(data));
-    console.log(result);
-    if (!result) {
-      errors[fieldName] =
-        "Password must contain at least one lower case letter, one \n upper case letter, number and special character.";
-      result = false;
-    } else if (data.length < 8) {
-      errors[fieldName] = "Your password has less than 8 characters.";
-      result = false;
-    }
-  }
-};
-
-export const validatePasswordVerify = (data, password, errors, fieldName) => {
-  if (password !== data) {
-    errors[fieldName] = `Password does not match!`;
   }
 };
