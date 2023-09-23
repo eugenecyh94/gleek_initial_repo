@@ -209,7 +209,7 @@ export const createResendVerifyEmailOptionsVendor = (vendor, token) => {
     const message = `Hello ${vendor.email}, you have requested for the verification email to be resent.
     Please verify your email by clicking on the link: http://localhost:3001/vendor/verifyEmail/${token}`;
     const options = {
-      to: client.email,
+      to: vendor.email,
       subject: "Resend: Verify your Email on Gleek",
       text: message,
     };
