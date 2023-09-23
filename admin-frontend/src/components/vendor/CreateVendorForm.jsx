@@ -14,7 +14,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { validator } from "../../utils/VendorFieldsValidator";
 
 const CreateVendorForm = ({ vendorTypes, addVendor, admin }) => {
@@ -142,13 +142,24 @@ const CreateVendorForm = ({ vendorTypes, addVendor, admin }) => {
     }));
   };
 
+  useEffect(() => {
+    const updatedCompanySocials = {};
+    for (const socialMedia of socialMediaFields) {
+      updatedCompanySocials[socialMedia.platform] = socialMedia.url;
+    }
+    setFormData((prevData) => ({
+      ...prevData,
+      companySocials: updatedCompanySocials,
+    }));
+  }, [socialMediaFields]);
+
   const updateCompanySocials = () => {
     const updatedCompanySocials = socialMediaFields.reduce(
       (acc, { platform, url }) => {
         acc[platform] = url;
         return acc;
       },
-      {},
+      {}
     );
 
     setFormData((prevData) => ({
@@ -157,18 +168,10 @@ const CreateVendorForm = ({ vendorTypes, addVendor, admin }) => {
     }));
   };
 
-  const handlePlatformChange = (index, value) => {
-    const updatedFields = [...socialMediaFields];
-    updatedFields[index].platform = value;
-    setSocialMediaFields(updatedFields);
-    updateCompanySocials();
-  };
-
   const handleURLChange = (index, value) => {
     const updatedFields = [...socialMediaFields];
     updatedFields[index].url = value;
     setSocialMediaFields(updatedFields);
-    updateCompanySocials();
   };
 
   const handleSocialMediaValidate = (platform) => {
@@ -212,14 +215,18 @@ const CreateVendorForm = ({ vendorTypes, addVendor, admin }) => {
 
   const addField = () => {
     setSocialMediaFields([...socialMediaFields, { platform: "", url: "" }]);
-    updateCompanySocials();
   };
 
   const removeField = (index) => {
     const updatedFields = [...socialMediaFields];
     updatedFields.splice(index, 1);
     setSocialMediaFields(updatedFields);
-    updateCompanySocials();
+  };
+
+  const handlePlatformChange = (index, value) => {
+    const updatedFields = [...socialMediaFields];
+    updatedFields[index].platform = value;
+    setSocialMediaFields(updatedFields);
   };
 
   const handleClose = (event, reason) => {
@@ -232,10 +239,13 @@ const CreateVendorForm = ({ vendorTypes, addVendor, admin }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    console.log(formData);
     for (const fieldName in formData) {
       let errors = validator(formData, fieldName);
-      const newdata = { [fieldName]: errors[fieldName] };
-      setErrorData({ ...errorData, ...newdata });
+      setErrorData((prevData) => ({
+        ...prevData,
+        [fieldName]: errors[fieldName] || "",
+      }));
     }
     for (let field of socialMediaFields) {
       const { platform, url } = field;
@@ -250,19 +260,18 @@ const CreateVendorForm = ({ vendorTypes, addVendor, admin }) => {
     }
     if (!Object.values(errorData).every((error) => error === "")) {
       setError(true);
+      return;
     }
-
+    console.log("hmmm", errorData);
     try {
       const responseStatus = await addVendor(formData);
+      console.log(responseStatus);
       if (responseStatus) {
-        console.log("success");
         setIsOpen(true);
+      } else {
+        setError(true);
       }
     } catch (error) {
-      const errorMessage =
-        error?.response?.data?.errors?.[0]?.msg ||
-        error?.response?.data ||
-        null;
       setError(true);
     }
   };
@@ -505,9 +514,11 @@ const CreateVendorForm = ({ vendorTypes, addVendor, admin }) => {
                   />
                 </Grid>
                 <Grid item xs={1}>
-                  <IconButton onClick={() => removeField(index)}>
-                    <DeleteIcon />
-                  </IconButton>
+                  {socialMediaFields?.length > 1 && (
+                    <IconButton onClick={() => removeField(index)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  )}
                 </Grid>
               </Grid>
             ))}

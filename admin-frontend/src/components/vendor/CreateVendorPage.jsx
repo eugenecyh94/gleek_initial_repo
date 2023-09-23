@@ -12,7 +12,7 @@ const StyledPage = styled("div")(({ theme }) => ({
 }));
 
 const CreateVendorPage = () => {
-  const { vendorTypesFetcher, createVendor, isLoading, vendorTypes } =
+  const { vendorTypesFetcher, createVendor, vendorTypes } =
     useVendorStore();
   const { admin } = useAdminStore();
   const theme = useTheme();
@@ -20,8 +20,13 @@ const CreateVendorPage = () => {
     vendorTypesFetcher();
   }, []);
   return (
-    <MainBodyContainer hasBackButton={true} breadcrumbNames={["View All Vendors"]} breadcrumbLinks={["/viewAllVendors"]} currentBreadcrumbName={"Add Vendor"}>
     <StyledPage>
+      <MainBodyContainer
+        hasBackButton={true}
+        breadcrumbNames={["View All Vendors"]}
+        breadcrumbLinks={["/viewAllVendors"]}
+        currentBreadcrumbName={"Add Vendor"}
+      >
         <Typography
           alignItems={"center"}
           fontSize={25}
@@ -37,17 +42,13 @@ const CreateVendorPage = () => {
           <PersonAddAlt1Icon />
           Add Vendor
         </Typography>
-        {isLoading ? (
-          <CircularProgress sx={{ margin: "auto", marginTop: "32px" }} />
-        ) : (
-          <CreateVendorForm
-            vendorTypes={vendorTypes}
-            addVendor={createVendor}
-            admin={admin}
-          ></CreateVendorForm>
-        )}
+        <CreateVendorForm
+          vendorTypes={vendorTypes}
+          addVendor={createVendor}
+          admin={admin}
+        />
+      </MainBodyContainer>
     </StyledPage>
-    </MainBodyContainer>
   );
 };
 
