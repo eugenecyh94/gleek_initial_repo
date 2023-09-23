@@ -35,7 +35,7 @@ const VendorRegisterPage = () => {
   // states
   // user input
   const [showPassword, setShowPassword] = useState(false);
-  const { vendorTypesFetcher, vendorTypes, registerVendor } = useVendorStore();
+  const { registerVendor } = useVendorStore();
   const { openSnackbar } = useSnackbarStore();
   const [showPasswordVerify, setShowPasswordVerify] = useState(false);
   const navigate = useNavigate();
@@ -79,9 +79,13 @@ const VendorRegisterPage = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  useEffect(() => {
-    vendorTypesFetcher();
-  }, []);
+  const vendorTypes = {
+    B_CORP: "B Corp",
+    SOCIAL_ENTERPRISE: "Social Enterprise",
+    NON_PROFIT: "Non-profit",
+    SMALL_BUSINESS: "Small Business",
+    OTHER: "Other",
+  };
 
   // functions
   const handleClickShowPassword = () => setShowPassword((show) => !show);

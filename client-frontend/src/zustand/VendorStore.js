@@ -11,18 +11,18 @@ const useVendorStore = create((set) => ({
   setVendor: (vendor) => set({ vendor }),
   vendorTypes: {},
   setVendorTypes: (vendorTypes) => set({ vendorTypes }),
-  vendorTypesFetcher: async () => {
-    try {
-      const response = await AxiosConnect.get(
-        "/gleek/vendor/getAllVendorTypes",
-      );
-      const data = response.data;
-      set({ vendorTypes: data.VendorTypeEnum });
-    } catch (error) {
-      console.error(error);
-      alert(error.response.data);
-    }
-  },
+  // vendorTypesFetcher: async () => {
+  //   try {
+  //     const response = await AxiosConnect.get(
+  //       "/gleek/vendor/getAllVendorTypes",
+  //     );
+  //     const data = response.data;
+  //     set({ vendorTypes: data.VendorTypeEnum });
+  //   } catch (error) {
+  //     console.error(error);
+  //     alert(error.response.data);
+  //   }
+  // },
   registerVendor: async (userData) => {
     try {
       const response = await AxiosConnect.post(
@@ -117,6 +117,32 @@ const useVendorStore = create((set) => ({
     } catch (error) {
       console.log(error);
       throw error;
+    }
+  },
+  sendRecoverPasswordEmail: async (companyEmail) => {
+    try {
+      const response = await AxiosConnect.post(
+        "/gleek/vendor/recoverPasswordMail",
+        {
+          companyEmail: companyEmail,
+        },
+      );
+      console.log(response);
+      return response;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
+  resetPassword: async (newPassword) => {
+    try {
+      const response = await AxiosConnect.post("/gleek/vendor/resetPassword", {
+        newPassword: newPassword,
+      });
+      return response;
+    } catch (error) {
+      console.error(error);
+      alert(error.response.data);
     }
   },
 }));

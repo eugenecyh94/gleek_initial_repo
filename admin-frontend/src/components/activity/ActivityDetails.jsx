@@ -13,7 +13,7 @@ import {
   TableHead,
   TableRow,
   Typography,
-  useTheme
+  useTheme,
 } from "@mui/material";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
@@ -90,7 +90,7 @@ const ActivityDetails = () => {
                   style={{ marginRight: 8, marginTop: 6 }}
                   {...stringAvatar(
                     activityDetails?.linkedVendor?.companyName,
-                    theme
+                    theme,
                   )}
                 />
                 <Container>

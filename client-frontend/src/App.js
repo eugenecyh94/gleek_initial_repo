@@ -27,6 +27,8 @@ import ResetPassword from "./containers/Client/Password/ResetPassword";
 import ForgotPassword from "./containers/Client/Password/ClientForgotPassword";
 import VerifyEmailVendor from "./containers/Vendor/VerifyEmailVendor";
 import PrivacyVendor from "./containers/Vendor/PrivacyVendor";
+import VendorForgotPassword from "./containers/Vendor/Password/VendorForgotPassword";
+import VendorResetPassword from "./containers/Vendor/Password/ResetPassword";
 function App() {
   const { isLoading, clientError, login } = useClientStore();
   const { isLoadingVendor, vendorError, loginVendor } = useVendorStore();
@@ -151,6 +153,7 @@ function App() {
                 error={vendorError}
                 title="Vendor Login"
                 registerLink="/vendor/register"
+                forgotPasswordLink="/vendor/forgotPassword"
                 loginMethod={loginVendor}
               />
             }
@@ -220,6 +223,16 @@ function App() {
                 <PrivacyVendor />
               </VendorProtectedRoute>
             }
+          />
+          <Route
+            exact
+            path="/vendor/forgotPassword"
+            element={<VendorForgotPassword />}
+          />
+          <Route
+            exact
+            path="/vendor/resetPassword"
+            element={<VendorResetPassword />}
           />
         </Routes>
       </Layout>

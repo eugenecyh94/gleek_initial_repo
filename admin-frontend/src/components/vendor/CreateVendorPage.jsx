@@ -20,8 +20,13 @@ const CreateVendorPage = () => {
     vendorTypesFetcher();
   }, []);
   return (
-    <MainBodyContainer hasBackButton={true} breadcrumbNames={["View All Vendors"]} breadcrumbLinks={["/viewAllVendors"]} currentBreadcrumbName={"Add Vendor"}>
-    <StyledPage>
+    <MainBodyContainer
+      hasBackButton={true}
+      breadcrumbNames={["View All Vendors"]}
+      breadcrumbLinks={["/viewAllVendors"]}
+      currentBreadcrumbName={"Add Vendor"}
+    >
+      <StyledPage>
         <Typography
           alignItems={"center"}
           fontSize={25}
@@ -46,7 +51,7 @@ const CreateVendorPage = () => {
             admin={admin}
           ></CreateVendorForm>
         )}
-    </StyledPage>
+      </StyledPage>
     </MainBodyContainer>
   );
 };

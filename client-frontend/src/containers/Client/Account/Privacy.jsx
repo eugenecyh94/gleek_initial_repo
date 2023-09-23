@@ -110,7 +110,6 @@ function Privacy(props) {
                 />
               }
               label="I agree to receive email updates from Gleek."
-              
             />
             <FormControlLabel
               control={

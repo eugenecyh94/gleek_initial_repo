@@ -230,11 +230,11 @@ export const createResetPasswordEmailOptions = (client, token) => {
   return options;
 };
 
-export const createResetPasswordEmailOptions = (client, token) => {
-  const message = `Please add a new password for your account by clicking on the link: http://localhost:5000/gleek/auth/resetPassword/${token}`;
+export const createResetPasswordEmailOptionsVendor = (vendor, token) => {
+  const message = `Please add a new password for your account by clicking on the link: http://localhost:5000/gleek/vendor/resetPassword/${token}`;
   const options = {
-    to: client.email,
-    subject: "Gleek Client: Recover Password",
+    to: vendor.companyEmail,
+    subject: "Gleek Vendor: Recover Password",
     text: message,
   };
   return options;

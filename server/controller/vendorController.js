@@ -11,13 +11,16 @@ import { validationResult } from "express-validator";
 import { createVendorConsent } from "../service/consentService.js";
 import bcrypt from "bcryptjs";
 import { s3ImageGetService } from "../service/s3ImageGetService.js";
-const secret = process.env.JWT_SECRET_VENDOR;
 import {
   createVendorWelcomeMailOptions,
   createResendVerifyEmailOptionsVendor,
   createVerifyEmailOptionsVendor,
+  createResetPasswordEmailOptionsVendor,
 } from "../util/sendMailOptions.js";
 import sendMail from "../util/sendMail.js";
+
+const secret = process.env.JWT_SECRET_VENDOR;
+
 // sample account: companyEmail = "test@gmail.com", password = "7655Th#123"
 
 /*
@@ -36,9 +39,30 @@ const generateJwtToken = async (vendorId) => {
 };
 
 /*
+ * Set JWT Token into res's cookie
+ */
+const setCookies = (res, token) => {
+  res.cookie("token", token, {
+    httpOnly: true,
+    maxAge: 3600000, // Expires in 1 hour (milliseconds)
+    sameSite: "None", // Adjust this based on your security requirements
+    secure: true, // Use secure cookies in production
+    path: "/", // Set the path to your application root
+  });
+  res.cookie("userRole", "Vendor", {
+    httpOnly: true,
+    maxAge: 3600000,
+    sameSite: "None",
+    secure: true,
+    path: "/",
+  });
+  return res;
+};
+
+/*
  * Set JWT Token into cookie and return HTTP 200
  */
-const setCookieAndRespond = (res, token, vendor) => {
+const setCookieAndRespond = (res, token, vendor, msg) => {
   try {
     res.cookie("token", token, {
       httpOnly: true,
@@ -54,13 +78,14 @@ const setCookieAndRespond = (res, token, vendor) => {
       secure: true,
       path: "/",
     });
-    console.log(vendor);
-    res
-      .status(200)
-      .json({ msg: "Retrieved Vendor Account", token, vendor: vendor });
+    if (msg) {
+      res.status(200).json({ token, vendor: vendor, msg: msg });
+    } else {
+      res.status(200).json({ token, vendor: vendor });
+    }
   } catch (cookieError) {
     console.error(cookieError);
-    res.status(500).send("Error setting cookie");
+    res.status(500).send({ msg: "Error setting cookie" });
   }
 };
 
@@ -168,48 +193,7 @@ export const verifyEmail = async (req, res) => {
 };
 
 /*
- * Update the client account details (except for email and password)
- */
-export const updateClientAccountDetails = async (req, res) => {
-  try {
-    const client = req.user;
-    if (!client) {
-      return res.status(404).send("Client not found. Token may have expired.");
-    }
-
-    const body = req.body;
-    console.log("updateClientAccountDetails: body", body);
-
-    // remove password and email in case it is sent along in the body
-    const { password, email, ...updateData } = body;
-
-    console.log("updateClientAccountDetails: UpdateData", updateData);
-    const updatedClient = await Client.findOneAndUpdate(
-      { _id: client.id },
-      { ...updateData },
-      {
-        new: true,
-        select: {
-          password: 0,
-        },
-      },
-    );
-
-    console.log("updateClientAccountDetails: Updated client", updatedClient);
-
-    res.status(200).json({
-      success: true,
-      message: "Your profile is successfully updated!",
-      client: updatedClient,
-    });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ status: "error", msg: "Server Error" });
-  }
-};
-
-/*
-Login
+Vendor Login
 */
 export const postLogin = async (req, res) => {
   const errors = validationResult(req);
@@ -249,6 +233,9 @@ export const postLogin = async (req, res) => {
   }
 };
 
+/*
+Token Validation for Vendor 
+*/
 export const validateToken = async (req, res) => {
   const token = req.cookies.token;
 
@@ -296,7 +283,7 @@ export const getAllVendorTypes = async (req, res) => {
 };
 
 /**
- Log out
+ Log out Venbdor by clearing cookies
  */
 export const clearCookies = async (req, res) => {
   res.clearCookie("token");
@@ -304,6 +291,9 @@ export const clearCookies = async (req, res) => {
   res.status(200).end();
 };
 
+/**
+ Resend vendor verify email
+ */
 export const resendVerifyEmail = async (req, res) => {
   try {
     const vendor = req.user;
@@ -380,6 +370,9 @@ export const updateVendor = async (req, res) => {
   }
 };
 
+/*
+Update company logo
+*/
 export const updateCompanyLogo = async (req, res) => {
   try {
     const vendor = req.user;
@@ -412,12 +405,15 @@ export const updateCompanyLogo = async (req, res) => {
     });
   } catch (e) {
     console.error(e);
-    res.status(500).json("Server Error");
+    res.status(500).json({
+      error: true,
+      msg: "Server error",
+    });
   }
 };
 
 /*
- * Change password
+ * Change password for Vendor
  */
 export const postChangePassword = async (req, res) => {
   const errors = validationResult(req);
@@ -481,11 +477,88 @@ export const updateVendorAccountDetails = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Your profile is successfully updated!",
+      msg: "Your profile is successfully updated!",
       vendor: updatedVendor,
     });
   } catch (e) {
     console.error(e);
-    res.status(500).json("Server Error");
+    res.status(500).json(
+      res.status(500).json({
+        error: true,
+        msg: "Server error",
+      }),
+    );
+  }
+};
+
+/*
+ * Reset password (after getting recovering password email)
+ */
+export const postResetPassword = async (req, res) => {
+  const vendor = req.user;
+
+  try {
+    const { newPassword } = req.body;
+
+    const salt = await bcrypt.genSalt(10);
+    const hashed = await bcrypt.hash(newPassword, salt);
+
+    const updatedVendor = await VendorModel.findOneAndUpdate(
+      { _id: vendor.id },
+      { password: hashed },
+      { new: true },
+    );
+
+    return res.status(200).json({ msg: "Password successfully changed." });
+  } catch (err) {
+    console.error(err); // Log the error
+    return res.status(500).send({
+      error: true,
+      msg: "Server error",
+    });
+  }
+};
+
+/*
+ * Send recover password email
+ */
+export const recoverPasswordMail = async (req, res) => {
+  try {
+    const { companyEmail } = req.body;
+    const vendor = await VendorModel.findOne({ companyEmail }).select(
+      "-password",
+    );
+    if (!vendor) {
+      return res
+        .status(400)
+        .json({ msg: "There is no account tied to this email." });
+    }
+
+    const token = await generateJwtToken(vendor.id);
+    sendMail(createResetPasswordEmailOptionsVendor(vendor, token));
+
+    return setCookieAndRespond(res, token, vendor, "Recovery email sent!");
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("Server Error " + err.message);
+  }
+};
+
+/*
+ * Redirect vendor to reset password page
+ */
+export const resetPasswordRedirect = async (req, res) => {
+  const token = req.params.token;
+  if (!token) {
+    return res.status(403).send("Token Not Found!");
+  }
+  console.log("RESET");
+  console.log(token);
+  try {
+    setCookies(res, token);
+    res.status(200).redirect("http://localhost:3001/vendor/resetPassword");
+  } catch (cookieError) {
+    console.log(cookieError);
+    return res.status(500).send("Error setting cookie");
   }
 };
