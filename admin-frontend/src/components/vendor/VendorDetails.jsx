@@ -113,7 +113,7 @@ const VendorDetails = () => {
                 vendorDetails.companyEmail,
               ]}
             />
-            {vendorDetails && (
+            {/* {vendorDetails && (
               <ProfileCard
               title="Brand Names"
               icon={
@@ -123,7 +123,7 @@ const VendorDetails = () => {
               }
               fieldValues={vendorDetails ? vendorDetails.brandNames : []}
             />
-            )}
+            )} */}
             
             {Object.keys(vendorDetails.companySocials).length > 0 && (
               <ProfileCard

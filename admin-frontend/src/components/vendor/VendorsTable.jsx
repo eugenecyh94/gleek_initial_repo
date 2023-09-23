@@ -77,8 +77,8 @@ const VendorsTable = ({ vendors, updateVendor }) => {
   };
 
   const filterCriteria = {
-    approvedTab: { status: "APPROVED", approved: true },
-    pendingTab: { status: "PENDING", approved: false },
+    approvedTab: { status: "APPROVED" },
+    pendingTab: { status: "PENDING" },
     rejectedTab: { status: "REJECTED" },
   };
 
@@ -142,13 +142,13 @@ const VendorsTable = ({ vendors, updateVendor }) => {
       headerName: "Type",
       flex: 1,
       valueGetter: (params) => {
-        return params.row.companyType === "Other"
+        return params.row.vendorType === "Other"
           ? "Other - " + params.row.customCompanyType
-          : params.row.companyType;
+          : params.row.vendorType;
       },
     },
     {
-      field: "companyNumber",
+      field: "companyPhoneNumber",
       headerName: "HP Number",
       flex: 1,
     },
