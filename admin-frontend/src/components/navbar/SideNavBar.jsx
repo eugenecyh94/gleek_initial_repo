@@ -14,7 +14,7 @@ import { useSelectedNavItemStore } from "../../zustand/GlobalStore";
 const drawerWidth = 240;
 const activityManagementList = [
   { "View Published Activities": "/viewPublishedActivities" },
-  { "View Unpublished Activities": "/viewUnpublishedActivities" },
+  // { "View Unpublished Activities": "/viewUnpublishedActivities" },
 ];
 const userManagementList = [
   { "Admin Team": "/adminTeam" },

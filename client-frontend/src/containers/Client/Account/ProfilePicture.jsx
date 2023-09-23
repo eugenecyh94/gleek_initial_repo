@@ -1,17 +1,10 @@
-import React, { useEffect, useState } from "react";
-import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Grid,
-  Avatar,
-} from "@mui/material";
-import AccountSidebar from "./AccountSidebar";
 import { useTheme } from "@emotion/react";
-import AxiosConnect from "../../utils/AxiosConnect";
-import useClientStore from "../../zustand/ClientStore";
-import useSnackbarStore from "../../zustand/SnackbarStore";
+import { Avatar, Box, Button, Grid, Typography } from "@mui/material";
+import React, { useState } from "react";
+import AxiosConnect from "../../../utils/AxiosConnect";
+import useClientStore from "../../../zustand/ClientStore";
+import useSnackbarStore from "../../../zustand/SnackbarStore";
+import AccountSidebar from "./AccountSidebar";
 function AccountDetails(props) {
   const [formData, setFormData] = useState();
   const { openSnackbar } = useSnackbarStore();

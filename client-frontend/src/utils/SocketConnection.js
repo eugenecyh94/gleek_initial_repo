@@ -27,6 +27,7 @@ const SocketConnection = () => {
         setClient(null);
       }
     } catch (error) {
+      console.error(error);
       setVendor(null);
       setVendorAuthenticated(null);
       setAuthenticated(false);

@@ -8,11 +8,11 @@ import LoginPage from "./containers/LoginPage";
 import RegisterPage from "./containers/Client/RegisterPage";
 import ClientProtectedRoute from "./components/Routes/ClientProtectedRoute";
 import SocketConnection from "./utils/SocketConnection";
-import AccountDetails from "./containers/Account/AccountDetails";
-import Privacy from "./containers/Account/Privacy";
-import PasswordChange from "./containers/Account/PasswordChange";
-import ProfilePicture from "./containers/Account/ProfilePicture";
-import VerifyEmail from "./containers/Account/VerifyEmail";
+import AccountDetails from "./containers/Client/Account/AccountDetails";
+import Privacy from "./containers/Client/Account/Privacy";
+import PasswordChange from "./containers/Client/Account/PasswordChange";
+import ProfilePicture from "./containers/Client/Account/ProfilePicture";
+import VerifyEmail from "./containers/Client/Account/VerifyEmail";
 import ActivityDetailsPage from "./containers/ActivityDetailsPage";
 import useClientStore from "./zustand/ClientStore";
 import VendorRegisterPage from "./containers/Vendor/VendorRegisterPage";
@@ -23,7 +23,12 @@ import ActivitiesPage from "./containers/Vendor/ActivitiesPage";
 import AccountDetailsVendor from "./containers/Vendor/AccountDetailsVendor";
 import ProfilePictureVendor from "./containers/Vendor/ProfilePictureVendor";
 import PasswordChangeVendor from "./containers/Vendor/PasswordChangeVendor";
-
+import ResetPassword from "./containers/Client/Password/ResetPassword";
+import ForgotPassword from "./containers/Client/Password/ClientForgotPassword";
+import VerifyEmailVendor from "./containers/Vendor/VerifyEmailVendor";
+import PrivacyVendor from "./containers/Vendor/PrivacyVendor";
+import VendorForgotPassword from "./containers/Vendor/Password/VendorForgotPassword";
+import VendorResetPassword from "./containers/Vendor/Password/ResetPassword";
 function App() {
   const { isLoading, clientError, login } = useClientStore();
   const { isLoadingVendor, vendorError, loginVendor } = useVendorStore();
@@ -122,11 +127,24 @@ function App() {
                 error={clientError}
                 title="Client Login"
                 registerLink="/register"
+                forgotPasswordLink="/client/forgotPassword"
                 loginMethod={login}
               />
             }
           />
           <Route path="/register" element={<RegisterPage />} />
+          <Route
+            exact
+            path="client/resetPassword"
+            element={<ResetPassword />}
+          />
+          <Route
+            exact
+            path="/client/forgotPassword"
+            element={<ForgotPassword />}
+          />
+
+          {/* Vendor routes */}
           <Route
             path="/vendor/login"
             element={
@@ -135,6 +153,7 @@ function App() {
                 error={vendorError}
                 title="Vendor Login"
                 registerLink="/vendor/register"
+                forgotPasswordLink="/vendor/forgotPassword"
                 loginMethod={loginVendor}
               />
             }
@@ -180,6 +199,40 @@ function App() {
                 <PasswordChangeVendor />
               </VendorProtectedRoute>
             }
+          />
+          <Route
+            path="/vendor/verifyEmail/:token"
+            element={
+              <VendorProtectedRoute>
+                <VerifyEmailVendor />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/verifyEmail"
+            element={
+              <VendorProtectedRoute>
+                <VerifyEmailVendor />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/settings/termsAndConditons"
+            element={
+              <VendorProtectedRoute>
+                <PrivacyVendor />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/vendor/forgotPassword"
+            element={<VendorForgotPassword />}
+          />
+          <Route
+            exact
+            path="/vendor/resetPassword"
+            element={<VendorResetPassword />}
           />
         </Routes>
       </Layout>

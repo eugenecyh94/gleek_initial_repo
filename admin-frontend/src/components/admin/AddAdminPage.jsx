@@ -120,8 +120,12 @@ const AddAdminPage = () => {
   };
 
   return (
-    <MainBodyContainer hasBackButton={true} breadcrumbNames={["View All Admin"]} breadcrumbLinks={["/adminTeam"]} currentBreadcrumbName={"Add Admin"}> 
-      
+    <MainBodyContainer
+      hasBackButton={true}
+      breadcrumbNames={["View All Admin"]}
+      breadcrumbLinks={["/adminTeam"]}
+      currentBreadcrumbName={"Add Admin"}
+    >
       <Box
         display="flex"
         width={"80%"}

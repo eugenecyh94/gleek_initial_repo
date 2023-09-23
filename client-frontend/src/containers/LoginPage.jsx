@@ -11,6 +11,7 @@ import {
   OutlinedInput,
   FormHelperText,
   CircularProgress,
+  Link,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
@@ -62,6 +63,14 @@ const LoginPage = (props) => {
         ...prevData,
         password: !value ? "Password is required" : "",
       }));
+    }
+  };
+
+  const handleForgotPassword = async (event) => {
+    try {
+      navigate(props.forgotPasswordLink);
+    } catch (err) {
+      console.log(err.message);
     }
   };
 
@@ -205,7 +214,11 @@ const LoginPage = (props) => {
               Don't have an account? Sign Up
             </Typography>
           </Button>
-          <Button sx={{ marginTop: "32px" }} variant="text">
+          <Button
+            sx={{ marginTop: "32px" }}
+            variant="text"
+            onClick={handleForgotPassword}
+          >
             <Typography color="secondary" variant="body2">
               Forgot Password?
             </Typography>

@@ -16,7 +16,7 @@ const MainBodyContainer = ({
   const marginLeft = authenticated ? "240px" : "0px";
 
   return (
-    <Box marginTop={"64px"} marginBottom={"30px"}marginLeft={marginLeft}>
+    <Box marginTop={"64px"} marginBottom={"30px"} marginLeft={marginLeft}>
       <BreadCrumbsBar
         hasBackButton={hasBackButton}
         breadcrumbNames={breadcrumbNames}

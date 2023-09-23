@@ -257,9 +257,13 @@ export const useVendorStore = create((set) => ({
       set({ isLoading: true });
       const response = await AxiosConnect.post("/vendor/addVendor", vendorData);
       set({ vendor: response.data });
-      set({ isLoading: false });
+      setTimeout(() => {
+        set({ isLoading: false });
+      }, 500);
+      return true;
     } catch (error) {
       console.error(error);
+      throw error;
     }
   },
   vendorTypesFetcher: async () => {
