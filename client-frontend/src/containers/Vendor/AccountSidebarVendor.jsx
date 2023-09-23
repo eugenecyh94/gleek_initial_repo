@@ -1,10 +1,18 @@
 import React from "react";
-import { List, ListItemText, ListItemButton, Alert } from "@mui/material";
+import {
+  List,
+  ListItemText,
+  ListItemButton,
+  Alert,
+  Box,
+  Chip,
+} from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import Avatar from "@mui/material/Avatar";
 import { NavLink } from "react-router-dom";
 import { styled } from "@mui/system";
 import useVendorStore from "../../zustand/VendorStore";
+import MailOutlineIcon from "@mui/icons-material/MailOutline";
 const CustomNavLink = styled(NavLink)(({ theme }) => ({
   "&.active": {
     color: theme.palette.primary.main,
@@ -51,14 +59,36 @@ function AccountSidebarVendor(props) {
           src={vendor?.preSignedPhoto || "https://i.imgur.com/ZTevUo0.png"}
         ></Avatar>
       </div>
-      {vendor?.status === "PENDING" && (
-        <>
-          <Alert severity="warning">
-            Your account is pending review.
-            <p>Activity creation functionality will be limited.</p>
-          </Alert>
-        </>
-      )}
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        padding={2}
+      >
+        {vendor?.status === "PENDING" && (
+          <>
+            <Alert severity="warning">
+              Your account is pending review.
+              <p>Activity creation functionality will be limited.</p>
+            </Alert>
+          </>
+        )}
+        <Box marginTop={2}>
+          {vendor?.verified ? (
+            <Chip icon={<MailOutlineIcon />} label="Verified" />
+          ) : (
+            <Chip
+              component="a"
+              href="/vendor/verifyEmail"
+              icon={<MailOutlineIcon />}
+              label="Unverified"
+              variant="outlined"
+              clickable
+            />
+          )}
+        </Box>
+      </Box>
       <List>
         <CustomListItemButton
           route="/vendor/settings/profile"
@@ -71,6 +101,10 @@ function AccountSidebarVendor(props) {
         <CustomListItemButton
           route="/vendor/settings/password"
           text="Manage Password"
+        />
+        <CustomListItemButton
+          route="/vendor/settings/termsAndConditons"
+          text="Terms & Conditions"
         />
       </List>
     </div>

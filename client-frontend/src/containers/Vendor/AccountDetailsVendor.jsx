@@ -144,47 +144,36 @@ function AccountDetailsVendor(props) {
   );
 
   useEffect(() => {
-    console.log(socialMediaFields);
-  }, []);
-
-  const updateCompanySocials = () => {
-    const updatedCompanySocials = socialMediaFields.reduce(
-      (acc, { platform, url }) => {
-        acc[platform] = url;
-        return acc;
-      },
-      {},
-    );
-
+    const updatedCompanySocials = {};
+    for (const socialMedia of socialMediaFields) {
+      updatedCompanySocials[socialMedia.platform] = socialMedia.url;
+    }
     setFormData((prevData) => ({
       ...prevData,
       companySocials: updatedCompanySocials,
     }));
-  };
+  }, [socialMediaFields]);
+
   const addField = () => {
     setSocialMediaFields([...socialMediaFields, { platform: "", url: "" }]);
-    updateCompanySocials();
   };
 
   const removeField = (index) => {
     const updatedFields = [...socialMediaFields];
     updatedFields.splice(index, 1);
     setSocialMediaFields(updatedFields);
-    updateCompanySocials();
   };
 
   const handlePlatformChange = (index, value) => {
     const updatedFields = [...socialMediaFields];
     updatedFields[index].platform = value;
     setSocialMediaFields(updatedFields);
-    updateCompanySocials();
   };
 
   const handleURLChange = (index, value) => {
     const updatedFields = [...socialMediaFields];
     updatedFields[index].url = value;
     setSocialMediaFields(updatedFields);
-    updateCompanySocials();
   };
 
   const handleSocialMediaValidate = (platform) => {
@@ -534,9 +523,11 @@ function AccountDetailsVendor(props) {
                     />
                   </Grid>
                   <Grid item xs={1}>
-                    <IconButton onClick={() => removeField(index)}>
-                      <DeleteIcon />
-                    </IconButton>
+                    {index > 0 && (
+                      <IconButton onClick={() => removeField(index)}>
+                        <DeleteIcon />
+                      </IconButton>
+                    )}
                   </Grid>
                 </Grid>
               ))}

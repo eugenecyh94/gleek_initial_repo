@@ -25,7 +25,10 @@ import ProfilePictureVendor from "./containers/Vendor/ProfilePictureVendor";
 import PasswordChangeVendor from "./containers/Vendor/PasswordChangeVendor";
 import ResetPassword from "./containers/Client/Password/ResetPassword";
 import ForgotPassword from "./containers/Client/Password/ClientForgotPassword";
-
+import VerifyEmailVendor from "./containers/Vendor/VerifyEmailVendor";
+import PrivacyVendor from "./containers/Vendor/PrivacyVendor";
+import VendorForgotPassword from "./containers/Vendor/Password/VendorForgotPassword";
+import VendorResetPassword from "./containers/Vendor/Password/ResetPassword";
 function App() {
   const { isLoading, clientError, login } = useClientStore();
   const { isLoadingVendor, vendorError, loginVendor } = useVendorStore();
@@ -130,7 +133,11 @@ function App() {
             }
           />
           <Route path="/register" element={<RegisterPage />} />
-          <Route exact path="client/resetPassword" element={<ResetPassword />} />
+          <Route
+            exact
+            path="client/resetPassword"
+            element={<ResetPassword />}
+          />
           <Route
             exact
             path="/client/forgotPassword"
@@ -146,6 +153,7 @@ function App() {
                 error={vendorError}
                 title="Vendor Login"
                 registerLink="/vendor/register"
+                forgotPasswordLink="/vendor/forgotPassword"
                 loginMethod={loginVendor}
               />
             }
@@ -191,6 +199,40 @@ function App() {
                 <PasswordChangeVendor />
               </VendorProtectedRoute>
             }
+          />
+          <Route
+            path="/vendor/verifyEmail/:token"
+            element={
+              <VendorProtectedRoute>
+                <VerifyEmailVendor />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/verifyEmail"
+            element={
+              <VendorProtectedRoute>
+                <VerifyEmailVendor />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/settings/termsAndConditons"
+            element={
+              <VendorProtectedRoute>
+                <PrivacyVendor />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/vendor/forgotPassword"
+            element={<VendorForgotPassword />}
+          />
+          <Route
+            exact
+            path="/vendor/resetPassword"
+            element={<VendorResetPassword />}
           />
         </Routes>
       </Layout>

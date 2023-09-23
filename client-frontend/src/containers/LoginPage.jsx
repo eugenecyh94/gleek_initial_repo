@@ -68,11 +68,11 @@ const LoginPage = (props) => {
 
   const handleForgotPassword = async (event) => {
     try {
-       navigate(props.forgotPasswordLink);
+      navigate(props.forgotPasswordLink);
     } catch (err) {
-       console.log(err.message);
+      console.log(err.message);
     }
- };
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -214,7 +214,11 @@ const LoginPage = (props) => {
               Don't have an account? Sign Up
             </Typography>
           </Button>
-          <Button sx={{ marginTop: "32px" }} variant="text" onClick={handleForgotPassword}>
+          <Button
+            sx={{ marginTop: "32px" }}
+            variant="text"
+            onClick={handleForgotPassword}
+          >
             <Typography color="secondary" variant="body2">
               Forgot Password?
             </Typography>
