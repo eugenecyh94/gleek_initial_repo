@@ -64,7 +64,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isError, setError] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState(
-    themes?.[0]?.parent?._id || "",
+    themes?.[0]?.parent?._id || ""
   );
   const [selectedSubTheme, setSelectedSubTheme] = useState([]);
   const [subthemes, setSubthemes] = useState([]);
@@ -126,7 +126,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     const themeId = event.target.value;
     setSelectedTheme(themeId);
     setSubthemes(
-      themes?.find((theme) => theme.parent?._id === themeId)?.children,
+      themes?.find((theme) => theme.parent?._id === themeId)?.children
     );
   };
 
@@ -335,7 +335,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
         ? isFood
           ? "Popups (Food)"
           : "Popups (Non-food)"
-        : activityType,
+        : activityType
     );
     formData.append("maxParticipants", maxParticipants);
     formData.append("clientMarkupPercentage", markup);
@@ -447,7 +447,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                         <MenuItem key={index} value={item.parent._id}>
                           {item.parent.name}
                         </MenuItem>
-                      ),
+                      )
                   )}
                 </Select>
               </FormControl>
@@ -512,7 +512,10 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                     <div {...props}>
                       <Avatar
                         style={{ marginRight: 6 }}
-                        {...stringAvatar(vendor?.companyName, theme)}
+                        src={vendor?.preSignedPhoto}
+                        {...(vendor?.preSignedPhoto
+                          ? {}
+                          : stringAvatar(vendor?.companyName, theme))}
                       />
                       {vendor?.companyName} - {vendor?.companyUEN}
                     </div>
@@ -731,7 +734,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                       <MenuItem key={enumValue} value={enumValue}>
                         {enumValue}
                       </MenuItem>
-                    ),
+                    )
                   )}
                 </Select>
               </FormControl>
@@ -885,7 +888,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                                 handleFieldChange(
                                   e,
                                   rowIndex,
-                                  "publicHolidayAddon",
+                                  "publicHolidayAddon"
                                 )
                               }
                               InputProps={{
