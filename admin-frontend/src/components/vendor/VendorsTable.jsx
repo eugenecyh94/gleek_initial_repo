@@ -205,6 +205,7 @@ const VendorsTable = ({ vendors, updateVendor }) => {
   return (
     <Box>
       <div style={{ display: "flex" }}>
+
         <Search>
           <SearchIconWrapper>
             <SearchIcon />
