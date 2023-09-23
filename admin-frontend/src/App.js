@@ -1,34 +1,162 @@
-import "./App.css";
 import { Route, Routes } from "react-router-dom";
-import { useEffect, useState } from "react";
-import ActivityList from "./components/activity/ActivityList";
-import AxiosConnect from "./utils/AxiosConnect";
-import { updateAllActivity } from "./zustand/GlobalStore";
+import "./App.css";
+import Home from "./components/Home";
+import Layout from "./components/Layout";
+import LoginPage from "./components/LoginPage";
+import ViewPublishedActivities from "./components/activity/ViewPublishedActivities";
+import ProtectedRoute from "./components/ProtectedRoutes.jsx";
+import ChangePassword from "./components/profile/ChangePassword.jsx";
+import ResetPassword from "./components/ResetPassword";
+import ViewAllVendors from "./components/vendor/ViewAllVendors";
+import ViewAllClients from "./components/client/ViewAllClients";
+import ClientDetails from "./components/client/ClientDetails";
+import CreateActivityPage from "./components/activity/CreateActivityPage";
+import ImageAndFileUpload from "./components/activityCreation/ImageAndFileUpload";
+import CreateVendorPage from "./components/vendor/CreateVendorPage";
+import SocketConnection from "./utils/SocketConnection";
+import ForgotPassword from "./components/ForgotPassword";
+import AccountDetails from "./components/profile/AccountDetails";
+import AddAdminPage from "./components/admin/AddAdminPage";
+import ViewAllAdmins from "./components/admin/ViewAllAdmins";
+import VendorDetails from "./components/vendor/VendorDetails";
+import ActivityDetails from "./components/activity/ActivityDetails";
 
 function App() {
-  //TODO - extract subscribe data function into external component SocketConnection.js
-  useEffect(() => {
-    const subscribeData = () => {
-      subscribeActivitiesData();
-    };
-    const subscribeActivitiesData = () => {
-      AxiosConnect.get("activity/all")
-        .then((body) => {
-          console.log("all activity subscribed::", body);
-          updateAllActivity(body.data);
-        })
-        .catch((e) => {
-          console.log("Error is ", e.error);
-        });
-    };
-    subscribeData();
-  }, []);
-
   return (
     <div>
-      <Routes>
-        <Route exact path="/" element={<ActivityList />} />
-      </Routes>
+      <SocketConnection />
+      <Layout>
+        <Routes>
+          <Route exact path="/" element={<Home />} />
+          <Route
+            exact
+            path="/createActivity"
+            element={
+              <ProtectedRoute>
+                <CreateActivityPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewPublishedActivities"
+            element={
+              <ProtectedRoute>
+                <ViewPublishedActivities />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewActivity/:activityId"
+            element={
+              <ProtectedRoute>
+                <ActivityDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewAllVendors"
+            element={
+              <ProtectedRoute>
+                <ViewAllVendors />
+              </ProtectedRoute>
+            }
+          />
+          {/* <Route
+            exact
+            path="/viewVendor/:vendorId"
+            element={
+              <ProtectedRoute>
+                <VendorDetails />
+              </ProtectedRoute>
+            }
+          /> */}
+          <Route
+            exact
+            path="/addVendor"
+            element={
+              <ProtectedRoute>
+                <CreateVendorPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/resetPassword"
+            element={
+              <ProtectedRoute>
+                <ResetPassword />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/manageProfile/changePassword"
+            element={
+              <ProtectedRoute>
+                <ChangePassword />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/manageProfile"
+            element={
+              <ProtectedRoute>
+                <AccountDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/adminTeam"
+            element={
+              <ProtectedRoute>
+                <ViewAllAdmins />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/adminTeam/addAdmin"
+            element={
+              <ProtectedRoute>
+                <AddAdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewAllClients"
+            element={
+              <ProtectedRoute>
+                <ViewAllClients />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewClient/:clientId"
+            element={
+              <ProtectedRoute>
+                <ClientDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgotPassword" element={<ForgotPassword />} />
+
+          {/*for testing image upload component*/}
+          <Route
+            path="/uploadTest"
+            element={
+              <ImageAndFileUpload limit={5} name="test" size={2000000} />
+            }
+          />
+        </Routes>
+      </Layout>
     </div>
   );
 }

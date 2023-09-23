@@ -1,30 +1,26 @@
 import { useEffect } from "react";
-import {
-  // activityStateStore,
-  updateAllActivity,
-} from "../zustand/GlobalStore";
-import AxiosConnect from "./AxiosConnect";
+import { useAdminStore } from "../zustand/GlobalStore.js";
+import AxiosConnect from "./AxiosConnect.js";
 
 const SocketConnection = () => {
-  const subscribeData = () => {
-    subscribeActivitiesData();
-    // subscribeBookingsData();
-  };
-
-  const subscribeActivitiesData = () => {
-    AxiosConnect.get("activity/all")
-      .then((body) => {
-        console.log("all activity subscribed::", body);
-        updateAllActivity(body.data);
-      })
-      .catch((e) => {
-        console.log("Error is ", e.error);
-      });
+  const { setAuthenticated, setAdmin } = useAdminStore();
+  const initialiseData = async () => {
+    try {
+      const response = await AxiosConnect.post("/gleekAdmin/validate-token");
+      const data = response.data;
+      setAuthenticated(true);
+      setAdmin(data.admin);
+    } catch (error) {
+      setAuthenticated(false);
+      setAdmin(null);
+    }
   };
 
   useEffect(() => {
-    subscribeData();
-  }, [subscribeData]);
+    initialiseData();
+  }, []);
+
+  return <></>;
 };
 
 export default SocketConnection;
