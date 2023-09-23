@@ -21,7 +21,7 @@ function PasswordChange(props) {
     const { name, value } = event.target;
     const newErrorData = { ...errorData };
 
-    //validatePassword(value, newErrorData, name);
+    validatePassword(value, newErrorData, name);
 
     setFormData((prevData) => ({
       ...prevData,
@@ -30,8 +30,11 @@ function PasswordChange(props) {
     setErrorData(newErrorData);
   };
 
-  const isFormValid =
-    formData.oldPassword.trim() !== "" && formData.newPassword.trim() !== "";
+  const disableButton = () => {
+    return !Object.values(errorData).every((error) => error === "");
+  };
+
+
 
   const handleSubmit = async (e) => {
     try {
@@ -147,7 +150,7 @@ function PasswordChange(props) {
           mt={4}
           variant="contained"
           type="submit"
-          disabled={!isFormValid}
+          disabled={disableButton()}
         >
           <Typography variant="body1">Reset</Typography>
         </Button>
