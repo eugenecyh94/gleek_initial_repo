@@ -9,7 +9,7 @@ import {
 } from "@mui/x-data-grid";
 import PropTypes from "prop-types";
 import { useState } from "react";
-import ClientDetails from "./ClientDetails";
+
 import { useNavigate } from "react-router-dom";
 
 const ClientsTable = ({ clients, updateClient }) => {
@@ -27,7 +27,7 @@ const ClientsTable = ({ clients, updateClient }) => {
   const [selectedTab, setSelectedTab] = useState("approvedTab");
   const [currentTabRows, setCurrentTabRows] = useState(() => {
     return clients.filter(
-      (client) => client.status === filterCriteria[selectedTab].status,
+      (client) => client.status === filterCriteria[selectedTab].status
     );
   });
 
@@ -35,8 +35,8 @@ const ClientsTable = ({ clients, updateClient }) => {
     setSelectedTab(newValue);
     setCurrentTabRows(
       clients.filter(
-        (client) => client.status === filterCriteria[newValue].status,
-      ),
+        (client) => client.status === filterCriteria[newValue].status
+      )
     );
   };
 
@@ -128,9 +128,14 @@ const ClientsTable = ({ clients, updateClient }) => {
         <Tab label="Rejected" value="rejectedTab" />
       </Tabs>
       {/* <div style={{ height: 500, width: "100%" }}> */}
-      <div style={{ flex: 1 }}>
-        {/* <Box flexDirection="column" justifyItems = "center" display="flex" width={"50%"} height={500}> */}
-        <Box>
+      <div style={{ flex: 1, maxHeight: "500px", overflow: "auto" }}>
+        <Box
+          flexDirection="column"
+          justifyItems="center"
+          display="flex"
+          width={"100%"}
+          height={500}
+        >
           <DataGrid
             initialState={{
               pagination: {
