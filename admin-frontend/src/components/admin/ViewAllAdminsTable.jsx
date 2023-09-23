@@ -121,39 +121,39 @@ const AdminsTable = (admins) => {
 
   return (
     <Box>
-      <div style={{ display: "flex"}}>
-      <Search>
-        <SearchIconWrapper>
-          <SearchIcon />
-        </SearchIconWrapper>
-        <StyledInputBase
-          placeholder="Find an admin…"
-          inputProps={{ "aria-label": "search" }}
-          onChange={(event) => requestSearch(event.target.value)}
-        />
-      </Search>
-      {admin.role === "MANAGERIAL" ? (
-        <StyledDiv>
-          <StyledButton
-            variant="contained"
-            color="light_purple"
-            onClick={handleCreateButtonClick}
-          >
-            <Typography
-              style={{
-                display: "flex",
-              }}
-              component="div"
-              color="white"
+      <div style={{ display: "flex" }}>
+        <Search>
+          <SearchIconWrapper>
+            <SearchIcon />
+          </SearchIconWrapper>
+          <StyledInputBase
+            placeholder="Find an admin…"
+            inputProps={{ "aria-label": "search" }}
+            onChange={(event) => requestSearch(event.target.value)}
+          />
+        </Search>
+        {admin.role === "MANAGERIAL" ? (
+          <StyledDiv>
+            <StyledButton
+              variant="contained"
+              color="light_purple"
+              onClick={handleCreateButtonClick}
             >
-              <AddIcon />
-              Create
-            </Typography>
-          </StyledButton>
-        </StyledDiv>
-      ) : (
-        <></>
-      )}
+              <Typography
+                style={{
+                  display: "flex",
+                }}
+                component="div"
+                color="white"
+              >
+                <AddIcon />
+                Create
+              </Typography>
+            </StyledButton>
+          </StyledDiv>
+        ) : (
+          <></>
+        )}
       </div>
       <div style={{ height: 500, width: "100%" }}>
         <DataGrid

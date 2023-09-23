@@ -1,27 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import axios from "axios";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
-import AxiosConnect from "../../../utils/AxiosConnect";
+import AxiosConnect from "../../utils/AxiosConnect";
 import { Box } from "@mui/material";
-import useClientStore from "../../../zustand/ClientStore";
-import useSnackbarStore from "../../../zustand/SnackbarStore";
+import useVendorStore from "../../zustand/VendorStore";
+import useSnackbarStore from "../../zustand/SnackbarStore";
 import { CheckCircleOutline } from "@mui/icons-material";
 
 // TODO: Look into: Verification will not work if the user is signed out of their account.
 
-function VerifyEmail() {
+function VerifyEmailVendor() {
   const { token } = useParams();
   const [isLoading, setIsLoading] = useState(true);
   const [status, setStatus] = useState("");
-  const { verifyEmail, client } = useClientStore();
+  const { verifyEmail, vendor } = useVendorStore();
 
   const { openSnackbar } = useSnackbarStore();
 
   useEffect(() => {
     const getVerifyEmail = async () => {
-      if (client && client.verified) {
+      if (vendor && vendor.verified) {
         setIsLoading(false);
         setStatus("success");
         return;
@@ -50,7 +51,7 @@ function VerifyEmail() {
   const resendVerificationEmail = async () => {
     try {
       const response = await AxiosConnect.get(
-        "/gleek/client/resendVerifyEmail",
+        "/gleek/vendor/resendVerifyEmail",
       );
       openSnackbar(response.data.msg, "success");
     } catch (err) {
@@ -70,6 +71,7 @@ function VerifyEmail() {
       <Box
         boxShadow={3}
         p={3}
+        m={2}
         bgcolor="white"
         borderRadius={4}
         textAlign="center"
@@ -82,17 +84,19 @@ function VerifyEmail() {
             </Typography>
 
             <Typography variant="body1">
-              Start exploring our thoughtfully curated collection of
-              sustainability and employee wellness activities.
+              We're thrilled to have you on board as a valued vendor. Here,
+              you'll find a community of like-minded businesses committed to
+              making a positive impact on the world. Start by creating
+              activities today!
             </Typography>
             <Button
               variant="contained"
               color="tertiary"
               component={Link}
-              to="/shop"
+              to="/vendor/activities"
               sx={{ mt: 3 }}
             >
-              Shop
+              Create an Activity!
             </Button>
           </div>
         )}
@@ -133,4 +137,4 @@ function VerifyEmail() {
   );
 }
 
-export default VerifyEmail;
+export default VerifyEmailVendor;

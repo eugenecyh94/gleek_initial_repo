@@ -12,10 +12,10 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import useClientStore from "../../../zustand/ClientStore";
+import useVendorStore from "../../../zustand/VendorStore";
 import useSnackbarStore from "../../../zustand/SnackbarStore";
 
-const ResetPassword = () => {
+const VendorResetPassword = () => {
   const { openSnackbar } = useSnackbarStore();
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordVerify, setShowPasswordVerify] = useState(false);
@@ -37,7 +37,7 @@ const ResetPassword = () => {
     event.preventDefault();
     console.log(formData);
   };
-  const { resetPassword } = useClientStore();
+  const { resetPassword } = useVendorStore();
 
   const handleChange = (event) => {
     // name is field name
@@ -238,4 +238,4 @@ const ResetPassword = () => {
   );
 };
 
-export default ResetPassword;
+export default VendorResetPassword;

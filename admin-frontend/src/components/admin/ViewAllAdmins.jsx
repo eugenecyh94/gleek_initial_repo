@@ -19,7 +19,12 @@ const ViewAllAdmins = () => {
   }, [getAllAdmins]);
 
   return (
-    <MainBodyContainer hasBackButton={false} breadcrumbNames={[]} breadcrumbLinks={[]} currentBreadcrumbName={"View All Admins"}>
+    <MainBodyContainer
+      hasBackButton={false}
+      breadcrumbNames={[]}
+      breadcrumbLinks={[]}
+      currentBreadcrumbName={"View All Admins"}
+    >
       <Typography
         fontSize={25}
         fontWeight={700}
@@ -34,7 +39,7 @@ const ViewAllAdmins = () => {
       ) : (
         <ViewAllAdminsTable admins={admins} />
       )}
-      </ MainBodyContainer>
+    </MainBodyContainer>
   );
 };
 
