@@ -3,8 +3,6 @@ import {
   validateIsRequired,
   validatePostalCode,
   validatePhoneNumber,
-  validatePassword,
-  validatePasswordVerify,
 } from "./FieldsValidator";
 export const validator = (formData, fieldName) => {
   let errors = {};
@@ -20,7 +18,7 @@ export const validator = (formData, fieldName) => {
         formData["companyUEN"],
         formData[fieldName],
         errors,
-        fieldName,
+        fieldName
       );
       break;
     case "vendorDetails":
@@ -41,17 +39,6 @@ export const validator = (formData, fieldName) => {
     case "companyPhoneNumber":
       validatePhoneNumber(formData[fieldName], errors, fieldName);
       break;
-    case "password":
-      validatePassword(formData[fieldName], errors, fieldName);
-      break;
-    case "passwordVerify":
-      validatePasswordVerify(
-        formData[fieldName],
-        formData.password,
-        errors,
-        fieldName,
-      );
-      break;
     default:
   }
   return errors;
@@ -61,7 +48,7 @@ export const validateIfCustomCompanyTypeIsRequired = (
   uen,
   data,
   errors,
-  fieldName,
+  fieldName
 ) => {
   if (uen === "Other") {
     if (data === "") {
