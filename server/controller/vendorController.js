@@ -77,7 +77,7 @@ export const postRegister = async (req, res) => {
     const { acceptTermsAndConditions, ...newVendor } = req.body;
     console.log(
       "vendorController postRegister(): acceptTermsAndConditions",
-      acceptTermsAndConditions,
+      acceptTermsAndConditions
     );
 
     if (await vendorExists(newVendor.companyEmail)) {
@@ -95,7 +95,7 @@ export const postRegister = async (req, res) => {
     await createVendorConsent(
       createdVendor.id,
       acceptTermsAndConditions,
-      session,
+      session
     );
 
     const token = await generateJwtToken(createdVendor.id);
@@ -200,7 +200,14 @@ export const clearCookies = async (req, res) => {
 export const addVendor = async (req, res) => {
   try {
     const password = "adminpassword";
-    const newVendor = new VendorModel({ ...req.body, password });
+    const approvedDate = new Date();
+    const status = "APPROVED";
+    const newVendor = new VendorModel({
+      ...req.body,
+      password,
+      approvedDate,
+      status,
+    });
     await newVendor.save();
 
     return res.status(201).json(newVendor);
@@ -246,8 +253,8 @@ export const updateVendor = async (req, res) => {
     const updateData = req.body;
     const updatedVendor = await VendorModel.findOneAndUpdate(
       { _id: req.params.id },
-      { ...updateData },
-      { new: true },
+      { ...updateData, approvedDate: new Date() },
+      { new: true }
     );
     return res.status(201).json(updatedVendor);
   } catch (e) {
@@ -273,7 +280,7 @@ export const updateCompanyLogo = async (req, res) => {
     const updatedVendor = await VendorModel.findOneAndUpdate(
       { _id: vendor._id },
       { companyLogo: fileS3Location },
-      { new: true },
+      { new: true }
     );
 
     if (updatedVendor.companyLogo) {
@@ -318,7 +325,7 @@ export const postChangePassword = async (req, res) => {
     const updatedVendor = await VendorModel.findOneAndUpdate(
       { _id: vendor.id },
       { password: hashed },
-      { new: true },
+      { new: true }
     );
 
     return res.status(200).json("Password successfully changed.");

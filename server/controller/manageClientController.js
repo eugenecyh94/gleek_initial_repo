@@ -16,7 +16,7 @@ export const updateClient = async (req, res) => {
     const updatedClient = await Client.findOneAndUpdate(
       { _id: req.params.id },
       { ...updateData, approvedDate: Date.now() },
-      { new: true },
+      { new: true }
     );
     return res.status(201).json(updatedClient);
   } catch (err) {

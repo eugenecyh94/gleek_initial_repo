@@ -40,7 +40,9 @@ const ClientDetails = () => {
     const fetchClientDetails = async () => {
       await getClientDetails(clientId);
     };
+    console.log("fetchin" + clientId);
     fetchClientDetails();
+    console.log("done fetch")
   }, [getClientDetails, clientId, isUpdated]);
 
   return (

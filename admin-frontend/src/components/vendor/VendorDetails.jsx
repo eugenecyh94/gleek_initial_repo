@@ -26,24 +26,25 @@ import MainBodyContainer from "../common/MainBodyContainer";
 const VendorDetails = () => {
   const { vendorId } = useParams();
   const theme = useTheme();
-  const { isLoading, updateVendor, vendorDetails, getVendorDetails } =
+  const [isLoading, setIsLoading] = useState(true);
+  const { vendorDetails, getVendorDetails } =
     useVendorStore();
   const [isUpdated, setIsUpdated] = useState(false);
-
   const handleStatusUpdate = async (id, vendorDetails, newStatus) => {
     const updatedProfile = { ...vendorDetails, status: newStatus };
-    await updateVendor(id, updatedProfile);
+    //await updateVendor(id, updatedProfile);
     setIsUpdated(true);
   };
-  console.log("vendorId" + vendorId)
 
   useEffect(() => {
     const fetchVendorDetails = async () => {
       await getVendorDetails(vendorId);
     };
-    console.log("fetchin" + vendorId)
+    console.log("fetchin " + vendorId);
     fetchVendorDetails();
-  }, [getVendorDetails, vendorId, isUpdated]);
+    console.log("done fetch")
+    setIsLoading(false);
+  }, [isLoading]);
 
   return (
     <MainBodyContainer
@@ -112,15 +113,18 @@ const VendorDetails = () => {
                 vendorDetails.companyEmail,
               ]}
             />
-            <ProfileCard
+            {vendorDetails && (
+              <ProfileCard
               title="Brand Names"
               icon={
                 <BusinessIcon
                   style={{ color: theme.palette.dark_purple.main }}
                 />
               }
-              fieldValues={vendorDetails.brandNames}
+              fieldValues={vendorDetails ? vendorDetails.brandNames : []}
             />
+            )}
+            
             {Object.keys(vendorDetails.companySocials).length > 0 && (
               <ProfileCard
               title="Company Socials"

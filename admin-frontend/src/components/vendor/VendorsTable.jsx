@@ -1,9 +1,13 @@
 import styled from "@emotion/styled";
 import AddIcon from "@mui/icons-material/Add";
+import DoneIcon from "@mui/icons-material/Done";
+import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
 import { Button, InputBase, Typography, alpha } from "@mui/material";
+import PropTypes from "prop-types";
+import { Tab, Tabs } from "@mui/material";
 import Box from "@mui/material/Box";
-import { DataGrid, GridToolbarFilterButton } from "@mui/x-data-grid";
+import { DataGrid, GridToolbarFilterButton, GridActionsCellItem } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -61,47 +65,41 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const columns = [
-  {
-    field: "companyName",
-    headerName: "Name",
-    flex: 1,
-  },
-  {
-    field: "companyUEN",
-    headerName: "UEN",
-    flex: 1,
-  },
-  {
-    field: "companyAddress",
-    headerName: "Address",
-    flex: 1,
-  },
-  {
-    field: "typeOfCompany",
-    headerName: "Type",
-    flex: 1,
-    valueGetter: (params) => {
-      return params.row.companyType === "Other"
-        ? "Other - " + params.row.customCompanyType
-        : params.row.companyType;
-    },
-  },
-  {
-    field: "companyNumber",
-    headerName: "HP Number",
-    flex: 1,
-  },
-  {
-    field: "brandNames",
-    headerName: "Brand Names",
-    flex: 1,
-  },
-];
 
-const VendorsTable = (allVendors) => {
+
+
+
+const VendorsTable = ({ vendors, updateVendor }) => {
+  console.log(vendors)
+  const handleStatusUpdate = async (id, row, newStatus) => {
+    const approvedRow = { ...row, status: newStatus };
+    await updateVendor(id, approvedRow);
+  };
+
+  const filterCriteria = {
+    approvedTab: { status: "APPROVED", approved: true },
+    pendingTab: { status: "PENDING", approved: false },
+    rejectedTab: { status: "REJECTED" },
+  };
+
+  const [selectedTab, setSelectedTab] = useState("approvedTab");
+  const [currentTabRows, setCurrentTabRows] = useState(() => {
+    return vendors.filter(
+      (vendors) => vendors.status === filterCriteria[selectedTab].status,
+    );
+  });
+
+  const handleTabChange = (event, newValue) => {
+    setSelectedTab(newValue);
+    setCurrentTabRows(
+      vendors.filter(
+        (vendors) => vendors.status === filterCriteria[newValue].status,
+      ),
+    );
+  };
+
   const navigate = useNavigate();
-  const { vendors } = allVendors;
+  // const { vendors } = vendors;
   const [searchedRows, setSearchedRows] = useState([]);
   useEffect(() => {
     setSearchedRows(vendors);
@@ -122,6 +120,87 @@ const VendorsTable = (allVendors) => {
   const handleCreateButtonClick = () => {
     navigate("/addVendor");
   };
+
+  const columns = [
+    {
+      field: "companyName",
+      headerName: "Name",
+      flex: 1,
+    },
+    {
+      field: "companyUEN",
+      headerName: "UEN",
+      flex: 1,
+    },
+    {
+      field: "companyAddress",
+      headerName: "Address",
+      flex: 1,
+    },
+    {
+      field: "typeOfCompany",
+      headerName: "Type",
+      flex: 1,
+      valueGetter: (params) => {
+        return params.row.companyType === "Other"
+          ? "Other - " + params.row.customCompanyType
+          : params.row.companyType;
+      },
+    },
+    {
+      field: "companyNumber",
+      headerName: "HP Number",
+      flex: 1,
+    },
+    {
+      field: "brandNames",
+      headerName: "Brand Names",
+      flex: 1,
+    },
+  ];
+
+  if (selectedTab === "pendingTab") {
+    columns.push({
+      field: "approve",
+      headerName: "Approve?",
+      type: "actions",
+      flex: 1,
+      getActions: (params) => [
+        <GridActionsCellItem
+          key={params.row.id}
+          icon={<DoneIcon />}
+          onClick={async () =>
+            await handleStatusUpdate(params.row._id, params.row, "APPROVED")
+          }
+          label="approve"
+        />,
+        <GridActionsCellItem
+          key={params.row.id}
+          icon={<CloseIcon />}
+          onClick={async () =>
+            await handleStatusUpdate(params.row._id, params.row, "REJECTED")
+          }
+          label="reject"
+        />,
+      ],
+    });
+  }
+  if (selectedTab === "approvedTab") {
+    columns.push({
+      field: "approvedDate",
+      headerName: "Approved Date",
+      flex: 1,
+      valueFormatter: (params) => {
+        const date = new Date(params.value);
+        const formattedDate = date.toLocaleDateString(undefined, {
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        });
+        return formattedDate;
+      },
+    });
+  }
 
   return (
     <Box>
@@ -155,6 +234,11 @@ const VendorsTable = (allVendors) => {
           </StyledButton>
         </StyledDiv>
       </div>
+      <Tabs value={selectedTab} onChange={handleTabChange} centered>
+        <Tab label="Approved" value="approvedTab" />
+        <Tab label="To be Approved" value="pendingTab" />
+        <Tab label="Rejected" value="rejectedTab" />
+      </Tabs>
       <div style={{ height: 500, width: "100%" }}>
         <DataGrid
           initialState={{
@@ -163,7 +247,8 @@ const VendorsTable = (allVendors) => {
             },
           }}
           getRowId={(row) => row._id}
-          rows={searchedRows}
+          //rows={searchedRows}
+          rows = {currentTabRows}
           columns={columns}
           slots={{
             toolbar: GridToolbarFilterButton,
@@ -173,5 +258,9 @@ const VendorsTable = (allVendors) => {
       </div>
     </Box>
   );
+};
+VendorsTable.propTypes = {
+  vendors: PropTypes.array.isRequired,
+  updateVendor: PropTypes.func.isRequired,
 };
 export default VendorsTable;

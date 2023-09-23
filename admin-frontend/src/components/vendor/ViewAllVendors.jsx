@@ -8,7 +8,7 @@ import MainBodyContainer from "../common/MainBodyContainer";
 
 const ViewAllVendors = () => {
   const theme = useTheme();
-  const { vendors, getVendors, isLoading } = useVendorStore();
+  const { vendors, getVendors, isLoading, updateVendor } = useVendorStore();
   useEffect(() => {
     const fetchData = async () => {
       await getVendors();
@@ -35,7 +35,7 @@ const ViewAllVendors = () => {
       {isLoading ? (
         <CircularProgress sx={{ margin: "auto", marginTop: "32px" }} />
       ) : (
-        <VendorsTable vendors={vendors}></VendorsTable>
+        <VendorsTable vendors={vendors} updateVendor={updateVendor}></VendorsTable>
       )}
     </MainBodyContainer>
   );

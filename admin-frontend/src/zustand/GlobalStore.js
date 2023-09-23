@@ -241,6 +241,17 @@ export const useVendorStore = create((set) => ({
       console.error(error);
     }
   },
+  updateVendor: async (id, payload) => {
+    try {
+      set(() => ({ isLoading: true }));
+      await AxiosConnect.patch("vendor/updateVendor", id, payload);
+      const response = await AxiosConnect.get("/vendor/viewAllVendors");
+      set({ vendors: response.data });
+      set(() => ({ isLoading: false }));
+    } catch (error) {
+      console.error(error);
+    }
+  },
   createVendor: async (vendorData) => {
     try {
       set({ isLoading: true });

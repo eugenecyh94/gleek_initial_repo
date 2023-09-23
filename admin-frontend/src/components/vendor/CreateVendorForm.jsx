@@ -253,6 +253,12 @@ const CreateVendorForm = ({ vendorTypes, addVendor, admin }) => {
     }
 
     try {
+      // //add approvedDate field and status as approved
+      // const updatedFormData = {
+      //   ...formData,
+      //   approvedDate: now,
+      //   status: "approved",
+      // };
       const responseStatus = await addVendor(formData);
       if (responseStatus) {
         console.log("success");
