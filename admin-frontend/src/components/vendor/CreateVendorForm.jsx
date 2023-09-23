@@ -152,21 +152,13 @@ const CreateVendorForm = ({ vendorTypes, addVendor, admin }) => {
       companySocials: updatedCompanySocials,
     }));
   }, [socialMediaFields]);
-
-  const updateCompanySocials = () => {
-    const updatedCompanySocials = socialMediaFields.reduce(
-      (acc, { platform, url }) => {
-        acc[platform] = url;
-        return acc;
-      },
-      {}
-    );
-
-    setFormData((prevData) => ({
+  useEffect(() => {
+    let errors = validator(formData, "customCompanyType");
+    setErrorData((prevData) => ({
       ...prevData,
-      companySocials: updatedCompanySocials,
+      customCompanyType: errors?.customCompanyType || "",
     }));
-  };
+  }, [formData.vendorType]);
 
   const handleURLChange = (index, value) => {
     const updatedFields = [...socialMediaFields];
