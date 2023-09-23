@@ -326,7 +326,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData();
-    formData.append("adminCreated", admin.id);
+    formData.append("adminCreated", admin._id);
     formData.append("title", title);
     formData.append("description", description);
     formData.append(
