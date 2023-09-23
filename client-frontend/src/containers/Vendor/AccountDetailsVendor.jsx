@@ -356,6 +356,7 @@ function AccountDetailsVendor(props) {
               value={formData.companyEmail}
               helperText={errorData.companyEmail}
               error={errorData.companyEmail.length > 0}
+              disabled
             />
           </Grid>
           <Grid item p={0} xs={12} md={6}>
