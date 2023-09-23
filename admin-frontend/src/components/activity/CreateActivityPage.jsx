@@ -32,13 +32,13 @@ const CreateActivityPage = () => {
   }, [getThemes]);
 
   return (
-    <MainBodyContainer
-      hasBackButton={true}
-      breadcrumbNames={["View Published Activities"]}
-      breadcrumbLinks={["/viewPublishedActivities"]}
-      currentBreadcrumbName={"Create Activity"}
-    >
-      <StyledPage>
+    <StyledPage>
+      <MainBodyContainer
+        hasBackButton={true}
+        breadcrumbNames={["View Published Activities"]}
+        breadcrumbLinks={["/viewPublishedActivities"]}
+        currentBreadcrumbName={"Create Activity"}
+      >
         <Typography
           alignItems={"center"}
           fontSize={25}
@@ -64,8 +64,8 @@ const CreateActivityPage = () => {
             admin={admin}
           ></CreateActivityForm>
         )}
-      </StyledPage>
-    </MainBodyContainer>
+      </MainBodyContainer>
+    </StyledPage>
   );
 };
 export default CreateActivityPage;
