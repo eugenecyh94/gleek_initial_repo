@@ -154,6 +154,14 @@ function AccountDetailsVendor(props) {
     }));
   }, [socialMediaFields]);
 
+  useEffect(() => {
+    let errors = validator(formData, "customCompanyType");
+    setErrorData((prevData) => ({
+      ...prevData,
+      customCompanyType: errors?.customCompanyType || "",
+    }));
+  }, [formData.vendorType]);
+
   const addField = () => {
     setSocialMediaFields([...socialMediaFields, { platform: "", url: "" }]);
   };

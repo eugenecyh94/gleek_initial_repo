@@ -132,6 +132,14 @@ const VendorRegisterPage = () => {
     );
   };
 
+  useEffect(() => {
+    let errors = validator(formData, "customCompanyType");
+    setErrorData((prevData) => ({
+      ...prevData,
+      customCompanyType: errors?.customCompanyType || "",
+    }));
+  }, [formData.vendorType]);
+
   // Vendor Type Select Manu
   const handleMenuChange = (event) => {
     const { name, value } = event.target;
