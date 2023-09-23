@@ -10,7 +10,7 @@ const SocketConnection = () => {
   const { setRole } = useGlobalStore();
   const initialiseData = async () => {
     try {
-      const response = await AxiosConnect.post("/gleek/auth/validateToken");
+      const response = await AxiosConnect.post("/gleek/validateToken");
       const data = response.data;
 
       if (data.hasOwnProperty("client")) {
