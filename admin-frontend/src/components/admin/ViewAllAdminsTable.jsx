@@ -7,6 +7,7 @@ import { DataGrid, GridToolbarFilterButton } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAdminStore } from "../../zustand/GlobalStore";
+import MainBodyContainer from "../common/MainBodyContainer";
 
 const StyledButton = styled(Button)`
   padding-left: 6px;
@@ -120,12 +121,13 @@ const AdminsTable = (admins) => {
 
   return (
     <Box>
+      <div style={{ display: "flex"}}>
       <Search>
         <SearchIconWrapper>
           <SearchIcon />
         </SearchIconWrapper>
         <StyledInputBase
-          placeholder="Find a vendor…"
+          placeholder="Find an admin…"
           inputProps={{ "aria-label": "search" }}
           onChange={(event) => requestSearch(event.target.value)}
         />
@@ -152,6 +154,7 @@ const AdminsTable = (admins) => {
       ) : (
         <></>
       )}
+      </div>
       <div style={{ height: 500, width: "100%" }}>
         <DataGrid
           initialState={{

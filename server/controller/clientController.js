@@ -11,6 +11,7 @@ import {
 } from "../service/clientService.js";
 import {
   createClientConsent,
+  getClientConsent,
   updateConsent,
 } from "../service/consentService.js";
 import sendMail from "../util/sendMail.js";
@@ -18,6 +19,7 @@ import { s3ImageGetService } from "../service/s3ImageGetService.js";
 import {
   createClientWelcomeMailOptions,
   createResendVerifyEmailOptions,
+  createResetPasswordEmailOptions,
   createVerifyEmailOptions,
 } from "../util/sendMailOptions.js";
 
@@ -41,7 +43,7 @@ const generateJwtToken = async (clientId) => {
 /*
  * Set JWT Token into cookie and return HTTP 200
  */
-const setCookieAndRespond = (res, token, client) => {
+const setCookieAndRespond = (res, token, client, msg) => {
   try {
     res.cookie("token", token, {
       httpOnly: true,
@@ -58,11 +60,36 @@ const setCookieAndRespond = (res, token, client) => {
       path: "/",
     });
     console.log(client);
-    res.status(200).json({ token, client: client });
+    if (msg) {
+      res.status(200).json({ token, client: client, msg: msg });
+    } else {
+      res.status(200).json({ token, client: client });
+    }
   } catch (cookieError) {
     console.error(cookieError);
     res.status(500).send("Error setting cookie");
   }
+};
+
+/*
+ * Set JWT Token into res's cookie
+ */
+const setCookies = (res, token) => {
+  res.cookie("token", token, {
+    httpOnly: true,
+    maxAge: 3600000, // Expires in 1 hour (milliseconds)
+    sameSite: "None", // Adjust this based on your security requirements
+    secure: true, // Use secure cookies in production
+    path: "/", // Set the path to your application root
+  });
+  res.cookie("userRole", "Client", {
+    httpOnly: true,
+    maxAge: 3600000,
+    sameSite: "None",
+    secure: true,
+    path: "/",
+  });
+  return res;
 };
 
 /**
@@ -183,6 +210,7 @@ export const validateToken = async (req, res) => {
 
     return res.status(200).json({ token, client: clientWithoutPassword });
   } catch (err) {
+    console.error(err);
     // If verification fails (e.g., due to an invalid or expired token), send an error response
     return res.status(401).send("Invalid Token");
   }
@@ -213,7 +241,9 @@ export const postChangePassword = async (req, res) => {
     const isSame = await bcrypt.compare(oldPassword, client.password);
 
     if (!isSame)
-      return res.status(401).json("Old password entered is incorrect.");
+      return res
+        .status(401)
+        .json({ msg: "Old password entered is incorrect." });
 
     const salt = await bcrypt.genSalt(10);
     const hashed = await bcrypt.hash(newPassword, salt);
@@ -224,7 +254,32 @@ export const postChangePassword = async (req, res) => {
       { new: true },
     );
 
-    return res.status(200).json("Password successfully changed.");
+    return res.status(200).json({ msg: "Password successfully changed." });
+  } catch (err) {
+    console.error(err); // Log the error
+    return res.status(500).send({ msg: "Server Error" });
+  }
+};
+
+/*
+ * Reset password (after getting recovering password email)
+ */
+export const postResetPassword = async (req, res) => {
+  const client = req.user;
+
+  try {
+    const { newPassword } = req.body;
+
+    const salt = await bcrypt.genSalt(10);
+    const hashed = await bcrypt.hash(newPassword, salt);
+
+    const updatedClient = await Client.findOneAndUpdate(
+      { _id: client.id },
+      { password: hashed },
+      { new: true },
+    );
+
+    return res.status(200).json({ msg: "Password successfully changed." });
   } catch (err) {
     console.error(err); // Log the error
     return res.status(500).send("Server Error");
@@ -284,14 +339,10 @@ export const updateConsentSettings = async (req, res) => {
     }
 
     const body = req.body;
-    console.log("updatePrivacySettings: body", body);
 
     const updateData = body;
 
     const updatedConsent = await updateConsent(client, updateData);
-
-    console.log("updatePrivacySettings: Updated consent", updatedConsent);
-
     res.status(200).json({
       msg: "Your privacy settings has been successfully updated!",
       consent: updatedConsent,
@@ -424,5 +475,39 @@ export const resendVerifyEmail = async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.status(500).json({ status: "error", msg: "Server Error" });
+  }
+};
+
+export const recoverPasswordMail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const client = await Client.findOne({ email }).select("-password");
+    if (!client) {
+      return res
+        .status(400)
+        .json({ msg: "There is no account tied to this email." });
+    }
+
+    const token = await generateJwtToken(client.id);
+    sendMail(createResetPasswordEmailOptions(client, token));
+
+    return setCookieAndRespond(res, token, client, "Recovery email sent!");
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("Server Error " + err.message);
+  }
+};
+
+export const resetPasswordRedirect = async (req, res) => {
+  const token = req.params.token;
+  if (!token) {
+    return res.status(403).send("Token Not Found!");
+  }
+
+  try {
+    setCookies(res, token);
+    res.status(200).redirect("http://localhost:3001/client/resetPassword");
+  } catch (cookieError) {
+    return res.status(500).send("Error setting cookie");
   }
 };

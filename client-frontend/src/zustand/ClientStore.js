@@ -48,13 +48,25 @@ const useClientStore = create((set) => ({
   },
   changePassword: async (oldPassword, newPassword) => {
     try {
-      await AxiosConnect.post("/gleek/client/changePassword", {
+      const response = await AxiosConnect.post("/gleek/client/changePassword", {
         oldPassword: oldPassword,
         newPassword: newPassword,
       });
-      return true;
+      return response;
     } catch (error) {
+      console.error(error);
       throw error;
+    }
+  },
+  resetPassword: async (newPassword) => {
+    try {
+      const response = await AxiosConnect.post("/gleek/client/resetPassword", {
+        newPassword: newPassword,
+      });
+      return response;
+    } catch (error) {
+      console.error(error);
+      alert(error.response.data);
     }
   },
 
@@ -100,6 +112,18 @@ const useClientStore = create((set) => ({
       if (response.data.status === "success") {
         set({ client: response.data.client });
       }
+      return response;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
+  recoverPassword: async (email) => {
+    try {
+      const response = await AxiosConnect.post("/gleek/auth/recoverPassword", {
+        email: email,
+      });
+      console.log(response);
       return response;
     } catch (error) {
       console.log(error);

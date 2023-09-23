@@ -9,13 +9,10 @@ import {
 } from "@mui/material";
 import AccountSidebar from "./AccountSidebar";
 import { useTheme } from "@emotion/react";
-import AxiosConnect from "../../utils/AxiosConnect";
-import useClientStore from "../../zustand/ClientStore";
-import useSnackbarStore from "../../zustand/SnackbarStore";
+import AxiosConnect from "../../../utils/AxiosConnect";
+
 function AccountDetails(props) {
   const [formData, setFormData] = useState();
-  const { openSnackbar } = useSnackbarStore();
-  const { setClient } = useClientStore();
   const [newProfilePictureData, setNewProfilePictureData] = useState({
     file: null,
     preview: null,
@@ -39,7 +36,7 @@ function AccountDetails(props) {
     const allowedTypes = ["image/jpeg", "image/png", "image/jpeg"];
     //Can consider implementing file size limit check
     const selectedFile = e.target.files && e.target.files[0];
-    if (allowedTypes.includes(selectedFile?.type)) {
+    if (allowedTypes.includes(selectedFile.type)) {
       console.log("Valid file selected:", selectedFile);
       setNewProfilePictureData({
         file: selectedFile,
@@ -51,28 +48,14 @@ function AccountDetails(props) {
     }
   };
 
-  const handleUploadProfilePicture = async (event) => {
-    event.preventDefault();
+  const handleUploadProfilePicture = (e) => {
     if (!newProfilePictureData.file) {
       console.error("No file has been attached");
       return;
     }
     const formData = new FormData();
     formData.append("image", newProfilePictureData.file);
-    try {
-      // Send the multipart form data using Axios
-      const response = await AxiosConnect.patchMultipart(
-        "/gleek/client/updateProfilePicture",
-        formData,
-      );
-      console.log(response);
-
-      setClient(response.data.client);
-      openSnackbar("Uploaded image!", "success");
-    } catch (error) {
-      console.error("Error uploading file:", error);
-      // Handle the error as needed (e.g., show a message to the user)
-    }
+    AxiosConnect.patchMultipart("/gleek/client/updateProfilePicture", formData);
   };
 
   const theme = useTheme();

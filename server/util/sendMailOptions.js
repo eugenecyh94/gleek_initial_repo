@@ -219,3 +219,23 @@ export const createResendVerifyEmailOptionsVendor = (vendor, token) => {
     console.log(err);
   }
 };
+
+export const createResetPasswordEmailOptions = (client, token) => {
+  const message = `Please add a new password for your account by clicking on the link: http://localhost:5000/gleek/auth/resetPassword/${token}`;
+  const options = {
+    to: client.email,
+    subject: "Gleek Client: Recover Password",
+    text: message,
+  };
+  return options;
+};
+
+export const createResetPasswordEmailOptions = (client, token) => {
+  const message = `Please add a new password for your account by clicking on the link: http://localhost:5000/gleek/auth/resetPassword/${token}`;
+  const options = {
+    to: client.email,
+    subject: "Gleek Client: Recover Password",
+    text: message,
+  };
+  return options;
+};

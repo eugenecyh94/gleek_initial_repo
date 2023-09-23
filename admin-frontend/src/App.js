@@ -18,6 +18,7 @@ import ForgotPassword from "./components/ForgotPassword";
 import AccountDetails from "./components/profile/AccountDetails";
 import AddAdminPage from "./components/admin/AddAdminPage";
 import ViewAllAdmins from "./components/admin/ViewAllAdmins";
+import ActivityDetails from "./components/activity/ActivityDetails";
 
 function App() {
   return (
@@ -46,10 +47,28 @@ function App() {
           />
           <Route
             exact
+            path="/viewActivity/:activityId"
+            element={
+              <ProtectedRoute>
+                <ActivityDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
             path="/viewAllVendors"
             element={
               <ProtectedRoute>
                 <ViewAllVendors />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/addVendor"
+            element={
+              <ProtectedRoute>
+                <CreateVendorPage />
               </ProtectedRoute>
             }
           />
@@ -82,10 +101,28 @@ function App() {
           />
           <Route
             exact
+            path="/adminTeam"
+            element={
+              <ProtectedRoute>
+                <ViewAllAdmins />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
             path="/adminTeam/addAdmin"
             element={
               <ProtectedRoute>
                 <AddAdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewAllClients"
+            element={
+              <ProtectedRoute>
+                <ViewAllClients />
               </ProtectedRoute>
             }
           />
@@ -100,24 +137,7 @@ function App() {
           />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
-          <Route
-            exact
-            path="/adminTeam"
-            element={
-              <ProtectedRoute>
-                <ViewAllAdmins />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/viewAllClients"
-            element={
-              <ProtectedRoute>
-                <ViewAllClients />
-              </ProtectedRoute>
-            }
-          />
+
           {/*for testing image upload component*/}
           <Route
             path="/uploadTest"

@@ -1,14 +1,14 @@
 import styled from "@emotion/styled";
-import { CircularProgress, Toolbar, Typography, useTheme } from "@mui/material";
+import CreateIcon from "@mui/icons-material/Create";
+import { CircularProgress, Typography, useTheme } from "@mui/material";
 import { useEffect } from "react";
 import {
   useAdminStore,
   useThemeStore,
   useVendorStore,
 } from "../../zustand/GlobalStore";
-import Layout from "../Layout";
+import MainBodyContainer from "../common/MainBodyContainer";
 import CreateActivityForm from "./CreateActivityForm";
-import CreateIcon from "@mui/icons-material/Create";
 
 const StyledPage = styled("div")(({ theme }) => ({
   backgroundColor: theme.palette.grey.pale_grey,
@@ -32,9 +32,13 @@ const CreateActivityPage = () => {
   }, [getThemes]);
 
   return (
-    <StyledPage>
-      <Layout>
-        <Toolbar />
+    <MainBodyContainer
+      hasBackButton={true}
+      breadcrumbNames={["View Published Activities"]}
+      breadcrumbLinks={["/viewPublishedActivities"]}
+      currentBreadcrumbName={"Create Activity"}
+    >
+      <StyledPage>
         <Typography
           alignItems={"center"}
           fontSize={25}
@@ -60,8 +64,8 @@ const CreateActivityPage = () => {
             admin={admin}
           ></CreateActivityForm>
         )}
-      </Layout>
-    </StyledPage>
+      </StyledPage>
+    </MainBodyContainer>
   );
 };
 export default CreateActivityPage;
