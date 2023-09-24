@@ -63,9 +63,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
   const { createActivity } = useActivityStore();
   const [isOpen, setIsOpen] = useState(false);
   const [isError, setError] = useState(false);
-  const [selectedTheme, setSelectedTheme] = useState(
-    themes?.[0]?.parent?._id || ""
-  );
+  const [selectedTheme, setSelectedTheme] = useState();
   const [selectedSubTheme, setSelectedSubTheme] = useState([]);
   const [subthemes, setSubthemes] = useState([]);
 
@@ -88,6 +86,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
   const [formErrors, setFormErrors] = useState();
   const [activityImages, setActivityImages] = useState([]);
   const [selectedVendor, setSelectedVendor] = useState();
+  const [pendingCertType, setPendingCertType] = useState();
 
   const foodCategories = Object.values(FoodCategoryEnum);
   const sdgList = Object.values(SustainableDevelopmentGoalsEnum);
@@ -136,8 +135,14 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
   };
 
   const handleMaxParticipantsChange = (event) => {
-    const newMaxParticipants = parseInt(event.target.value, 10) || null;
-    setMaxParticipants(newMaxParticipants);
+    const limitChar = 4;
+    let newMaxParticipants = 0;
+    if (event.target.value.toString().length <= limitChar) {
+      newMaxParticipants = parseInt(event.target.value, 10) || null;
+      setMaxParticipants(newMaxParticipants);
+    } else {
+      newMaxParticipants = maxParticipants;
+    }
 
     const newData = [];
     for (let i = 0; i < Math.ceil(newMaxParticipants / 10); i++) {
@@ -241,12 +246,21 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
       setSelectedVendor(null);
     }
   };
+  const handlePendingCertTypeChange = (event) => {
+    setPendingCertType(event.target.value);
+  };
 
   const validateForm = () => {
     const errors = {};
+    if (!selectedTheme || selectedTheme?.length === 0) {
+      errors.theme = "Please select a theme!";
+    }
+    if (!selectedSubTheme || selectedSubTheme?.length === 0) {
+      errors.subtheme = "Please select at least one learning point!";
+    }
 
     if (!dayAvailabilities || dayAvailabilities?.length === 0) {
-      errors.dayAvailabilities = "At least one Day Availability is required";
+      errors.dayAvailabilities = "At least one Day Availability is required!";
     }
     if (!sdg || sdg?.length === 0) {
       errors.sdg = "At least one sustainability goal needs to be provided!";
@@ -285,9 +299,37 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     ) {
       errors.popupitems = "Please fill in popup items sold!";
     }
+    if (
+      (activityType &&
+        activityType === ActivityTypeEnum.POPUP &&
+        !selectedFoodCat) ||
+      selectedFoodCat?.length === 0
+    ) {
+      errors.foodCat = "Please select at least one food category!";
+    }
+
+    if (
+      activityType &&
+      activityType === ActivityTypeEnum.POPUP &&
+      isFood &&
+      isFoodCertPending &&
+      (!pendingCertType || pendingCertType === "")
+    ) {
+      errors.pendingCertType = "Please fill in pending cert type!";
+    }
+
+    if (
+      activityType &&
+      activityType === ActivityTypeEnum.POPUP &&
+      isFood &&
+      isFoodCertPending &&
+      !foodCertDate
+    ) {
+      errors.foodCertDate = "Please fill in expected certification date!";
+    }
 
     if (!selectedVendor || selectedVendor === "") {
-      errors.selectedVendor = "Please select a vendor";
+      errors.vendor = "Please select a vendor";
     }
 
     if (!activityImages || activityImages?.length === 0) {
@@ -300,7 +342,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
   };
 
   const resetForm = () => {
-    setSelectedTheme(themes?.[0]?.parent?._id || "");
+    setSelectedTheme();
     setSelectedSubTheme([]);
     setSubthemes([]);
     setMaxParticipants();
@@ -370,6 +412,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
       }
     }
     formData.append("linkedVendor", selectedVendor);
+    formData.append("pendingCertificationType", pendingCertType);
 
     for (let i = 0; i < activityImages.length; i++) {
       formData.append("images", activityImages[i]);
@@ -426,11 +469,15 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                 fullWidth
                 value={title ?? ""}
                 onChange={handleTitleChange}
-                error={title !== null && title?.length === 0}
+                helperText={formErrors?.title}
+                error={
+                  (title !== null && title?.length === 0) ||
+                  formErrors?.title?.length > 0
+                }
               />
             </Grid>
             <Grid item xs={4}>
-              <FormControl fullWidth>
+              <FormControl fullWidth error={formErrors?.theme?.length > 0}>
                 <InputLabel id="themeLabel" required>
                   Theme
                 </InputLabel>
@@ -450,10 +497,11 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                       )
                   )}
                 </Select>
+                <FormHelperText error>{formErrors?.theme}</FormHelperText>
               </FormControl>
             </Grid>
             <Grid item xs={4}>
-              <FormControl fullWidth>
+              <FormControl fullWidth error={formErrors?.subtheme?.length > 0}>
                 <InputLabel id="subThemeLabel">Learning Points</InputLabel>
                 <Select
                   labelId="subThemeLabel"
@@ -469,7 +517,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                     </MenuItem>
                   ))}
                 </Select>
-                <FormHelperText>
+                <FormHelperText error={formErrors?.subtheme?.length > 0}>
                   Select one or more learning points based on theme
                 </FormHelperText>
               </FormControl>
@@ -485,7 +533,11 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                 onChange={handleDescriptionChange}
                 value={description ?? ""}
                 required
-                error={description !== null && description?.length === 0}
+                helperText={formErrors?.description}
+                error={
+                  (description !== null && description?.length === 0) ||
+                  formErrors?.description?.length > 0
+                }
               />
             </Grid>
           </Grid>
@@ -501,33 +553,40 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                 Vendor Details
               </Typography>
               <Grid item xs={6} paddingTop={2}>
-                <Autocomplete
-                  onChange={handleVendorChange}
-                  disablePortal
-                  id="combo-box-demo"
-                  options={vendors}
-                  sx={{ width: 300 }}
-                  getOptionLabel={(vendor) => vendor.companyName}
-                  renderOption={(props, vendor) => (
-                    <div {...props}>
-                      <Avatar
-                        style={{ marginRight: 6 }}
-                        src={vendor?.preSignedPhoto}
-                        {...(vendor?.preSignedPhoto
-                          ? {}
-                          : stringAvatar(vendor?.companyName, theme))}
+                <FormControl fullWidth error={formErrors?.vendor?.length > 0}>
+                  <Autocomplete
+                    onChange={handleVendorChange}
+                    disablePortal
+                    id="combo-box-demo"
+                    options={vendors}
+                    sx={{ width: 300 }}
+                    getOptionLabel={(vendor) => vendor.companyName}
+                    renderOption={(props, vendor) => (
+                      <div {...props}>
+                        <Avatar
+                          style={{ marginRight: 6 }}
+                          src={vendor?.preSignedPhoto}
+                          {...(vendor?.preSignedPhoto
+                            ? {}
+                            : stringAvatar(vendor?.companyName, theme))}
+                        />
+                        {vendor?.companyName} - {vendor?.companyUEN}
+                      </div>
+                    )}
+                    renderInput={(params) => (
+                      <TextField
+                        error={formErrors?.vendor?.length > 0}
+                        {...params}
+                        label="Pick from existing vendor"
                       />
-                      {vendor?.companyName} - {vendor?.companyUEN}
-                    </div>
-                  )}
-                  renderInput={(params) => (
-                    <TextField {...params} label="Pick from existing vendor" />
-                  )}
-                  value={
-                    vendors.find((vendor) => vendor._id === selectedVendor) ||
-                    null
-                  }
-                />
+                    )}
+                    value={
+                      vendors.find((vendor) => vendor._id === selectedVendor) ||
+                      null
+                    }
+                  />
+                  <FormHelperText error>{formErrors?.vendor}</FormHelperText>
+                </FormControl>
               </Grid>
               {/* <Grid item xs={6} paddingTop={2}>
                 <Typography fontSize={"0.75rem"}>
@@ -561,7 +620,10 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
               </Typography>
             </Grid>
             <Grid item xs={6} paddingTop={2}>
-              <FormControl fullWidth>
+              <FormControl
+                fullWidth
+                error={formErrors?.activityType?.length > 0}
+              >
                 <InputLabel id="activityType" required>
                   Activity Type
                 </InputLabel>
@@ -578,6 +640,9 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText error>
+                  {formErrors?.activityType}
+                </FormHelperText>
               </FormControl>
 
               {activityType === ActivityTypeEnum.POPUP && (
@@ -618,7 +683,11 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                       disabled={false}
                       fullWidth
                       onChange={handlePopupItemsChange}
-                      error={popupitems !== null && popupitems?.length === 0}
+                      helperText={formErrors?.popupitems}
+                      error={
+                        (popupitems !== null && popupitems?.length === 0) ||
+                        formErrors?.popupitems?.length > 0
+                      }
                     />
                   </Grid>
                 </Grid>
@@ -627,8 +696,15 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
 
             <Grid item xs={3} paddingTop={2}>
               {activityType === ActivityTypeEnum.POPUP && isFood && (
-                <FormGroup>
-                  <InputLabel id="foodCategory">Food Category</InputLabel>
+                <FormGroup error={formErrors?.foodCat?.length > 0}>
+                  <InputLabel
+                    id="foodCategory"
+                    required
+                    error={formErrors?.foodCat?.length > 0}
+                  >
+                    Food Category
+                  </InputLabel>
+                  <FormHelperText error>{formErrors?.foodCat}</FormHelperText>
                   {foodCategories.map((label) => (
                     <FormControlLabel
                       key={label}
@@ -640,6 +716,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                         />
                       }
                       label={label}
+                      error={formErrors?.foodCat?.length > 0}
                     />
                   ))}
                 </FormGroup>
@@ -675,15 +752,37 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                             label="Pending cert type"
                             disabled={false}
                             fullWidth
+                            onChange={handlePendingCertTypeChange}
+                            error={
+                              pendingCertType === "" ||
+                              formErrors?.pendingCertType?.length > 0
+                            }
                           />
                         </Grid>
                         <Grid item paddingTop={2}>
-                          <LocalizationProvider dateAdapter={AdapterDayjs}>
-                            <DatePicker
-                              label="Expected certified date"
-                              onChange={handleFoodCertDateChange}
-                            />
-                          </LocalizationProvider>
+                          <FormControl
+                            fullWidth
+                            error={formErrors?.foodCertDate?.length > 0}
+                          >
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                              <DatePicker
+                                error={formErrors?.foodCertDate?.length > 0}
+                                label="Expected certified date"
+                                onChange={handleFoodCertDateChange}
+                                renderInput={(params) => (
+                                  <TextField
+                                    sx={{ width: "100%" }}
+                                    {...params}
+                                    error
+                                    // error={formErrors?.foodCertDate?.length > 0}
+                                  />
+                                )}
+                              />
+                            </LocalizationProvider>
+                            <FormHelperText>
+                              {formErrors?.foodCertDate}
+                            </FormHelperText>
+                          </FormControl>
                         </Grid>
                       </Grid>
                     )}
@@ -697,7 +796,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
               )}
             </Grid>
             <Grid item xs={6}>
-              <FormControl fullWidth>
+              <FormControl fullWidth error={formErrors?.location?.length > 0}>
                 <InputLabel id="activityType" required>
                   Location
                 </InputLabel>
@@ -714,10 +813,14 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText error>{formErrors?.location}</FormHelperText>
               </FormControl>
             </Grid>
             <Grid item xs={3}>
-              <FormControl fullWidth>
+              <FormControl
+                fullWidth
+                error={formErrors?.dayAvailabilities?.length > 0}
+              >
                 <InputLabel id="dayAvailabilities" required>
                   Day Availabilities
                 </InputLabel>
@@ -737,6 +840,9 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                     )
                   )}
                 </Select>
+                <FormHelperText error>
+                  {formErrors?.dayAvailabilities}
+                </FormHelperText>
               </FormControl>
             </Grid>
             <Grid item xs={3}>
@@ -754,7 +860,11 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                   ),
                 }}
                 value={duration ?? ""}
-                error={duration !== null && duration?.length === 0}
+                error={
+                  (duration !== null && duration?.length === 0) ||
+                  formErrors?.duration?.length > 0
+                }
+                helperText={formErrors?.duration}
               />
             </Grid>
           </Grid>
@@ -767,7 +877,10 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
             paddingTop={2}
           >
             <Grid item xs={12}>
-              <InputLabel id="sdg">Sustainability Development Goals</InputLabel>
+              <InputLabel id="sdg" required error={formErrors?.sdg?.length > 0}>
+                Sustainability Development Goals
+              </InputLabel>
+              <FormHelperText error>{formErrors?.sdg}</FormHelperText>
             </Grid>
             {columnsArray.map((column, columnIndex) => (
               <Grid item xs={3} key={columnIndex}>
@@ -811,7 +924,11 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                 type="number"
                 value={maxParticipants ?? ""}
                 onChange={handleMaxParticipantsChange}
-                error={maxParticipants !== null && maxParticipants === 0}
+                error={
+                  (maxParticipants !== null && maxParticipants === 0) ||
+                  formErrors?.maxParticipants?.length > 0
+                }
+                helperText={formErrors?.maxParticipants}
               />
             </Grid>
             <Grid item xs={4}>
@@ -830,7 +947,11 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                   ),
                 }}
                 onChange={handleMarkupChange}
-                error={markup !== null && markup?.length === 0}
+                error={
+                  (markup !== null && markup?.length === 0) ||
+                  formErrors?.markup?.length > 0
+                }
+                helperText={formErrors?.markup}
               />
             </Grid>
             <Grid item xs={12}>
@@ -945,21 +1066,30 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
             alignItems="left"
             justifyContent="left"
           ></Grid>
+        </StyledContainer>
+        <StyledContainer elevation={3}>
           <Grid item xs={12}>
             <Typography
               color={theme.palette.primary.main}
               component="div"
               paddingTop={2}
+              paddingBottom={2}
             >
               Upload activity images
             </Typography>
-            <ImageAndFileUpload
-              limit={4}
-              name={"idk"}
-              size={5000000}
-              setActivityImages={setActivityImages}
-              activityImages={activityImages}
-            />
+            <FormGroup>
+              <ImageAndFileUpload
+                limit={4}
+                name={"idk"}
+                size={5000000}
+                setActivityImages={setActivityImages}
+                activityImages={activityImages}
+                error={formErrors?.activityImages?.length > 0}
+              />
+              <FormHelperText error>
+                {formErrors?.activityImages}
+              </FormHelperText>
+            </FormGroup>
           </Grid>
         </StyledContainer>
       </div>
@@ -992,9 +1122,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
         <Alert severity="error" sx={{ width: "100%" }}>
           {!formErrors
             ? "Error creating form!"
-            : Object.values(formErrors)?.map((item, key) => (
-                <div key={key}>{item}</div>
-              ))}
+            : "Error creating form! Please fill in required fields."}
         </Alert>
       </Snackbar>
     </form>

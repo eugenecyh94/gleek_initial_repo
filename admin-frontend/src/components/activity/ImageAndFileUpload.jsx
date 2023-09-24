@@ -1,21 +1,24 @@
 /* eslint-disable react/prop-types */
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import styled from "@emotion/styled";
 import { Fragment, useCallback, useRef } from "react";
 import { ImageConfig } from "../../utils/ImageConfig";
 
-export const CustomBox = styled(Box)({
+export const CustomBox = styled(Box)(({ error }) => ({
   "&.MuiBox-root": {
     backgroundColor: "#fff",
     borderRadius: "2rem",
-    boxShadow: "rgba(149, 157, 165, 0.2) 0px 8px 24px",
+    boxShadow: `${
+      error ? "rgba(211, 47, 47, 0.2)" : "rgba(149, 157, 165, 0.2)"
+    } 0px 8px 24px`,
     padding: "1rem",
+    border: error ? "1px solid rgba(211, 47, 47, 1)" : null,
   },
   "&.MuiBox-root:hover, &.MuiBox-root.dragover": {
     opacity: 0.6,
   },
-});
+}));
 
 const ImageAndFileUpload = ({
   limit,
@@ -23,6 +26,7 @@ const ImageAndFileUpload = ({
   size,
   setActivityImages,
   activityImages,
+  error,
 }) => {
   const wrapperRef = useRef(null);
 
@@ -48,7 +52,7 @@ const ImageAndFileUpload = ({
         setActivityImages(updatedList);
       }
     },
-    [activityImages, limit],
+    [activityImages, limit]
   );
 
   const fileRemove = (file) => {
@@ -65,7 +69,7 @@ const ImageAndFileUpload = ({
 
   return (
     <Fragment>
-      <CustomBox>
+      <CustomBox error={error}>
         <Box
           display="flex"
           justifyContent="center"
