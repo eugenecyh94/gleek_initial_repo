@@ -1,6 +1,9 @@
 import DoneIcon from "@mui/icons-material/Done";
+import QueryBuilderIcon from "@mui/icons-material/QueryBuilder";
+import DoDisturbIcon from "@mui/icons-material/DoDisturb";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import CloseIcon from "@mui/icons-material/Close";
-import { Tab, Tabs } from "@mui/material";
+import { Badge, Tab, Tabs } from "@mui/material";
 import Box from "@mui/material/Box";
 import {
   DataGrid,
@@ -17,6 +20,10 @@ const ClientsTable = ({ clients, updateClient }) => {
     const approvedRow = { ...row, status: newStatus };
     await updateClient(id, approvedRow);
   };
+
+  const badgeNumber = clients.filter(
+    (client) => client.status === "PENDING"
+  ).length;
 
   const filterCriteria = {
     approvedTab: { status: "APPROVED" },
@@ -123,9 +130,17 @@ const ClientsTable = ({ clients, updateClient }) => {
   return (
     <Box>
       <Tabs value={selectedTab} onChange={handleTabChange} centered>
-        <Tab label="Approved" value="approvedTab" />
-        <Tab label="To be Approved" value="pendingTab" />
-        <Tab label="Rejected" value="rejectedTab" />
+        <Tab label="Approved" value="approvedTab" icon={<TaskAltIcon />} />
+        <Tab
+          label="To be Approved"
+          value="pendingTab"
+          icon={
+            <Badge color="error" badgeContent={badgeNumber}>
+              <QueryBuilderIcon />
+            </Badge>
+          }
+        ></Tab>
+        <Tab label="Rejected" value="rejectedTab" icon={<DoDisturbIcon />} />
       </Tabs>
       {/* <div style={{ height: 500, width: "100%" }}> */}
       <div style={{ flex: 1, maxHeight: "500px", overflow: "auto" }}>

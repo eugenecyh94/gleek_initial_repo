@@ -18,6 +18,9 @@ const theme = createTheme({
     grey: {
       pale_grey: "#FAFAFA",
     },
+    error: {
+      main: "#D32F2F",
+    },
   },
   typography: {
     fontFamily: "Fredoka",
