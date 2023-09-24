@@ -19,7 +19,7 @@ export default function BreadCrumbsBar({
       boxShadow={4}
       position="sticky"
       bgcolor={"white"}
-      zIndex={1}
+      zIndex={2}
       top="64px"
       display="flex"
       flexDirection="row"
