@@ -909,26 +909,28 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
               </FormControl>
             </Grid>
             <Grid item xs={3}>
-              <TextField
-                id="duration"
-                label="Duration"
-                placeholder="Duration"
-                type="number"
+              <FormControl
                 fullWidth
-                onChange={handleDurationChange}
-                required
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">min</InputAdornment>
-                  ),
-                }}
-                value={duration ?? ""}
                 error={
                   (duration !== null && duration?.length === 0) ||
                   formErrors?.duration?.length > 0
                 }
-                helperText={formErrors?.duration}
-              />
+              >
+                <InputLabel id="duration">Duration</InputLabel>
+                <Select
+                  labelId="durationLabel"
+                  id="duration"
+                  value={duration}
+                  label="Duration"
+                  onChange={handleDurationChange}
+                >
+                  <MenuItem value={30}>30 min</MenuItem>
+                  <MenuItem value={60}>60 min</MenuItem>
+                  <MenuItem value={90}>90 min</MenuItem>
+                  <MenuItem value={120}>120 min</MenuItem>
+                </Select>
+                <FormHelperText error>{formErrors?.duration}</FormHelperText>
+              </FormControl>
             </Grid>
           </Grid>
 
