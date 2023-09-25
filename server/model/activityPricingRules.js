@@ -14,6 +14,14 @@ const activityPricingRulesSchema = new mongoose.Schema({
   publicHolidayAddon: Number,
   onlineAddon: Number,
   offlineAddon: Number,
+  clientPricePerPax: {
+    type: Number,
+    required: true,
+  },
+  clientWeekendAddon: Number,
+  clientPublicHolidayAddon: Number,
+  clientOnlineAddon: Number,
+  clientOfflineAddon: Number,
   activity: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Activity",
@@ -21,6 +29,6 @@ const activityPricingRulesSchema = new mongoose.Schema({
 });
 const ActivityPricingRulesModel = mongoose.model(
   "ActivityPricingRules",
-  activityPricingRulesSchema,
+  activityPricingRulesSchema
 );
 export default ActivityPricingRulesModel;

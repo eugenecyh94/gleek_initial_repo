@@ -4,6 +4,7 @@ import AddIcon from "@mui/icons-material/Add";
 import {
   Alert,
   Avatar,
+  Box,
   Button,
   FormControl,
   FormHelperText,
@@ -74,6 +75,9 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
   const [description, setDescription] = useState();
 
   const [activityPricingRuleList, setData] = useState([]);
+  const [clientActivityPricingRule, setClientActivityPricingRule] = useState(
+    []
+  );
   const [isFood, setIsFood] = useState(false);
   const [isFoodCertPending, setIsFoodCertPending] = useState(false);
   const [selectedFoodCat, setSelectedFoodCat] = useState([]);
@@ -150,7 +154,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
       const endRange = startRange + 9;
       newData.push({
         paxInterval: `${startRange} - ${endRange}`,
-        pricePerPax: 0,
+        pricePerPax: null,
         weekendAddon: 0,
         publicHolidayAddon: 0,
         onlineAddon: 0,
@@ -159,7 +163,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
       if (startRange + 9 === 50 && newMaxParticipants > 50) {
         newData.push({
           paxInterval: `> ${50}`,
-          pricePerPax: 0,
+          pricePerPax: null,
           weekendAddon: 0,
           publicHolidayAddon: 0,
           onlineAddon: 0,
@@ -171,14 +175,60 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     setData(newData);
   };
 
-  const handleFieldChange = (event, rowIndex, columnName) => {
+  const handlePricingRuleFieldChange = (event, rowIndex, columnName) => {
+    const newVal = event.target.value;
     const updatedData = [...activityPricingRuleList];
-    updatedData[rowIndex][columnName] = event.target.value;
+    const updatedClientData = [...clientActivityPricingRule];
+    const oldValue = updatedClientData?.[rowIndex]?.[columnName];
+    if (oldValue !== undefined) {
+      updatedClientData[rowIndex][columnName] = Math.ceil(
+        parseFloat(newVal) * (parseFloat(markup) / 100) + parseFloat(newVal)
+      );
+    }
+    updatedData[rowIndex][columnName] = newVal;
     setData(updatedData);
+    setClientActivityPricingRule(updatedClientData);
   };
 
   const handleMarkupChange = (event) => {
+    const newMarkup = event.target.value;
     setMarkup(event.target.value);
+    const newActivityPricingRule = [];
+    activityPricingRuleList.forEach((rule) => {
+      const {
+        paxInterval,
+        pricePerPax,
+        weekendAddon,
+        publicHolidayAddon,
+        onlineAddon,
+        offlineAddon,
+      } = rule;
+      newActivityPricingRule.push({
+        paxInterval,
+        pricePerPax: Math.ceil(
+          parseFloat(pricePerPax) * (parseFloat(newMarkup) / 100) +
+            parseFloat(pricePerPax)
+        ),
+        weekendAddon: Math.ceil(
+          parseFloat(weekendAddon) * (parseFloat(newMarkup) / 100) +
+            parseFloat(weekendAddon)
+        ),
+        publicHolidayAddon: Math.ceil(
+          parseFloat(publicHolidayAddon) * (parseFloat(newMarkup) / 100) +
+            parseFloat(publicHolidayAddon)
+        ),
+        onlineAddon: Math.ceil(
+          parseFloat(onlineAddon) * (parseFloat(newMarkup) / 100) +
+            parseFloat(onlineAddon)
+        ),
+        offlineAddon: Math.ceil(
+          parseFloat(offlineAddon) * (parseFloat(newMarkup) / 100) +
+            parseFloat(offlineAddon)
+        ),
+      });
+      return;
+    });
+    setClientActivityPricingRule(newActivityPricingRule);
   };
 
   const handleActivityTypeChange = (event) => {
@@ -252,6 +302,16 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
 
   const validateForm = () => {
     const errors = {};
+    const priceError = {};
+    activityPricingRuleList.forEach((rule, rowIndex) => {
+      if (rule.pricePerPax === null) {
+        priceError[rowIndex] = "Price per pax is required!";
+      }
+    });
+    if (Object.keys(priceError).length > 0) {
+      errors.activityPricingRules = priceError;
+    }
+
     if (!selectedTheme || selectedTheme?.length === 0) {
       errors.theme = "Please select a theme!";
     }
@@ -300,10 +360,9 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
       errors.popupitems = "Please fill in popup items sold!";
     }
     if (
-      (activityType &&
-        activityType === ActivityTypeEnum.POPUP &&
-        !selectedFoodCat) ||
-      selectedFoodCat?.length === 0
+      activityType &&
+      activityType === ActivityTypeEnum.POPUP &&
+      !selectedFoodCat
     ) {
       errors.foodCat = "Please select at least one food category!";
     }
@@ -396,6 +455,10 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     activityPricingRuleList.forEach((pricingRuleObj, index) => {
       const pricingJSON = JSON.stringify(pricingRuleObj);
       formData.append("activityPricingRules", pricingJSON);
+    });
+    clientActivityPricingRule.forEach((pricingRuleObj, index) => {
+      const pricingJSON = JSON.stringify(pricingRuleObj);
+      formData.append("clientActivityPricingRules", pricingJSON);
     });
     if (activityType === ActivityTypeEnum.POPUP) {
       {
@@ -973,83 +1036,262 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                         <TableRow key={rowIndex}>
                           <TableCell>{row.paxInterval}</TableCell>
                           <TableCell>
-                            <TextField
-                              value={row.pricePerPax}
-                              onChange={(e) =>
-                                handleFieldChange(e, rowIndex, "pricePerPax")
-                              }
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    $
-                                  </InputAdornment>
-                                ),
-                              }}
-                            />
+                            <div
+                              style={{ display: "flex", alignItems: "center" }}
+                            >
+                              <TextField
+                                value={row?.pricePerPax ?? ""}
+                                onChange={(e) =>
+                                  handlePricingRuleFieldChange(
+                                    e,
+                                    rowIndex,
+                                    "pricePerPax"
+                                  )
+                                }
+                                InputProps={{
+                                  startAdornment: (
+                                    <InputAdornment position="start">
+                                      $
+                                    </InputAdornment>
+                                  ),
+                                }}
+                                placeholder="0"
+                                helperText={
+                                  formErrors?.activityPricingRules?.[rowIndex]
+                                }
+                                error={
+                                  formErrors?.activityPricingRules?.[rowIndex]
+                                    ?.length > 0
+                                }
+                              />
+                              {!isNaN(
+                                clientActivityPricingRule?.[rowIndex]
+                                  ?.pricePerPax
+                              ) && (
+                                <Box
+                                  sx={{
+                                    paddingLeft: 2,
+                                    color: theme.palette.primary.main,
+                                    flexDirection: "column",
+                                    paddingBottom: 2,
+                                  }}
+                                >
+                                  <Box sx={{ whiteSpace: "nowrap" }}>
+                                    Client Price
+                                  </Box>
+                                  <Box sx={{ textAlign: "center" }}>
+                                    <>
+                                      $
+                                      {
+                                        clientActivityPricingRule?.[rowIndex]
+                                          ?.pricePerPax
+                                      }
+                                    </>
+                                  </Box>
+                                </Box>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell>
-                            <TextField
-                              value={row.weekendAddon}
-                              onChange={(e) =>
-                                handleFieldChange(e, rowIndex, "weekendAddon")
-                              }
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    $
-                                  </InputAdornment>
-                                ),
-                              }}
-                            />
+                            <div
+                              style={{ display: "flex", alignItems: "center" }}
+                            >
+                              <TextField
+                                value={row.weekendAddon}
+                                onChange={(e) =>
+                                  handlePricingRuleFieldChange(
+                                    e,
+                                    rowIndex,
+                                    "weekendAddon"
+                                  )
+                                }
+                                InputProps={{
+                                  startAdornment: (
+                                    <InputAdornment position="start">
+                                      $
+                                    </InputAdornment>
+                                  ),
+                                }}
+                              />
+                              {!isNaN(
+                                clientActivityPricingRule?.[rowIndex]
+                                  ?.weekendAddon
+                              ) && (
+                                <Box
+                                  sx={{
+                                    paddingLeft: 2,
+                                    color: theme.palette.primary.main,
+                                    flexDirection: "column",
+                                    paddingBottom: 2,
+                                  }}
+                                >
+                                  <Box sx={{ whiteSpace: "nowrap" }}>
+                                    Client Price
+                                  </Box>
+                                  <Box sx={{ textAlign: "center" }}>
+                                    <>
+                                      $
+                                      {
+                                        clientActivityPricingRule?.[rowIndex]
+                                          ?.weekendAddon
+                                      }
+                                    </>
+                                  </Box>
+                                </Box>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell>
-                            <TextField
-                              value={row.publicHolidayAddon}
-                              onChange={(e) =>
-                                handleFieldChange(
-                                  e,
-                                  rowIndex,
-                                  "publicHolidayAddon"
-                                )
-                              }
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    $
-                                  </InputAdornment>
-                                ),
-                              }}
-                            />
+                            <div
+                              style={{ display: "flex", alignItems: "center" }}
+                            >
+                              <TextField
+                                value={row.publicHolidayAddon}
+                                onChange={(e) =>
+                                  handlePricingRuleFieldChange(
+                                    e,
+                                    rowIndex,
+                                    "publicHolidayAddon"
+                                  )
+                                }
+                                InputProps={{
+                                  startAdornment: (
+                                    <InputAdornment position="start">
+                                      $
+                                    </InputAdornment>
+                                  ),
+                                }}
+                              />
+                              {!isNaN(
+                                clientActivityPricingRule?.[rowIndex]
+                                  ?.publicHolidayAddon
+                              ) && (
+                                <Box
+                                  sx={{
+                                    paddingLeft: 2,
+                                    color: theme.palette.primary.main,
+                                    flexDirection: "column",
+                                    paddingBottom: 2,
+                                  }}
+                                >
+                                  <Box sx={{ whiteSpace: "nowrap" }}>
+                                    Client Price
+                                  </Box>
+                                  <Box sx={{ textAlign: "center" }}>
+                                    <>
+                                      $
+                                      {
+                                        clientActivityPricingRule?.[rowIndex]
+                                          ?.publicHolidayAddon
+                                      }
+                                    </>
+                                  </Box>
+                                </Box>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell>
-                            <TextField
-                              value={row.onlineAddon}
-                              onChange={(e) =>
-                                handleFieldChange(e, rowIndex, "onlineAddon")
-                              }
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    $
-                                  </InputAdornment>
-                                ),
-                              }}
-                            />
+                            <div
+                              style={{ display: "flex", alignItems: "center" }}
+                            >
+                              <TextField
+                                value={row.onlineAddon}
+                                onChange={(e) =>
+                                  handlePricingRuleFieldChange(
+                                    e,
+                                    rowIndex,
+                                    "onlineAddon"
+                                  )
+                                }
+                                InputProps={{
+                                  startAdornment: (
+                                    <InputAdornment position="start">
+                                      $
+                                    </InputAdornment>
+                                  ),
+                                }}
+                              />
+                              {!isNaN(
+                                clientActivityPricingRule?.[rowIndex]
+                                  ?.onlineAddon
+                              ) && (
+                                <Box
+                                  sx={{
+                                    paddingLeft: 2,
+                                    color: theme.palette.primary.main,
+                                    flexDirection: "column",
+                                    paddingBottom: 2,
+                                  }}
+                                >
+                                  <Box sx={{ whiteSpace: "nowrap" }}>
+                                    Client Price
+                                  </Box>
+                                  <Box sx={{ textAlign: "center" }}>
+                                    <>
+                                      $
+                                      {
+                                        clientActivityPricingRule?.[rowIndex]
+                                          ?.onlineAddon
+                                      }
+                                    </>
+                                  </Box>
+                                </Box>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell>
-                            <TextField
-                              value={row.offlineAddon}
-                              onChange={(e) =>
-                                handleFieldChange(e, rowIndex, "offlineAddon")
-                              }
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    $
-                                  </InputAdornment>
-                                ),
-                              }}
-                            />
+                            <div
+                              style={{ display: "flex", alignItems: "center" }}
+                            >
+                              <TextField
+                                value={row.offlineAddon}
+                                onChange={(e) =>
+                                  handlePricingRuleFieldChange(
+                                    e,
+                                    rowIndex,
+                                    "offlineAddon"
+                                  )
+                                }
+                                InputProps={{
+                                  startAdornment: (
+                                    <InputAdornment position="start">
+                                      $
+                                    </InputAdornment>
+                                  ),
+                                }}
+                              />
+                              {!isNaN(
+                                clientActivityPricingRule?.[rowIndex]
+                                  ?.offlineAddon
+                              ) && (
+                                <Box
+                                  sx={{
+                                    paddingLeft: 2,
+                                    color: theme.palette.primary.main,
+                                    flexDirection: "column",
+                                    paddingBottom: 2,
+                                  }}
+                                >
+                                  <Box sx={{ whiteSpace: "nowrap" }}>
+                                    Client Price
+                                  </Box>
+                                  <Box sx={{ textAlign: "center" }}>
+                                    {!isNaN(
+                                      clientActivityPricingRule?.[rowIndex]
+                                        ?.offlineAddon
+                                    ) ? (
+                                      <>
+                                        $
+                                        {
+                                          clientActivityPricingRule?.[rowIndex]
+                                            ?.offlineAddon
+                                        }
+                                      </>
+                                    ) : null}
+                                  </Box>
+                                </Box>
+                              )}
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
