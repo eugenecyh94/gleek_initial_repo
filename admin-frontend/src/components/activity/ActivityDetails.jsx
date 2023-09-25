@@ -5,6 +5,8 @@ import {
   Chip,
   CircularProgress,
   Grid,
+  ImageList,
+  ImageListItem,
   Paper,
   Table,
   TableBody,
@@ -90,7 +92,7 @@ const ActivityDetails = () => {
                   style={{ marginRight: 8, marginTop: 6 }}
                   {...stringAvatar(
                     activityDetails?.linkedVendor?.companyName,
-                    theme,
+                    theme
                   )}
                 />
                 <Container>
@@ -225,11 +227,21 @@ const ActivityDetails = () => {
                 >
                   Activity Images
                 </Typography>
-                <StyledDiv>
-                  {activityDetails?.preSignedImages?.map((img, index) => (
-                    <img src={img} key={index} style={{ maxWidth: "100px" }} />
+                <ImageList
+                  sx={{ width: 500, height: 450 }}
+                  cols={3}
+                  rowHeight={164}
+                >
+                  {activityDetails?.preSignedImages?.map((item, index) => (
+                    <ImageListItem key={index}>
+                      <img
+                        srcSet={`${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                        src={item}
+                        loading="lazy"
+                      />
+                    </ImageListItem>
                   ))}
-                </StyledDiv>
+                </ImageList>
               </Grid>
             </Grid>
           </Grid>
