@@ -45,7 +45,7 @@ const Layout = ({ children }) => {
         display="flex"
         flexDirection="row"
         justifyContent="space-evenly"
-        alignItems="center"
+        alignItems="stretch"
       >
         <Box flex={1} mt={8}>
           {children}
