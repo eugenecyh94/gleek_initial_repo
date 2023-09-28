@@ -3,15 +3,17 @@ import HomePageNavBar from "./navbar/HomePageNavBar";
 import SideNavBar from "./navbar/SideNavBar";
 import { useAdminStore } from "../zustand/GlobalStore";
 import Grid from "@mui/material/Grid";
+import { useTheme } from "@mui/material/styles";
 
 const Layout = ({ children }) => {
   const { authenticated, admin } = useAdminStore();
   const mainContentColumn = authenticated ? 9.5 : 12;
   const navBarColumn = authenticated ? 2.5 : 0;
-  console.log(mainContentColumn);
-  console.log(navBarColumn);
+  const theme = useTheme();
+  const backgroundColor = theme.palette.backgroundColor.main;
+
   return (
-    <Box minHeight="100vh" flexDirection="column" display="flex">
+    <Box bgcolor={backgroundColor} minHeight="100vh" flexDirection="column" display="flex">
       <Grid xs={12}>
         <HomePageNavBar />
       </Grid>
@@ -26,7 +28,6 @@ const Layout = ({ children }) => {
           display="flex"
           flexDirection="row"
           justifyContent="space-evenly"
-          //   alignItems="flex-start"
           alignItems="center"
         >
           <Box flex={1}>{children}</Box>
