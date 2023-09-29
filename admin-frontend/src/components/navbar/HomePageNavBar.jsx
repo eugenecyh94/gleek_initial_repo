@@ -98,7 +98,7 @@ const HomePageNavBar = ({ toggleSidebar }) => {
                   to="/manageProfile"
                   style={{ all: "unset", cursor: "pointer" }}
                 >
-                  <Typography textAlign="center">Manage Profile</Typography>
+                  <Typography textAlign="center">Manage Account</Typography>
                 </Link>
               </MenuItem>
             </Menu>
