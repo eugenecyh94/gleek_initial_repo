@@ -16,7 +16,8 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
-import LockPersonIcon from "@mui/icons-material/LockPerson";
+// import LockPersonIcon from "@mui/icons-material/LockPerson";
+import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import { useNavigate } from "react-router-dom";
 import { useAdminStore } from "../../zustand/GlobalStore";
 import MainBodyContainer from "../common/MainBodyContainer";
@@ -32,7 +33,7 @@ const AddAdminPage = () => {
   const [formData, setFormData] = useState({
     email: "",
     name: "",
-    role: "",
+    role: "EXECUTIVE",
   });
   // error
   const [errorData, setErrorData] = useState({
@@ -100,9 +101,9 @@ const AddAdminPage = () => {
       case "email":
         validateEmail(formData[fieldName], errors, fieldName);
         break;
-      //  case "phoneNumber":
-      //     validatePhoneNumber(formData[fieldName], errors, fieldName);
-      //     break;
+      case "name":
+        validateName(formData[fieldName], errors, fieldName);
+        break;
       default:
     }
     return errors;
@@ -119,6 +120,12 @@ const AddAdminPage = () => {
     }
   };
 
+  const validateName = (data, errors, fieldName) => {
+    if (data === "") {
+      errors[fieldName] = `${fieldName} is required!`;
+    }
+  };
+
   return (
     <MainBodyContainer
       hasBackButton={true}
@@ -126,70 +133,72 @@ const AddAdminPage = () => {
       breadcrumbLinks={["/adminTeam"]}
       currentBreadcrumbName={"Add Admin"}
     >
-      <Box
-        display="flex"
-        width={"80%"}
-        flexDirection="row"
-        justifyContent="space-evenly"
-        alignItems="center"
+      <Typography
+        alignItems={"center"}
+        fontSize={25}
+        fontWeight={700}
+        noWrap
+        component="div"
+        color={theme.palette.primary.main}
+        paddingBottom={2}
+        style={{
+          display: "flex",
+        }}
       >
-        <Box>
-          <Box display="flex" flexDirection="column" alignItems="center" m={3}>
-            <Box borderRadius="50%" bgcolor={primary} p={1}>
-              <LockPersonIcon fontSize="large" color="accent" />
-            </Box>
-          </Box>
-          <Typography color="tertiary" variant="h5">
-            Register
-          </Typography>
-        </Box>
-        <form>
-          <Box display="flex" flexDirection="row">
-            <Box mr={1} display="flex" flexDirection="column">
-              <TextField
-                size="small"
-                autoFocus
-                autoComplete="on"
-                id="name"
-                required
-                name="name"
-                placeholder="Name"
-                onChange={handleChange}
-                onBlur={handleChange}
-                label="Name"
-                helperText={errorData.name}
-                error={errorData.name.length > 0}
-                sx={{ marginTop: "24px" }}
-              ></TextField>
-              <TextField
-                size="small"
-                autoComplete="on"
-                id="email"
-                required
-                name="email"
-                placeholder="Email"
-                label="Email"
-                onChange={handleChange}
-                onBlur={handleChange}
-                helperText={errorData.email}
-                error={errorData.email.length > 0}
-                sx={{ marginTop: "16px" }}
-              ></TextField>
-              <InputLabel id="role-dropdown">Role</InputLabel>
-              <Select
-                labelId="role"
-                name="role"
-                id="role"
-                label="Role"
-                required
-                value={formData.role}
-                onChange={handleChange}
-              >
-                <MenuItem value={"MANAGERIAL"}>MANAGERIAL</MenuItem>
-                <MenuItem value={"EXECUTIVE"}>EXECUTIVE</MenuItem>
-              </Select>
-            </Box>
-          </Box>
+        <PersonAddAlt1Icon sx={{ marginRight: 1 }} />
+        Register Admin
+      </Typography>
+      <form>
+        <Box
+          display="flex"
+          width={"80%"}
+          flexDirection="column"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <TextField
+            size="small"
+            autoFocus
+            autoComplete="on"
+            id="name"
+            required
+            name="name"
+            placeholder="Name"
+            onChange={handleChange}
+            onBlur={handleChange}
+            label="Name"
+            helperText={errorData.name}
+            error={errorData.name.length > 0}
+            sx={{ marginTop: "24px" }}
+          ></TextField>
+          <TextField
+            size="small"
+            autoComplete="on"
+            id="email"
+            required
+            name="email"
+            placeholder="Email"
+            label="Email"
+            onChange={handleChange}
+            onBlur={handleChange}
+            helperText={errorData.email}
+            error={errorData.email.length > 0}
+            sx={{ marginTop: "16px" }}
+          ></TextField>
+          <FormControl required sx={{ m: 2, minWidth: 200 }} size="small">
+            <InputLabel id="role-dropdown">Role</InputLabel>
+            <Select
+              labelId="role"
+              name="role"
+              id="role"
+              label="Role"
+              value={formData.role}
+              onChange={handleChange}
+            >
+              <MenuItem value={"MANAGERIAL"}>MANAGERIAL</MenuItem>
+              <MenuItem value={"EXECUTIVE"}>EXECUTIVE</MenuItem>
+            </Select>
+          </FormControl>
 
           <Button
             sx={{ marginTop: "24px" }}
@@ -201,8 +210,8 @@ const AddAdminPage = () => {
           >
             <Typography variant="body1">Register</Typography>
           </Button>
-        </form>
-      </Box>
+        </Box>
+      </form>
     </MainBodyContainer>
   );
 };

@@ -147,7 +147,7 @@ const AdminsTable = (admins) => {
                 color="white"
               >
                 <AddIcon />
-                Create
+                Admin
               </Typography>
             </StyledButton>
           </StyledDiv>

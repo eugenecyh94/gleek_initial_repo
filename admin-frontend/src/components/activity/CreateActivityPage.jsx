@@ -51,7 +51,7 @@ const CreateActivityPage = () => {
             display: "flex",
           }}
         >
-          <CreateIcon />
+          <CreateIcon sx={{ marginRight: 1 }} />
           Create Activity
         </Typography>
         {isLoading ? (
