@@ -7,7 +7,11 @@ import { Button, InputBase, Typography, alpha } from "@mui/material";
 import PropTypes from "prop-types";
 import { Tab, Tabs } from "@mui/material";
 import Box from "@mui/material/Box";
-import { DataGrid, GridToolbarFilterButton, GridActionsCellItem } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridToolbarFilterButton,
+  GridActionsCellItem,
+} from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -65,12 +69,8 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-
-
-
-
 const VendorsTable = ({ vendors, updateVendor }) => {
-  console.log(vendors)
+  console.log(vendors);
   const handleStatusUpdate = async (id, row, newStatus) => {
     const approvedRow = { ...row, status: newStatus };
     await updateVendor(id, approvedRow);
@@ -113,7 +113,7 @@ const VendorsTable = ({ vendors, updateVendor }) => {
   };
 
   const handleRowClick = (vendor) => {
-    console.log(vendor)
+    console.log(vendor);
     navigate(`/viewVendor/${vendor._id}`);
   };
 
@@ -205,7 +205,6 @@ const VendorsTable = ({ vendors, updateVendor }) => {
   return (
     <Box>
       <div style={{ display: "flex" }}>
-
         <Search>
           <SearchIconWrapper>
             <SearchIcon />
@@ -249,7 +248,7 @@ const VendorsTable = ({ vendors, updateVendor }) => {
           }}
           getRowId={(row) => row._id}
           //rows={searchedRows}
-          rows = {currentTabRows}
+          rows={currentTabRows}
           columns={columns}
           slots={{
             toolbar: GridToolbarFilterButton,

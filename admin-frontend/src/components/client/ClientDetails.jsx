@@ -42,7 +42,7 @@ const ClientDetails = () => {
     };
     console.log("fetchin" + clientId);
     fetchClientDetails();
-    console.log("done fetch")
+    console.log("done fetch");
   }, [getClientDetails, clientId, isUpdated]);
 
   return (

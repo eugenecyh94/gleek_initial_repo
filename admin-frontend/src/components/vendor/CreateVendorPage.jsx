@@ -12,8 +12,7 @@ const StyledPage = styled("div")(({ theme }) => ({
 }));
 
 const CreateVendorPage = () => {
-  const { vendorTypesFetcher, createVendor, vendorTypes } =
-    useVendorStore();
+  const { vendorTypesFetcher, createVendor, vendorTypes } = useVendorStore();
   const { admin } = useAdminStore();
   const theme = useTheme();
   useEffect(() => {
