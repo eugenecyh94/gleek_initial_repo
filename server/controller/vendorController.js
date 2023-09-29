@@ -108,7 +108,7 @@ export const postRegister = async (req, res) => {
     const { acceptTermsAndConditions, ...newVendor } = req.body;
     console.log(
       "vendorController postRegister(): acceptTermsAndConditions",
-      acceptTermsAndConditions
+      acceptTermsAndConditions,
     );
 
     if (await vendorExists(newVendor.companyEmail)) {
@@ -126,7 +126,7 @@ export const postRegister = async (req, res) => {
     await createVendorConsent(
       createdVendor.id,
       acceptTermsAndConditions,
-      session
+      session,
     );
 
     const token = await generateJwtToken(createdVendor.id);
@@ -205,8 +205,8 @@ export const postLogin = async (req, res) => {
   try {
     const { companyEmail, password } = req.body;
     const vendor = await VendorModel.findOne({ companyEmail });
+    if (!vendor) return res.status(404).send({ msg: "Invalid Credentials." });
     const isSamePassword = await bcrypt.compare(password, vendor.password);
-
     if (vendor && isSamePassword) {
       // If vendor REJECTED, send error message.
       if (vendor.status === "REJECTED") {
@@ -368,7 +368,7 @@ export const updateVendor = async (req, res) => {
     const updatedVendor = await VendorModel.findOneAndUpdate(
       { _id: req.params.id },
       { ...updateData, approvedDate: new Date() },
-      { new: true }
+      { new: true },
     );
     return res.status(201).json(updatedVendor);
   } catch (e) {
@@ -397,7 +397,7 @@ export const updateCompanyLogo = async (req, res) => {
     const updatedVendor = await VendorModel.findOneAndUpdate(
       { _id: vendor._id },
       { companyLogo: fileS3Location },
-      { new: true }
+      { new: true },
     );
 
     if (updatedVendor.companyLogo) {
@@ -445,7 +445,7 @@ export const postChangePassword = async (req, res) => {
     const updatedVendor = await VendorModel.findOneAndUpdate(
       { _id: vendor.id },
       { password: hashed },
-      { new: true }
+      { new: true },
     );
 
     return res.status(200).json("Password successfully changed.");

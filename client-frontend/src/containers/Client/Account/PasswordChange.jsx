@@ -34,8 +34,6 @@ function PasswordChange(props) {
     return !Object.values(errorData).every((error) => error === "");
   };
 
-
-
   const handleSubmit = async (e) => {
     try {
       e.preventDefault();

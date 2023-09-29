@@ -27,7 +27,7 @@ const ClientsTable = ({ clients, updateClient }) => {
   const [selectedTab, setSelectedTab] = useState("approvedTab");
   const [currentTabRows, setCurrentTabRows] = useState(() => {
     return clients.filter(
-      (client) => client.status === filterCriteria[selectedTab].status
+      (client) => client.status === filterCriteria[selectedTab].status,
     );
   });
 
@@ -35,8 +35,8 @@ const ClientsTable = ({ clients, updateClient }) => {
     setSelectedTab(newValue);
     setCurrentTabRows(
       clients.filter(
-        (client) => client.status === filterCriteria[newValue].status
-      )
+        (client) => client.status === filterCriteria[newValue].status,
+      ),
     );
   };
 
