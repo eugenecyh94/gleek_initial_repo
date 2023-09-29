@@ -27,8 +27,7 @@ const VendorDetails = () => {
   const { vendorId } = useParams();
   const theme = useTheme();
   const [isLoading, setIsLoading] = useState(true);
-  const { vendorDetails, getVendorDetails } =
-    useVendorStore();
+  const { vendorDetails, getVendorDetails } = useVendorStore();
   const [isUpdated, setIsUpdated] = useState(false);
   const handleStatusUpdate = async (id, vendorDetails, newStatus) => {
     const updatedProfile = { ...vendorDetails, status: newStatus };
@@ -42,7 +41,7 @@ const VendorDetails = () => {
     };
     console.log("fetchin " + vendorId);
     fetchVendorDetails();
-    console.log("done fetch")
+    console.log("done fetch");
     setIsLoading(false);
   }, [isLoading]);
 
@@ -88,13 +87,13 @@ const VendorDetails = () => {
                 "Company Name",
                 "UEN",
                 "Company Type", //custom type?
-                "Details"
+                "Details",
               ]}
               fieldValues={[
                 vendorDetails.companyName,
                 vendorDetails.companyUEN,
                 vendorDetails.companyType,
-                vendorDetails.vendorDetails
+                vendorDetails.vendorDetails,
               ]}
             />
             <ProfileCard
@@ -102,11 +101,7 @@ const VendorDetails = () => {
               icon={
                 <PersonIcon style={{ color: theme.palette.dark_purple.main }} />
               }
-              fieldNames={[
-                "Address",
-                "Phone Number",
-                "Email",
-              ]}
+              fieldNames={["Address", "Phone Number", "Email"]}
               fieldValues={[
                 vendorDetails.companyAddress,
                 vendorDetails.companyNumber,
@@ -124,19 +119,18 @@ const VendorDetails = () => {
               fieldValues={vendorDetails ? vendorDetails.brandNames : []}
             />
             )} */}
-            
+
             {Object.keys(vendorDetails.companySocials).length > 0 && (
               <ProfileCard
-              title="Company Socials"
-              icon={
-                <PaidIcon style={{ color: theme.palette.dark_purple.main }} />
-              }
-              fieldNames={Object.keys(vendorDetails.companySocials)}
-              fieldValues={Object.values(vendorDetails.companySocials)}
-            />
-            )
-            }
-            
+                title="Company Socials"
+                icon={
+                  <PaidIcon style={{ color: theme.palette.dark_purple.main }} />
+                }
+                fieldNames={Object.keys(vendorDetails.companySocials)}
+                fieldValues={Object.values(vendorDetails.companySocials)}
+              />
+            )}
+
             {vendorDetails.status === "APPROVED" && (
               <ProfileCard
                 title="Account Details"

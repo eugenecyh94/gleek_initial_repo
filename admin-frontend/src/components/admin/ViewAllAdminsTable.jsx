@@ -132,7 +132,7 @@ const AdminsTable = (admins) => {
             onChange={(event) => requestSearch(event.target.value)}
           />
         </Search>
-        {admin.role === "MANAGERIAL" ? (
+        {admin.role === "MANAGERIAL" && (
           <StyledDiv>
             <StyledButton
               variant="contained"
@@ -151,11 +151,16 @@ const AdminsTable = (admins) => {
               </Typography>
             </StyledButton>
           </StyledDiv>
-        ) : (
-          <></>
         )}
       </div>
-      <div style={{ height: 500, width: "100%" }}>
+      <div style={{ flex: 1, maxHeight: "500px", overflow: "auto" }}>
+        <Box
+          flexDirection="column"
+          justifyItems="center"
+          display="flex"
+          width={"99%"}
+          height={500}
+        >
         <DataGrid
           initialState={{
             pagination: {
@@ -169,6 +174,7 @@ const AdminsTable = (admins) => {
             toolbar: GridToolbarFilterButton,
           }}
         />
+        </Box>
       </div>
     </Box>
   );

@@ -130,26 +130,32 @@ function LoginPage(props) {
             <Box
               display="flex"
               flexDirection="column"
-              p={4}
+              p={5}
               bgcolor={"grey.50"}
               borderRadius={10}
               sx={{ width: "25rem" }}
               boxShadow={1}
             >
-              <Box display="flex" flexDirection="column" alignItems="center" padding={3}>
               <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              width="50px"
-              height="50px"
-              bgcolor={primary}
-              borderRadius="50%"
-            >
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                padding={3}
+              >
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  width="50px"
+                  height="50px"
+                  bgcolor={primary}
+                  borderRadius="50%"
+                >
                   <LockPersonIcon fontSize="large" color="accent" />
-                
-              </Box>
-              <Typography color="primary" variant="h4">Admin Login</Typography>
+                </Box>
+                <Typography color="primary" variant="h4">
+                  Admin Login
+                </Typography>
               </Box>
               <TextField
                 size="small"
@@ -228,15 +234,15 @@ function LoginPage(props) {
             </Box>
           </form>
           <Box
-        width={"30%"}
-        component="img"
-        sx={{
-          maxHeight: "auto",
-          maxWidth: "100%",
-        }}
-        alt="Illustrations by Storyset"
-        src={loginImage}
-      />
+            width={"30%"}
+            component="img"
+            sx={{
+              maxHeight: "auto",
+              maxWidth: "100%",
+            }}
+            alt="Illustrations by Storyset"
+            src={loginImage}
+          />
         </Box>
       )}
     </Box>

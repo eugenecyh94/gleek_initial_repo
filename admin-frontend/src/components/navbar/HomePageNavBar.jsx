@@ -13,8 +13,9 @@ import {
 import { useState } from "react";
 import { useAdminStore } from "../../zustand/GlobalStore";
 import { Link, useNavigate } from "react-router-dom";
+import MenuIcon from '@mui/icons-material/Menu';
 
-const HomePageNavBar = () => {
+const HomePageNavBar = ({ toggleSidebar} ) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const settings = ["Profile", "Account", "Dashboard", "Logout"];
@@ -49,6 +50,15 @@ const HomePageNavBar = () => {
       sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
     >
       <Toolbar style={{ paddingLeft: 16, justifyContent: "space-between" }}>
+        {authenticated && (
+          <IconButton
+            color="inherit"
+            onClick={toggleSidebar}
+        >
+            <MenuIcon />
+          </IconButton>
+          
+        )}
         <Link to="/" style={{ all: "unset", cursor: "pointer" }}>
           <Typography fontSize={25} fontWeight={700} noWrap component="div">
             Gleek Admin

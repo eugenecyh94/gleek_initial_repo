@@ -92,7 +92,7 @@ const ActivityDetails = () => {
                   style={{ marginRight: 8, marginTop: 6 }}
                   {...stringAvatar(
                     activityDetails?.linkedVendor?.companyName,
-                    theme
+                    theme,
                   )}
                 />
                 <Container>
