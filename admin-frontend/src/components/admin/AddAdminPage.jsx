@@ -131,7 +131,7 @@ const AddAdminPage = () => {
       hasBackButton={true}
       breadcrumbNames={["View All Admin"]}
       breadcrumbLinks={["/adminTeam"]}
-      currentBreadcrumbName={"Add Admin"}
+      currentBreadcrumbName={"Register Admin"}
     >
       <Typography
         alignItems={"center"}
