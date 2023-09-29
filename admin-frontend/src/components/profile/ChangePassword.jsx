@@ -37,7 +37,7 @@ const ChangePassword = () => {
   });
   // error
   const [errorData, setErrorData] = useState({
-    password: "",
+    password: "password is required!",
     passwordVerify: "",
   });
   // functions

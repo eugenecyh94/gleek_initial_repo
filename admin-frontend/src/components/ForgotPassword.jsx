@@ -74,13 +74,14 @@ const ForgotPassword = () => {
         flexDirection="row"
         justifyContent="space-evenly"
         alignItems="center"
+        marginTop={12}
       >
         <form>
           <Box
             display="flex"
             flexDirection="column"
             p={4}
-            bgcolor={secondary}
+            bgcolor="grey.50"
             borderRadius={10}
             sx={{ minWidth: "25rem" }}
             boxShadow={2}
@@ -89,7 +90,7 @@ const ForgotPassword = () => {
               <Box borderRadius="50%" bgcolor={primary} p={1}>
                 <LockPersonIcon fontSize="large" color="accent" />
               </Box>
-            </Box>
+            
             <Typography variant="h5">Recover Password</Typography>
             <TextField
               size="small"
@@ -116,6 +117,7 @@ const ForgotPassword = () => {
             >
               <Typography variant="body1">Send Recovery Link</Typography>
             </Button>
+          </Box>
           </Box>
         </form>
       </Box>
