@@ -204,7 +204,7 @@ const ActivityListTable = (allActivities) => {
           </StyledButton>
         </StyledDiv>
       </div>
-      <div style={{ height: 500, width: "100%" }}>
+      <div style={{ height: 500, width: "99%" }}>
         <DataGrid
           initialState={{
             pagination: {

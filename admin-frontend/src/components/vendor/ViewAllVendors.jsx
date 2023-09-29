@@ -35,7 +35,10 @@ const ViewAllVendors = () => {
       {isLoading ? (
         <CircularProgress sx={{ margin: "auto", marginTop: "32px" }} />
       ) : (
-        <VendorsTable vendors={vendors} updateVendor={updateVendor}></VendorsTable>
+        <VendorsTable
+          vendors={vendors}
+          updateVendor={updateVendor}
+        ></VendorsTable>
       )}
     </MainBodyContainer>
   );
