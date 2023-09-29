@@ -32,7 +32,7 @@ const StyledDiv = styled("div")`
   color: ${({ theme }) => theme.palette.primary.main};
 `;
 
-const SideNavBar = ( {isSidebarOpen} ) => {
+const SideNavBar = ({ isSidebarOpen }) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const selectedItem = useSelectedNavItemStore((state) => state.selectedItem);

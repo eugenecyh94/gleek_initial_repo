@@ -13,9 +13,9 @@ import {
 import { useState } from "react";
 import { useAdminStore } from "../../zustand/GlobalStore";
 import { Link, useNavigate } from "react-router-dom";
-import MenuIcon from '@mui/icons-material/Menu';
+import MenuIcon from "@mui/icons-material/Menu";
 
-const HomePageNavBar = ({ toggleSidebar} ) => {
+const HomePageNavBar = ({ toggleSidebar }) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const settings = ["Profile", "Account", "Dashboard", "Logout"];
@@ -51,13 +51,9 @@ const HomePageNavBar = ({ toggleSidebar} ) => {
     >
       <Toolbar style={{ paddingLeft: 16, justifyContent: "space-between" }}>
         {authenticated && (
-          <IconButton
-            color="inherit"
-            onClick={toggleSidebar}
-        >
+          <IconButton color="inherit" onClick={toggleSidebar}>
             <MenuIcon />
           </IconButton>
-          
         )}
         <Link to="/" style={{ all: "unset", cursor: "pointer" }}>
           <Typography fontSize={25} fontWeight={700} noWrap component="div">

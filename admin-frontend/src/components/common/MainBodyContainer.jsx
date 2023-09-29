@@ -17,19 +17,19 @@ const MainBodyContainer = ({
 
   return (
     // <Box marginTop={"64px"} marginBottom={"30px"} marginLeft={marginLeft}>
-      <Box marginTop={"64px"} marginBottom={"30px"} >
-    <Box>
-      <BreadCrumbsBar
-        hasBackButton={hasBackButton}
-        breadcrumbNames={breadcrumbNames}
-        breadcrumbLinks={breadcrumbLinks}
-        currentBreadcrumbName={currentBreadcrumbName}
-      />
-      <Box marginTop={"20px"} marginLeft={"30px"} marginRight={"30px"}>
-      {/* <Box> */}
-        {children}
+    <Box marginTop={"64px"} marginBottom={"30px"}>
+      <Box>
+        <BreadCrumbsBar
+          hasBackButton={hasBackButton}
+          breadcrumbNames={breadcrumbNames}
+          breadcrumbLinks={breadcrumbLinks}
+          currentBreadcrumbName={currentBreadcrumbName}
+        />
+        <Box marginTop={"20px"} marginLeft={"30px"} marginRight={"30px"}>
+          {/* <Box> */}
+          {children}
+        </Box>
       </Box>
-    </Box>
     </Box>
   );
 };

@@ -198,27 +198,27 @@ const VendorsTable = ({ vendors, updateVendor }) => {
         <Tab label="Rejected" value="rejectedTab" icon={<DoDisturbIcon />} />
       </Tabs>
       <div style={{ flex: 1, maxHeight: "500px", overflow: "auto" }}>
-      <Box
+        <Box
           flexDirection="column"
           justifyItems="center"
           display="flex"
           width={"99%"}
           height={500}
         >
-        <DataGrid
-          initialState={{
-            pagination: {
-              paginationModel: { pageSize: 25, page: 0 },
-            },
-          }}
-          getRowId={(row) => row._id}
-          rows={currentTabRows}
-          columns={columns}
-          slots={{
-            toolbar: GridToolbarFilterButton,
-          }}
-          onRowClick={(params) => handleRowClick(params.row)}
-        />
+          <DataGrid
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: 25, page: 0 },
+              },
+            }}
+            getRowId={(row) => row._id}
+            rows={currentTabRows}
+            columns={columns}
+            slots={{
+              toolbar: GridToolbarFilterButton,
+            }}
+            onRowClick={(params) => handleRowClick(params.row)}
+          />
         </Box>
       </div>
     </Box>

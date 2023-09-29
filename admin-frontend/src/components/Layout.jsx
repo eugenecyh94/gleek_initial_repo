@@ -26,7 +26,7 @@ const Layout = ({ children }) => {
       display="flex"
     >
       <Grid xs={12}>
-        <HomePageNavBar toggleSidebar={toggleSidebar}/>
+        <HomePageNavBar toggleSidebar={toggleSidebar} />
       </Grid>
       {authenticated && (
         <Grid xs={navBarColumn}>
@@ -41,9 +41,9 @@ const Layout = ({ children }) => {
         alignItems="top"
         marginLeft={marginLeft}
       >
-          <Box flex={1}>{children}</Box>
-        </Box>
+        <Box flex={1}>{children}</Box>
       </Box>
+    </Box>
   );
 };
 

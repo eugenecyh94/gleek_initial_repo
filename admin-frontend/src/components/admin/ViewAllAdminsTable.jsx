@@ -161,19 +161,19 @@ const AdminsTable = (admins) => {
           width={"99%"}
           height={500}
         >
-        <DataGrid
-          initialState={{
-            pagination: {
-              paginationModel: { pageSize: 25, page: 0 },
-            },
-          }}
-          getRowId={(row) => row._id}
-          rows={searchedRows}
-          columns={columns}
-          slots={{
-            toolbar: GridToolbarFilterButton,
-          }}
-        />
+          <DataGrid
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: 25, page: 0 },
+              },
+            }}
+            getRowId={(row) => row._id}
+            rows={searchedRows}
+            columns={columns}
+            slots={{
+              toolbar: GridToolbarFilterButton,
+            }}
+          />
         </Box>
       </div>
     </Box>
