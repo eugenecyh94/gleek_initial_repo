@@ -17,6 +17,11 @@ import { resendVerifyEmail } from "../../controller/vendorController.js";
 import { recoverPasswordMail } from "../../controller/vendorController.js";
 import { postResetPassword } from "../../controller/vendorController.js";
 import { resetPasswordRedirect } from "../../controller/vendorController.js";
+import {
+  getBlockedTimeslotsByActivityId,
+  addBlockedTimeslot,
+} from "../../controller/blockedTimeslotController.js";
+
 const router = express.Router();
 
 /*
@@ -60,4 +65,10 @@ router.patch("/updateAccount", verifyToken, updateVendorAccountDetails);
 router.post("/recoverPasswordMail", recoverPasswordMail);
 router.post("/resetPassword", verifyToken, postResetPassword);
 router.get("/resetPassword/:token", resetPasswordRedirect);
+// Blocked Timeslots
+router.get(
+  "/getBlockedTimeslotsByActivityId/:activityId",
+  getBlockedTimeslotsByActivityId,
+);
+router.post("/addBlockedTimeslot", addBlockedTimeslot);
 export default router;
