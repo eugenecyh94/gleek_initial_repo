@@ -1313,9 +1313,9 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                         value={minParticipants ?? ""}
                         onChange={handleMinParticipantsChange}
                         error={
-                          (maxParticipants !== null && maxParticipants === 0) ||
+                          (minParticipants !== null && minParticipants === 0) ||
                           isMaxSmallerThanMin() ||
-                          formErrors?.maxParticipants?.length > 0
+                          formErrors?.minParticipants?.length > 0
                         }
                         helperText={
                           isMaxSmallerThanMin()
@@ -1409,6 +1409,11 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                                           "end"
                                         )
                                       }
+                                      value={
+                                        !isNaN(row?.end) && row?.end
+                                          ? row?.end
+                                          : ""
+                                      }
                                     />
                                   </div>
                                 </TableCell>
@@ -1429,7 +1434,12 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                                         </InputAdornment>
                                       ),
                                     }}
-                                    value={row?.pricePerPax ?? ""}
+                                    value={
+                                      !isNaN(row?.pricePerPax) &&
+                                      row?.pricePerPax
+                                        ? row?.pricePerPax
+                                        : ""
+                                    }
                                     onChange={(e) =>
                                       handlePriceChange(
                                         e,
