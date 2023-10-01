@@ -1,17 +1,21 @@
 /* eslint-disable react/prop-types */
 import styled from "@emotion/styled";
-import AddIcon from "@mui/icons-material/Add";
 import {
   Alert,
   Avatar,
   Box,
   Button,
+  Chip,
   FormControl,
   FormHelperText,
   Grid,
   InputLabel,
   MenuItem,
   Select,
+  Stack,
+  Step,
+  StepLabel,
+  Stepper,
   TextField,
   Typography,
 } from "@mui/material";
@@ -34,7 +38,7 @@ import TableRow from "@mui/material/TableRow";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import {
   ActivityDayAvailabilityEnum,
   ActivityTypeEnum,
@@ -44,6 +48,8 @@ import {
 } from "../../utils/TypeEnum";
 import { useActivityStore } from "../../zustand/GlobalStore";
 import ImageAndFileUpload from "./ImageAndFileUpload";
+import { TimePicker } from "@mui/x-date-pickers";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 
 const StyledButton = styled(Button)`
   padding-left: 6px;
@@ -69,20 +75,32 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
   const [subthemes, setSubthemes] = useState([]);
 
   const [maxParticipants, setMaxParticipants] = useState();
+  const [minParticipants, setMinParticipants] = useState();
   const [markup, setMarkup] = useState();
   const [activityType, setActivityType] = useState("");
   const [title, setTitle] = useState();
   const [description, setDescription] = useState();
 
   const [activityPricingRuleList, setData] = useState([]);
-  const [clientActivityPricingRule, setClientActivityPricingRule] = useState(
-    []
-  );
+  const [pricingRanges, setPricingRanges] = useState([]);
+  const [pricingRangeError, setPricingRangeError] = useState([]);
+  const [pricingRangeDone, setPricingRangeDone] = useState(false);
+  const [pricingAddons, setPricingAddons] = useState({
+    weekendPricing: { amount: null, isDiscount: false },
+    offlinePricing: { amount: null, isDiscount: false },
+    onlinePricing: { amount: null, isDiscount: false },
+  });
+  const steps = [
+    "Select number of participants",
+    "Input pricing",
+    "Input markup pricing",
+    "Pricing addons / discounts",
+  ];
   const [isFood, setIsFood] = useState(false);
   const [isFoodCertPending, setIsFoodCertPending] = useState(false);
   const [selectedFoodCat, setSelectedFoodCat] = useState([]);
   const [foodCertDate, setFoodCertDate] = useState(null);
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState([]);
   const [popupitems, setPopupitems] = useState();
   const [sdg, setSdg] = useState([]);
   const [dayAvailabilities, setDayAvailabilities] = useState([]);
@@ -91,6 +109,11 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
   const [activityImages, setActivityImages] = useState([]);
   const [selectedVendor, setSelectedVendor] = useState();
   const [pendingCertType, setPendingCertType] = useState();
+  const [activeStep, setActiveStep] = useState(0);
+  const [bookingNotice, setBookingNotice] = useState();
+  const [startTime, setStartTime] = useState(null);
+  const [endTime, setEndTime] = useState(null);
+  const [capacity, setCapacity] = useState();
 
   const foodCategories = Object.values(FoodCategoryEnum);
   const sdgList = Object.values(SustainableDevelopmentGoalsEnum);
@@ -138,6 +161,14 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     setSelectedSubTheme(themeId);
   };
 
+  const handleMinParticipantsChange = (event) => {
+    setMinParticipants(event.target.value);
+  };
+
+  const isMaxSmallerThanMin = () => {
+    return parseInt(maxParticipants) < parseInt(minParticipants);
+  };
+
   const handleMaxParticipantsChange = (event) => {
     const limitChar = 4;
     let newMaxParticipants = 0;
@@ -147,88 +178,195 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     } else {
       newMaxParticipants = maxParticipants;
     }
-
-    const newData = [];
-    for (let i = 0; i < Math.ceil(newMaxParticipants / 10); i++) {
-      const startRange = i * 10 + 1;
-      const endRange = startRange + 9;
-      newData.push({
-        paxInterval: `${startRange} - ${endRange}`,
-        pricePerPax: null,
-        weekendAddon: 0,
-        publicHolidayAddon: 0,
-        onlineAddon: 0,
-        offlineAddon: 0,
-      });
-      if (startRange + 9 === 50 && newMaxParticipants > 50) {
-        newData.push({
-          paxInterval: `> ${50}`,
-          pricePerPax: null,
-          weekendAddon: 0,
-          publicHolidayAddon: 0,
-          onlineAddon: 0,
-          offlineAddon: 0,
-        });
-        break;
-      }
-    }
-    setData(newData);
   };
 
-  const handlePricingRuleFieldChange = (event, rowIndex, columnName) => {
-    const newVal = event.target.value;
-    const updatedData = [...activityPricingRuleList];
-    const updatedClientData = [...clientActivityPricingRule];
-    const oldValue = updatedClientData?.[rowIndex]?.[columnName];
-    if (oldValue !== undefined) {
-      updatedClientData[rowIndex][columnName] = Math.ceil(
-        parseFloat(newVal) * (parseFloat(markup) / 100) + parseFloat(newVal)
-      );
+  const handleAddRange = (rowIndex) => {
+    const currentData = [...pricingRanges];
+    const errorData = [...pricingRangeError];
+    const currentEnd = parseInt(pricingRanges?.[rowIndex]?.end);
+    const currentStart = parseInt(pricingRanges?.[rowIndex]?.start);
+    if (
+      currentEnd >= parseInt(minParticipants) &&
+      currentEnd <= parseInt(maxParticipants)
+    ) {
+      currentData.push({
+        start: parseInt(currentEnd + 1),
+        end: null,
+        pricePerPax: null,
+        clientPrice: null,
+      });
+      errorData.push({ range: "", pricePerPax: null });
+      setPricingRanges(currentData);
+      setPricingRangeError(errorData);
+    } else {
+      let message = "";
+      if (currentEnd < currentStart) {
+        message = "End Range must be less than Start Range";
+      } else if (currentEnd > maxParticipants) {
+        message = "End Range cannot be more than max participants";
+      }
+      const pricingErrors = [...pricingRangeError];
+      pricingErrors[rowIndex]["range"] = message;
+      setPricingRangeError(pricingErrors);
     }
-    updatedData[rowIndex][columnName] = newVal;
-    setData(updatedData);
-    setClientActivityPricingRule(updatedClientData);
+  };
+
+  const pricingRangeHasError = () => {
+    return pricingRangeError.some((e) => e.range?.length > 0);
+  };
+
+  const handlePricingRangesChange = (event, rowIndex, columnName) => {
+    const newVal = event.target.value;
+    const updatedData = [...pricingRanges];
+    const errors = [...pricingRangeError];
+
+    if (parseInt(newVal) > maxParticipants) {
+      errors[rowIndex]["range"] =
+        "End Range cannot be more than max participants";
+    } else if (
+      updatedData?.[rowIndex]?.["start"] <= parseInt(newVal) &&
+      parseInt(newVal) < maxParticipants
+    ) {
+      errors[rowIndex]["range"] = "";
+      setPricingRangeDone(false);
+    } else if (
+      updatedData?.[rowIndex]?.["start"] <= parseInt(newVal) &&
+      parseInt(newVal) === maxParticipants
+    ) {
+      errors[rowIndex]["range"] = "";
+      setPricingRangeDone(true);
+      const thing = updatedData.slice(0, rowIndex + 1);
+      thing[rowIndex][columnName] = parseInt(newVal);
+      setPricingRanges(thing);
+      setPricingRangeError(errors);
+      return;
+    } else if (updatedData?.[rowIndex]?.["start"] > parseInt(newVal)) {
+      errors[rowIndex]["range"] = "End Range must be more than Start Range";
+    }
+    updatedData[rowIndex][columnName] = parseInt(newVal);
+    if (updatedData?.[rowIndex + 1]) {
+      updatedData[rowIndex + 1]["start"] = parseInt(parseInt(newVal) + 1);
+    }
+    if (updatedData?.[rowIndex + 1]) {
+      if (
+        updatedData?.[rowIndex + 1]?.["start"] >
+        updatedData?.[rowIndex + 1]?.["end"]
+      ) {
+        errors[rowIndex + 1]["range"] =
+          "End Range must be more than Start Range";
+      } else if (updatedData?.[rowIndex + 1]?.["end"] === maxParticipants) {
+        errors[rowIndex + 1]["range"] = "";
+        setPricingRangeDone(true);
+      } else {
+        errors[rowIndex + 1]["range"] = "";
+      }
+    }
+
+    setPricingRanges(updatedData);
+    setPricingRangeError(errors);
+  };
+  const handlePriceChange = (event, rowIndex, columnName) => {
+    let error = [...pricingRangeError];
+    const newPrice = parseInt(event.target.value);
+    if (newPrice > 0) {
+      error[rowIndex]["pricePerPax"] = null;
+    } else if (newPrice === 0) {
+      error[rowIndex]["pricePerPax"] = "Price per pax has to be more than 0";
+    }
+    const updatedData = [...pricingRanges];
+    updatedData[rowIndex][columnName] = newPrice;
+    setPricingRanges(updatedData);
+    setPricingRangeError(error);
+  };
+  const handlePricingAddonChange = (event, type, isDiscount) => {
+    const percentage = event.target?.value;
+    const newPricingAddons = { ...pricingAddons };
+    newPricingAddons[type] = {
+      amount: !percentage
+        ? pricingAddons[type]?.amount
+        : parseFloat(percentage),
+      isDiscount: isDiscount ?? pricingAddons[type]?.isDiscount,
+    };
+    setPricingAddons(newPricingAddons);
+  };
+
+  const handleBack = () => {
+    if (activeStep === 1) {
+      setPricingAddons({
+        weekendPricing: { amount: null, isDiscount: false },
+        offlinePricing: { amount: null, isDiscount: false },
+        onlinePricing: { amount: null, isDiscount: false },
+      });
+      setPricingRanges([]);
+      setPricingRangeError([]);
+      setMarkup();
+    }
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const handleNext = () => {
+    if (activeStep === 0) {
+      const newData = [];
+      const errorData = [];
+      if (!isMaxSmallerThanMin()) {
+        newData.push({
+          start: parseInt(minParticipants),
+          end: null,
+          pricePerPax: null,
+          clientPrice: null,
+        });
+        errorData.push({ range: "", pricePerPax: null });
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      }
+      setPricingRanges(newData);
+      setPricingRangeError(errorData);
+    } else if (activeStep === 1) {
+      const errors = [...pricingRangeError];
+      let hasErrors = false;
+      pricingRanges.map((row, index) => {
+        if (!row.pricePerPax) {
+          errors[index]["pricePerPax"] = "Please fill in price per pax";
+          hasErrors = true;
+        }
+        if (!row.end) {
+          errors[index]["end"] = "Please fill in end interval";
+          hasErrors = true;
+        }
+      });
+      setPricingRangeError(errors);
+      if (!hasErrors) {
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      }
+    } else if (activeStep === 2) {
+      if (!markup) {
+        const error = {
+          ...formErrors,
+          markup: "Please fill in pricing markup!",
+        };
+        setFormErrors(error);
+      } else {
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      }
+    }
   };
 
   const handleMarkupChange = (event) => {
     const newMarkup = event.target.value;
     setMarkup(event.target.value);
-    const newActivityPricingRule = [];
-    activityPricingRuleList.forEach((rule) => {
-      const {
-        paxInterval,
-        pricePerPax,
-        weekendAddon,
-        publicHolidayAddon,
-        onlineAddon,
-        offlineAddon,
-      } = rule;
-      newActivityPricingRule.push({
-        paxInterval,
-        pricePerPax: Math.ceil(
-          parseFloat(pricePerPax) * (parseFloat(newMarkup) / 100) +
-            parseFloat(pricePerPax)
-        ),
-        weekendAddon: Math.ceil(
-          parseFloat(weekendAddon) * (parseFloat(newMarkup) / 100) +
-            parseFloat(weekendAddon)
-        ),
-        publicHolidayAddon: Math.ceil(
-          parseFloat(publicHolidayAddon) * (parseFloat(newMarkup) / 100) +
-            parseFloat(publicHolidayAddon)
-        ),
-        onlineAddon: Math.ceil(
-          parseFloat(onlineAddon) * (parseFloat(newMarkup) / 100) +
-            parseFloat(onlineAddon)
-        ),
-        offlineAddon: Math.ceil(
-          parseFloat(offlineAddon) * (parseFloat(newMarkup) / 100) +
-            parseFloat(offlineAddon)
-        ),
-      });
-      return;
+    const newClientPrice = [...pricingRanges];
+    newClientPrice.forEach((rule, index) => {
+      const { pricePerPax } = rule;
+      const clientPrice = Math.ceil(
+        parseFloat(pricePerPax) * (parseFloat(newMarkup) / 100) +
+          parseFloat(pricePerPax)
+      );
+      newClientPrice[index].clientPrice = clientPrice;
     });
-    setClientActivityPricingRule(newActivityPricingRule);
+    if (newMarkup) {
+      const error = { ...formErrors, markup: "" };
+      setFormErrors(error);
+    }
+    setPricingRanges(newClientPrice);
   };
 
   const handleActivityTypeChange = (event) => {
@@ -245,6 +383,18 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
 
   const handleFoodCertDateChange = (date) => {
     setFoodCertDate(date);
+  };
+
+  const handleStartTimeChange = (date) => {
+    setStartTime(date);
+  };
+
+  const handleEndTimeChange = (date) => {
+    setEndTime(date);
+  };
+
+  const handleCapacityChange = (event) => {
+    setCapacity(event.target.value);
   };
 
   const handleFoodCatChange = (event) => {
@@ -299,7 +449,9 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
   const handlePendingCertTypeChange = (event) => {
     setPendingCertType(event.target.value);
   };
-
+  const handleBookingNoticeChange = (event) => {
+    setBookingNotice(event.target.value);
+  };
   const validateForm = () => {
     const errors = {};
     const priceError = {};
@@ -336,8 +488,8 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
       errors.activityType = "Activity Type is required!";
     }
 
-    if (!location || location === "") {
-      errors.location = "Location is required!";
+    if (!location || location?.length === 0) {
+      errors.location = "At least one Location is required!";
     }
 
     if (!duration) {
@@ -346,6 +498,10 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
 
     if (!maxParticipants) {
       errors.maxParticipants = "Max. Participants is required!";
+    }
+
+    if (!minParticipants) {
+      errors.minParticipants = "Min. Participants is required!";
     }
 
     if (!markup) {
@@ -391,13 +547,34 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
       errors.vendor = "Please select a vendor";
     }
 
-    if (!activityImages || activityImages?.length === 0) {
-      errors.activityImages =
-        "Please upload at least one photo of your activity!";
+    if (!capacity) {
+      errors.capacity = "Capacity is required!";
     }
 
+    if (!startTime) {
+      errors.startTime = "Earliest Start time is required!";
+    }
+
+    if (!endTime) {
+      errors.endTime = "Latest Start Time is required!";
+    }
+
+    pricingRanges.map((row) => {
+      if (!row.pricePerPax) {
+        errors.pricing = "Please complete price setting!";
+      }
+      if (!row.end) {
+        errors.pricing = "Please complete price setting!";
+      }
+    });
+
+    // if (!activityImages || activityImages?.length === 0) {
+    //   errors.activityImages =
+    //     "Please upload at least one photo of your activity!";
+    // }
+
     setFormErrors(errors);
-    return Object.keys(errors).length === 0;
+    return Object.keys(errors).length === 0 && !pricingRangeHasError();
   };
 
   const resetForm = () => {
@@ -414,7 +591,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     setIsFoodCertPending(false);
     setSelectedFoodCat([]);
     setFoodCertDate(null);
-    setLocation("");
+    setLocation([]);
     setPopupitems();
     setSdg([]);
     setDayAvailabilities([]);
@@ -422,6 +599,17 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     setFormErrors({});
     setActivityImages([]);
     setSelectedVendor();
+    setPricingAddons({
+      weekendPricing: { amount: null, isDiscount: false },
+      offlinePricing: { amount: null, isDiscount: false },
+      onlinePricing: { amount: null, isDiscount: false },
+    });
+    setPricingRanges([]);
+    setPricingRangeError([]);
+    setStartTime();
+    setEndTime();
+    setBookingNotice();
+    setActiveStep(0);
   };
 
   const handleSubmit = async (event) => {
@@ -442,24 +630,35 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     formData.append("clientMarkupPercentage", markup);
     formData.append("duration", duration);
     formData.append("theme", selectedTheme);
-    formData.append("location", location);
-    dayAvailabilities.forEach((obj, index) => {
+    if (bookingNotice) {
+      formData.append("bookingNotice", bookingNotice);
+    } else {
+      formData.append("bookingNotice", 0);
+    }
+
+    formData.append("startTime", startTime?.toISOString());
+    formData.append("endTime", endTime?.toISOString());
+    formData.append("capacity", capacity);
+    location.forEach((obj) => {
+      formData.append("location", obj);
+    });
+    dayAvailabilities.forEach((obj) => {
       formData.append("dayAvailabilities", obj);
     });
-    selectedSubTheme.forEach((obj, index) => {
+    selectedSubTheme.forEach((obj) => {
       formData.append("subtheme", obj);
     });
-    sdg.forEach((obj, index) => {
+    sdg.forEach((obj) => {
       formData.append("sdg", obj);
     });
-    activityPricingRuleList.forEach((pricingRuleObj, index) => {
-      const pricingJSON = JSON.stringify(pricingRuleObj);
+    pricingRanges.forEach((obj) => {
+      const pricingJSON = JSON.stringify(obj);
       formData.append("activityPricingRules", pricingJSON);
     });
-    clientActivityPricingRule.forEach((pricingRuleObj, index) => {
-      const pricingJSON = JSON.stringify(pricingRuleObj);
-      formData.append("clientActivityPricingRules", pricingJSON);
-    });
+    for (const key in pricingAddons) {
+      formData.append(key, JSON.stringify(pricingAddons[key]));
+    }
+
     if (activityType === ActivityTypeEnum.POPUP) {
       {
         formData.append("popupItemsSold", popupitems);
@@ -467,7 +666,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
           formData.append("isFoodCertPending", isFoodCertPending);
           if (isFoodCertPending) {
             formData.append("foodCertDate", foodCertDate?.toISOString());
-            selectedFoodCat.forEach((obj, index) => {
+            selectedFoodCat.forEach((obj) => {
               formData.append("foodCategory", obj);
             });
           }
@@ -483,7 +682,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
 
     if (validateForm()) {
       try {
-        const responseStatus = await createActivity(formData);
+        await createActivity(formData);
         resetForm();
         setIsOpen(true);
       } catch (error) {
@@ -756,7 +955,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                 </Grid>
               )}
             </Grid>
-
             <Grid item xs={3} paddingTop={2}>
               {activityType === ActivityTypeEnum.POPUP && isFood && (
                 <FormGroup error={formErrors?.foodCat?.length > 0}>
@@ -837,7 +1035,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                                     sx={{ width: "100%" }}
                                     {...params}
                                     error
-                                    // error={formErrors?.foodCertDate?.length > 0}
                                   />
                                 )}
                               />
@@ -860,7 +1057,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
             </Grid>
             <Grid item xs={6}>
               <FormControl fullWidth error={formErrors?.location?.length > 0}>
-                <InputLabel id="activityType" required>
+                <InputLabel id="location" required>
                   Location
                 </InputLabel>
                 <Select
@@ -869,6 +1066,14 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                   placeholder="Location"
                   onChange={handleLocationTypeChange}
                   value={location}
+                  multiple
+                  renderValue={(selected) => (
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                      {selected.map((value) => (
+                        <Chip key={value} label={value} />
+                      ))}
+                    </Box>
+                  )}
                 >
                   {Object.values(LocationEnum).map((enumValue) => (
                     <MenuItem key={enumValue} value={enumValue}>
@@ -920,7 +1125,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                 <Select
                   labelId="durationLabel"
                   id="duration"
-                  value={duration}
+                  value={duration ?? ""}
                   label="Duration"
                   onChange={handleDurationChange}
                 >
@@ -931,6 +1136,81 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                 </Select>
                 <FormHelperText error>{formErrors?.duration}</FormHelperText>
               </FormControl>
+            </Grid>
+            <Grid item xs={3}>
+              <FormControl fullWidth error={formErrors?.startTime?.length > 0}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <TimePicker
+                    label="Earliest Start Time"
+                    minutesStep={30}
+                    value={startTime}
+                    onChange={handleStartTimeChange}
+                  />
+                </LocalizationProvider>
+                <FormHelperText>{formErrors?.startTime}</FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid item xs={3}>
+              <FormControl fullWidth error={formErrors?.endTime?.length > 0}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <TimePicker
+                    label="Latest Start Time"
+                    minutesStep={30}
+                    value={endTime}
+                    onChange={handleEndTimeChange}
+                  />
+                </LocalizationProvider>
+                <FormHelperText>{formErrors?.endTime}</FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid item xs={3}>
+              <TextField
+                id="bookingNotice"
+                name="bookingNotice"
+                label="Advance Booking Notice"
+                disabled={false}
+                fullWidth
+                type="number"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      {parseInt(bookingNotice) === 1 ? <>day</> : <>days</>}
+                    </InputAdornment>
+                  ),
+                }}
+                value={bookingNotice ?? ""}
+                onChange={handleBookingNoticeChange}
+                error={
+                  (bookingNotice !== null && bookingNotice === 0) ||
+                  formErrors?.bookingNotice?.length > 0
+                }
+                helperText={formErrors?.bookingNotice}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <TextField
+                required
+                id="capacity"
+                name="capacity"
+                label="Capacity"
+                disabled={false}
+                fullWidth
+                type="number"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      {parseInt(capacity) === 1 ? <>client</> : <>clients</>}
+                    </InputAdornment>
+                  ),
+                }}
+                value={capacity ?? ""}
+                onChange={handleCapacityChange}
+                error={
+                  (capacity !== null && capacity === 0) ||
+                  formErrors?.capacity?.length > 0
+                }
+                helperText={formErrors?.capacity}
+              />
             </Grid>
           </Grid>
 
@@ -969,7 +1249,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
         </StyledContainer>
         <StyledContainer elevation={3}>
           <Grid container spacing={1} alignItems="left" justifyContent="left">
-            <Grid item xs={12}>
+            <Grid item xs={12} justifyContent={"space-between"}>
               <Typography
                 color={theme.palette.primary.main}
                 component="div"
@@ -977,330 +1257,500 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
               >
                 Participants and Pricing
               </Typography>
-            </Grid>
-            <Grid item xs={4}>
-              <TextField
-                required
-                id="maxParticipants"
-                name="maxParticipants"
-                label="Max. participants"
-                disabled={false}
-                fullWidth
-                type="number"
-                value={maxParticipants ?? ""}
-                onChange={handleMaxParticipantsChange}
-                error={
-                  (maxParticipants !== null && maxParticipants === 0) ||
-                  formErrors?.maxParticipants?.length > 0
-                }
-                helperText={formErrors?.maxParticipants}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField
-                required
-                id="markup"
-                name="markup"
-                label="Markup Percentage"
-                disabled={false}
-                fullWidth
-                type="number"
-                value={markup ?? ""}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="start">%</InputAdornment>
-                  ),
-                }}
-                onChange={handleMarkupChange}
-                error={
-                  (markup !== null && markup?.length === 0) ||
-                  formErrors?.markup?.length > 0
-                }
-                helperText={formErrors?.markup}
-              />
+              {formErrors?.pricing && (
+                <Typography
+                  color={theme.palette.error.main}
+                  style={{ display: "flex", alignItems: "center" }}
+                >
+                  <WarningAmberIcon />
+                  {formErrors?.pricing}
+                </Typography>
+              )}
             </Grid>
             <Grid item xs={12}>
-              {maxParticipants > 0 && (
-                <TableContainer component={Paper}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Pax Interval</TableCell>
-                        <TableCell>Price Per Pax</TableCell>
-                        <TableCell>Weekend Addon</TableCell>
-                        <TableCell>Public Holiday Addon</TableCell>
-                        <TableCell>Online Addon</TableCell>
-                        <TableCell>Offline Addon</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {activityPricingRuleList.map((row, rowIndex) => (
-                        <TableRow key={rowIndex}>
-                          <TableCell>{row.paxInterval}</TableCell>
-                          <TableCell>
-                            <div
-                              style={{ display: "flex", alignItems: "center" }}
-                            >
-                              <TextField
-                                value={row?.pricePerPax ?? ""}
-                                onChange={(e) =>
-                                  handlePricingRuleFieldChange(
-                                    e,
-                                    rowIndex,
-                                    "pricePerPax"
-                                  )
-                                }
-                                InputProps={{
-                                  startAdornment: (
-                                    <InputAdornment position="start">
-                                      $
-                                    </InputAdornment>
-                                  ),
-                                }}
-                                placeholder="0"
-                                helperText={
-                                  formErrors?.activityPricingRules?.[rowIndex]
-                                }
-                                error={
-                                  formErrors?.activityPricingRules?.[rowIndex]
-                                    ?.length > 0
-                                }
-                              />
-                              {!isNaN(
-                                clientActivityPricingRule?.[rowIndex]
-                                  ?.pricePerPax
-                              ) && (
-                                <Box
-                                  sx={{
-                                    paddingLeft: 2,
-                                    color: theme.palette.primary.main,
-                                    flexDirection: "column",
-                                    paddingBottom: 2,
-                                  }}
-                                >
-                                  <Box sx={{ whiteSpace: "nowrap" }}>
-                                    Client Price
-                                  </Box>
-                                  <Box sx={{ textAlign: "center" }}>
-                                    <>
-                                      $
-                                      {
-                                        clientActivityPricingRule?.[rowIndex]
-                                          ?.pricePerPax
+              <Stepper activeStep={activeStep}>
+                {steps.map((label) => {
+                  const stepProps = {};
+                  const labelProps = {};
+                  return (
+                    <Step key={label} {...stepProps}>
+                      <StepLabel {...labelProps}>{label}</StepLabel>
+                    </Step>
+                  );
+                })}
+              </Stepper>
+              <Fragment>
+                {activeStep === 0 && (
+                  <Grid
+                    container
+                    spacing={1}
+                    alignItems="left"
+                    justifyContent="left"
+                    paddingTop={2}
+                  >
+                    <Grid item xs={4}>
+                      <TextField
+                        required
+                        id="minParticipants"
+                        name="minParticipants"
+                        label="Min. participants"
+                        disabled={false}
+                        fullWidth
+                        type="number"
+                        value={minParticipants ?? ""}
+                        onChange={handleMinParticipantsChange}
+                        error={
+                          (maxParticipants !== null && maxParticipants === 0) ||
+                          isMaxSmallerThanMin() ||
+                          formErrors?.maxParticipants?.length > 0
+                        }
+                        helperText={
+                          isMaxSmallerThanMin()
+                            ? "Min Participants must be smaller than Max Participants"
+                            : formErrors?.minParticipants
+                        }
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        required
+                        id="maxParticipants"
+                        name="maxParticipants"
+                        label="Max. participants"
+                        disabled={false}
+                        fullWidth
+                        type="number"
+                        value={maxParticipants ?? ""}
+                        onChange={handleMaxParticipantsChange}
+                        error={
+                          (maxParticipants !== null && maxParticipants === 0) ||
+                          isMaxSmallerThanMin() ||
+                          formErrors?.maxParticipants?.length > 0
+                        }
+                        helperText={
+                          isMaxSmallerThanMin()
+                            ? "Max Participants must be greater than Min Participants"
+                            : formErrors?.maxParticipants
+                        }
+                      />
+                    </Grid>
+                  </Grid>
+                )}
+                {activeStep === 1 && (
+                  <>
+                    <Grid item xs={12}>
+                      <Typography>
+                        Maximum Participants: {maxParticipants}
+                      </Typography>
+                      <Typography>
+                        Minimum Participants: {minParticipants}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TableContainer component={Paper}>
+                        <Table>
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Start Range</TableCell>
+                              <TableCell>End Range</TableCell>
+                              <TableCell>Price Per Pax</TableCell>
+                              <TableCell>Action</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {pricingRanges.map((row, rowIndex) => (
+                              <TableRow key={rowIndex}>
+                                <TableCell>
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "space-evenly",
+                                    }}
+                                  >
+                                    <Box>{row.start}</Box>
+
+                                    <Box sx={{ whiteSpace: "nowrap" }}>to</Box>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    <TextField
+                                      error={
+                                        pricingRangeError?.[rowIndex]?.range
+                                          ?.length > 0
                                       }
-                                    </>
-                                  </Box>
-                                </Box>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div
-                              style={{ display: "flex", alignItems: "center" }}
-                            >
-                              <TextField
-                                value={row.weekendAddon}
-                                onChange={(e) =>
-                                  handlePricingRuleFieldChange(
-                                    e,
-                                    rowIndex,
-                                    "weekendAddon"
-                                  )
-                                }
-                                InputProps={{
-                                  startAdornment: (
-                                    <InputAdornment position="start">
-                                      $
-                                    </InputAdornment>
-                                  ),
-                                }}
-                              />
-                              {!isNaN(
-                                clientActivityPricingRule?.[rowIndex]
-                                  ?.weekendAddon
-                              ) && (
-                                <Box
-                                  sx={{
-                                    paddingLeft: 2,
-                                    color: theme.palette.primary.main,
-                                    flexDirection: "column",
-                                    paddingBottom: 2,
-                                  }}
-                                >
-                                  <Box sx={{ whiteSpace: "nowrap" }}>
-                                    Client Price
-                                  </Box>
-                                  <Box sx={{ textAlign: "center" }}>
-                                    <>
-                                      $
-                                      {
-                                        clientActivityPricingRule?.[rowIndex]
-                                          ?.weekendAddon
+                                      helperText={
+                                        pricingRangeError?.[rowIndex]?.range
                                       }
-                                    </>
-                                  </Box>
-                                </Box>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div
-                              style={{ display: "flex", alignItems: "center" }}
-                            >
-                              <TextField
-                                value={row.publicHolidayAddon}
-                                onChange={(e) =>
-                                  handlePricingRuleFieldChange(
-                                    e,
-                                    rowIndex,
-                                    "publicHolidayAddon"
-                                  )
-                                }
-                                InputProps={{
-                                  startAdornment: (
-                                    <InputAdornment position="start">
-                                      $
-                                    </InputAdornment>
-                                  ),
-                                }}
-                              />
-                              {!isNaN(
-                                clientActivityPricingRule?.[rowIndex]
-                                  ?.publicHolidayAddon
-                              ) && (
-                                <Box
-                                  sx={{
-                                    paddingLeft: 2,
-                                    color: theme.palette.primary.main,
-                                    flexDirection: "column",
-                                    paddingBottom: 2,
-                                  }}
-                                >
-                                  <Box sx={{ whiteSpace: "nowrap" }}>
-                                    Client Price
-                                  </Box>
-                                  <Box sx={{ textAlign: "center" }}>
-                                    <>
-                                      $
-                                      {
-                                        clientActivityPricingRule?.[rowIndex]
-                                          ?.publicHolidayAddon
+                                      type="number"
+                                      value={row?.end}
+                                      onChange={(e) =>
+                                        handlePricingRangesChange(
+                                          e,
+                                          rowIndex,
+                                          "end"
+                                        )
                                       }
-                                    </>
-                                  </Box>
-                                </Box>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div
-                              style={{ display: "flex", alignItems: "center" }}
-                            >
-                              <TextField
-                                value={row.onlineAddon}
-                                onChange={(e) =>
-                                  handlePricingRuleFieldChange(
-                                    e,
-                                    rowIndex,
-                                    "onlineAddon"
-                                  )
-                                }
-                                InputProps={{
-                                  startAdornment: (
-                                    <InputAdornment position="start">
-                                      $
-                                    </InputAdornment>
-                                  ),
-                                }}
-                              />
-                              {!isNaN(
-                                clientActivityPricingRule?.[rowIndex]
-                                  ?.onlineAddon
-                              ) && (
-                                <Box
-                                  sx={{
-                                    paddingLeft: 2,
-                                    color: theme.palette.primary.main,
-                                    flexDirection: "column",
-                                    paddingBottom: 2,
-                                  }}
-                                >
-                                  <Box sx={{ whiteSpace: "nowrap" }}>
-                                    Client Price
-                                  </Box>
-                                  <Box sx={{ textAlign: "center" }}>
-                                    <>
-                                      $
-                                      {
-                                        clientActivityPricingRule?.[rowIndex]
-                                          ?.onlineAddon
-                                      }
-                                    </>
-                                  </Box>
-                                </Box>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div
-                              style={{ display: "flex", alignItems: "center" }}
-                            >
-                              <TextField
-                                value={row.offlineAddon}
-                                onChange={(e) =>
-                                  handlePricingRuleFieldChange(
-                                    e,
-                                    rowIndex,
-                                    "offlineAddon"
-                                  )
-                                }
-                                InputProps={{
-                                  startAdornment: (
-                                    <InputAdornment position="start">
-                                      $
-                                    </InputAdornment>
-                                  ),
-                                }}
-                              />
-                              {!isNaN(
-                                clientActivityPricingRule?.[rowIndex]
-                                  ?.offlineAddon
-                              ) && (
-                                <Box
-                                  sx={{
-                                    paddingLeft: 2,
-                                    color: theme.palette.primary.main,
-                                    flexDirection: "column",
-                                    paddingBottom: 2,
-                                  }}
-                                >
-                                  <Box sx={{ whiteSpace: "nowrap" }}>
-                                    Client Price
-                                  </Box>
-                                  <Box sx={{ textAlign: "center" }}>
-                                    {!isNaN(
-                                      clientActivityPricingRule?.[rowIndex]
-                                        ?.offlineAddon
-                                    ) ? (
-                                      <>
-                                        $
-                                        {
-                                          clientActivityPricingRule?.[rowIndex]
-                                            ?.offlineAddon
-                                        }
-                                      </>
-                                    ) : null}
-                                  </Box>
-                                </Box>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              )}
+                                    />
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <TextField
+                                    type="number"
+                                    error={
+                                      pricingRangeError?.[rowIndex]?.pricePerPax
+                                        ?.length > 0
+                                    }
+                                    helperText={
+                                      pricingRangeError?.[rowIndex]?.pricePerPax
+                                    }
+                                    InputProps={{
+                                      startAdornment: (
+                                        <InputAdornment position="start">
+                                          $
+                                        </InputAdornment>
+                                      ),
+                                    }}
+                                    value={row?.pricePerPax ?? ""}
+                                    onChange={(e) =>
+                                      handlePriceChange(
+                                        e,
+                                        rowIndex,
+                                        "pricePerPax"
+                                      )
+                                    }
+                                  />
+                                </TableCell>
+                                <TableCell>
+                                  {rowIndex + 1 === pricingRanges.length &&
+                                    !pricingRangeDone && (
+                                      <Button
+                                        disabled={pricingRangeHasError()}
+                                        onClick={() => handleAddRange(rowIndex)}
+                                      >
+                                        Add
+                                      </Button>
+                                    )}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </Grid>
+                  </>
+                )}
+                {activeStep === 2 && (
+                  <Grid
+                    container
+                    spacing={1}
+                    alignItems="left"
+                    justifyContent="left"
+                    paddingTop={2}
+                  >
+                    <Grid item xs={4}>
+                      <TextField
+                        required
+                        id="markup"
+                        name="markup"
+                        label="Markup Percentage"
+                        disabled={false}
+                        fullWidth
+                        type="number"
+                        value={markup ?? ""}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="start">%</InputAdornment>
+                          ),
+                        }}
+                        onChange={handleMarkupChange}
+                        error={
+                          (markup !== null && markup?.length === 0) ||
+                          formErrors?.markup?.length > 0
+                        }
+                        helperText={formErrors?.markup}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TableContainer component={Paper}>
+                        <Table>
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Start Range</TableCell>
+                              <TableCell>{"           "}</TableCell>
+                              <TableCell>End Range</TableCell>
+                              <TableCell>Price Per Pax</TableCell>
+                              <TableCell>Client Price</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {pricingRanges.map((row, rowIndex) => (
+                              <TableRow key={rowIndex}>
+                                <TableCell>
+                                  <Box>{row.start}</Box>
+                                </TableCell>
+                                <TableCell>
+                                  <Box sx={{ whiteSpace: "nowrap" }}>to</Box>
+                                </TableCell>
+                                <TableCell>
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    <Box>{row?.end}</Box>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <Box>${row?.pricePerPax}</Box>
+                                </TableCell>
+                                <TableCell>
+                                  $
+                                  {!isNaN(row?.clientPrice) && (
+                                    <>{row?.clientPrice}</>
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </Grid>
+                  </Grid>
+                )}
+                {activeStep === 3 && (
+                  <>
+                    <Grid
+                      container
+                      spacing={1}
+                      alignItems="left"
+                      justifyContent="left"
+                      paddingTop={2}
+                      paddingLeft={2}
+                    >
+                      <Grid sx={4}>
+                        <TextField
+                          required
+                          id="weekendPrice"
+                          name="weekendPrice"
+                          label="Weekend Pricing"
+                          disabled={false}
+                          fullWidth
+                          value={pricingAddons?.weekendPricing?.amount ?? ""}
+                          type="number"
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position="start">
+                                %
+                              </InputAdornment>
+                            ),
+                          }}
+                          onChange={(event) =>
+                            handlePricingAddonChange(event, "weekendPricing")
+                          }
+                          error={
+                            (markup !== null && markup?.length === 0) ||
+                            formErrors?.markup?.length > 0
+                          }
+                          helperText={formErrors?.markup}
+                        />
+                      </Grid>
+                      <Grid item xs={4} paddingTop={2} paddingLeft={2}>
+                        <Stack direction="row" spacing={1}>
+                          <Chip
+                            label="Discount"
+                            onClick={(event) =>
+                              handlePricingAddonChange(
+                                event,
+                                "weekendPricing",
+                                true
+                              )
+                            }
+                            disabled={
+                              pricingAddons?.weekendPricing?.isDiscount === true
+                            }
+                          />
+                          <Chip
+                            label="Addon"
+                            onClick={(event) =>
+                              handlePricingAddonChange(
+                                event,
+                                "weekendPricing",
+                                false
+                              )
+                            }
+                            disabled={
+                              pricingAddons?.weekendPricing?.isDiscount ===
+                              false
+                            }
+                          />
+                        </Stack>
+                      </Grid>
+                    </Grid>
+                    <Grid
+                      container
+                      spacing={1}
+                      alignItems="left"
+                      justifyContent="left"
+                      paddingTop={2}
+                      paddingLeft={2}
+                    >
+                      <Grid sx={4}>
+                        <TextField
+                          required
+                          id="weekendPrice"
+                          name="weekendPrice"
+                          label="Online Pricing"
+                          disabled={false}
+                          fullWidth
+                          value={pricingAddons?.onlinePricing?.amount}
+                          type="number"
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position="start">
+                                %
+                              </InputAdornment>
+                            ),
+                          }}
+                          onChange={(event) =>
+                            handlePricingAddonChange(event, "onlinePricing")
+                          }
+                          error={
+                            (markup !== null && markup?.length === 0) ||
+                            formErrors?.markup?.length > 0
+                          }
+                          helperText={formErrors?.markup}
+                        />
+                      </Grid>
+                      <Grid item xs={4} paddingTop={2} paddingLeft={2}>
+                        <Stack direction="row" spacing={1}>
+                          <Chip
+                            label="Discount"
+                            onClick={(event) =>
+                              handlePricingAddonChange(
+                                event,
+                                "onlinePricing",
+                                true
+                              )
+                            }
+                            disabled={
+                              pricingAddons?.onlinePricing?.isDiscount === true
+                            }
+                          />
+                          <Chip
+                            label="Addon"
+                            onClick={(event) =>
+                              handlePricingAddonChange(
+                                event,
+                                "onlinePricing",
+                                false
+                              )
+                            }
+                            disabled={
+                              pricingAddons?.onlinePricing?.isDiscount === false
+                            }
+                          />
+                        </Stack>
+                      </Grid>
+                    </Grid>
+                    <Grid
+                      container
+                      spacing={1}
+                      alignItems="left"
+                      justifyContent="left"
+                      paddingTop={2}
+                      paddingLeft={2}
+                    >
+                      <Grid sx={4}>
+                        <TextField
+                          required
+                          id="offlinePrice"
+                          name="offlinePrice"
+                          label="Offline Pricing"
+                          disabled={false}
+                          fullWidth
+                          type="number"
+                          value={pricingAddons?.offlinePricing?.amount}
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position="start">
+                                %
+                              </InputAdornment>
+                            ),
+                          }}
+                          onChange={(event) =>
+                            handlePricingAddonChange(event, "offlinePricing")
+                          }
+                          error={
+                            (markup !== null && markup?.length === 0) ||
+                            formErrors?.markup?.length > 0
+                          }
+                          helperText={formErrors?.markup}
+                        />
+                      </Grid>
+                      <Grid item xs={4} paddingTop={2} paddingLeft={2}>
+                        <Stack direction="row" spacing={1}>
+                          <Chip
+                            label="Discount"
+                            onClick={(event) =>
+                              handlePricingAddonChange(
+                                event,
+                                "offlinePricing",
+                                true
+                              )
+                            }
+                            disabled={
+                              pricingAddons?.offlinePricing?.isDiscount === true
+                            }
+                          />
+                          <Chip
+                            label="Addon"
+                            onClick={(event) =>
+                              handlePricingAddonChange(
+                                event,
+                                "offlinePricing",
+                                false
+                              )
+                            }
+                            disabled={
+                              pricingAddons?.offlinePricing?.isDiscount ===
+                              false
+                            }
+                          />
+                        </Stack>
+                      </Grid>
+                    </Grid>
+                  </>
+                )}
+                <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+                  <Button
+                    color="inherit"
+                    disabled={activeStep === 0}
+                    onClick={handleBack}
+                    sx={{ mr: 1 }}
+                  >
+                    Back
+                  </Button>
+                  <Box sx={{ flex: "1 1 auto" }} />
+                  <Button
+                    disabled={
+                      (!pricingRangeDone && activeStep === 1) ||
+                      (activeStep === 0 &&
+                        (!maxParticipants || !minParticipants))
+                    }
+                    onClick={handleNext}
+                  >
+                    {activeStep === steps.length - 1 ? "Finish" : "Next"}
+                  </Button>
+                </Box>
+              </Fragment>
             </Grid>
           </Grid>
 

@@ -38,8 +38,29 @@ export const getActivity = async (req, res) => {
 export const addActivity = async (req, res) => {
   try {
     console.log("add activity body:", req.body);
-    const { activityPricingRules, clientActivityPricingRules, ...activity } =
-      req.body;
+    const {
+      activityPricingRules,
+      weekendPricing,
+      onlinePricing,
+      offlinePricing,
+      ...activity
+    } = req.body;
+    const parsedWeekend = JSON.parse(weekendPricing);
+    const parsedOnline = JSON.parse(onlinePricing);
+    const parsedOffline = JSON.parse(offlinePricing);
+
+    activity["weekendPricing"] = {
+      amount: parsedWeekend.amount,
+      isDiscount: parsedWeekend.isDiscount,
+    };
+    activity["onlinePricing"] = {
+      amount: parsedOnline.amount,
+      isDiscount: parsedOnline.isDiscount,
+    };
+    activity["offlinePricing"] = {
+      amount: parsedOffline.amount,
+      isDiscount: parsedOffline.isDiscount,
+    };
     const newActivity = new ActivityModel({ ...activity });
     const savedActivity = await newActivity.save();
     const imageFiles = req.files;
@@ -70,22 +91,12 @@ export const addActivity = async (req, res) => {
     activityPricingRules.forEach((jsonString, index) => {
       try {
         const pricingObject = JSON.parse(jsonString);
-        const clientPricingObject = JSON.parse(
-          clientActivityPricingRules[index]
-        );
 
         const activitypriceobject = {
-          paxInterval: pricingObject.paxInterval,
+          start: pricingObject.start,
+          end: pricingObject.end,
           pricePerPax: pricingObject.pricePerPax,
-          weekendAddon: pricingObject.weekendAddon,
-          publicHolidayAddon: pricingObject.publicHolidayAddon,
-          onlineAddon: pricingObject.onlineAddon,
-          offlineAddon: pricingObject.offlineAddon,
-          clientPricePerPax: clientPricingObject.pricePerPax,
-          clientWeekendAddon: clientPricingObject.weekendAddon,
-          clientPublicHolidayAddon: clientPricingObject.publicHolidayAddon,
-          clientOnlineAddon: clientPricingObject.onlineAddon,
-          clientOfflineAddon: clientPricingObject.offlineAddon,
+          clientPrice: pricingObject.clientPrice,
         };
         activitypriceobjects.push(activitypriceobject);
       } catch (error) {
@@ -110,6 +121,7 @@ export const addActivity = async (req, res) => {
         }
       );
     });
+
     res.status(201).json({
       message: "Activity added successfully",
       activity: savedActivity,
