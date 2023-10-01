@@ -165,7 +165,7 @@ const VendorDetails = () => {
       <Divider variant="middle" />
       <Box sx={{ m: 5 }}>
         <Typography color={theme.palette.primary.dark} variant="h4">
-          {vendorDetails.companyName}'s Activities
+          {vendorDetails?.companyName}'s Activities
         </Typography>
         <Grid
           container
@@ -173,7 +173,7 @@ const VendorDetails = () => {
           columns={{ xs: 4, sm: 8, md: 12, lg: 12, xl: 16 }}
         >
           {vendorActivities.map((activity) => (
-            <Grid item key={activity.id} xs={4} sm={4} md={4} lg={4} xl={4}>
+            <Grid item key={activity._id} xs={4} sm={4} md={4} lg={4} xl={4}>
               <Link
                 href={`/shop/activity/${activity._id}`}
                 style={{ textDecoration: "none" }}
