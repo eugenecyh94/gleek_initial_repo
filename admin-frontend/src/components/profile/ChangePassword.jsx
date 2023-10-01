@@ -26,6 +26,7 @@ const ChangePassword = () => {
   const theme = useTheme();
   const secondary = theme.palette.secondary.main;
   const primary = theme.palette.primary.main;
+  const background = theme.palette.backgroundColor.secondary;
   // states
   // user input
   const [showPassword, setShowPassword] = useState(false);
@@ -36,7 +37,7 @@ const ChangePassword = () => {
   });
   // error
   const [errorData, setErrorData] = useState({
-    password: "",
+    password: "password is required!",
     passwordVerify: "",
   });
   // functions
@@ -97,7 +98,7 @@ const ChangePassword = () => {
           formData[fieldName],
           formData.password,
           errors,
-          fieldName,
+          fieldName
         );
         break;
       default:
@@ -134,12 +135,26 @@ const ChangePassword = () => {
       breadcrumbLinks={["/manageProfile"]}
       currentBreadcrumbName={"Change Password"}
     >
+      <Typography
+        alignItems={"center"}
+        fontSize={25}
+        fontWeight={700}
+        noWrap
+        component="div"
+        color={theme.palette.primary.main}
+        paddingBottom={2}
+        style={{
+          display: "flex",
+        }}
+      >
+        Manage Account
+      </Typography>
       <Box
         display="flex"
         flexDirection="row"
         justifyContent="space-evenly"
-        alignItems="top"
-        p={8}
+        // alignItems="left"
+        p={3}
         width={"100%"}
       >
         <Box width={"20%"}>
@@ -149,108 +164,112 @@ const ChangePassword = () => {
           <Box
             display="flex"
             flexDirection="column"
-            p={4}
-            bgcolor={secondary}
+            p={6}
+            bgcolor={background}
             borderRadius={10}
-            sx={{ minWidth: "25rem" }}
             boxShadow={2}
           >
             <Box display="flex" flexDirection="column" alignItems="center">
               <Box borderRadius="50%" bgcolor={primary} p={1}>
                 <LockPersonIcon fontSize="large" color="accent" />
               </Box>
-            </Box>
-            <Typography variant="h5">Change Password</Typography>
-            <Box display="flex" flexDirection="row">
-              <FormControl
+
+              <Typography variant="h5">Change Password</Typography>
+              <Box
+                display="flex"
+                flexDirection="column"
+                sx={{ width: "400px" }}
+              >
+                <FormControl
+                  sx={{ marginTop: "24px" }}
+                  size="small"
+                  required
+                  variant="outlined"
+                >
+                  <InputLabel htmlFor="outlined-adornment-password">
+                    New Password
+                  </InputLabel>
+                  <OutlinedInput
+                    id="password"
+                    name="password"
+                    onChange={handleChange}
+                    onBlur={handleChange}
+                    value={formData.password}
+                    type={showPassword ? "text" : "password"}
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={handleClickShowPassword}
+                          onMouseDown={handleMouseDownPassword}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    }
+                    label="Password"
+                  />
+                  {errorData.password.length > 0 && (
+                    <FormHelperText error id="my-helper-text">
+                      {errorData.password}
+                    </FormHelperText>
+                  )}
+                </FormControl>
+                <FormControl
+                  sx={{ marginTop: "24px" }}
+                  size="small"
+                  required
+                  variant="outlined"
+                >
+                  <InputLabel htmlFor="outlined-adornment-password">
+                    Confirm your password
+                  </InputLabel>
+                  <OutlinedInput
+                    id="passwordVerify"
+                    name="passwordVerify"
+                    onChange={handleChange}
+                    onBlur={handleChange}
+                    value={formData.passwordVerify}
+                    type={showPasswordVerify ? "text" : "password"}
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={handleClickShowPasswordVerify}
+                          onMouseDown={handleMouseDownPassword}
+                          edge="end"
+                        >
+                          {showPasswordVerify ? (
+                            <VisibilityOff />
+                          ) : (
+                            <Visibility />
+                          )}
+                        </IconButton>
+                      </InputAdornment>
+                    }
+                    label="Confirm your password"
+                  />
+                  {errorData.passwordVerify.length > 0 && (
+                    <FormHelperText error id="my-helper-text">
+                      {errorData.passwordVerify}
+                    </FormHelperText>
+                  )}
+                </FormControl>
+              </Box>
+              <Button
                 sx={{ marginTop: "24px" }}
-                size="small"
-                required
-                variant="outlined"
+                mt={4}
+                variant="contained"
+                type="submit"
+                disabled={
+                  !Object.values(errorData).every((error) => error === "")
+                }
+                onClick={handleSubmit}
               >
-                <InputLabel htmlFor="outlined-adornment-password">
-                  New Password
-                </InputLabel>
-                <OutlinedInput
-                  id="password"
-                  name="password"
-                  onChange={handleChange}
-                  onBlur={handleChange}
-                  value={formData.password}
-                  type={showPassword ? "text" : "password"}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                        edge="end"
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                  label="Password"
-                />
-                {errorData.password.length > 0 && (
-                  <FormHelperText error id="my-helper-text">
-                    {errorData.password}
-                  </FormHelperText>
-                )}
-              </FormControl>
-              <FormControl
-                sx={{ marginTop: "24px", marginLeft: "16px" }}
-                size="small"
-                required
-                variant="outlined"
-              >
-                <InputLabel htmlFor="outlined-adornment-password">
-                  Confirm your password
-                </InputLabel>
-                <OutlinedInput
-                  id="passwordVerify"
-                  name="passwordVerify"
-                  onChange={handleChange}
-                  onBlur={handleChange}
-                  value={formData.passwordVerify}
-                  type={showPasswordVerify ? "text" : "password"}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPasswordVerify}
-                        onMouseDown={handleMouseDownPassword}
-                        edge="end"
-                      >
-                        {showPasswordVerify ? (
-                          <VisibilityOff />
-                        ) : (
-                          <Visibility />
-                        )}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                  label="Confirm your password"
-                />
-                {errorData.passwordVerify.length > 0 && (
-                  <FormHelperText error id="my-helper-text">
-                    {errorData.passwordVerify}
-                  </FormHelperText>
-                )}
-              </FormControl>
+                <Typography variant="body1">Change Password</Typography>
+              </Button>
             </Box>
-            <Button
-              sx={{ marginTop: "24px" }}
-              mt={4}
-              variant="contained"
-              type="submit"
-              disabled={
-                !Object.values(errorData).every((error) => error === "")
-              }
-              onClick={handleSubmit}
-            >
-              <Typography variant="body1">Change Password</Typography>
-            </Button>
           </Box>
         </form>
       </Box>

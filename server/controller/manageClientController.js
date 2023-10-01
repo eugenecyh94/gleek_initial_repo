@@ -1,4 +1,6 @@
 import Client from "../model/clientModel.js";
+import sendMail from "../util/sendMail.js";
+import { createRegistrationApprovalEmailOptions } from "../util/sendMailOptions.js";
 
 export const getAllClients = async (req, res) => {
   try {
@@ -16,8 +18,9 @@ export const updateClient = async (req, res) => {
     const updatedClient = await Client.findOneAndUpdate(
       { _id: req.params.id },
       { ...updateData, approvedDate: Date.now() },
-      { new: true },
+      { new: true }
     );
+    sendMail(createRegistrationApprovalEmailOptions(updatedClient));
     return res.status(201).json(updatedClient);
   } catch (err) {
     console.error(err);

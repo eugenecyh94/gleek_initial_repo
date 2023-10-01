@@ -38,7 +38,8 @@ export const getActivity = async (req, res) => {
 export const addActivity = async (req, res) => {
   try {
     console.log("add activity body:", req.body);
-    const { activityPricingRules, ...activity } = req.body;
+    const { activityPricingRules, clientActivityPricingRules, ...activity } =
+      req.body;
     const newActivity = new ActivityModel({ ...activity });
     const savedActivity = await newActivity.save();
     const imageFiles = req.files;
@@ -62,13 +63,16 @@ export const addActivity = async (req, res) => {
     await ActivityModel.findByIdAndUpdate(
       { _id: savedActivity._id },
       { images: imagesPathArr },
-      { new: true },
+      { new: true }
     );
 
     const activitypriceobjects = [];
-    activityPricingRules.forEach((jsonString) => {
+    activityPricingRules.forEach((jsonString, index) => {
       try {
         const pricingObject = JSON.parse(jsonString);
+        const clientPricingObject = JSON.parse(
+          clientActivityPricingRules[index]
+        );
 
         const activitypriceobject = {
           paxInterval: pricingObject.paxInterval,
@@ -77,8 +81,12 @@ export const addActivity = async (req, res) => {
           publicHolidayAddon: pricingObject.publicHolidayAddon,
           onlineAddon: pricingObject.onlineAddon,
           offlineAddon: pricingObject.offlineAddon,
+          clientPricePerPax: clientPricingObject.pricePerPax,
+          clientWeekendAddon: clientPricingObject.weekendAddon,
+          clientPublicHolidayAddon: clientPricingObject.publicHolidayAddon,
+          clientOnlineAddon: clientPricingObject.onlineAddon,
+          clientOfflineAddon: clientPricingObject.offlineAddon,
         };
-
         activitypriceobjects.push(activitypriceobject);
       } catch (error) {
         console.error(`Error parsing JSON: ${error}`);
@@ -97,9 +105,9 @@ export const addActivity = async (req, res) => {
                 },
               },
             },
-            { new: true, useFindAndModify: false },
+            { new: true, useFindAndModify: false }
           );
-        },
+        }
       );
     });
     res.status(201).json({

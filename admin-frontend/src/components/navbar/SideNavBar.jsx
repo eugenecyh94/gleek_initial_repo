@@ -32,12 +32,12 @@ const StyledDiv = styled("div")`
   color: ${({ theme }) => theme.palette.primary.main};
 `;
 
-const SideNavBar = () => {
+const SideNavBar = ({ isSidebarOpen }) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const selectedItem = useSelectedNavItemStore((state) => state.selectedItem);
   const setSelectedItem = useSelectedNavItemStore(
-    (state) => state.setSelectedItem,
+    (state) => state.setSelectedItem
   );
   const handleItemClick = async (item, link) => {
     navigate(link);
@@ -47,7 +47,9 @@ const SideNavBar = () => {
   return (
     <Box sx={{ display: "flex" }}>
       <Drawer
-        variant="permanent"
+        //variant="permanent"
+        variant="persistent"
+        open={isSidebarOpen}
         sx={{
           width: 120,
           flexShrink: 0,
@@ -78,7 +80,7 @@ const SideNavBar = () => {
                     onClick={() =>
                       handleItemClick(
                         Object.keys(item)[0],
-                        item[Object.keys(item)[0]],
+                        item[Object.keys(item)[0]]
                       )
                     }
                   >
@@ -107,7 +109,7 @@ const SideNavBar = () => {
                     onClick={() =>
                       handleItemClick(
                         Object.keys(item)[0],
-                        item[Object.keys(item)[0]],
+                        item[Object.keys(item)[0]]
                       )
                     }
                   >

@@ -38,7 +38,7 @@ const CreateVendorPage = () => {
             display: "flex",
           }}
         >
-          <PersonAddAlt1Icon />
+          <PersonAddAlt1Icon sx={{ marginRight: 1 }} />
           Add Vendor
         </Typography>
         <CreateVendorForm

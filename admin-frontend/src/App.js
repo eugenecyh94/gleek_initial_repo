@@ -82,7 +82,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
+          {/* <Route
             exact
             path="/resetPassword"
             element={
@@ -90,7 +90,7 @@ function App() {
                 <ResetPassword />
               </ProtectedRoute>
             }
-          />
+          /> */}
           <Route
             exact
             path="/manageProfile/changePassword"
