@@ -14,28 +14,27 @@ import { useNavigate, useParams } from "react-router-dom";
 import ActivityCardItem from "../../../components/ActivityCardItem";
 import AxiosConnect from "../../../utils/AxiosConnect";
 import useSnackbarStore from "../../../zustand/SnackbarStore";
+import useVendorStore from "../../../zustand/VendorStore";
 
 const VendorDetails = () => {
   const { id } = useParams();
   const theme = useTheme();
   const navigate = useNavigate();
   const { openSnackbar } = useSnackbarStore();
-  const [vendorDetails, setVendorDetails] = useState(null);
+  const { vendor, getVendorDetails } = useVendorStore();
+
   const [vendorActivities, setVendorActivities] = useState([]);
   const tertiary = theme.palette.tertiary.main;
   const primary = theme.palette.primary.main;
 
   useEffect(() => {
-    const subscribeVendorDetails = async () => {
+    const subscribeVendor = async () => {
       try {
-        const response = await AxiosConnect.get(
-          `/gleek/vendor/viewVendor/${id}`,
-        );
-        setVendorDetails(response.data || null);
+        const response = await getVendorDetails(id);
       } catch (err) {
         console.error(err);
         openSnackbar("This vendor does not exist.", "error");
-        navigate("/");
+        // navigate("/");
       }
     };
 
@@ -53,11 +52,11 @@ const VendorDetails = () => {
       }
     };
 
-    subscribeVendorDetails();
+    subscribeVendor();
     subscribeVendorActivities();
   }, []);
 
-  if (!vendorDetails)
+  if (!vendor)
     return (
       <Box
         display="flex"
@@ -78,7 +77,16 @@ const VendorDetails = () => {
       p={5}
       width={"100%"}
     >
-      <Grid container spacing={2} sx={{ m: 5 }}>
+      <Grid
+        container
+      
+
+        spacing={{ xs: 2, md: 2 }}
+        columns={{ xs: 4, sm: 8, md: 12 }}
+        justifyContents="center"
+        width={"100%"}
+        sx={{ p: 5 }}
+      >
         <Grid item xs={12}>
           <Box display="flex" alignItems="center" justifyItems="center">
             <Avatar
@@ -86,57 +94,61 @@ const VendorDetails = () => {
                 bgcolor: primary,
                 width: 100,
                 height: 100,
-                fontSize: "80px", // Adjust the font size as needed
+                fontSize: "80px", 
               }}
-              src={vendorDetails?.preSignedPhoto || ""}
+              src={vendor?.preSignedPhoto || ""}
             >
-              {vendorDetails?.preSignedPhoto
+              {vendor?.preSignedPhoto
                 ? null
-                : vendorDetails.companyName.charAt(0).toUpperCase()}
+                : vendor.companyName.charAt(0).toUpperCase()}
             </Avatar>
-            <Typography variant="h4" color={theme.palette.primary.dark} marginLeft={2}>
-              {vendorDetails.companyName}
+            <Typography
+              variant="h4"
+              color={theme.palette.primary.dark}
+              marginLeft={2}
+            >
+              {vendor.companyName}
             </Typography>
           </Box>
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid item xs={4}>
           <Typography color={theme.palette.primary.main}>
             Company UEN
           </Typography>
-          <Typography>{vendorDetails?.companyUEN}</Typography>
+          <Typography>{vendor?.companyUEN}</Typography>
         </Grid>
 
         <Grid item xs={4}>
           <Typography color={theme.palette.primary.main}>
             Company Email
           </Typography>
-          <Typography>{vendorDetails?.companyEmail}</Typography>
+          <Typography>{vendor?.companyEmail}</Typography>
         </Grid>
         <Grid item xs={4}>
           <Typography color={theme.palette.primary.main}>
             Phone Number
           </Typography>
-          <Typography>{vendorDetails?.companyPhoneNumber}</Typography>
+          <Typography>{vendor?.companyPhoneNumber}</Typography>
         </Grid>
         <Grid item xs={4}>
           <Typography color={theme.palette.primary.main}>
             Company Address
           </Typography>
-          <Typography>{vendorDetails?.companyAddress}</Typography>
+          <Typography>{vendor?.companyAddress}</Typography>
         </Grid>
         <Grid item xs={4}>
           <Typography color={theme.palette.primary.main}>
             Postal Code
           </Typography>
-          <Typography>{vendorDetails?.companyPostalCode}</Typography>
+          <Typography>{vendor?.companyPostalCode}</Typography>
         </Grid>
         <Grid item xs={4}>
           <Typography color={theme.palette.primary.main}>
             Company Type
           </Typography>
           <Typography>
-            {vendorDetails?.customCompanyType || vendorDetails?.vendorType}
+            {vendor?.customCompanyType || vendor?.vendorType}
           </Typography>
         </Grid>
 
@@ -144,7 +156,7 @@ const VendorDetails = () => {
           <Typography color={theme.palette.primary.main}>
             Brand Names
           </Typography>
-          {vendorDetails?.brandNames?.map((s, index) => (
+          {vendor?.brandNames?.map((s, index) => (
             <Chip key={index} label={s} style={{ paddingTop: 2 }} />
           ))}
         </Grid>
@@ -152,8 +164,8 @@ const VendorDetails = () => {
           <Typography color={theme.palette.primary.main}>
             Social Media
           </Typography>
-          {vendorDetails?.companySocials &&
-            Object.entries(vendorDetails?.companySocials).map(
+          {vendor?.companySocials &&
+            Object.entries(vendor?.companySocials).map(
               ([socialMediaName, link], index) => (
                 <div key={index}>
                   <Typography variant="body1">{socialMediaName}</Typography>
@@ -170,13 +182,17 @@ const VendorDetails = () => {
           <Typography color={theme.palette.primary.main}>
             Vendor Details
           </Typography>
-          <Typography>{vendorDetails?.vendorDetails}</Typography>
+          <Typography>{vendor?.vendor}</Typography>
         </Grid>
       </Grid>
       <Divider variant="middle" />
       <Box sx={{ m: 5 }}>
-        <Typography color={theme.palette.primary.dark} variant="h4" marginBottom={2}>
-          {vendorDetails?.companyName}'s Activities
+        <Typography
+          color={theme.palette.primary.dark}
+          variant="h4"
+          marginBottom={2}
+        >
+          {vendor?.companyName}'s Activities
         </Typography>
         <Grid
           container

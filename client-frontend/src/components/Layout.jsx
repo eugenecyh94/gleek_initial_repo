@@ -47,7 +47,7 @@ const Layout = ({ children }) => {
         justifyContent="space-evenly"
         alignItems="stretch"
       >
-        <Box flex={1} mt={8}>
+        <Box flex={1} mt={5}>
           {children}
         </Box>
       </Box>
