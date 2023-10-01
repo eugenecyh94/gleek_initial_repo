@@ -1,4 +1,4 @@
-import { Box, Typography, useMediaQuery, Rating, Paper } from "@mui/material";
+import { Box, Typography, useMediaQuery, Rating } from "@mui/material";
 import React from "react";
 import { useTheme, lighten } from "@mui/material/styles";
 
@@ -7,7 +7,6 @@ const ActivityItem = ({ activity }) => {
   const accent = theme.palette.accent.main;
   const tertiary = theme.palette.tertiary.main;
   const tertiaryLighter = lighten(theme.palette.tertiary.main, 0.4);
-
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
   const isMediumScreen = useMediaQuery((theme) =>
     theme.breakpoints.between("sm", "md"),
@@ -18,19 +17,12 @@ const ActivityItem = ({ activity }) => {
   let containerStyle = {
     height: "15rem", // Default for extra-large screens
     maxWidth: "100%",
-    width: "100%",
-    objectFit: "cover",
-    borderTopLeftRadius: "4px",
-    borderTopRightRadius: "4px",
   };
 
   if (isLargeScreen) {
     containerStyle = {
       height: "15rem", // Customize for large screens
       maxWidth: "100%",
-      objectFit: "cover",
-      borderTopLeftRadius: "4px",
-      borderTopRightRadius: "4px",
     };
   }
 
@@ -38,9 +30,6 @@ const ActivityItem = ({ activity }) => {
     containerStyle = {
       height: "12rem", // Customize for medium screens
       maxWidth: "100%",
-      objectFit: "cover",
-      borderTopLeftRadius: "4px",
-      borderTopRightRadius: "4px",
     };
   }
 
@@ -48,28 +37,21 @@ const ActivityItem = ({ activity }) => {
     containerStyle = {
       height: "20rem", // Customize for small screens
       maxWidth: "100%",
-      objectFit: "cover",
-      borderTopLeftRadius: "4px",
-      borderTopRightRadius: "4px",
     };
   }
   return (
-    <Paper
+    <Box
       display="flex"
       flexDirection="column"
-      bgcolor={"grey.50"}
-      sx={{ height: "100%", overflow: "hidden"}}
+      bgcolor={tertiaryLighter}
+      boxShadow={2}
+      sx={{ height: "100%" }}
     >
-      <Box
-        display="flex"
-        justifyContent="center"
-        width={"100%"}
-        bgcolor={"grey.50"}
-      >
+      <Box display="flex" justifyContent="center" bgcolor={tertiary}>
         {/* Apply styling to the image */}
         <img src={activity.image} alt={activity.title} style={containerStyle} />
       </Box>
-      <Box p={3}>
+      <Box p={1}>
         <Typography color={accent} fontWeight="700" variant="h5">
           {activity.title}
         </Typography>
@@ -110,7 +92,7 @@ const ActivityItem = ({ activity }) => {
           </Box>
         </Box>
       </Box>
-    </Paper>
+    </Box>
   );
 };
 
