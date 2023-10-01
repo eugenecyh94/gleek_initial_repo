@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Box,
   Chip,
   CircularProgress,
@@ -13,7 +14,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import ActivityCardItem from "../../../components/ActivityCardItem";
 import AxiosConnect from "../../../utils/AxiosConnect";
 import useSnackbarStore from "../../../zustand/SnackbarStore";
-
 
 const VendorDetails = () => {
   const { id } = useParams();
@@ -78,15 +78,26 @@ const VendorDetails = () => {
       p={5}
       width={"100%"}
     >
-      <Grid
-        container
-        spacing={2}
-        sx={{ m: 5 }} 
-      >
+      <Grid container spacing={2} sx={{ m: 5 }}>
         <Grid item xs={12}>
-          <Typography variant="h4" color={theme.palette.primary.dark}>
-            {vendorDetails.companyName}
-          </Typography>
+          <Box display="flex" alignItems="center" justifyItems="center">
+            <Avatar
+              sx={{
+                bgcolor: primary,
+                width: 100,
+                height: 100,
+                fontSize: "80px", // Adjust the font size as needed
+              }}
+              src={vendorDetails?.preSignedPhoto || ""}
+            >
+              {vendorDetails?.preSignedPhoto
+                ? null
+                : vendorDetails.companyName.charAt(0).toUpperCase()}
+            </Avatar>
+            <Typography variant="h4" color={theme.palette.primary.dark} marginLeft={2}>
+              {vendorDetails.companyName}
+            </Typography>
+          </Box>
         </Grid>
 
         <Grid item xs={12}>
@@ -164,7 +175,7 @@ const VendorDetails = () => {
       </Grid>
       <Divider variant="middle" />
       <Box sx={{ m: 5 }}>
-        <Typography color={theme.palette.primary.dark} variant="h4">
+        <Typography color={theme.palette.primary.dark} variant="h4" marginBottom={2}>
           {vendorDetails?.companyName}'s Activities
         </Typography>
         <Grid
