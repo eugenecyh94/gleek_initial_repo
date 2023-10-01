@@ -39,7 +39,7 @@ function PasswordChange(props) {
       e.preventDefault();
       const response = await changePassword(
         formData.oldPassword,
-        formData.newPassword
+        formData.newPassword,
       );
 
       openSnackbar(response.data.msg);

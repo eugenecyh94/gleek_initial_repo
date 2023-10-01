@@ -98,7 +98,7 @@ const ChangePassword = () => {
           formData[fieldName],
           formData.password,
           errors,
-          fieldName
+          fieldName,
         );
         break;
       default:

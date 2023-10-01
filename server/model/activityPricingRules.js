@@ -29,6 +29,6 @@ const activityPricingRulesSchema = new mongoose.Schema({
 });
 const ActivityPricingRulesModel = mongoose.model(
   "ActivityPricingRules",
-  activityPricingRulesSchema
+  activityPricingRulesSchema,
 );
 export default ActivityPricingRulesModel;
