@@ -2,6 +2,8 @@ import { Box, Typography, useMediaQuery, Rating, Paper } from "@mui/material";
 import React from "react";
 import { useTheme, lighten } from "@mui/material/styles";
 
+// Temporary fix until ActivityItem.jsx is finalised
+
 const ActivityCardItem = ({ activity }) => {
   const theme = useTheme();
   const accent = theme.palette.accent.main;
@@ -56,9 +58,8 @@ const ActivityCardItem = ({ activity }) => {
   return (
     <Paper
       display="flex"
-      flexDirection="column"
       bgcolor={"grey.50"}
-      sx={{ height: "100%", overflow: "hidden"}}
+      sx={{ height: "100%", overflow: "hidden" }}
     >
       <Box
         display="flex"
@@ -67,20 +68,26 @@ const ActivityCardItem = ({ activity }) => {
         bgcolor={"grey.50"}
       >
         {/* Apply styling to the image */}
-        <img src={activity.preSignedImages[0]} alt={activity.title} style={containerStyle} />
+        {activity?.preSignedImages && activity?.preSignedImages.length > 0 && (
+          <img
+            src={activity.preSignedImages[0]}
+            alt={activity.title}
+            style={containerStyle}
+          />
+        )}
       </Box>
       <Box p={3}>
         <Typography color={accent} fontWeight="700" variant="h5">
           {activity.title}
         </Typography>
         <Typography color={accent} mt={2} variant="body1">
-          By {activity.linkedVendor.companyName}
+          By {activity.linkedVendor?.companyName}
         </Typography>
         <Typography color={accent} variant="body1">
           {activity.description}
         </Typography>
         <Typography color={accent} variant="body1">
-          Duration: {activity.durationMinutes} minutes
+          Duration: {activity.duration} minutes
         </Typography>
         <Box
           display="flex"
@@ -99,7 +106,7 @@ const ActivityCardItem = ({ activity }) => {
           <Box display="flex" flexDirection="row">
             <Typography color={accent} variant="body2" mr={1}>
               {/* {activity.rating.toFixed(1)} */}
-                {1}
+              {1}
             </Typography>
             <Rating
               name="rating-read"

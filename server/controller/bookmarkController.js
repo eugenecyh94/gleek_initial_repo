@@ -8,16 +8,20 @@ export const fetchBookmarks = async (req, res) => {
     const bookmarks = await Bookmark.find({ client })
       .populate({
         path: "vendor",
-        select: "companyName vendorDetails vendorType",
+
       })
       .populate({
         path: "activity",
-        select: "title description ",
+        populate: {
+          path: "linkedVendor",
+        
+        },
       })
       .sort("-created");
 
     res.status(200).json(bookmarks);
   } catch (error) {
+    console.error(error);
     res.status(400).json({
       error: "Your request could not be processed. Please try again.",
     });
