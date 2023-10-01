@@ -9,6 +9,9 @@ const theme = createTheme({
     secondary: {
       main: "#FFDBC3",
     },
+    backgroundColor: {
+      secondary: "#F5F5F5",
+    },
     light_purple: {
       main: "#9F91CC",
     },

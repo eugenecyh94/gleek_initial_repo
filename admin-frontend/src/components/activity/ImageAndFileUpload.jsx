@@ -52,7 +52,7 @@ const ImageAndFileUpload = ({
         setActivityImages(updatedList);
       }
     },
-    [activityImages, limit]
+    [activityImages, limit],
   );
 
   const fileRemove = (file) => {

@@ -12,8 +12,7 @@ const StyledPage = styled("div")(({ theme }) => ({
 }));
 
 const CreateVendorPage = () => {
-  const { vendorTypesFetcher, createVendor, vendorTypes } =
-    useVendorStore();
+  const { vendorTypesFetcher, createVendor, vendorTypes } = useVendorStore();
   const { admin } = useAdminStore();
   const theme = useTheme();
   useEffect(() => {
@@ -39,7 +38,7 @@ const CreateVendorPage = () => {
             display: "flex",
           }}
         >
-          <PersonAddAlt1Icon />
+          <PersonAddAlt1Icon sx={{ marginRight: 1 }} />
           Add Vendor
         </Typography>
         <CreateVendorForm

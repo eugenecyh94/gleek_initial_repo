@@ -84,7 +84,7 @@ export const addActivity = async (req, res) => {
     await ActivityModel.findByIdAndUpdate(
       { _id: savedActivity._id },
       { images: imagesPathArr },
-      { new: true }
+      { new: true },
     );
 
     const activitypriceobjects = [];
@@ -116,9 +116,9 @@ export const addActivity = async (req, res) => {
                 },
               },
             },
-            { new: true, useFindAndModify: false }
+            { new: true, useFindAndModify: false },
           );
-        }
+        },
       );
     });
 
