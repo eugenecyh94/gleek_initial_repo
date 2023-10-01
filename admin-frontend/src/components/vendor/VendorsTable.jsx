@@ -40,7 +40,7 @@ const VendorsTable = ({ vendors, updateVendor }) => {
   };
 
   const badgeNumber = vendors.filter(
-    (vendor) => vendor.status === "PENDING"
+    (vendor) => vendor.status === "PENDING",
   ).length;
 
   const filterCriteria = {
@@ -52,7 +52,7 @@ const VendorsTable = ({ vendors, updateVendor }) => {
   const [selectedTab, setSelectedTab] = useState("approvedTab");
   const [currentTabRows, setCurrentTabRows] = useState(() => {
     return vendors.filter(
-      (vendors) => vendors.status === filterCriteria[selectedTab].status
+      (vendors) => vendors.status === filterCriteria[selectedTab].status,
     );
   });
 
@@ -60,8 +60,8 @@ const VendorsTable = ({ vendors, updateVendor }) => {
     setSelectedTab(newValue);
     setCurrentTabRows(
       vendors.filter(
-        (vendors) => vendors.status === filterCriteria[newValue].status
-      )
+        (vendors) => vendors.status === filterCriteria[newValue].status,
+      ),
     );
   };
 
@@ -197,22 +197,29 @@ const VendorsTable = ({ vendors, updateVendor }) => {
         />
         <Tab label="Rejected" value="rejectedTab" icon={<DoDisturbIcon />} />
       </Tabs>
-      <div style={{ height: 500, width: "100%" }}>
-        <DataGrid
-          initialState={{
-            pagination: {
-              paginationModel: { pageSize: 25, page: 0 },
-            },
-          }}
-          getRowId={(row) => row._id}
-          //rows={searchedRows}
-          rows={currentTabRows}
-          columns={columns}
-          slots={{
-            toolbar: GridToolbarFilterButton,
-          }}
-          onRowClick={(params) => handleRowClick(params.row)}
-        />
+      <div style={{ flex: 1, maxHeight: "500px", overflow: "auto" }}>
+        <Box
+          flexDirection="column"
+          justifyItems="center"
+          display="flex"
+          width={"99%"}
+          height={500}
+        >
+          <DataGrid
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: 25, page: 0 },
+              },
+            }}
+            getRowId={(row) => row._id}
+            rows={currentTabRows}
+            columns={columns}
+            slots={{
+              toolbar: GridToolbarFilterButton,
+            }}
+            onRowClick={(params) => handleRowClick(params.row)}
+          />
+        </Box>
       </div>
     </Box>
   );

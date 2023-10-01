@@ -20,12 +20,25 @@ function AccountDetails(props) {
       breadcrumbNames={[]}
       currentBreadcrumbName={"Account Details"}
     >
+      <Typography
+        alignItems={"center"}
+        fontSize={25}
+        fontWeight={700}
+        noWrap
+        component="div"
+        color="primary"
+        paddingBottom={2}
+        style={{
+          display: "flex",
+        }}
+      >
+        Manage Account
+      </Typography>
       <Box
         display="flex"
         flexDirection="row"
         justifyContent="space-evenly"
-        alignItems="top"
-        p={8}
+        p={3}
         width={"100%"}
       >
         <Box width={"20%"}>
@@ -36,7 +49,9 @@ function AccountDetails(props) {
           display="flex"
           flexDirection="column"
           width={"100%"}
-          p={6}
+          marginTop={4}
+          marginLeft={8}
+          marginRight={8}
           flexWrap={"wrap"}
         >
           <Box
@@ -45,7 +60,7 @@ function AccountDetails(props) {
             alignItems="left"
             marginBottom={2}
           >
-            <Typography color="secondary" variant="h4">
+            <Typography color="primary" variant="h4">
               Account Details
             </Typography>
           </Box>

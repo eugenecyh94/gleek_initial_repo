@@ -20,6 +20,7 @@ import { useTheme } from "@mui/material/styles";
 import LockPersonIcon from "@mui/icons-material/LockPerson";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAdminStore } from "../zustand/GlobalStore.js";
+import loginImage from "../assets/imageUploadIcon/login.png";
 import HomePageNavBar from "./navbar/HomePageNavBar.jsx";
 
 function LoginPage(props) {
@@ -129,18 +130,33 @@ function LoginPage(props) {
             <Box
               display="flex"
               flexDirection="column"
-              p={4}
-              bgcolor={tertiary}
+              p={5}
+              bgcolor={"grey.50"}
               borderRadius={10}
               sx={{ width: "25rem" }}
-              boxShadow={2}
+              boxShadow={1}
             >
-              <Box display="flex" flexDirection="column" alignItems="center">
-                <Box borderRadius="50%" bgcolor={primary} p={1}>
+              <Box
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                padding={3}
+              >
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  width="50px"
+                  height="50px"
+                  bgcolor={primary}
+                  borderRadius="50%"
+                >
                   <LockPersonIcon fontSize="large" color="accent" />
                 </Box>
+                <Typography color="primary" variant="h4">
+                  Admin Login
+                </Typography>
               </Box>
-              <Typography variant="h5">Login</Typography>
               <TextField
                 size="small"
                 autoFocus
@@ -155,7 +171,7 @@ function LoginPage(props) {
                 value={email}
                 helperText={error}
                 error={error.length > 0}
-                sx={{ marginTop: "32px" }}
+                sx={{ marginTop: "15px" }}
               ></TextField>
               <FormControl
                 sx={{ marginTop: "32px" }}
@@ -217,7 +233,16 @@ function LoginPage(props) {
               </Button>
             </Box>
           </form>
-          <Box>IMAGE TO BE ADDED LATER</Box>
+          <Box
+            width={"30%"}
+            component="img"
+            sx={{
+              maxHeight: "auto",
+              maxWidth: "100%",
+            }}
+            alt="Illustrations by Storyset"
+            src={loginImage}
+          />
         </Box>
       )}
     </Box>

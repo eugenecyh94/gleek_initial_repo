@@ -76,7 +76,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
 
   const [activityPricingRuleList, setData] = useState([]);
   const [clientActivityPricingRule, setClientActivityPricingRule] = useState(
-    []
+    [],
   );
   const [isFood, setIsFood] = useState(false);
   const [isFoodCertPending, setIsFoodCertPending] = useState(false);
@@ -129,7 +129,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     const themeId = event.target.value;
     setSelectedTheme(themeId);
     setSubthemes(
-      themes?.find((theme) => theme.parent?._id === themeId)?.children
+      themes?.find((theme) => theme.parent?._id === themeId)?.children,
     );
   };
 
@@ -182,7 +182,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     const oldValue = updatedClientData?.[rowIndex]?.[columnName];
     if (oldValue !== undefined) {
       updatedClientData[rowIndex][columnName] = Math.ceil(
-        parseFloat(newVal) * (parseFloat(markup) / 100) + parseFloat(newVal)
+        parseFloat(newVal) * (parseFloat(markup) / 100) + parseFloat(newVal),
       );
     }
     updatedData[rowIndex][columnName] = newVal;
@@ -207,23 +207,23 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
         paxInterval,
         pricePerPax: Math.ceil(
           parseFloat(pricePerPax) * (parseFloat(newMarkup) / 100) +
-            parseFloat(pricePerPax)
+            parseFloat(pricePerPax),
         ),
         weekendAddon: Math.ceil(
           parseFloat(weekendAddon) * (parseFloat(newMarkup) / 100) +
-            parseFloat(weekendAddon)
+            parseFloat(weekendAddon),
         ),
         publicHolidayAddon: Math.ceil(
           parseFloat(publicHolidayAddon) * (parseFloat(newMarkup) / 100) +
-            parseFloat(publicHolidayAddon)
+            parseFloat(publicHolidayAddon),
         ),
         onlineAddon: Math.ceil(
           parseFloat(onlineAddon) * (parseFloat(newMarkup) / 100) +
-            parseFloat(onlineAddon)
+            parseFloat(onlineAddon),
         ),
         offlineAddon: Math.ceil(
           parseFloat(offlineAddon) * (parseFloat(newMarkup) / 100) +
-            parseFloat(offlineAddon)
+            parseFloat(offlineAddon),
         ),
       });
       return;
@@ -436,7 +436,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
         ? isFood
           ? "Popups (Food)"
           : "Popups (Non-food)"
-        : activityType
+        : activityType,
     );
     formData.append("maxParticipants", maxParticipants);
     formData.append("clientMarkupPercentage", markup);
@@ -557,7 +557,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                         <MenuItem key={index} value={item.parent._id}>
                           {item.parent.name}
                         </MenuItem>
-                      )
+                      ),
                   )}
                 </Select>
                 <FormHelperText error>{formErrors?.theme}</FormHelperText>
@@ -900,7 +900,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                       <MenuItem key={enumValue} value={enumValue}>
                         {enumValue}
                       </MenuItem>
-                    )
+                    ),
                   )}
                 </Select>
                 <FormHelperText error>
@@ -1047,7 +1047,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                                   handlePricingRuleFieldChange(
                                     e,
                                     rowIndex,
-                                    "pricePerPax"
+                                    "pricePerPax",
                                   )
                                 }
                                 InputProps={{
@@ -1068,7 +1068,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                               />
                               {!isNaN(
                                 clientActivityPricingRule?.[rowIndex]
-                                  ?.pricePerPax
+                                  ?.pricePerPax,
                               ) && (
                                 <Box
                                   sx={{
@@ -1104,7 +1104,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                                   handlePricingRuleFieldChange(
                                     e,
                                     rowIndex,
-                                    "weekendAddon"
+                                    "weekendAddon",
                                   )
                                 }
                                 InputProps={{
@@ -1117,7 +1117,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                               />
                               {!isNaN(
                                 clientActivityPricingRule?.[rowIndex]
-                                  ?.weekendAddon
+                                  ?.weekendAddon,
                               ) && (
                                 <Box
                                   sx={{
@@ -1153,7 +1153,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                                   handlePricingRuleFieldChange(
                                     e,
                                     rowIndex,
-                                    "publicHolidayAddon"
+                                    "publicHolidayAddon",
                                   )
                                 }
                                 InputProps={{
@@ -1166,7 +1166,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                               />
                               {!isNaN(
                                 clientActivityPricingRule?.[rowIndex]
-                                  ?.publicHolidayAddon
+                                  ?.publicHolidayAddon,
                               ) && (
                                 <Box
                                   sx={{
@@ -1202,7 +1202,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                                   handlePricingRuleFieldChange(
                                     e,
                                     rowIndex,
-                                    "onlineAddon"
+                                    "onlineAddon",
                                   )
                                 }
                                 InputProps={{
@@ -1215,7 +1215,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                               />
                               {!isNaN(
                                 clientActivityPricingRule?.[rowIndex]
-                                  ?.onlineAddon
+                                  ?.onlineAddon,
                               ) && (
                                 <Box
                                   sx={{
@@ -1251,7 +1251,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                                   handlePricingRuleFieldChange(
                                     e,
                                     rowIndex,
-                                    "offlineAddon"
+                                    "offlineAddon",
                                   )
                                 }
                                 InputProps={{
@@ -1264,7 +1264,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                               />
                               {!isNaN(
                                 clientActivityPricingRule?.[rowIndex]
-                                  ?.offlineAddon
+                                  ?.offlineAddon,
                               ) && (
                                 <Box
                                   sx={{
@@ -1280,7 +1280,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                                   <Box sx={{ textAlign: "center" }}>
                                     {!isNaN(
                                       clientActivityPricingRule?.[rowIndex]
-                                        ?.offlineAddon
+                                        ?.offlineAddon,
                                     ) ? (
                                       <>
                                         $

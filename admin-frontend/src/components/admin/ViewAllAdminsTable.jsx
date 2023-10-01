@@ -132,7 +132,7 @@ const AdminsTable = (admins) => {
             onChange={(event) => requestSearch(event.target.value)}
           />
         </Search>
-        {admin.role === "MANAGERIAL" ? (
+        {admin.role === "MANAGERIAL" && (
           <StyledDiv>
             <StyledButton
               variant="contained"
@@ -147,28 +147,34 @@ const AdminsTable = (admins) => {
                 color="white"
               >
                 <AddIcon />
-                Create
+                Admin
               </Typography>
             </StyledButton>
           </StyledDiv>
-        ) : (
-          <></>
         )}
       </div>
-      <div style={{ height: 500, width: "100%" }}>
-        <DataGrid
-          initialState={{
-            pagination: {
-              paginationModel: { pageSize: 25, page: 0 },
-            },
-          }}
-          getRowId={(row) => row._id}
-          rows={searchedRows}
-          columns={columns}
-          slots={{
-            toolbar: GridToolbarFilterButton,
-          }}
-        />
+      <div style={{ flex: 1, maxHeight: "500px", overflow: "auto" }}>
+        <Box
+          flexDirection="column"
+          justifyItems="center"
+          display="flex"
+          width={"99%"}
+          height={500}
+        >
+          <DataGrid
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: 25, page: 0 },
+              },
+            }}
+            getRowId={(row) => row._id}
+            rows={searchedRows}
+            columns={columns}
+            slots={{
+              toolbar: GridToolbarFilterButton,
+            }}
+          />
+        </Box>
       </div>
     </Box>
   );

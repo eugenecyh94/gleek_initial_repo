@@ -10,7 +10,7 @@ export const updateCurrentActivity = (selectedActivity) => {
   }));
   console.log(
     "activity store current activity updated::",
-    useActivityStore.getState()
+    useActivityStore.getState(),
   );
 };
 
@@ -21,7 +21,7 @@ export const updateAllActivity = (newAllActivities) => {
   }));
   console.log(
     "activity store all activity updated::",
-    useActivityStore.getState()
+    useActivityStore.getState(),
   );
 };
 
@@ -135,7 +135,7 @@ export const useAdminStore = create((set) => ({
     try {
       const response = await AxiosConnect.post(
         "/gleekAdmin/register",
-        newAdmin
+        newAdmin,
       );
       const data = response.data;
       console.log(data);
@@ -189,7 +189,7 @@ export const useActivityStore = create((set) => ({
     try {
       const response = await AxiosConnect.postMultiPart(
         "/activity/addActivity",
-        newActivityData
+        newActivityData,
       );
       set({ newActivity: response.data.activity });
     } catch (error) {
@@ -200,7 +200,7 @@ export const useActivityStore = create((set) => ({
     try {
       set({ isLoading: true });
       const response = await AxiosConnect.get(
-        `/activity/viewActivity/${activityId}`
+        `/activity/viewActivity/${activityId}`,
       );
       console.log("HUEHUE", response);
       set({ activityDetails: response.data.data });
@@ -269,7 +269,7 @@ export const useVendorStore = create((set) => ({
   vendorTypesFetcher: async () => {
     try {
       const response = await AxiosConnect.get(
-        "/gleek/vendor/getAllVendorTypes"
+        "/gleek/vendor/getAllVendorTypes",
       );
       const data = response.data;
       set({ vendorTypes: data.VendorTypeEnum });
@@ -320,7 +320,7 @@ export const useClientStore = create((set) => ({
     try {
       set({ isLoading: true });
       const response = await AxiosConnect.get(
-        `/client/getClientDetails/${clientId}`
+        `/client/getClientDetails/${clientId}`,
       );
       set({ clientDetails: response.data });
       set({ isLoading: false });
