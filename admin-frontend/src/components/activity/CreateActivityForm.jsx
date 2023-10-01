@@ -54,6 +54,13 @@ import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 const StyledButton = styled(Button)`
   padding-left: 6px;
 `;
+
+const StyledChip = styled(Chip)`
+  &.Mui-disabled {
+    color: #ffffff;
+    background-color: #5c4b99; /* Change the background color for disabled state */
+  }
+`;
 const StyledContainer = styled(Paper)`
   padding: 20px;
   padding-top: 6px;
@@ -81,7 +88,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
   const [title, setTitle] = useState();
   const [description, setDescription] = useState();
 
-  const [activityPricingRuleList, setData] = useState([]);
   const [pricingRanges, setPricingRanges] = useState([]);
   const [pricingRangeError, setPricingRangeError] = useState([]);
   const [pricingRangeDone, setPricingRangeDone] = useState(false);
@@ -152,7 +158,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     const themeId = event.target.value;
     setSelectedTheme(themeId);
     setSubthemes(
-      themes?.find((theme) => theme.parent?._id === themeId)?.children,
+      themes?.find((theme) => theme.parent?._id === themeId)?.children
     );
   };
 
@@ -278,13 +284,20 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     setPricingRanges(updatedData);
     setPricingRangeError(error);
   };
-  const handlePricingAddonChange = (event, type, isDiscount) => {
-    const percentage = event.target?.value;
+  const handlePricingAddonChange = (event, type) => {
+    const percentage = event.target.value;
+
     const newPricingAddons = { ...pricingAddons };
     newPricingAddons[type] = {
-      amount: !percentage
-        ? pricingAddons[type]?.amount
-        : parseFloat(percentage),
+      ...pricingAddons[type],
+      amount: isNaN(percentage) ? null : percentage,
+    };
+    setPricingAddons(newPricingAddons);
+  };
+  const handleDiscountChange = (type, isDiscount) => {
+    const newPricingAddons = { ...pricingAddons };
+    newPricingAddons[type] = {
+      ...pricingAddons[type],
       isDiscount: isDiscount ?? pricingAddons[type]?.isDiscount,
     };
     setPricingAddons(newPricingAddons);
@@ -455,7 +468,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
   const validateForm = () => {
     const errors = {};
     const priceError = {};
-    activityPricingRuleList.forEach((rule, rowIndex) => {
+    pricingRanges.forEach((rule, rowIndex) => {
       if (rule.pricePerPax === null) {
         priceError[rowIndex] = "Price per pax is required!";
       }
@@ -586,7 +599,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     setActivityType("");
     setTitle();
     setDescription();
-    setData([]);
     setIsFood(false);
     setIsFoodCertPending(false);
     setSelectedFoodCat([]);
@@ -610,6 +622,8 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     setEndTime();
     setBookingNotice();
     setActiveStep(0);
+    setCapacity();
+    setMinParticipants();
   };
 
   const handleSubmit = async (event) => {
@@ -624,7 +638,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
         ? isFood
           ? "Popups (Food)"
           : "Popups (Non-food)"
-        : activityType,
+        : activityType
     );
     formData.append("maxParticipants", maxParticipants);
     formData.append("clientMarkupPercentage", markup);
@@ -683,7 +697,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     if (validateForm()) {
       try {
         await createActivity(formData);
-        resetForm();
+        // resetForm();
         setIsOpen(true);
       } catch (error) {
         setError(true);
@@ -756,7 +770,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                         <MenuItem key={index} value={item.parent._id}>
                           {item.parent.name}
                         </MenuItem>
-                      ),
+                      )
                   )}
                 </Select>
                 <FormHelperText error>{formErrors?.theme}</FormHelperText>
@@ -1105,7 +1119,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                       <MenuItem key={enumValue} value={enumValue}>
                         {enumValue}
                       </MenuItem>
-                    ),
+                    )
                   )}
                 </Select>
                 <FormHelperText error>
@@ -1143,7 +1157,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                   <TimePicker
                     label="Earliest Start Time"
                     minutesStep={30}
-                    value={startTime}
                     onChange={handleStartTimeChange}
                   />
                 </LocalizationProvider>
@@ -1156,7 +1169,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                   <TimePicker
                     label="Latest Start Time"
                     minutesStep={30}
-                    value={endTime}
                     onChange={handleEndTimeChange}
                   />
                 </LocalizationProvider>
@@ -1339,14 +1351,14 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                 {activeStep === 1 && (
                   <>
                     <Grid item xs={12}>
-                      <Typography>
-                        Maximum Participants: {maxParticipants}
-                      </Typography>
-                      <Typography>
-                        Minimum Participants: {minParticipants}
+                      <Typography
+                        color={theme.palette.primary.main}
+                        sx={{ paddingTop: 2 }}
+                      >
+                        Participant range: {minParticipants} - {maxParticipants}
                       </Typography>
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={12} paddingTop={2}>
                       <TableContainer component={Paper}>
                         <Table>
                           <TableHead>
@@ -1389,7 +1401,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                                         pricingRangeError?.[rowIndex]?.range
                                       }
                                       type="number"
-                                      value={row?.end}
                                       onChange={(e) =>
                                         handlePricingRangesChange(
                                           e,
@@ -1483,7 +1494,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                           <TableHead>
                             <TableRow>
                               <TableCell>Start Range</TableCell>
-                              <TableCell>{"           "}</TableCell>
                               <TableCell>End Range</TableCell>
                               <TableCell>Price Per Pax</TableCell>
                               <TableCell>Client Price</TableCell>
@@ -1494,9 +1504,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                               <TableRow key={rowIndex}>
                                 <TableCell>
                                   <Box>{row.start}</Box>
-                                </TableCell>
-                                <TableCell>
-                                  <Box sx={{ whiteSpace: "nowrap" }}>to</Box>
                                 </TableCell>
                                 <TableCell>
                                   <div
@@ -1537,13 +1544,11 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                     >
                       <Grid sx={4}>
                         <TextField
-                          required
                           id="weekendPrice"
                           name="weekendPrice"
                           label="Weekend Pricing"
-                          disabled={false}
                           fullWidth
-                          value={pricingAddons?.weekendPricing?.amount ?? ""}
+                          value={pricingAddons?.weekendPricing?.amount}
                           type="number"
                           InputProps={{
                             endAdornment: (
@@ -1555,36 +1560,23 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                           onChange={(event) =>
                             handlePricingAddonChange(event, "weekendPricing")
                           }
-                          error={
-                            (markup !== null && markup?.length === 0) ||
-                            formErrors?.markup?.length > 0
-                          }
-                          helperText={formErrors?.markup}
                         />
                       </Grid>
                       <Grid item xs={4} paddingTop={2} paddingLeft={2}>
                         <Stack direction="row" spacing={1}>
-                          <Chip
+                          <StyledChip
                             label="Discount"
-                            onClick={(event) =>
-                              handlePricingAddonChange(
-                                event,
-                                "weekendPricing",
-                                true
-                              )
+                            onClick={() =>
+                              handleDiscountChange("weekendPricing", true)
                             }
                             disabled={
                               pricingAddons?.weekendPricing?.isDiscount === true
                             }
                           />
-                          <Chip
+                          <StyledChip
                             label="Addon"
-                            onClick={(event) =>
-                              handlePricingAddonChange(
-                                event,
-                                "weekendPricing",
-                                false
-                              )
+                            onClick={() =>
+                              handleDiscountChange("weekendPricing", false)
                             }
                             disabled={
                               pricingAddons?.weekendPricing?.isDiscount ===
@@ -1604,9 +1596,8 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                     >
                       <Grid sx={4}>
                         <TextField
-                          required
-                          id="weekendPrice"
-                          name="weekendPrice"
+                          id="onlinePrice"
+                          name="onlinePrice"
                           label="Online Pricing"
                           disabled={false}
                           fullWidth
@@ -1622,36 +1613,23 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                           onChange={(event) =>
                             handlePricingAddonChange(event, "onlinePricing")
                           }
-                          error={
-                            (markup !== null && markup?.length === 0) ||
-                            formErrors?.markup?.length > 0
-                          }
-                          helperText={formErrors?.markup}
                         />
                       </Grid>
                       <Grid item xs={4} paddingTop={2} paddingLeft={2}>
                         <Stack direction="row" spacing={1}>
-                          <Chip
+                          <StyledChip
                             label="Discount"
-                            onClick={(event) =>
-                              handlePricingAddonChange(
-                                event,
-                                "onlinePricing",
-                                true
-                              )
+                            onClick={() =>
+                              handleDiscountChange("onlinePricing", true)
                             }
                             disabled={
                               pricingAddons?.onlinePricing?.isDiscount === true
                             }
                           />
-                          <Chip
+                          <StyledChip
                             label="Addon"
-                            onClick={(event) =>
-                              handlePricingAddonChange(
-                                event,
-                                "onlinePricing",
-                                false
-                              )
+                            onClick={() =>
+                              handleDiscountChange("onlinePricing", false)
                             }
                             disabled={
                               pricingAddons?.onlinePricing?.isDiscount === false
@@ -1670,7 +1648,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                     >
                       <Grid sx={4}>
                         <TextField
-                          required
                           id="offlinePrice"
                           name="offlinePrice"
                           label="Offline Pricing"
@@ -1688,36 +1665,23 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                           onChange={(event) =>
                             handlePricingAddonChange(event, "offlinePricing")
                           }
-                          error={
-                            (markup !== null && markup?.length === 0) ||
-                            formErrors?.markup?.length > 0
-                          }
-                          helperText={formErrors?.markup}
                         />
                       </Grid>
                       <Grid item xs={4} paddingTop={2} paddingLeft={2}>
                         <Stack direction="row" spacing={1}>
-                          <Chip
+                          <StyledChip
                             label="Discount"
-                            onClick={(event) =>
-                              handlePricingAddonChange(
-                                event,
-                                "offlinePricing",
-                                true
-                              )
+                            onClick={() =>
+                              handleDiscountChange("offlinePricing", true)
                             }
                             disabled={
                               pricingAddons?.offlinePricing?.isDiscount === true
                             }
                           />
-                          <Chip
+                          <StyledChip
                             label="Addon"
-                            onClick={(event) =>
-                              handlePricingAddonChange(
-                                event,
-                                "offlinePricing",
-                                false
-                              )
+                            onClick={() =>
+                              handleDiscountChange("offlinePricing", false)
                             }
                             disabled={
                               pricingAddons?.offlinePricing?.isDiscount ===
@@ -1739,16 +1703,18 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                     Back
                   </Button>
                   <Box sx={{ flex: "1 1 auto" }} />
-                  <Button
-                    disabled={
-                      (!pricingRangeDone && activeStep === 1) ||
-                      (activeStep === 0 &&
-                        (!maxParticipants || !minParticipants))
-                    }
-                    onClick={handleNext}
-                  >
-                    {activeStep === steps.length - 1 ? "Finish" : "Next"}
-                  </Button>
+                  {activeStep < steps.length - 1 && (
+                    <Button
+                      disabled={
+                        (!pricingRangeDone && activeStep === 1) ||
+                        (activeStep === 0 &&
+                          (!maxParticipants || !minParticipants))
+                      }
+                      onClick={handleNext}
+                    >
+                      Next
+                    </Button>
+                  )}
                 </Box>
               </Fragment>
             </Grid>

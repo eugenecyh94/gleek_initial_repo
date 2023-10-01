@@ -50,16 +50,16 @@ export const addActivity = async (req, res) => {
     const parsedOffline = JSON.parse(offlinePricing);
 
     activity["weekendPricing"] = {
-      amount: parsedWeekend.amount,
-      isDiscount: parsedWeekend.isDiscount,
+      amount: parsedWeekend?.amount,
+      isDiscount: parsedWeekend?.isDiscount,
     };
     activity["onlinePricing"] = {
-      amount: parsedOnline.amount,
-      isDiscount: parsedOnline.isDiscount,
+      amount: parsedOnline?.amount,
+      isDiscount: parsedOnline?.isDiscount,
     };
     activity["offlinePricing"] = {
-      amount: parsedOffline.amount,
-      isDiscount: parsedOffline.isDiscount,
+      amount: parsedOffline?.amount,
+      isDiscount: parsedOffline?.isDiscount,
     };
     const newActivity = new ActivityModel({ ...activity });
     const savedActivity = await newActivity.save();
@@ -84,25 +84,37 @@ export const addActivity = async (req, res) => {
     await ActivityModel.findByIdAndUpdate(
       { _id: savedActivity._id },
       { images: imagesPathArr },
-      { new: true },
+      { new: true }
     );
 
     const activitypriceobjects = [];
-    activityPricingRules.forEach((jsonString, index) => {
-      try {
-        const pricingObject = JSON.parse(jsonString);
+    if (Array.isArray(activityPricingRules)) {
+      activityPricingRules.forEach((jsonString, index) => {
+        try {
+          const pricingObject = JSON.parse(jsonString);
 
-        const activitypriceobject = {
-          start: pricingObject.start,
-          end: pricingObject.end,
-          pricePerPax: pricingObject.pricePerPax,
-          clientPrice: pricingObject.clientPrice,
-        };
-        activitypriceobjects.push(activitypriceobject);
-      } catch (error) {
-        console.error(`Error parsing JSON: ${error}`);
-      }
-    });
+          const activitypriceobject = {
+            start: pricingObject.start,
+            end: pricingObject.end,
+            pricePerPax: pricingObject.pricePerPax,
+            clientPrice: pricingObject.clientPrice,
+          };
+          activitypriceobjects.push(activitypriceobject);
+        } catch (error) {
+          console.error(`Error parsing JSON: ${error}`);
+        }
+      });
+    } else {
+      const pricingObject = JSON.parse(activityPricingRules);
+
+      const activitypriceobject = {
+        start: pricingObject.start,
+        end: pricingObject.end,
+        pricePerPax: pricingObject.pricePerPax,
+        clientPrice: pricingObject.clientPrice,
+      };
+      activitypriceobjects.push(activitypriceobject);
+    }
 
     activitypriceobjects.map(async (pricingRule) => {
       ActivityPricingRulesModel.create(pricingRule).then(
@@ -116,9 +128,9 @@ export const addActivity = async (req, res) => {
                 },
               },
             },
-            { new: true, useFindAndModify: false },
+            { new: true, useFindAndModify: false }
           );
-        },
+        }
       );
     });
 
