@@ -58,7 +58,8 @@ const StyledButton = styled(Button)`
 const StyledChip = styled(Chip)`
   &.Mui-disabled {
     color: #ffffff;
-    background-color: #5c4b99; /* Change the background color for disabled state */
+    background-color: #5c4b99;
+    opacity: 1;
   }
 `;
 const StyledContainer = styled(Paper)`
@@ -697,7 +698,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     if (validateForm()) {
       try {
         await createActivity(formData);
-        // resetForm();
+        resetForm();
         setIsOpen(true);
       } catch (error) {
         setError(true);
