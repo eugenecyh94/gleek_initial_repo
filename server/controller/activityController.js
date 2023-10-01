@@ -35,6 +35,31 @@ export const getActivity = async (req, res) => {
   }
 };
 
+export const getActivitiesByVendorId = async (req, res) => {
+  try {
+    const { vendorId } = req.params;
+    console.log(vendorId);
+
+    const activities = await ActivityModel.find({ linkedVendor: vendorId })
+      .populate("activityPricingRules")
+      .populate("theme")
+      .populate("subtheme")
+      .populate("linkedVendor");
+
+    // Use the first image of each activity
+    const imagesToGet = activities.map((activity) => activity.images[0]);
+    const preSignedUrlArr = await s3ImageGetService(imagesToGet);
+    activities.forEach((activity, index) => {
+      activity.preSignedImages = [preSignedUrlArr[index]];
+    });
+
+    res.status(200).json(activities);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 export const addActivity = async (req, res) => {
   try {
     console.log("add activity body:", req.body);
@@ -63,7 +88,7 @@ export const addActivity = async (req, res) => {
     await ActivityModel.findByIdAndUpdate(
       { _id: savedActivity._id },
       { images: imagesPathArr },
-      { new: true }
+      { new: true },
     );
 
     const activitypriceobjects = [];
@@ -71,7 +96,7 @@ export const addActivity = async (req, res) => {
       try {
         const pricingObject = JSON.parse(jsonString);
         const clientPricingObject = JSON.parse(
-          clientActivityPricingRules[index]
+          clientActivityPricingRules[index],
         );
 
         const activitypriceobject = {
@@ -105,9 +130,9 @@ export const addActivity = async (req, res) => {
                 },
               },
             },
-            { new: true, useFindAndModify: false }
+            { new: true, useFindAndModify: false },
           );
-        }
+        },
       );
     });
     res.status(201).json({

@@ -2,6 +2,7 @@ import express from "express";
 import { check } from "express-validator";
 import {
   getAllVendorTypes,
+  getVendor,
   updateCompanyLogo,
 } from "../../controller/vendorController.js";
 import { postRegister } from "../../controller/vendorController.js";
@@ -23,6 +24,8 @@ const router = express.Router();
 Note: This file contains the /vendor router
 */
 
+// /gleek/vendor/viewVendor/:id
+router.get("/viewVendor/:id", getVendor);
 // /gleek/vendor/getAllVendorTypes
 router.get("/getAllVendorTypes", getAllVendorTypes);
 router.post(
@@ -60,4 +63,7 @@ router.patch("/updateAccount", verifyToken, updateVendorAccountDetails);
 router.post("/recoverPasswordMail", recoverPasswordMail);
 router.post("/resetPassword", verifyToken, postResetPassword);
 router.get("/resetPassword/:token", resetPasswordRedirect);
+
+
+
 export default router;

@@ -346,7 +346,7 @@ export const getVendor = async (req, res) => {
   try {
     console.log(req.params.id);
     const vendor = await VendorModel.findById(req.params.id);
-    return res.status(201).json(vendor);
+    return res.status(200).json(vendor);
   } catch (e) {
     console.log(e);
     res.status(500).json("Server Error");
