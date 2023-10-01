@@ -207,7 +207,7 @@ export const postLogin = async (req, res) => {
     const { companyEmail, password } = req.body;
     const vendor = await VendorModel.findOne({ companyEmail });
     const isSamePassword = await bcrypt.compare(password, vendor.password);
-
+    if (!vendor) return res.status(404).send({ msg: "Invalid Credentials." });
     if (vendor && isSamePassword) {
       // If vendor REJECTED, send error message.
       if (vendor.status === "REJECTED") {
