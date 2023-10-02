@@ -59,7 +59,7 @@ function getTimeslotCapacities(
   capacity,
   bookings,
   blockedTimeslots,
-  duration,
+  duration
 ) {
   // Create a hashmap to store capacities for each starttime slot
   const capacities = new Map(startTimes.map((slot) => [slot, capacity]));
@@ -109,12 +109,12 @@ function generateAllTimeslots(
   capacity,
   bookings,
   blockedTimeslots,
-  duration,
+  duration
 ) {
   const startTimes = generateStartTimes(
     earliestStartTime,
     latestStartTime,
-    interval,
+    interval
   );
 
   const timeslotCapacities = getTimeslotCapacities(
@@ -122,7 +122,7 @@ function generateAllTimeslots(
     capacity,
     bookings,
     blockedTimeslots,
-    duration,
+    duration
   );
 
   const allTimeslots = startTimes.map((startTime, index) => {
@@ -140,8 +140,8 @@ function generateAllTimeslots(
   return allTimeslots;
 }
 
-// GET /gleek/booking/getAvailableBookingTimeslots/:activityId/:selectedDate
-// Eg: /gleek/booking/getAvailableBookingTimeslots/60b9b6b9e6b3a83a3c3b3b3b/2023-10-07T00:00:00.000Z
+// GET /gleek/client/getAvailableBookingTimeslots/:activityId/:selectedDate
+// Eg: /gleek/client/getAvailableBookingTimeslots/60b9b6b9e6b3a83a3c3b3b3b/2023-10-07T00:00:00.000Z
 export const getAvailableBookingTimeslots = async (req, res) => {
   try {
     const { activityId, selectedDate } = req.params;
@@ -188,7 +188,7 @@ export const getAvailableBookingTimeslots = async (req, res) => {
     const minDate = new Date(
       today.getFullYear(),
       today.getMonth(),
-      today.getDate() + daysInAdvance,
+      today.getDate() + daysInAdvance
     );
     if (dateParam < minDate) {
       return res.status(400).json({
@@ -241,7 +241,7 @@ export const getAvailableBookingTimeslots = async (req, res) => {
       1,
       bookings,
       blockedTimeslots,
-      activity.duration,
+      activity.duration
     );
 
     res.status(200).json({
@@ -256,7 +256,7 @@ export const getAvailableBookingTimeslots = async (req, res) => {
   }
 };
 
-// POST /booking/createBooking
+// POST /gleek/client/createBooking
 // Request body expects (for example):
 // {
 // "clientId" : "60b9b6b9e6b3a83a3c3b3b3b",
@@ -372,14 +372,14 @@ export const createBooking = async (req, res) => {
       1,
       bookings,
       blockedTimeslots,
-      activity.duration,
+      activity.duration
     );
 
     // If selected timeslot is not available, return error
     const timeslot = allTimeslots.find(
       (timeslot) =>
         timeslot.startTime.getTime() === selectedStartDateTime.getTime() &&
-        timeslot.endTime.getTime() === selectedEndDateTime.getTime(),
+        timeslot.endTime.getTime() === selectedEndDateTime.getTime()
     );
     console.log("Selected timeslot: ", timeslot);
 

@@ -1,9 +1,16 @@
 import express from "express";
-import { getAvailableBookingTimeslots } from "../../controller/bookingController.js";
+import {
+  getAvailableBookingTimeslots,
+  createBooking,
+} from "../../controller/bookingController.js";
 
 const router = express.Router();
+
+// Booking
 router.get(
   "/getAvailableBookingTimeslots/:activityId/:selectedDate",
-  getAvailableBookingTimeslots,
+  getAvailableBookingTimeslots
 );
+router.post("/createBooking", createBooking);
+
 export default router;

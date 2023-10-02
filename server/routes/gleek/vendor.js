@@ -17,10 +17,6 @@ import { resendVerifyEmail } from "../../controller/vendorController.js";
 import { recoverPasswordMail } from "../../controller/vendorController.js";
 import { postResetPassword } from "../../controller/vendorController.js";
 import { resetPasswordRedirect } from "../../controller/vendorController.js";
-import {
-  getBlockedTimeslotsByActivityId,
-  addBlockedTimeslot,
-} from "../../controller/blockedTimeslotController.js";
 
 const router = express.Router();
 
@@ -37,7 +33,7 @@ router.post(
     check("companyEmail", "Please enter a valid email").isEmail(),
     check("password", "Minimum password length is 8").isLength({ min: 8 }),
   ],
-  postRegister,
+  postRegister
 );
 router.post(
   "/login",
@@ -46,7 +42,7 @@ router.post(
     check("companyEmail", "Please enter a valid email").isEmail(),
     check("password", "Minimum password length is 8").isLength({ min: 8 }),
   ],
-  postLogin,
+  postLogin
 );
 router.post("/validateToken", validateToken);
 router.get("/logout", clearCookies);
@@ -54,7 +50,7 @@ router.patch(
   "/updateCompanyLogo",
   verifyToken,
   uploadS3CompanyLogo.single("image"),
-  updateCompanyLogo,
+  updateCompanyLogo
 );
 // Verify Email
 router.get("/verifyEmail/:token", verifyEmail);
@@ -65,10 +61,5 @@ router.patch("/updateAccount", verifyToken, updateVendorAccountDetails);
 router.post("/recoverPasswordMail", recoverPasswordMail);
 router.post("/resetPassword", verifyToken, postResetPassword);
 router.get("/resetPassword/:token", resetPasswordRedirect);
-// Blocked Timeslots
-router.get(
-  "/getBlockedTimeslotsByActivityId/:activityId",
-  getBlockedTimeslotsByActivityId,
-);
-router.post("/addBlockedTimeslot", addBlockedTimeslot);
+
 export default router;
