@@ -12,11 +12,14 @@ import {
   Select,
 } from "@mui/material";
 import useShopStore from "../../zustand/ShopStore";
-import { useTheme } from "@mui/material/styles";
+import { duration, useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import PriceFilter from "../../components/Filters/PriceFilter";
 import CheckBoxGroup from "../../components/Filters/CheckBoxGroup";
 import RadioButtonGroup from "../../components/Filters/RadioButtonGroup";
+import NestedCheckboxList from "../../components/Filters/NestedCheckBoxList";
+import AxiosConnect from "../../utils/AxiosConnect";
+
 const ShopPage = (props) => {
   const navigate = useNavigate();
   const activitiesSampleData = [
@@ -344,6 +347,11 @@ const ShopPage = (props) => {
     setSortBy,
     currentActivity,
     setCurrentActivity,
+    themes,
+    isLoadingThemes,
+    getThemes,
+    filter,
+    setFilter,
   } = useShopStore();
   const theme = useTheme();
 
@@ -364,6 +372,13 @@ const ShopPage = (props) => {
       (a, b) => b.date - a.date,
     );
     setActivities(sortedActivities);
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await getThemes();
+    };
+    fetchData();
   }, []);
 
   const handlePageChange = (newPage) => {
@@ -408,7 +423,7 @@ const ShopPage = (props) => {
   };
 
   const initialLocationState = Object.fromEntries(
-    Object.entries(Locations).map(([key, value]) => [key, false]),
+    Object.entries(Locations).map(([key, value]) => [value, false]),
   );
 
   const [locationState, setLocationState] =
@@ -447,7 +462,7 @@ const ShopPage = (props) => {
 
   const initialSGState = Object.fromEntries(
     Object.entries(SustainableDevelopmentGoals).map(([key, value]) => [
-      key,
+      value,
       false,
     ]),
   );
@@ -460,39 +475,158 @@ const ShopPage = (props) => {
     });
   };
 
-  const SIZE = {
-    COSY: "Cosy (1-10 participants)",
-    SMALL: "Small (11-20 participants)",
-    MEDIUM: "Medium (21-30 participants)",
-    LARGE: "Large (31+ participants)",
+  const ActivityDayAvailability = {
+    WEEKDAYS: "Weekdays",
+    WEEKENDS: "Weekends",
+    PUBLIC_HOLIDAYS: "Public Holidays",
   };
 
-  const [durationState, setDurationState] = useState("");
+  const initialDaysAvailabilityState = Object.fromEntries(
+    Object.entries(ActivityDayAvailability).map(([key, value]) => [
+      value,
+      false,
+    ]),
+  );
 
+  const [daysAvailabilityState, setDaysAvailabilityState] = React.useState(
+    initialDaysAvailabilityState,
+  );
+  const handleDaysAvailabilityChange = (event) => {
+    setDaysAvailabilityState({
+      ...daysAvailabilityState,
+      [event.target.name]: event.target.checked,
+    });
+  };
+
+  const TYPE = {
+    WORKSHOP: "Workshops",
+    TALKS: "Talks/ Seminars/ Webinars",
+    LEARNING_JOURNEY: "Learning Journeys",
+    POPUP_FOOD: "Popups (Food)",
+    POPUP_NONFOOD: "Popups (Non-food)",
+  };
+
+  const initialActivityTypeState = Object.fromEntries(
+    Object.entries(TYPE).map(([key, value]) => [value, false]),
+  );
+
+  const [activityTypeState, setActivityTypeState] = React.useState(
+    initialActivityTypeState,
+  );
+  const handleActivityTypeChange = (event) => {
+    setActivityTypeState({
+      ...activityTypeState,
+      [event.target.name]: event.target.checked,
+    });
+  };
+
+  const durations = {
+    THIRTY_MINS: 30,
+    AN_HOUR: 60,
+    AN_HOUR_HALF: 90,
+    TWO_HOURS: 120,
+  };
+
+  const initialDurationState = Object.fromEntries(
+    Object.entries(durations).map(([key, value]) => [value, false]),
+  );
+
+  const [durationState, setDurationState] =
+    React.useState(initialDurationState);
   const handleDurationChange = (event) => {
-    setDurationState(event.target.value);
+    setDurationState({
+      ...durationState,
+      [event.target.name]: event.target.checked,
+    });
   };
+
+  useEffect(() => {
+    const filterActivities = async () => {
+      const response = await AxiosConnect.post(
+        "/gleek/shop/getFilteredActivities",
+        {
+          filter: filter,
+        },
+      );
+    };
+    filterActivities();
+  }, [filter]);
+
+  useEffect(() => {
+    const locations = Object.entries(locationState)
+      .filter(([key, value]) => value === true)
+      .map(([key, value]) => key);
+
+    setFilter({ ...filter, locations: locations });
+  }, [locationState]);
+
+  useEffect(() => {
+    const sgs = Object.entries(sgState)
+      .filter(([key, value]) => value === true)
+      .map(([key, value]) => key);
+
+    setFilter({ ...filter, sgs: sgs });
+  }, [sgState]);
+
+  useEffect(() => {
+    const daysAvailability = Object.entries(daysAvailabilityState)
+      .filter(([key, value]) => value === true)
+      .map(([key, value]) => key);
+
+    setFilter({ ...filter, daysAvailability: daysAvailability });
+  }, [daysAvailabilityState]);
+
+  useEffect(() => {
+    const activityType = Object.entries(activityTypeState)
+      .filter(([key, value]) => value === true)
+      .map(([key, value]) => key);
+
+    setFilter({ ...filter, activityType: activityType });
+  }, [activityTypeState]);
+
+  useEffect(() => {
+    const duration = Object.entries(durationState)
+      .filter(([key, value]) => value === true)
+      .map(([key, value]) => key);
+
+    setFilter({ ...filter, duration: duration });
+  }, [durationState]);
+
   return (
     <Grid container spacing={5} p={5}>
       {/* Left Column */}
       <Grid item xs={12} sm={12} md={12} lg={3}>
+        <Button>CLEAR ALL</Button>
+        <NestedCheckboxList title="Themes" themes={themes} />
+        <CheckBoxGroup
+          title="Activity Type"
+          handleChange={handleActivityTypeChange}
+          state={activityTypeState}
+          VALUES={TYPE}
+        />
         <PriceFilter
           minRangeValue={minRangeValue}
           maxRangeValue={maxRangeValue}
           sliderValue={sliderValue}
           handleSliderChange={handleSliderChange}
         />
-        <RadioButtonGroup
-          value={durationState}
-          handleChange={handleDurationChange}
-          title="Duration"
-          VALUES={SIZE}
-        />
         <CheckBoxGroup
           title="Location"
           handleChange={handleLocationChange}
           state={locationState}
           VALUES={Locations}
+        />
+        <CheckBoxGroup
+          title="Duration (minutes)"
+          handleChange={handleDurationChange}
+          state={durationState}
+          VALUES={durations}
+        />
+        <CheckBoxGroup
+          title="Days Availability"
+          handleChange={handleDaysAvailabilityChange}
+          state={daysAvailabilityState}
+          VALUES={ActivityDayAvailability}
         />
         <CheckBoxGroup
           title="Sustainable Development Goals"
@@ -521,7 +655,7 @@ const ShopPage = (props) => {
             <Typography mr={3} color={accent} variant="h6">
               Sort by:
             </Typography>
-            <FormControl size="small">
+            {/* <FormControl size="small">
               <InputLabel id="sort-by-label">Sort by:</InputLabel>
               <Select
                 labelId="sort-by-label"
@@ -538,7 +672,7 @@ const ShopPage = (props) => {
                   Price Low to High
                 </MenuItem>
               </Select>
-            </FormControl>
+            </FormControl> */}
           </Box>
         </Box>
         {/* Right Column */}

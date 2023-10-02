@@ -22,9 +22,13 @@ import SearchBar from "./SearchBar/SearchBar.jsx";
 import SearchIcon from "@mui/icons-material/Search";
 import useGlobalStore from "../zustand/GlobalStore.js";
 import useVendorStore from "../zustand/VendorStore.js";
+import useShopStore from "../zustand/ShopStore.js";
+import AxiosConnect from "../utils/AxiosConnect.js";
+
 function NavBar(props) {
   const { authenticated, client, logoutClient } = useClientStore();
   const { vendorAuthenticated, vendor, logoutVendor } = useVendorStore();
+  const { searchValue, filter } = useShopStore();
   const { role, setRole } = useGlobalStore();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [anchorE2, setAnchorE2] = React.useState(null);
@@ -64,12 +68,6 @@ function NavBar(props) {
     }
   };
 
-  // Search bar (WIP)
-  const [value, setValue] = useState("");
-  const onChange = (event, { newValue }) => {
-    setValue(newValue);
-  };
-
   // Role selection
   const handleRoleChange = (event) => {
     setRole(event.target.value);
@@ -88,6 +86,17 @@ function NavBar(props) {
   } else {
     registerLink = "/register";
   }
+
+  const searchOnClick = async () => {
+    navigate("/shop");
+    const response = await AxiosConnect.post(
+      "/gleek/shop/getFilteredActivities",
+      {
+        filter: filter,
+        searchValue: searchValue,
+      },
+    );
+  };
 
   return (
     <div>
@@ -206,11 +215,9 @@ function NavBar(props) {
               </Typography>
             </Link>
             <Box display="flex" flexDirection="row">
-              <SearchBar value={value} onChange={onChange} />
+              <SearchBar />
               <IconButton
-                onClick={() => {
-                  navigate("/shop");
-                }}
+                onClick={searchOnClick}
                 sx={{ marginLeft: "5px" }}
                 color="tertiary"
                 aria-label="search"

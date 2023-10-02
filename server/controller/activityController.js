@@ -2,6 +2,8 @@ import ActivityModel from "../model/activityModel.js";
 import ActivityPricingRulesModel from "../model/activityPricingRules.js";
 import ThemeModel from "../model/themeModel.js";
 import { s3ImageGetService } from "../service/s3ImageGetService.js";
+import { VendorTypeEnum } from "../util/vendorTypeEnum.js";
+import mongoose from "mongoose";
 
 export const getAllActivities = async (req, res) => {
   try {
@@ -192,5 +194,94 @@ export const getAllThemes = async (req, res) => {
     res
       .status(500)
       .json({ error: "Themes cannot be added", message: error.message });
+  }
+};
+
+export const getActivitiesWithFilters = async (req, res) => {
+  try {
+    const { filter, searchValue } = req.body;
+    // Convert string IDs to ObjectId instances
+    const subthemeIds = filter.themes.map(
+      (id) => new mongoose.Types.ObjectId(id),
+    );
+
+    // Initialize the query
+    const query = {};
+
+    if (searchValue != null && searchValue.length > 0) {
+      // If searchValue is provided, add title search to the query
+      query.title = {
+        $regex: new RegExp(searchValue, "i"), // "i" makes the regex case-insensitive
+      };
+    }
+
+    if (filter.locations.length > 0) {
+      // Add location filter when locations is not empty
+      query.location = {
+        $in: filter.locations,
+      };
+    }
+
+    if (subthemeIds.length > 0) {
+      // Add subtheme filter when subthemes is not empty
+      query.subtheme = {
+        $in: subthemeIds,
+      };
+    }
+
+    if (filter.sgs.length > 0) {
+      query.sdg = {
+        $in: filter.sgs,
+      };
+    }
+
+    if (filter.daysAvailability.length > 0) {
+      query.dayAvailabilities = {
+        $in: filter.daysAvailability,
+      };
+    }
+
+    if (filter.activityType.length > 0) {
+      query.activityType = {
+        $in: filter.activityType,
+      };
+    }
+
+    if (filter.duration.length > 0) {
+      query.duration = {
+        $in: filter.duration,
+      };
+    }
+
+    const activities = await ActivityModel.find(query);
+
+    console.log(activities);
+    return res.status(200).json({
+      success: true,
+      message: "Filtered activities fetched!",
+      activities: activities,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: true, msg: "Server error" });
+  }
+};
+
+export const getAllActivitiesNames = async (req, res) => {
+  try {
+    // Query the collection to get titles of all documents
+    const activityTitles = await ActivityModel.find({}, "title");
+
+    // Extract the titles from the result
+    const titles = activityTitles.map((activity) => activity.title);
+
+    res.status(200).json({
+      success: true,
+      data: titles,
+      message: "Activity titles fetched!",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: true, msg: "Server error" });
   }
 };

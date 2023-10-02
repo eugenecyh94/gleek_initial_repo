@@ -11,7 +11,7 @@ const PriceFilter = (props) => {
     return value;
   };
   return (
-    <Box boxShadow={2} borderRadius={2}>
+    <Box boxShadow={2} borderRadius={2} mt={5}>
       <Box
         bgcolor={primary}
         sx={{
