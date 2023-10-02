@@ -86,7 +86,7 @@ export const addActivity = async (req, res) => {
     await ActivityModel.findByIdAndUpdate(
       { _id: savedActivity._id },
       { images: imagesPathArr },
-      { new: true }
+      { new: true },
     );
 
     const activitypriceobjects = [];
@@ -130,9 +130,9 @@ export const addActivity = async (req, res) => {
                 },
               },
             },
-            { new: true, useFindAndModify: false }
+            { new: true, useFindAndModify: false },
           );
-        }
+        },
       );
     });
 
@@ -277,9 +277,28 @@ export const getActivitiesWithFilters = async (req, res) => {
       };
     }
 
-    const activities = await ActivityModel.find(query);
+    if (filter.priceRange[0] !== null && filter.priceRange[1] !== null) {
+      const pricingRules = await ActivityPricingRulesModel.find({
+        pricePerPax: {
+          $gte: filter.priceRange[0], // Greater than or equal to minPrice
+          $lte: filter.priceRange[1], // Less than or equal to maxPrice
+        },
+      });
+      const pricingRuleIds = pricingRules.map((rule) => rule._id);
+      query.activityPricingRules = {
+        $in: pricingRuleIds,
+      };
+    }
 
-    console.log(activities);
+    const activities = await ActivityModel.find(query).populate(
+      "activityPricingRules",
+    );
+
+    // console.log(
+    //   "********************************************************************************"
+    // );
+    // console.log(activities);
+
     return res.status(200).json({
       success: true,
       message: "Filtered activities fetched!",
@@ -307,5 +326,50 @@ export const getAllActivitiesNames = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: true, msg: "Server error" });
+  }
+};
+
+export const getMinAndMaxPricePerPax = async (req, res) => {
+  try {
+    const activities = await ActivityModel.find({}).populate(
+      "activityPricingRules",
+    );
+    if (activities.length === 0) {
+      return res.status(200).send({
+        success: true,
+        msg: "No activities found!",
+        minPrice: null,
+        maxPrice: null,
+      });
+    }
+
+    const pricingRules = activities.flatMap(
+      (activity) => activity.activityPricingRules,
+    );
+
+    if (pricingRules.length === 0) {
+      return res.status(200).send({
+        success: true,
+        msg: "No pricing rules found!",
+        minPrice: null,
+        maxPrice: null,
+      });
+    }
+
+    const minPrice = Math.min(...pricingRules.map((rule) => rule.pricePerPax));
+    const maxPrice = Math.max(...pricingRules.map((rule) => rule.pricePerPax));
+
+    console.log("Minimum Price Per Pax:", minPrice);
+    console.log("Maximum Price Per Pax:", maxPrice);
+
+    res.status(200).json({
+      success: true,
+      message: "Maximum and minimum prices fetched!",
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Server error", message: error.message });
   }
 };

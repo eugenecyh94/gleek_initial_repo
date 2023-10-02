@@ -352,6 +352,9 @@ const ShopPage = (props) => {
     getThemes,
     filter,
     setFilter,
+    minPriceValue,
+    maxPriceValue,
+    getPriceInterval,
   } = useShopStore();
   const theme = useTheme();
 
@@ -377,6 +380,7 @@ const ShopPage = (props) => {
   useEffect(() => {
     const fetchData = async () => {
       await getThemes();
+      await getPriceInterval();
     };
     fetchData();
   }, []);
@@ -404,11 +408,9 @@ const ShopPage = (props) => {
     setCurrentPage(currentPage);
   };
 
-  const minRangeValue = 0;
-  const maxRangeValue = 100;
   const [sliderValue, setSliderValue] = React.useState([
-    minRangeValue,
-    maxRangeValue,
+    minPriceValue,
+    maxPriceValue,
   ]);
   const handleSliderChange = (event, newValue) => {
     setSliderValue(newValue);
@@ -549,6 +551,7 @@ const ShopPage = (props) => {
         },
       );
     };
+    console.log(filter);
     filterActivities();
   }, [filter]);
 
@@ -592,6 +595,10 @@ const ShopPage = (props) => {
     setFilter({ ...filter, duration: duration });
   }, [durationState]);
 
+  useEffect(() => {
+    setFilter({ ...filter, priceRange: sliderValue });
+  }, [sliderValue]);
+
   return (
     <Grid container spacing={5} p={5}>
       {/* Left Column */}
@@ -605,8 +612,8 @@ const ShopPage = (props) => {
           VALUES={TYPE}
         />
         <PriceFilter
-          minRangeValue={minRangeValue}
-          maxRangeValue={maxRangeValue}
+          minRangeValue={minPriceValue}
+          maxRangeValue={maxPriceValue}
           sliderValue={sliderValue}
           handleSliderChange={handleSliderChange}
         />

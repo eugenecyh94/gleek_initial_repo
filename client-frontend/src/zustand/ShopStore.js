@@ -14,10 +14,8 @@ const useShopStore = create((set) => ({
   themes: [],
   getThemes: async () => {
     try {
-      set({ isLoadingThemes: true });
       const response = await AxiosConnect.get("/gleek/shop/getAllThemes");
       set({ themes: response.data.data.slice(1) });
-      set({ isLoadingThemes: false });
     } catch (error) {
       console.error(error);
     }
@@ -29,6 +27,7 @@ const useShopStore = create((set) => ({
     daysAvailability: [],
     activityType: [],
     duration: [],
+    priceRange: [],
   },
   setFilter: (newFilter) => set({ filter: newFilter }),
   searchValue: "",
@@ -45,6 +44,29 @@ const useShopStore = create((set) => ({
   },
   suggestions: [],
   setSuggestions: (newSuggestions) => set({ suggestions: newSuggestions }),
+  minPriceValue: null,
+  maxPriceValue: null,
+  setMaxPriceValue: (newMaxPriceValue) =>
+    set({ maxPriceValue: newMaxPriceValue }),
+  setMinPriceValue: (newMinPriceValue) =>
+    set({ minPriceValue: newMinPriceValue }),
+  getPriceInterval: async () => {
+    set({ priceFilterLoading: true });
+    try {
+      const response = await AxiosConnect.get(
+        "/gleek/shop/getMinAndMaxPricePerPax",
+      );
+      console.log(response.data);
+      set({ minPriceValue: response.data.minPrice });
+      set({ maxPriceValue: response.data.maxPrice });
+      set({ priceFilterLoading: false });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  priceFilterLoading: true,
+  setPriceFilterLoading: (newPriceFilterLoading) =>
+    set({ priceFilterLoading: newPriceFilterLoading }),
 }));
 
 export default useShopStore;
