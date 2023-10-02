@@ -1,5 +1,6 @@
 import React from "react";
 import useShopStore from "../zustand/ShopStore";
+import { useParams } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -14,6 +15,7 @@ import { useTheme, lighten } from "@mui/material/styles";
 
 const ActivityDetailsPage = () => {
   const { currentActivity } = useShopStore();
+  const { activityId } = useParams();
   const theme = useTheme();
   const tertiaryLighter = lighten(theme.palette.tertiary.main, 0.4);
   const accent = theme.palette.accent.main;
