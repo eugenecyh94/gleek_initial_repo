@@ -410,9 +410,6 @@ const ShopPage = (props) => {
                     const clickedActivity = activities.find(
                       (item) => item._id.toString() === activity._id.toString(),
                     );
-                    if (clickedActivity) {
-                      setCurrentActivity(clickedActivity);
-                    }
                     navigate(`/shop/activity/${activity._id.toString()}`);
                   }}
                 >

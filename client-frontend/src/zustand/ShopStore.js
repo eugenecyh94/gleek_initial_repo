@@ -11,6 +11,20 @@ const useShopStore = create((set) => ({
   currentActivity: null,
   setCurrentActivity: (newCurrentActivity) =>
     set({ currentActivity: newCurrentActivity }),
+  currentActivityLoading: true,
+  getCurrentActivity: async (activityId) => {
+    try {
+      set({ currentActivityLoading: true });
+      const response = await AxiosConnect.get(
+        `/gleek/shop/viewActivity/${activityId}`,
+      );
+      console.log(response.data.data);
+      set({ currentActivity: response.data.data });
+      set({ currentActivityLoading: false });
+    } catch (error) {
+      console.error(error);
+    }
+  },
   themes: [],
   getThemes: async () => {
     try {

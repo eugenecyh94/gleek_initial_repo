@@ -5,7 +5,7 @@ import { getAllThemes } from "../../controller/activityController.js";
 import { getAllActivitiesNames } from "../../controller/activityController.js";
 import { getMinAndMaxPricePerPax } from "../../controller/activityController.js";
 import { verifyToken } from "../../middleware/clientAuth.js";
-
+import { getActivity } from "../../controller/activityController.js";
 const router = express.Router();
 
 /*
@@ -19,4 +19,6 @@ router.post("/getFilteredActivities", verifyToken, getActivitiesWithFilters);
 router.get("/getAllActivitiesNames", verifyToken, getAllActivitiesNames);
 
 router.get("/getMinAndMaxPricePerPax", verifyToken, getMinAndMaxPricePerPax);
+
+router.get("/viewActivity/:id", verifyToken, getActivity);
 export default router;

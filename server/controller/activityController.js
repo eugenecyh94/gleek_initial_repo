@@ -29,6 +29,26 @@ export const getActivity = async (req, res) => {
     let preSignedUrlArr = await s3ImageGetService(foundActivity.images);
     foundActivity.preSignedImages = preSignedUrlArr;
     console.log("each push:", foundActivity.preSignedImages);
+    // Create a function to find the minimum price per pax for each activity
+    async function findMinimumPricePerPax(foundActivity) {
+      let minPricePerPax = Infinity;
+      for (const pricingRule of foundActivity.activityPricingRules) {
+        if (pricingRule.pricePerPax < minPricePerPax) {
+          minPricePerPax = pricingRule.pricePerPax;
+        }
+      }
+      return minPricePerPax;
+    }
+    // Populate the minimum price per pax for each activity
+    foundActivity.minimumPricePerPax =
+      await findMinimumPricePerPax(foundActivity);
+    if (foundActivity.linkedVendor && foundActivity.linkedVendor.companyLogo) {
+      let preSignedUrl = await s3ImageGetService(
+        foundActivity.linkedVendor.companyLogo,
+      );
+      foundActivity.linkedVendor.preSignedPhoto = preSignedUrl;
+    }
+
     res.status(200).json({
       data: foundActivity,
     });
@@ -326,11 +346,6 @@ export const getActivitiesWithFilters = async (req, res) => {
 
     // Create a function to find the minimum price per pax for each activity
     async function findMinimumPricePerPax(activity) {
-      // Your logic to find the minimum price per pax from activityPricingRules
-      // This might involve iterating through activity.activityPricingRules
-      // and finding the minimum price.
-
-      // For example:
       let minPricePerPax = Infinity;
       for (const pricingRule of activity.activityPricingRules) {
         if (pricingRule.pricePerPax < minPricePerPax) {

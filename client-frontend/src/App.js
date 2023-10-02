@@ -14,7 +14,7 @@ import PasswordChange from "./containers/Client/Account/PasswordChange";
 import ProfilePicture from "./containers/Client/Account/ProfilePicture";
 import VerifyEmail from "./containers/Client/Account/VerifyEmail";
 import MyBookmarks from "./containers/Client/Bookmark/MyBookmarks";
-import ActivityDetailsPage from "./containers/ActivityDetailsPage";
+import ActivityDetailsPage from "./containers/ActivityDetailsPage/ActivityDetailsPage";
 
 import useClientStore from "./zustand/ClientStore";
 import VendorRegisterPage from "./containers/Vendor/VendorRegisterPage";
@@ -125,7 +125,7 @@ function App() {
             }
           />
           <Route
-            path="/shop/activity/:id"
+            path="/shop/activity/:activityId"
             element={
               <ClientProtectedRoute>
                 <ActivityDetailsPage />
