@@ -13,6 +13,8 @@ import {
   Select,
   Grid,
   Avatar,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
@@ -22,6 +24,7 @@ import SearchBar from "./SearchBar/SearchBar.jsx";
 import SearchIcon from "@mui/icons-material/Search";
 import useGlobalStore from "../zustand/GlobalStore.js";
 import useVendorStore from "../zustand/VendorStore.js";
+import { BookmarkBorderOutlined, LogoutOutlined, Person2Outlined } from "@mui/icons-material";
 function NavBar(props) {
   const { authenticated, client, logoutClient } = useClientStore();
   const { vendorAuthenticated, vendor, logoutVendor } = useVendorStore();
@@ -265,6 +268,7 @@ function NavBar(props) {
                 anchorEl={anchorE2}
                 open={open2}
                 onClose={handleClose2}
+                onClick={handleClose2}
                 MenuListProps={{
                   "aria-labelledby": "icon-button",
                 }}
@@ -273,6 +277,7 @@ function NavBar(props) {
                     elevation: 2,
                   },
                 }}
+                disableScrollLock={true}
               >
                 <MenuItem disabled sx={{ px: "32px" }}>
                   {client?.email}
@@ -283,10 +288,27 @@ function NavBar(props) {
                     navigate("/settings");
                   }}
                 >
-                  Profile Settings
+                  <ListItemIcon>
+                    <Person2Outlined />
+                  </ListItemIcon>
+                  <ListItemText>Settings</ListItemText>
+                </MenuItem>
+                <MenuItem
+                  sx={{ px: "32px" }}
+                  onClick={() => {
+                    navigate("/bookmarks");
+                  }}
+                >
+                  <ListItemIcon>
+                    <BookmarkBorderOutlined />
+                  </ListItemIcon>
+                  <ListItemText>Bookmarks</ListItemText>
                 </MenuItem>
                 <MenuItem sx={{ px: "32px" }} onClick={logout}>
-                  Log out
+                  <ListItemIcon>
+                    <LogoutOutlined />
+                  </ListItemIcon>
+                  <ListItemText>Logout</ListItemText>
                 </MenuItem>
               </Menu>
             </Box>
