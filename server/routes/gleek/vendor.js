@@ -65,9 +65,4 @@ router.post("/recoverPasswordMail", recoverPasswordMail);
 router.post("/resetPassword", verifyToken, postResetPassword);
 router.get("/resetPassword/:token", resetPasswordRedirect);
 
-<<<<<<< HEAD
-=======
-
-
->>>>>>> develop-2
 export default router;

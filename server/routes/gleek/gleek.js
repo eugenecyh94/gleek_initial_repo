@@ -3,13 +3,10 @@ import shopRoutes from "./shop.js";
 import authRoutes from "./auth.js";
 import clientRoutes from "./client.js";
 import vendorRoutes from "./vendor.js";
-<<<<<<< HEAD
 import bookingRoutes from "./booking.js";
 import timeslotRoutes from "./timeslot.js";
-=======
 import bookmarkRoutes from "./bookmark.js";
 import activityRoutes from "./activity.js";
->>>>>>> develop-2
 import { userRouter } from "../../controller/gleekUserRouterController.js";
 const router = express.Router();
 

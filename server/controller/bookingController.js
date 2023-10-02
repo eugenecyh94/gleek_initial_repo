@@ -2,6 +2,53 @@ import BookingModel from "../model/bookingModel.js";
 import ActivityModel from "../model/activityModel.js";
 import ClientModel from "../model/clientModel.js";
 import BlockedTimeslotModel from "../model/blockedTimeslotModel.js";
+import { validationResult } from "express-validator";
+import jwt from "jsonwebtoken";
+
+const secret = process.env.JWT_SECRET_ClIENT;
+
+/*
+ * Generate JWT Token
+ */
+const generateJwtToken = async (clientId) => {
+  const payload = {
+    client: { id: clientId },
+  };
+  return new Promise((resolve, reject) => {
+    jwt.sign(payload, secret, { expiresIn: 360000 }, (err, token) => {
+      if (err) reject(err);
+      resolve(token);
+    });
+  });
+};
+
+// export const validateToken = async (req, res) => {
+//   const token = req.cookies.token;
+//   if (!token) {
+//     return res.status(403).send("A token is required for authentication");
+//   }
+
+//   try {
+//     const decoded = jwt.verify(token, secret);
+//     const client = await Client.findById(decoded.client.id);
+//     if (!client) {
+//       return res.status(401).send("Client not found");
+//     }
+
+//     if (client.photo) {
+//       const preSignedUrl = await s3ImageGetService(client.photo);
+//       client.preSignedPhoto = preSignedUrl;
+//     }
+
+//     const { password, ...clientWithoutPassword } = client.toObject();
+
+//     return res.status(200).json({ token, client: clientWithoutPassword });
+//   } catch (err) {
+//     console.error(err);
+//     // If verification fails (e.g., due to an invalid or expired token), send an error response
+//     return res.status(401).send("Invalid Token");
+//   }
+// };
 
 // GET /booking/getAllBookings
 export const getAllBookings = async (req, res) => {
@@ -45,8 +92,6 @@ function generateStartTimes(earliestStartTime, latestStartTime, interval) {
   const endTimeObj = new Date(latestStartTime);
 
   while (currentTime <= endTimeObj) {
-    // const hours = currentTime.getHours().toString().padStart(2, "0");
-    // const minutes = currentTime.getMinutes().toString().padStart(2, "0");
     startTimes.push(new Date(currentTime));
     currentTime.setTime(currentTime.getTime() + interval * 60 * 1000); // Add interval in milliseconds
   }
@@ -140,9 +185,19 @@ function generateAllTimeslots(
   return allTimeslots;
 }
 
-// GET /gleek/client/getAvailableBookingTimeslots/:activityId/:selectedDate
-// Eg: /gleek/client/getAvailableBookingTimeslots/60b9b6b9e6b3a83a3c3b3b3b/2023-10-07T00:00:00.000Z
+// GET /gleek/booking/getAvailableBookingTimeslots/:activityId/:selectedDate
+// Eg: /gleek/booking/getAvailableBookingTimeslots/60b9b6b9e6b3a83a3c3b3b3b/2023-10-07T00:00:00.000Z
 export const getAvailableBookingTimeslots = async (req, res) => {
+  const errors = validationResult(req);
+
+  const client = req.user;
+  // console.log("Client", client);
+
+  if (!errors.isEmpty()) {
+    // 422 status due to validation errors
+    return res.status(422).json({ errors: errors.array() });
+  }
+
   try {
     const { activityId, selectedDate } = req.params;
     // Validate that activity exists
@@ -184,7 +239,7 @@ export const getAvailableBookingTimeslots = async (req, res) => {
 
     // Validate that date parameter is XX days in advance
     const today = new Date();
-    const daysInAdvance = 7;
+    const daysInAdvance = activity.bookingNotice;
     const minDate = new Date(
       today.getFullYear(),
       today.getMonth(),
@@ -200,21 +255,40 @@ export const getAvailableBookingTimeslots = async (req, res) => {
     // Validate that date parameter is not a public holiday
     // (public holidays are not available for booking)
 
-    // Generate timeslots in 30 min intervals from 9:00 AM to 5:00 PM
+    // Generate timeslots in 30 min intervals from earliest start to latest start time
+    console.log("SELECTED DATE: ", dateParam.toLocaleDateString());
     const earliestStartTime = new Date(dateParam);
-    earliestStartTime.setUTCHours(9, 0, 0, 0); // 9:00 AM
+    earliestStartTime.setHours(
+      activity.startTime.getHours(),
+      activity.startTime.getMinutes(),
+      0,
+      0
+    );
     const latestStartTime = new Date(dateParam);
-    latestStartTime.setUTCHours(17, 0, 0, 0); // 5:00 PM
+    latestStartTime.setHours(
+      activity.endTime.getHours(),
+      activity.endTime.getMinutes(),
+      0,
+      0
+    );
+    console.log(
+      "EARLIEST START TIME: ",
+      earliestStartTime.toLocaleDateString(),
+      earliestStartTime.toLocaleTimeString()
+    );
+    console.log(
+      "LATEST START TIME: ",
+      latestStartTime.toLocaleDateString(),
+      latestStartTime.toLocaleTimeString()
+    );
+
     const interval = 30; // 30 minutes
 
-    console.log("earliestStartTime: ", earliestStartTime);
-    console.log("latestStartTime: ", latestStartTime);
-
     const startOfDay = new Date(dateParam);
-    startOfDay.setUTCHours(0, 0, 0, 0); // Set time to 00:00:00.000 of the selected day
+    startOfDay.setHours(0, 0, 0, 0); // Set time to 00:00:00.000 of the selected day
 
     const endOfDay = new Date(dateParam);
-    endOfDay.setUTCHours(23, 59, 59, 999); // Set time to 23:59:59.999 of the selected day
+    endOfDay.setHours(23, 59, 59, 999); // Set time to 23:59:59.999 of the selected day
 
     // Get activity's bookings for the selected date
     const bookings = await BookingModel.find({
@@ -238,7 +312,7 @@ export const getAvailableBookingTimeslots = async (req, res) => {
       earliestStartTime,
       latestStartTime,
       interval,
-      1,
+      activity.capacity,
       bookings,
       blockedTimeslots,
       activity.duration
@@ -256,13 +330,12 @@ export const getAvailableBookingTimeslots = async (req, res) => {
   }
 };
 
-// POST /gleek/client/createBooking
+// POST /gleek/booking/createBooking
 // Request body expects (for example):
 // {
-// "clientId" : "60b9b6b9e6b3a83a3c3b3b3b",
 // "activityId" : "60b9b6b9e6b3a83a3c3b3b3b",
-// "startDateTime" : "2023-12-04T16:00:00.000Z",
-// "endDateTime" : "2023-12-04T17:00:00.000Z",
+// "startDateTime" : "2023-12-04T00:00:00.000Z",
+// "endDateTime" : "2023-12-04T02:00:00.000Z",
 // "basePricePerPax" : 50,
 // "totalPax" : 5,
 // "weekendAddOnCost" : 10,
@@ -277,9 +350,18 @@ export const getAvailableBookingTimeslots = async (req, res) => {
 // }
 
 export const createBooking = async (req, res) => {
+  const errors = validationResult(req);
+
+  const client = req.user;
+  console.log("Client", client);
+
+  if (!errors.isEmpty()) {
+    // 422 status due to validation errors
+    return res.status(422).json({ errors: errors.array() });
+  }
+
   try {
     const {
-      clientId,
       activityId,
       startDateTime,
       endDateTime,
@@ -291,13 +373,7 @@ export const createBooking = async (req, res) => {
       ...restBody
     } = req.body;
 
-    // Check if client exists and is approved to make bookings
-    const client = await ClientModel.findById(clientId);
-    if (client === null) {
-      return res.status(404).json({
-        error: "Client not found with the provided ID.",
-      });
-    }
+    // Check if client is approved to make bookings
     if (client.status !== "APPROVED") {
       return res.status(400).json({
         error: "Client is not approved to make bookings yet.",
@@ -326,26 +402,52 @@ export const createBooking = async (req, res) => {
       offlineAddOnCost;
 
     // Check if activity is available for booking
-    // Generate timeslots in 30 min intervals from 9:00 AM to 5:00 PM
+    // Generate timeslots in 30 min intervals from earliest start to latest start time
     const selectedStartDateTime = new Date(startDateTime);
     const selectedEndDateTime = new Date(endDateTime);
-
-    console.log("selectedStartDateTime: ", selectedStartDateTime);
+    console.log(
+      "SELECTED STARTTIME: ",
+      selectedStartDateTime.toLocaleDateString(),
+      selectedStartDateTime.toLocaleTimeString()
+    );
+    console.log(
+      "SELECTED ENDTIME: ",
+      selectedEndDateTime.toLocaleDateString(),
+      selectedEndDateTime.toLocaleTimeString()
+    );
 
     const earliestStartTime = new Date(startDateTime);
-    earliestStartTime.setUTCHours(9, 0, 0, 0); // 9:00 AM
+    earliestStartTime.setHours(
+      activity.startTime.getHours(),
+      activity.startTime.getMinutes(),
+      0,
+      0
+    );
     const latestStartTime = new Date(startDateTime);
-    latestStartTime.setUTCHours(17, 0, 0, 0); // 5:00 PM
+    latestStartTime.setHours(
+      activity.endTime.getHours(),
+      activity.endTime.getMinutes(),
+      0,
+      0
+    );
+    console.log(
+      "EARLIEST START TIME: ",
+      earliestStartTime.toLocaleDateString(),
+      earliestStartTime.toLocaleTimeString()
+    );
+    console.log(
+      "LATEST START TIME: ",
+      latestStartTime.toLocaleDateString(),
+      latestStartTime.toLocaleTimeString()
+    );
+
     const interval = 30; // 30 minutes
 
-    console.log("earliestStartTime: ", earliestStartTime);
-    console.log("latestStartTime: ", latestStartTime);
-
     const startOfDay = new Date(startDateTime);
-    startOfDay.setUTCHours(0, 0, 0, 0); // Set time to 00:00:00.000 of the selected day
+    startOfDay.setHours(0, 0, 0, 0); // Set time to 00:00:00.000 of the selected day
 
     const endOfDay = new Date(startDateTime);
-    endOfDay.setUTCHours(23, 59, 59, 999); // Set time to 23:59:59.999 of the selected day
+    endOfDay.setHours(23, 59, 59, 999); // Set time to 23:59:59.999 of the selected day
 
     // Get activity's bookings for the selected date
     const bookings = await BookingModel.find({
@@ -369,7 +471,7 @@ export const createBooking = async (req, res) => {
       earliestStartTime,
       latestStartTime,
       interval,
-      1,
+      activity.capacity,
       bookings,
       blockedTimeslots,
       activity.duration
@@ -391,7 +493,7 @@ export const createBooking = async (req, res) => {
 
     // Create booking
     const booking = new BookingModel({
-      clientId,
+      clientId: client.id,
       activityId,
       startDateTime,
       endDateTime,

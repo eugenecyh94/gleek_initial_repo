@@ -3,6 +3,7 @@ import {
   getBlockedTimeslotsByActivityId,
   addBlockedTimeslot,
 } from "../../controller/blockedTimeslotController.js";
+import verifyToken from "../../middleware/vendorAuth.js";
 
 const router = express.Router();
 
@@ -11,6 +12,6 @@ router.get(
   "/getBlockedTimeslotsByActivityId/:activityId",
   getBlockedTimeslotsByActivityId
 );
-router.post("/addBlockedTimeslot", addBlockedTimeslot);
+router.post("/addBlockedTimeslot", verifyToken, addBlockedTimeslot);
 
 export default router;

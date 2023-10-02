@@ -1,6 +1,6 @@
 import BlockedTimeslotModel from "../model/blockedTimeslotModel.js";
 
-// GET /gleek/vendor/getBlockedTimeslotsByActivityId/:activityId
+// GET /gleek/timeslot/getBlockedTimeslotsByActivityId/:activityId
 export const getBlockedTimeslotsByActivityId = async (req, res) => {
   try {
     const { activityId } = req.params;
@@ -17,7 +17,7 @@ export const getBlockedTimeslotsByActivityId = async (req, res) => {
   }
 };
 
-// POST /gleek/vendor/addBlockedTimeslot
+// POST /gleek/timeslot/addBlockedTimeslot
 // Request body expects:
 // {
 //   "activityId": "60b9a9f9f0a6a93c4c0e4e8d",
