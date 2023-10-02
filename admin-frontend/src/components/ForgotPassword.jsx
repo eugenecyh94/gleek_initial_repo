@@ -90,34 +90,34 @@ const ForgotPassword = () => {
               <Box borderRadius="50%" bgcolor={primary} p={1}>
                 <LockPersonIcon fontSize="large" color="accent" />
               </Box>
-            
-            <Typography variant="h5">Recover Password</Typography>
-            <TextField
-              size="small"
-              autoComplete="on"
-              id="email"
-              required
-              name="email"
-              placeholder="Email"
-              onChange={handleChange}
-              onBlur={handleChange}
-              label="Email"
-              value={email}
-              helperText={emailError}
-              error={emailError.length > 0}
-              sx={{ marginTop: "32px" }}
-            ></TextField>
-            <Button
-              sx={{ marginTop: "24px" }}
-              mt={4}
-              variant="contained"
-              type="submit"
-              disabled={emailError != ""}
-              onClick={handleSubmit}
-            >
-              <Typography variant="body1">Send Recovery Link</Typography>
-            </Button>
-          </Box>
+
+              <Typography variant="h5">Recover Password</Typography>
+              <TextField
+                size="small"
+                autoComplete="on"
+                id="email"
+                required
+                name="email"
+                placeholder="Email"
+                onChange={handleChange}
+                onBlur={handleChange}
+                label="Email"
+                value={email}
+                helperText={emailError}
+                error={emailError.length > 0}
+                sx={{ marginTop: "32px" }}
+              ></TextField>
+              <Button
+                sx={{ marginTop: "24px" }}
+                mt={4}
+                variant="contained"
+                type="submit"
+                disabled={emailError != ""}
+                onClick={handleSubmit}
+              >
+                <Typography variant="body1">Send Recovery Link</Typography>
+              </Button>
+            </Box>
           </Box>
         </form>
       </Box>

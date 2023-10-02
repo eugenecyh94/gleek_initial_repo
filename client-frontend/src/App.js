@@ -13,7 +13,9 @@ import Privacy from "./containers/Client/Account/Privacy";
 import PasswordChange from "./containers/Client/Account/PasswordChange";
 import ProfilePicture from "./containers/Client/Account/ProfilePicture";
 import VerifyEmail from "./containers/Client/Account/VerifyEmail";
+import MyBookmarks from "./containers/Client/Bookmark/MyBookmarks";
 import ActivityDetailsPage from "./containers/ActivityDetailsPage";
+
 import useClientStore from "./zustand/ClientStore";
 import VendorRegisterPage from "./containers/Vendor/VendorRegisterPage";
 import ErrorPage from "./containers/ErrorPage";
@@ -29,6 +31,8 @@ import VerifyEmailVendor from "./containers/Vendor/VerifyEmailVendor";
 import PrivacyVendor from "./containers/Vendor/PrivacyVendor";
 import VendorForgotPassword from "./containers/Vendor/Password/VendorForgotPassword";
 import VendorResetPassword from "./containers/Vendor/Password/ResetPassword";
+import VendorDetails from "./containers/Client/Activity/VendorDetails";
+
 function App() {
   const { isLoading, clientError, login } = useClientStore();
   const { isLoadingVendor, vendorError, loginVendor } = useVendorStore();
@@ -96,6 +100,15 @@ function App() {
           />
 
           <Route
+            path="/bookmarks"
+            element={
+              <ClientProtectedRoute>
+                <MyBookmarks />
+              </ClientProtectedRoute>
+            }
+          />
+
+          <Route
             path="/cart"
             element={
               <ClientProtectedRoute>
@@ -119,6 +132,11 @@ function App() {
               </ClientProtectedRoute>
             }
           />
+          <Route exact path="/shop/vendor/:id"    element={
+              <ClientProtectedRoute>
+                <VendorDetails />
+              </ClientProtectedRoute>
+            } />
           <Route
             path="/login"
             element={
