@@ -14,7 +14,7 @@ const activitySchema = new mongoose.Schema({
   subtheme: [{ type: mongoose.Schema.Types.ObjectId, ref: "Theme" }],
   activityType: { type: String, enum: TYPE, required: true },
   duration: { type: Number, required: true },
-  location: { type: String, enum: LOCATION, required: true },
+  location: { type: [String], enum: LOCATION, required: true },
   size: { type: String, enum: SIZE },
   sdg: {
     type: [String],
@@ -70,6 +70,36 @@ const activitySchema = new mongoose.Schema({
   popupItemsSold: { type: String },
   preSignedImages: {
     type: Array,
+  },
+  capacity: { type: Number, required: true },
+  bookingNotice: { type: Number, required: true },
+  startTime: { type: Date },
+  endTime: { type: Date },
+  // addon pricing
+  weekendPricing: {
+    amount: {
+      type: Number,
+    },
+    isDiscount: {
+      type: Boolean,
+    },
+  },
+  offlinePricing: {
+    amount: {
+      type: Number,
+      default: null,
+    },
+    isDiscount: {
+      type: Boolean,
+    },
+  },
+  onlinePricing: {
+    amount: {
+      type: Number,
+    },
+    isDiscount: {
+      type: Boolean,
+    },
   },
 });
 
