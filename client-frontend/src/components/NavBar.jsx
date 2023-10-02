@@ -13,6 +13,8 @@ import {
   Select,
   Grid,
   Avatar,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
@@ -24,11 +26,22 @@ import useGlobalStore from "../zustand/GlobalStore.js";
 import useVendorStore from "../zustand/VendorStore.js";
 import useShopStore from "../zustand/ShopStore.js";
 import AxiosConnect from "../utils/AxiosConnect.js";
+import {
+  BookmarkBorderOutlined,
+  LogoutOutlined,
+  Person2Outlined,
+} from "@mui/icons-material";
 
 function NavBar(props) {
   const { authenticated, client, logoutClient } = useClientStore();
   const { vendorAuthenticated, vendor, logoutVendor } = useVendorStore();
-  const { searchValue, filter } = useShopStore();
+  const {
+    searchValue,
+    searchValueOnClicked,
+    setSearchValueOnClicked,
+    filter,
+    getFilteredActivitiesWithSearchValue,
+  } = useShopStore();
   const { role, setRole } = useGlobalStore();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [anchorE2, setAnchorE2] = React.useState(null);
@@ -89,13 +102,8 @@ function NavBar(props) {
 
   const searchOnClick = async () => {
     navigate("/shop");
-    const response = await AxiosConnect.post(
-      "/gleek/shop/getFilteredActivities",
-      {
-        filter: filter,
-        searchValue: searchValue,
-      },
-    );
+    getFilteredActivitiesWithSearchValue(filter, searchValue);
+    setSearchValueOnClicked(searchValue);
   };
 
   return (
@@ -272,6 +280,7 @@ function NavBar(props) {
                 anchorEl={anchorE2}
                 open={open2}
                 onClose={handleClose2}
+                onClick={handleClose2}
                 MenuListProps={{
                   "aria-labelledby": "icon-button",
                 }}
@@ -280,6 +289,7 @@ function NavBar(props) {
                     elevation: 2,
                   },
                 }}
+                disableScrollLock={true}
               >
                 <MenuItem disabled sx={{ px: "32px" }}>
                   {client?.email}
@@ -290,10 +300,27 @@ function NavBar(props) {
                     navigate("/settings");
                   }}
                 >
-                  Profile Settings
+                  <ListItemIcon>
+                    <Person2Outlined />
+                  </ListItemIcon>
+                  <ListItemText>Settings</ListItemText>
+                </MenuItem>
+                <MenuItem
+                  sx={{ px: "32px" }}
+                  onClick={() => {
+                    navigate("/bookmarks");
+                  }}
+                >
+                  <ListItemIcon>
+                    <BookmarkBorderOutlined />
+                  </ListItemIcon>
+                  <ListItemText>Bookmarks</ListItemText>
                 </MenuItem>
                 <MenuItem sx={{ px: "32px" }} onClick={logout}>
-                  Log out
+                  <ListItemIcon>
+                    <LogoutOutlined />
+                  </ListItemIcon>
+                  <ListItemText>Logout</ListItemText>
                 </MenuItem>
               </Menu>
             </Box>

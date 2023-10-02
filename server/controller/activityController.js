@@ -37,6 +37,31 @@ export const getActivity = async (req, res) => {
   }
 };
 
+export const getActivitiesByVendorId = async (req, res) => {
+  try {
+    const { vendorId } = req.params;
+    console.log(vendorId);
+
+    const activities = await ActivityModel.find({ linkedVendor: vendorId })
+      .populate("activityPricingRules")
+      .populate("theme")
+      .populate("subtheme")
+      .populate("linkedVendor");
+
+    // Use the first image of each activity
+    const imagesToGet = activities.map((activity) => activity.images[0]);
+    const preSignedUrlArr = await s3ImageGetService(imagesToGet);
+    activities.forEach((activity, index) => {
+      activity.preSignedImages = [preSignedUrlArr[index]];
+    });
+
+    res.status(200).json(activities);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 export const addActivity = async (req, res) => {
   try {
     console.log("add activity body:", req.body);
@@ -224,10 +249,6 @@ export const getAllThemes = async (req, res) => {
 export const getActivitiesWithFilters = async (req, res) => {
   try {
     const { filter, searchValue } = req.body;
-    // Convert string IDs to ObjectId instances
-    const subthemeIds = filter.themes.map(
-      (id) => new mongoose.Types.ObjectId(id),
-    );
 
     // Initialize the query
     const query = {};
@@ -237,6 +258,7 @@ export const getActivitiesWithFilters = async (req, res) => {
       query.title = {
         $regex: new RegExp(searchValue, "i"), // "i" makes the regex case-insensitive
       };
+      console.log(searchValue);
     }
 
     if (filter.locations.length > 0) {
@@ -245,6 +267,11 @@ export const getActivitiesWithFilters = async (req, res) => {
         $in: filter.locations,
       };
     }
+
+    // Convert string IDs to ObjectId instances
+    const subthemeIds = filter.themes.map(
+      (id) => new mongoose.Types.ObjectId(id),
+    );
 
     if (subthemeIds.length > 0) {
       // Add subtheme filter when subthemes is not empty
@@ -290,10 +317,34 @@ export const getActivitiesWithFilters = async (req, res) => {
       };
     }
 
-    const activities = await ActivityModel.find(query).populate(
-      "activityPricingRules",
-    );
+    // Add the condition for isDraft to be false
+    query.isDraft = false;
 
+    const activities = await ActivityModel.find(query)
+      .populate("activityPricingRules")
+      .populate("linkedVendor");
+
+    // Create a function to find the minimum price per pax for each activity
+    async function findMinimumPricePerPax(activity) {
+      // Your logic to find the minimum price per pax from activityPricingRules
+      // This might involve iterating through activity.activityPricingRules
+      // and finding the minimum price.
+
+      // For example:
+      let minPricePerPax = Infinity;
+      for (const pricingRule of activity.activityPricingRules) {
+        if (pricingRule.pricePerPax < minPricePerPax) {
+          minPricePerPax = pricingRule.pricePerPax;
+        }
+      }
+      return minPricePerPax;
+    }
+
+    // Populate the minimum price per pax for each activity
+    for (const activity of activities) {
+      activity.minimumPricePerPax = await findMinimumPricePerPax(activity);
+      activity.preSignedImages = await s3ImageGetService(activity.images);
+    }
     // console.log(
     //   "********************************************************************************"
     // );
@@ -313,7 +364,10 @@ export const getActivitiesWithFilters = async (req, res) => {
 export const getAllActivitiesNames = async (req, res) => {
   try {
     // Query the collection to get titles of all documents
-    const activityTitles = await ActivityModel.find({}, "title");
+    const activityTitles = await ActivityModel.find(
+      { isDraft: false },
+      "title",
+    );
 
     // Extract the titles from the result
     const titles = activityTitles.map((activity) => activity.title);
@@ -359,8 +413,8 @@ export const getMinAndMaxPricePerPax = async (req, res) => {
     const minPrice = Math.min(...pricingRules.map((rule) => rule.pricePerPax));
     const maxPrice = Math.max(...pricingRules.map((rule) => rule.pricePerPax));
 
-    console.log("Minimum Price Per Pax:", minPrice);
-    console.log("Maximum Price Per Pax:", maxPrice);
+    // console.log("Minimum Price Per Pax:", minPrice);
+    // console.log("Maximum Price Per Pax:", maxPrice);
 
     res.status(200).json({
       success: true,

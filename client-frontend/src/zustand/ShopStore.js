@@ -27,11 +27,54 @@ const useShopStore = create((set) => ({
     daysAvailability: [],
     activityType: [],
     duration: [],
-    priceRange: [],
+    priceRange: [null, null],
   },
   setFilter: (newFilter) => set({ filter: newFilter }),
+  getFilteredActivitiesLoading: true,
+  setFilteredActivitiesLoading: (newFilteredActivitiesLoading) =>
+    set({ filteredActivitiesLoading: newFilteredActivitiesLoading }),
+  getFilteredActivities: async (filter, searchValue) => {
+    try {
+      set({ getFilteredActivitiesLoading: true });
+      const response = await AxiosConnect.post(
+        "/gleek/shop/getFilteredActivities",
+        {
+          filter: filter,
+          searchValue: searchValue,
+        },
+      );
+      set({ activities: response.data.activities });
+      console.log(response.data.activities);
+      setTimeout(() => {
+        set({ getFilteredActivitiesLoading: false });
+      }, 200);
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  getFilteredActivitiesWithSearchValue: async (filter, searchValue) => {
+    try {
+      set({ getFilteredActivitiesLoading: true });
+      const response = await AxiosConnect.post(
+        "/gleek/shop/getFilteredActivities",
+        {
+          filter: filter,
+          searchValue,
+        },
+      );
+      set({ activities: response.data.activities });
+      setTimeout(() => {
+        set({ getFilteredActivitiesLoading: false });
+      }, 200);
+    } catch (error) {
+      console.error(error);
+    }
+  },
   searchValue: "",
   setSearchValue: (newSearchValue) => set({ searchValue: newSearchValue }),
+  searchValueOnClicked: "",
+  setSearchValueOnClicked: (newSearchValueOnClicked) =>
+    set({ searchValueOnClicked: newSearchValueOnClicked }),
   getInitialSuggestions: async () => {
     try {
       const response = await AxiosConnect.get(
@@ -56,10 +99,12 @@ const useShopStore = create((set) => ({
       const response = await AxiosConnect.get(
         "/gleek/shop/getMinAndMaxPricePerPax",
       );
-      console.log(response.data);
+
       set({ minPriceValue: response.data.minPrice });
       set({ maxPriceValue: response.data.maxPrice });
-      set({ priceFilterLoading: false });
+      setTimeout(() => {
+        set({ priceFilterLoading: false });
+      }, 200);
     } catch (error) {
       console.error(error);
     }
