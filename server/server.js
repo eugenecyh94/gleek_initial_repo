@@ -9,26 +9,28 @@ import gleekAdminRoutes from "./routes/gleekAdmin/gleekAdmin.js";
 import vendorRoutes from "./routes/gleekAdmin/vendorRoute.js";
 import client from "./routes/gleekAdmin/client.js";
 import activityTestController from "./controller/activityTestController.js";
+import pdf from "html-pdf";
+import { InvoiceTemplate } from "./assets/templates/InvoiceTemplate.js";
 
 const app = express();
 
 const port = process.env.PORT;
 // Custom middleware to apply different CORS options based on the origin
 const customCors = (req, callback) => {
-  const whitelist = ["http://localhost:3001", "http://localhost:3002"];
-  const origin = req.header("Origin");
+   const whitelist = ["http://localhost:3001", "http://localhost:3002"];
+   const origin = req.header("Origin");
 
-  if (whitelist.includes(origin)) {
-    // Apply credentials: true for http://localhost:3001
-    const corsOptions = {
-      origin,
-      credentials: true,
-    };
-    callback(null, corsOptions);
-  } else {
-    // Disallow CORS for other origins
-    callback();
-  }
+   if (whitelist.includes(origin)) {
+      // Apply credentials: true for http://localhost:3001
+      const corsOptions = {
+         origin,
+         credentials: true,
+      };
+      callback(null, corsOptions);
+   } else {
+      // Disallow CORS for other origins
+      callback();
+   }
 };
 
 app.use(cors(customCors));
@@ -46,6 +48,17 @@ app.use("/gleek", gleekRoutes);
 //for activity image upload test
 app.use("/testActivity", activityTestController);
 
+app.get("/pdf", (req, res, next) => {
+   const stream = res.writeHead(200, {
+      "Content-Type": "appplication/pdf",
+      "Content-Disposition": "attachment;filename=test.pdf",
+   });
+
+   pdf.create(InvoiceTemplate("Yunus"), {}).toStream(function (err, stream) {
+      stream.pipe(res);
+   });
+});
+
 app.listen(port, () => {
-  console.log(`Server is running on port: ${port}`);
+   console.log(`Server is running on port: ${port}`);
 });
