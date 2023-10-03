@@ -79,8 +79,6 @@ const VendorDetails = () => {
     >
       <Grid
         container
-      
-
         spacing={{ xs: 2, md: 2 }}
         columns={{ xs: 4, sm: 8, md: 12 }}
         justifyContents="center"
@@ -94,7 +92,7 @@ const VendorDetails = () => {
                 bgcolor: primary,
                 width: 100,
                 height: 100,
-                fontSize: "80px", 
+                fontSize: "80px",
               }}
               src={vendor?.preSignedPhoto || ""}
             >

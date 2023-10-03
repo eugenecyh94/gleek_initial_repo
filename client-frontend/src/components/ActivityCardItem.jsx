@@ -1,6 +1,7 @@
 import { Box, Typography, useMediaQuery, Rating, Paper } from "@mui/material";
 import React from "react";
 import { useTheme, lighten } from "@mui/material/styles";
+import notFound from "../assets/not_found.png";
 
 // Temporary fix until ActivityItem.jsx is finalised
 
@@ -75,6 +76,9 @@ const ActivityCardItem = ({ activity }) => {
             style={containerStyle}
           />
         )}
+        {!activity.preSignedImages.length > 0 && (
+          <img src={notFound} alt={activity.title} style={containerStyle} />
+        )}
       </Box>
       <Box p={3}>
         <Typography color={accent} fontWeight="700" variant="h5">
@@ -83,7 +87,16 @@ const ActivityCardItem = ({ activity }) => {
         <Typography color={accent} mt={2} variant="body1">
           By {activity.linkedVendor?.companyName}
         </Typography>
-        <Typography color={accent} variant="body1">
+        <Typography
+          color={accent}
+          variant="body1"
+          sx={{
+            maxWidth: "300px",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
           {activity.description}
         </Typography>
         <Typography color={accent} variant="body1">
@@ -99,14 +112,14 @@ const ActivityCardItem = ({ activity }) => {
             <Typography color={accent} mt={4} variant="body1">
               From{" "}
             </Typography>
-            {/* <Typography color={accent} variant="h6" fontWeight="700">
-              ${activity.startPricePerPax}/pax
-            </Typography> */}
+            <Typography color={accent} variant="h6" fontWeight="700">
+              ${activity.minimumPricePerPax}/pax
+            </Typography>
           </Box>
           <Box display="flex" flexDirection="row">
             <Typography color={accent} variant="body2" mr={1}>
               {/* {activity.rating.toFixed(1)} */}
-              {1}
+              {activity.rating == undefined ? 0 : activity.rating}
             </Typography>
             <Rating
               name="rating-read"

@@ -8,13 +8,11 @@ export const fetchBookmarks = async (req, res) => {
     const bookmarks = await Bookmark.find({ client })
       .populate({
         path: "vendor",
-
       })
       .populate({
         path: "activity",
         populate: {
           path: "linkedVendor",
-        
         },
       })
       .sort("-created");

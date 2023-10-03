@@ -101,6 +101,7 @@ const activitySchema = new mongoose.Schema({
       type: Boolean,
     },
   },
+  minimumPricePerPax: { type: Number },
 });
 
 const ActivityModel = mongoose.model("Activity", activitySchema, "activities");
