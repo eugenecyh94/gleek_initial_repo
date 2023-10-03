@@ -1,4 +1,5 @@
 import Bookmark from "../model/bookmarkModel.js";
+import { prepareActivityMinimumPricePerPaxAndSingleImage } from "../service/activityService.js";
 import { BookmarkEnum } from "../util/gleek/bookmarkEnum.js";
 
 export const fetchBookmarks = async (req, res) => {
@@ -12,10 +13,22 @@ export const fetchBookmarks = async (req, res) => {
       .populate({
         path: "activity",
         populate: {
-          path: "linkedVendor",
+          path: "linkedVendor activityPricingRules",
         },
       })
       .sort("-created");
+
+    console.log(bookmarks[0]);
+
+    const preSignedPromises = bookmarks.map(async (bm) => {
+      if (bm.activity) {
+        await prepareActivityMinimumPricePerPaxAndSingleImage(bm.activity);
+      }
+    });
+
+    await Promise.all(preSignedPromises);
+
+    console.log(bookmarks)
 
     res.status(200).json(bookmarks);
   } catch (error) {

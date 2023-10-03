@@ -24,6 +24,7 @@ function MyBookmarks() {
     const fetchBookmarks = async () => {
       const response = await AxiosConnect.get(`/gleek/bookmark`);
       const data = response.data;
+      console.log(data)
       const activityBookmarks = data.filter(
         (bookmark) => bookmark.type === "ACTIVITY",
       );
@@ -67,16 +68,18 @@ function MyBookmarks() {
           spacing={{ xs: 2, md: 3 }}
           columns={{ xs: 4, sm: 8, md: 12, lg: 12, xl: 16 }}
         >
-          {activityBookmarks.map((bm) => (
-            <Grid item key={bm._id} xs={4} sm={4} md={4} lg={4} xl={4}>
-              <Link
-                href={`/shop/activity/${bm.activity._id}`}
-                style={{ textDecoration: "none" }}
-              >
-                <ActivityCardItem activity={bm.activity} />
-              </Link>
-            </Grid>
-          ))}
+          {activityBookmarks.map((bm) => {
+            return bm.activity ? (
+              <Grid item key={bm._id} xs={4} sm={4} md={4} lg={4} xl={4}>
+                <Link
+                  href={`/shop/activity/${bm.activity._id}`}
+                  style={{ textDecoration: "none" }}
+                >
+                  <ActivityCardItem activity={bm.activity} />
+                </Link>
+              </Grid>
+            ) : null;
+          })}
         </Grid>
       </TabPanel>
       <TabPanel value={selectedTab} index="vendor">

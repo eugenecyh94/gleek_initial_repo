@@ -1,6 +1,10 @@
 import ActivityModel from "../model/activityModel.js";
 import ActivityPricingRulesModel from "../model/activityPricingRules.js";
 import ThemeModel from "../model/themeModel.js";
+import {
+  findMinimumPricePerPax,
+  prepareActivityMinimumPricePerPaxAndSingleImage,
+} from "../service/activityService.js";
 import { s3ImageGetService } from "../service/s3ImageGetService.js";
 import { VendorTypeEnum } from "../util/vendorTypeEnum.js";
 import mongoose from "mongoose";
@@ -29,16 +33,7 @@ export const getActivity = async (req, res) => {
     let preSignedUrlArr = await s3ImageGetService(foundActivity.images);
     foundActivity.preSignedImages = preSignedUrlArr;
     console.log("each push:", foundActivity.preSignedImages);
-    // Create a function to find the minimum price per pax for each activity
-    async function findMinimumPricePerPax(foundActivity) {
-      let minPricePerPax = Infinity;
-      for (const pricingRule of foundActivity.activityPricingRules) {
-        if (pricingRule.pricePerPax < minPricePerPax) {
-          minPricePerPax = pricingRule.pricePerPax;
-        }
-      }
-      return minPricePerPax;
-    }
+
     // Populate the minimum price per pax for each activity
     foundActivity.minimumPricePerPax =
       await findMinimumPricePerPax(foundActivity);
@@ -68,12 +63,11 @@ export const getActivitiesByVendorId = async (req, res) => {
       .populate("subtheme")
       .populate("linkedVendor");
 
-    // Use the first image of each activity
-    const imagesToGet = activities.map((activity) => activity.images[0]);
-    const preSignedUrlArr = await s3ImageGetService(imagesToGet);
-    activities.forEach((activity, index) => {
-      activity.preSignedImages = [preSignedUrlArr[index]];
+    const preSignedPromises = activities.map(async (activity) => {
+      await prepareActivityMinimumPricePerPaxAndSingleImage(activity);
     });
+
+    await Promise.all(preSignedPromises);
 
     res.status(200).json(activities);
   } catch (error) {
