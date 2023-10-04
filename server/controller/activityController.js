@@ -1,7 +1,7 @@
 import ActivityModel from "../model/activityModel.js";
 import ActivityPricingRulesModel from "../model/activityPricingRules.js";
 import ThemeModel from "../model/themeModel.js";
-import { s3ImageGetService } from "../service/s3ImageGetService.js";
+import { s3GetImages } from "../service/s3ImageServices.js";
 import { VendorTypeEnum } from "../util/vendorTypeEnum.js";
 import mongoose from "mongoose";
 
@@ -49,7 +49,7 @@ export const getActivity = async (req, res) => {
       .populate("linkedVendor")
       .populate("theme")
       .populate("subtheme");
-    let preSignedUrlArr = await s3ImageGetService(foundActivity.images);
+    let preSignedUrlArr = await s3GetImages(foundActivity.images);
     foundActivity.preSignedImages = preSignedUrlArr;
     console.log("each push:", foundActivity.preSignedImages);
     // Create a function to find the minimum price per pax for each activity
@@ -66,7 +66,7 @@ export const getActivity = async (req, res) => {
     foundActivity.minimumPricePerPax =
       await findMinimumPricePerPax(foundActivity);
     if (foundActivity.linkedVendor && foundActivity.linkedVendor.companyLogo) {
-      let preSignedUrl = await s3ImageGetService(
+      let preSignedUrl = await s3GetImages(
         foundActivity.linkedVendor.companyLogo,
       );
       foundActivity.linkedVendor.preSignedPhoto = preSignedUrl;
@@ -93,7 +93,7 @@ export const getActivitiesByVendorId = async (req, res) => {
 
     // Use the first image of each activity
     const imagesToGet = activities.map((activity) => activity.images[0]);
-    const preSignedUrlArr = await s3ImageGetService(imagesToGet);
+    const preSignedUrlArr = await s3GetImages(imagesToGet);
     activities.forEach((activity, index) => {
       activity.preSignedImages = [preSignedUrlArr[index]];
     });
@@ -608,7 +608,7 @@ export const getActivitiesWithFilters = async (req, res) => {
     // Populate the minimum price per pax for each activity
     for (const activity of activities) {
       activity.minimumPricePerPax = await findMinimumPricePerPax(activity);
-      activity.preSignedImages = await s3ImageGetService(activity.images);
+      activity.preSignedImages = await s3GetImages(activity.images);
     }
     // console.log(
     //   "********************************************************************************"
