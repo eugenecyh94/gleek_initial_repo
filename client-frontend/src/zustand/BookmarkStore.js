@@ -83,8 +83,6 @@ const useBookmarkStore = create((set) => ({
         },
       );
       console.log(response);
-
-      // Remove the bookmark from the state
       set((state) => ({
         activityBookmarks: state.activityBookmarks.filter(
           (bookmark) => bookmark._id !== bm._id,
@@ -94,27 +92,25 @@ const useBookmarkStore = create((set) => ({
       throw error;
     }
   },
-
-  // removeActivityBookmark: async (activityId, bm) => {
-  //   try {
-  //     console.log("?????")
-  //     // const response = await AxiosConnect.post(
-  //     //   `/gleek/bookmark/activity/${activityId}`,
-  //     //   {
-  //     //     isBookmarked: false,
-  //     //   },
-  //     // );
-  //     // console.log(response)
-  //     set((state) => ({
-  //       activityBookmarks: state.activityBookmarks.filter(
-  //         (bookmark) => bookmark.activity !== activityId
-  //       ),
-  //     }));
-
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // },
+  removeVendorBookmark: async (bm) => {
+    try {
+      console.log(bm.vendor._id)
+      const response = await AxiosConnect.post(
+        `/gleek/bookmark/vendor/${bm.vendor._id}`,
+        {
+          isBookmarked: false,
+        },
+      );
+      console.log(response);
+      set((state) => ({
+        vendorBookmarks: state.vendorBookmarks.filter(
+          (bookmark) => bookmark._id !== bm._id,
+        ),
+      }));
+    } catch (error) {
+      throw error;
+    }
+  },
 }));
 
 export default useBookmarkStore;

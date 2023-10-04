@@ -1,25 +1,22 @@
+import styled from "@emotion/styled";
 import {
-  Avatar,
   Box,
   CircularProgress,
   Grid,
   IconButton,
   Link,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
   Tab,
   Tabs,
-  Typography,
+  Typography
 } from "@mui/material";
-import styled from "@emotion/styled";
 
 import DeleteIcon from "@mui/icons-material/Delete";
 import React, { useEffect, useState } from "react";
 
 import ActivityCardItem from "../../../components/ActivityCardItem";
-import useBookmarkStore from "../../../zustand/BookmarkStore";
 import VendorProfileItem from "../../../components/Vendor/VendorProfileItem";
+import useBookmarkStore from "../../../zustand/BookmarkStore";
+import useSnackbarStore from "../../../zustand/SnackbarStore";
 
 const DeleteIconButtonActivity = styled(IconButton)`
   position: absolute;
@@ -46,8 +43,9 @@ function MyBookmarks() {
     isLoadingBookmarks,
     getBookmarks,
     removeActivityBookmark,
-    set,
+    removeVendorBookmark,
   } = useBookmarkStore();
+  const { openSnackbar } = useSnackbarStore();
   const [selectedTab, setSelectedTab] = useState("activity");
 
   useEffect(() => {
@@ -63,11 +61,23 @@ function MyBookmarks() {
   };
 
   const handleDeleteBookmark = async (bm) => {
-    await removeActivityBookmark(bm.activity._id, bm);
+    try {
+      await removeActivityBookmark(bm.activity._id, bm);
+      openSnackbar("Removed activity bookmark.", "success");
+    } catch (error) {
+      console.log(error);
+      openSnackbar("Error", "error");
+    }
   };
 
-  const handleDeleteVendorBookmark = async (vendorId) => {
-    console.log("!!");
+  const handleDeleteVendorBookmark = async (bm) => {
+    try {
+      await removeVendorBookmark(bm);
+      openSnackbar("Removed vendor bookmark.", "success");
+    } catch (error) {
+      console.log(error);
+      openSnackbar("Error", "error");
+    }
   };
 
   if (isLoadingBookmarks) {
@@ -136,8 +146,6 @@ function MyBookmarks() {
         index="vendor"
         minHeight="calc(100vh - 140px)"
       >
-        {" "}
-        {/* Set the min-height here */}
         <Grid
           container
           p={5}
@@ -158,9 +166,7 @@ function MyBookmarks() {
               {vendorBookmark?.vendor && (
                 <div style={{ position: "relative" }}>
                   <DeleteIconButtonVendor
-                    onClick={() =>
-                      handleDeleteVendorBookmark(vendorBookmark.vendor._id)
-                    }
+                    onClick={() => handleDeleteVendorBookmark(vendorBookmark)}
                   >
                     <DeleteIcon />
                   </DeleteIconButtonVendor>
