@@ -1,6 +1,7 @@
 import {
   Avatar,
   Box,
+  CircularProgress,
   Grid,
   Link,
   ListItem,
@@ -13,26 +14,20 @@ import {
 import React, { useEffect, useState } from "react";
 
 import ActivityCardItem from "../../../components/ActivityCardItem";
-import AxiosConnect from "../../../utils/AxiosConnect";
+import useBookmarkStore from "../../../zustand/BookmarkStore";
 
 function MyBookmarks() {
-  const [activityBookmarks, setActivityBookmarks] = useState([]);
-  const [vendorBookmarks, setVendorBookmarks] = useState([]);
+  const {
+    activityBookmarks,
+    vendorBookmarks,
+    isLoadingBookmarks,
+    getBookmarks,
+  } = useBookmarkStore();
   const [selectedTab, setSelectedTab] = useState("activity");
 
   useEffect(() => {
     const fetchBookmarks = async () => {
-      const response = await AxiosConnect.get(`/gleek/bookmark`);
-      const data = response.data;
-      console.log(data)
-      const activityBookmarks = data.filter(
-        (bookmark) => bookmark.type === "ACTIVITY",
-      );
-      const vendorBookmarks = data.filter(
-        (bookmark) => bookmark.type === "VENDOR",
-      );
-      setActivityBookmarks(activityBookmarks);
-      setVendorBookmarks(vendorBookmarks);
+      await getBookmarks();
     };
 
     fetchBookmarks();
@@ -41,6 +36,14 @@ function MyBookmarks() {
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue);
   };
+
+  if (isLoadingBookmarks) {
+    return (
+      <Box display="flex" alignItems="center" justifyContent="center">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box
