@@ -77,8 +77,10 @@ export const getActivityBookmarkStatus = async (req, res) => {
 
 export const updateActivityBookmark = async (req, res) => {
   try {
-    const { activity, isBookmarked } = req.body;
-    console.log(isBookmarked);
+    const { activityId } = req.params;
+    const { isBookmarked } = req.body;
+    const activity = activityId;
+    console.log(activity, isBookmarked);
     const client = req.user;
     let update = {
       isBookmarked,
@@ -108,6 +110,70 @@ export const updateActivityBookmark = async (req, res) => {
           activity,
           isBookmarked,
           type: BookmarkEnum.ACTIVITY,
+          client: client._id,
+        });
+      }
+
+      const bookmarkDoc = await bookmark.save();
+
+      res.status(200).json(bookmarkDoc);
+    }
+  } catch (e) {
+    console.error(e);
+    return res.status(400).json({
+      error: "Your request could not be processed. Please try again.",
+    });
+  }
+};
+
+export const getVendorBookmark = async (req, res) => {
+  try {
+    const client = req.user;
+    const { vendorId } = req.params;
+
+    const bookmark = await Bookmark.findOne({
+      vendor: vendorId,
+      client: client._id,
+    });
+
+    res.status(200).json(bookmark);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+export const updateVendorBookmark = async (req, res) => {
+  try {
+    const { vendorId } = req.params;
+    const { isBookmarked } = req.body;
+    
+    const vendor = vendorId;
+    const client = req.user;
+    let update = {
+      isBookmarked,
+      updated: Date.now(),
+      vendor: vendor,
+    };
+
+    let query = {
+      client: client._id,
+      vendor: vendor,
+    };
+
+    const updatedBookmark = await Bookmark.findOneAndUpdate(query, update, {
+      new: true,
+    });
+
+    if (updatedBookmark !== null) {
+      res.status(200).json(updatedBookmark);
+    } else {
+      let bookmark;
+      if (vendor) {
+        bookmark = new Bookmark({
+          vendor,
+          isBookmarked,
+          type: BookmarkEnum.VENDOR,
           client: client._id,
         });
       }

@@ -5,30 +5,29 @@ import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import useBookmarkStore from "../../zustand/BookmarkStore";
 import useSnackbarStore from "../../zustand/SnackbarStore";
 
-const ActivityBookmarkButton = ({ activityId }) => {
-  const { getBookmarkForActivity, currentBookmark, toggleActivityBookmark } =
+const VendorBookmarkButton = ({ vendorId }) => {
+  const { getBookmarkForVendor, currentBookmark, toggleVendorBookmark } =
     useBookmarkStore();
   const { openSnackbar } = useSnackbarStore();
 
   const theme = useTheme();
-  const primary = theme.palette.primary.main;
-  const primaryDark = theme.palette.primary.dark;
+  const secondary = theme.palette.secondary.main;
 
   useEffect(() => {
     const fetchBookmark = async () => {
       try {
-        await getBookmarkForActivity(activityId);
+        await getBookmarkForVendor(vendorId);
       } catch (error) {
         console.error(error);
       }
     };
 
     fetchBookmark();
-  }, [activityId, getBookmarkForActivity]);
+  }, [vendorId, getBookmarkForVendor]);
 
   const toggleBookmark = async () => {
     try {
-      await toggleActivityBookmark(activityId, !!currentBookmark?.isBookmarked);
+      await toggleVendorBookmark(vendorId, !!currentBookmark?.isBookmarked);
 
       openSnackbar("Updated bookmarks.", "success");
     } catch (error) {
@@ -40,16 +39,16 @@ const ActivityBookmarkButton = ({ activityId }) => {
     <Tooltip
       title={
         currentBookmark && currentBookmark.isBookmarked
-          ? "Remove Activity Bookmark"
-          : "Add Activity Bookmark"
+          ? "Remove Vendor Bookmark"
+          : "Add Vendor Bookmark"
       }
     >
       <Button
         onClick={toggleBookmark}
         variant={
           currentBookmark && currentBookmark.isBookmarked
-            ? "contained"
-            : "outlined"
+            ? "contained" 
+            : "outlined" 
         }
         color="secondary"
         startIcon={
@@ -68,4 +67,4 @@ const ActivityBookmarkButton = ({ activityId }) => {
   );
 };
 
-export default ActivityBookmarkButton;
+export default VendorBookmarkButton;

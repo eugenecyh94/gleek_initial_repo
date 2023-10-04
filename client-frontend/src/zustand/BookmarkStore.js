@@ -25,10 +25,12 @@ const useBookmarkStore = create((set) => ({
   },
   toggleActivityBookmark: async (activityId, isBookmarked) => {
     try {
-      const response = await AxiosConnect.post(`/gleek/bookmark/activity/${activityId}`, {
-        activity: activityId,
-        isBookmarked: !isBookmarked,
-      });
+      const response = await AxiosConnect.post(
+        `/gleek/bookmark/activity/${activityId}`,
+        {
+          isBookmarked: !isBookmarked,
+        },
+      );
       const currentBookmark = response.data;
       set({ currentBookmark });
     } catch (error) {
@@ -41,12 +43,78 @@ const useBookmarkStore = create((set) => ({
         `/gleek/bookmark/activity/${activityId}`,
       );
       const currentBookmark = response.data;
-      console.log("store", currentBookmark)
+      console.log("store", currentBookmark);
       set({ currentBookmark });
     } catch (error) {
       throw error;
     }
   },
+  toggleVendorBookmark: async (vendorId, isBookmarked) => {
+    try {
+      const response = await AxiosConnect.post(
+        `/gleek/bookmark/vendor/${vendorId}`,
+        {
+          isBookmarked: !isBookmarked,
+        },
+      );
+      const currentBookmark = response.data;
+      set({ currentBookmark });
+    } catch (error) {
+      throw error;
+    }
+  },
+  getBookmarkForVendor: async (vendorId) => {
+    try {
+      const response = await AxiosConnect.get(
+        `/gleek/bookmark/vendor/${vendorId}`,
+      );
+      const currentBookmark = response.data;
+      set({ currentBookmark });
+    } catch (error) {
+      throw error;
+    }
+  },
+  removeActivityBookmark: async (activityId, bm) => {
+    try {
+      const response = await AxiosConnect.post(
+        `/gleek/bookmark/activity/${activityId}`,
+        {
+          isBookmarked: false,
+        },
+      );
+      console.log(response);
+
+      // Remove the bookmark from the state
+      set((state) => ({
+        activityBookmarks: state.activityBookmarks.filter(
+          (bookmark) => bookmark._id !== bm._id,
+        ),
+      }));
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // removeActivityBookmark: async (activityId, bm) => {
+  //   try {
+  //     console.log("?????")
+  //     // const response = await AxiosConnect.post(
+  //     //   `/gleek/bookmark/activity/${activityId}`,
+  //     //   {
+  //     //     isBookmarked: false,
+  //     //   },
+  //     // );
+  //     // console.log(response)
+  //     set((state) => ({
+  //       activityBookmarks: state.activityBookmarks.filter(
+  //         (bookmark) => bookmark.activity !== activityId
+  //       ),
+  //     }));
+
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // },
 }));
 
 export default useBookmarkStore;

@@ -3,6 +3,7 @@ import {
   Box,
   CircularProgress,
   Grid,
+  IconButton,
   Link,
   ListItem,
   ListItemAvatar,
@@ -11,10 +12,32 @@ import {
   Tabs,
   Typography,
 } from "@mui/material";
+import styled from "@emotion/styled";
+
+import DeleteIcon from "@mui/icons-material/Delete";
 import React, { useEffect, useState } from "react";
 
 import ActivityCardItem from "../../../components/ActivityCardItem";
 import useBookmarkStore from "../../../zustand/BookmarkStore";
+import VendorProfileItem from "../../../components/Vendor/VendorProfileItem";
+
+const DeleteIconButtonActivity = styled(IconButton)`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: ${({ theme }) => theme.palette.background.paper};
+  border-radius: 50%;
+  z-index: 1;
+`;
+
+const DeleteIconButtonVendor = styled(IconButton)`
+  position: absolute;
+  top: 8px;
+  right: 5px;
+  background-color: ${({ theme }) => theme.palette.background.paper};
+  border-radius: 50%;
+  z-index: 1;
+`;
 
 function MyBookmarks() {
   const {
@@ -22,6 +45,8 @@ function MyBookmarks() {
     vendorBookmarks,
     isLoadingBookmarks,
     getBookmarks,
+    removeActivityBookmark,
+    set,
   } = useBookmarkStore();
   const [selectedTab, setSelectedTab] = useState("activity");
 
@@ -35,6 +60,14 @@ function MyBookmarks() {
 
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue);
+  };
+
+  const handleDeleteBookmark = async (bm) => {
+    await removeActivityBookmark(bm.activity._id, bm);
+  };
+
+  const handleDeleteVendorBookmark = async (vendorId) => {
+    console.log("!!");
   };
 
   if (isLoadingBookmarks) {
@@ -65,7 +98,13 @@ function MyBookmarks() {
         <Tab label="Activity" value="activity" />
         <Tab label="Vendor" value="vendor" />
       </Tabs>
-      <TabPanel value={selectedTab} index="activity">
+      <TabPanel
+        value={selectedTab}
+        index="activity"
+        minHeight="calc(100vh - 140px)"
+      >
+        {" "}
+        {/* Set the min-height here */}
         <Grid
           container
           spacing={{ xs: 2, md: 3 }}
@@ -74,25 +113,40 @@ function MyBookmarks() {
           {activityBookmarks.map((bm) => {
             return bm.activity ? (
               <Grid item key={bm._id} xs={4} sm={4} md={4} lg={4} xl={4}>
-                <Link
-                  href={`/shop/activity/${bm.activity._id}`}
-                  style={{ textDecoration: "none" }}
-                >
-                  <ActivityCardItem activity={bm.activity} />
-                </Link>
+                <div style={{ position: "relative" }}>
+                  <DeleteIconButtonActivity
+                    onClick={() => handleDeleteBookmark(bm)}
+                  >
+                    <DeleteIcon />
+                  </DeleteIconButtonActivity>
+                  <Link
+                    href={`/shop/activity/${bm.activity._id}`}
+                    style={{ textDecoration: "none" }}
+                  >
+                    <ActivityCardItem activity={bm.activity} />
+                  </Link>
+                </div>
               </Grid>
             ) : null;
           })}
         </Grid>
       </TabPanel>
-      <TabPanel value={selectedTab} index="vendor">
+      <TabPanel
+        value={selectedTab}
+        index="vendor"
+        minHeight="calc(100vh - 140px)"
+      >
+        {" "}
+        {/* Set the min-height here */}
         <Grid
           container
-          spacing={{ xs: 2, md: 3 }}
+          p={5}
+          spacing={{ xs: 6, md: 8 }}
           columns={{ xs: 4, sm: 8, md: 12, lg: 12, xl: 16 }}
         >
           {vendorBookmarks.map((vendorBookmark) => (
             <Grid
+              spacing={5}
               item
               key={vendorBookmark._id}
               xs={4}
@@ -101,31 +155,18 @@ function MyBookmarks() {
               lg={4}
               xl={4}
             >
-              <Link
-                href={`/shop/vendor/${vendorBookmark.vendor._id}`}
-                style={{ textDecoration: "none" }}
-              >
-                <ListItem>
-                  <ListItemAvatar>
-                    <Avatar>
-                      {vendorBookmark.vendor.preSignedPhoto ? (
-                        <img
-                          src={vendorBookmark.vendor.preSignedPhoto}
-                          alt="Vendor Avatar"
-                        />
-                      ) : (
-                        vendorBookmark?.vendor?.companyName
-                          .charAt(0)
-                          .toUpperCase()
-                      )}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={vendorBookmark.vendor.companyName}
-                    secondary={vendorBookmark.vendor.vendorType}
-                  />
-                </ListItem>
-              </Link>
+              {vendorBookmark?.vendor && (
+                <div style={{ position: "relative" }}>
+                  <DeleteIconButtonVendor
+                    onClick={() =>
+                      handleDeleteVendorBookmark(vendorBookmark.vendor._id)
+                    }
+                  >
+                    <DeleteIcon />
+                  </DeleteIconButtonVendor>
+                  <VendorProfileItem vendor={vendorBookmark?.vendor} />
+                </div>
+              )}
             </Grid>
           ))}
         </Grid>
@@ -135,11 +176,11 @@ function MyBookmarks() {
 }
 
 function TabPanel(props) {
-  const { children, value, index } = props;
+  const { children, value, index, minHeight } = props;
   return (
     <div hidden={value !== index}>
       {value === index && (
-        <Box pt={3} pb={3}>
+        <Box pt={3} pb={3} style={{ minHeight: minHeight }}>
           {children}
         </Box>
       )}
