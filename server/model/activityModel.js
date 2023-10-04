@@ -104,6 +104,7 @@ const activitySchema = new mongoose.Schema({
       type: Boolean,
     },
   },
+  minimumPricePerPax: { type: Number },
 });
 
 activitySchema.pre("findOneAndDelete", async function (next) {

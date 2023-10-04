@@ -244,7 +244,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     const themeId = event.target.value;
     setSelectedTheme(themeId);
     setSubthemes(
-      themes?.find((theme) => theme.parent?._id === themeId)?.children
+      themes?.find((theme) => theme.parent?._id === themeId)?.children,
     );
     setSelectedSubTheme([]);
   };
@@ -458,7 +458,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
       const { pricePerPax } = rule;
       const clientPrice = Math.ceil(
         parseFloat(pricePerPax) * (parseFloat(newMarkup) / 100) +
-          parseFloat(pricePerPax)
+          parseFloat(pricePerPax),
       );
       newClientPrice[index].clientPrice = clientPrice;
     });
@@ -752,7 +752,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
         ? isFood
           ? "Popups (Food)"
           : "Popups (Non-food)"
-        : activityType
+        : activityType,
     );
     formData.append("maxParticipants", maxParticipants);
     formData.append("clientMarkupPercentage", markup);
@@ -1011,7 +1011,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                         <MenuItem key={index} value={item.parent._id}>
                           {item.parent.name}
                         </MenuItem>
-                      )
+                      ),
                   )}
                 </Select>
                 <FormHelperText error>{formErrors?.theme}</FormHelperText>
@@ -1360,7 +1360,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                       <MenuItem key={enumValue} value={enumValue}>
                         {enumValue}
                       </MenuItem>
-                    )
+                    ),
                   )}
                 </Select>
                 <FormHelperText error>
@@ -1648,7 +1648,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                                         handlePricingRangesChange(
                                           e,
                                           rowIndex,
-                                          "end"
+                                          "end",
                                         )
                                       }
                                       value={
@@ -1686,7 +1686,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                                       handlePriceChange(
                                         e,
                                         rowIndex,
-                                        "pricePerPax"
+                                        "pricePerPax",
                                       )
                                     }
                                   />

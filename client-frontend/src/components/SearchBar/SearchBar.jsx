@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   MenuList,
@@ -9,17 +9,21 @@ import {
 } from "@mui/material"; // Import Typography
 import Autosuggest from "react-autosuggest";
 import "./searchbar.css";
+import useShopStore from "../../zustand/ShopStore";
 
 const SearchBar = (props) => {
-  const [value, setValue] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const {
+    setSearchValue,
+    searchValue,
+    suggestions,
+    setSuggestions,
+    getInitialSuggestions,
+  } = useShopStore();
 
   // Define your data source for suggestions here
   const getSuggestions = (value) => {
-    // Elastic Search Recommendations
-    // Past search queries
-    const suggestions = ["Option 1", "Option 2", "Option 3"];
+    getInitialSuggestions();
     return suggestions.filter((option) =>
       option.toLowerCase().includes(value.toLowerCase()),
     );
@@ -36,12 +40,12 @@ const SearchBar = (props) => {
   };
 
   const onChange = (event, { newValue }) => {
-    setValue(newValue);
+    setSearchValue(newValue);
   };
 
   const inputProps = {
     placeholder: "Search Gleek.com",
-    value,
+    value: searchValue,
     onChange,
   };
 
