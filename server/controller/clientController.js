@@ -15,7 +15,7 @@ import {
   updateConsent,
 } from "../service/consentService.js";
 import sendMail from "../util/sendMail.js";
-import { s3ImageGetService } from "../service/s3ImageGetService.js";
+import { s3GetImages } from "../service/s3ImageServices.js";
 import {
   createClientWelcomeMailOptions,
   createResendVerifyEmailOptions,
@@ -172,7 +172,7 @@ export const postLogin = async (req, res) => {
       }
 
       if (client.photo) {
-        const preSignedUrl = await s3ImageGetService(client.photo);
+        const preSignedUrl = await s3GetImages(client.photo);
         client.preSignedPhoto = preSignedUrl;
       }
 
@@ -202,7 +202,7 @@ export const validateToken = async (req, res) => {
     }
 
     if (client.photo) {
-      const preSignedUrl = await s3ImageGetService(client.photo);
+      const preSignedUrl = await s3GetImages(client.photo);
       client.preSignedPhoto = preSignedUrl;
     }
 
@@ -400,7 +400,7 @@ export const updateProfilePicture = async (req, res) => {
     );
 
     if (updatedClient.photo) {
-      const preSignedUrl = await s3ImageGetService(updatedClient.photo);
+      const preSignedUrl = await s3GetImages(updatedClient.photo);
       updatedClient.preSignedPhoto = preSignedUrl;
     }
 

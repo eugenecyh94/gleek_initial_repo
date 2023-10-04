@@ -331,10 +331,8 @@ export const useClientStore = create((set) => ({
 }));
 
 export const useImageUploadTestStore = create((set) => ({
-  imageList: [],
-  setImageList: (newImageList) => {
-    set({ imageList: newImageList });
-    console.log(useImageUploadTestStore.getState());
+  testActivities: [],
+  setTestActivities: (newActivityList) => {
+    set({ testActivities: newActivityList });
   },
-  vendors: [],
 }));
