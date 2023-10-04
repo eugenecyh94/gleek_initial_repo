@@ -87,10 +87,17 @@ const ImageEdit = (props) => {
   const handleRowClick = (event) => {
     setActivityToEdit(event);
     setImageListToEdit(event.preSignedImages);
+    console.log(imageListToEdit);
   };
 
   const handleRemoveImage = (id) => {
     setImageListToEdit((oldState) => oldState.filter((item) => item !== id));
+  };
+
+  const handleReset = () => {
+    setFileList([]);
+    setActivityToEdit(undefined);
+    setImageListToEdit([]);
   };
 
   const onClickSubmitUpdate = () => {
@@ -100,20 +107,23 @@ const ImageEdit = (props) => {
 
     const formData = new FormData();
     formData.append("activityId", activityToEdit._id);
-    formData.append("updatedImageList", imageListToEdit);
+    imageListToEdit.forEach((item) =>
+      formData.append("updatedImageList[]", item),
+    );
     for (let i = 0; i < fileList.length; i++) {
       formData.append("images", fileList[i]);
     }
     console.log(formData.get("activityId"));
     console.log(formData.get("updatedImageList"));
     console.log(formData.get("images"));
-    // AxiosConnect.postMultiPart("/testActivity/update", formData)
-    //     .then((body) => {
-    //         console.log("activity successfully updated", body);
-    //     })
-    //     .catch((e) => {
-    //         console.error(e.error);
-    //     });
+    AxiosConnect.patchMultiPart("/testActivity/update", formData)
+      .then((body) => {
+        console.log("activity successfully updated", body);
+        handleReset();
+      })
+      .catch((e) => {
+        console.error(e.error);
+      });
   };
 
   useEffect(() => {
@@ -188,17 +198,30 @@ const ImageEdit = (props) => {
             <></>
           )}
           {activityToEdit ? (
-            <Button
-              variant="contained"
-              type="submit"
-              fullWidth
-              sx={{ py: "0.8rem", my: 2 }}
-              onClick={() => {
-                onClickSubmitUpdate();
-              }}
-            >
-              Update Activity Images
-            </Button>
+            <Fragment>
+              <Button
+                variant="contained"
+                type="submit"
+                fullWidth
+                sx={{ py: "0.8rem", my: 2 }}
+                onClick={() => {
+                  onClickSubmitUpdate();
+                }}
+              >
+                Update Activity Images
+              </Button>
+              <Button
+                variant="contained"
+                type="submit"
+                fullWidth
+                sx={{ py: "0.8rem", my: 2 }}
+                onClick={() => {
+                  handleReset();
+                }}
+              >
+                Cancel Update
+              </Button>
+            </Fragment>
           ) : (
             <> </>
           )}
