@@ -10,7 +10,7 @@ export const updateCurrentActivity = (selectedActivity) => {
   }));
   console.log(
     "activity store current activity updated::",
-    useActivityStore.getState(),
+    useActivityStore.getState()
   );
 };
 
@@ -21,7 +21,7 @@ export const updateAllActivity = (newAllActivities) => {
   }));
   console.log(
     "activity store all activity updated::",
-    useActivityStore.getState(),
+    useActivityStore.getState()
   );
 };
 
@@ -135,7 +135,7 @@ export const useAdminStore = create((set) => ({
     try {
       const response = await AxiosConnect.post(
         "/gleekAdmin/register",
-        newAdmin,
+        newAdmin
       );
       const data = response.data;
       console.log(data);
@@ -185,11 +185,23 @@ export const useActivityStore = create((set) => ({
       console.error(error);
     }
   },
+  getActivityForAdmin: async (adminId) => {
+    try {
+      set({ isLoading: true });
+      const response = await AxiosConnect.get(
+        `/activity/myActivities/${adminId}`
+      );
+      set({ activities: response.data.data });
+      set({ isLoading: false });
+    } catch (error) {
+      console.error(error);
+    }
+  },
   createActivity: async (newActivityData) => {
     try {
       const response = await AxiosConnect.postMultiPart(
         "/activity/addActivity",
-        newActivityData,
+        newActivityData
       );
       set({ newActivity: response.data.activity });
     } catch (error) {
@@ -200,26 +212,43 @@ export const useActivityStore = create((set) => ({
     try {
       set({ isLoading: true });
       const response = await AxiosConnect.get(
-        `/activity/viewActivity/${activityId}`,
+        `/activity/viewActivity/${activityId}`
       );
-      console.log("HUEHUE", response);
       set({ activityDetails: response.data.data });
       set({ isLoading: false });
     } catch (error) {
       console.error(error);
     }
   },
+  saveActivity: async (activityDraftData) => {
+    try {
+      const response = await AxiosConnect.postMultiPart(
+        "/activity/saveActivity",
+        activityDraftData
+      );
+      set({ newActivity: response.data.activity });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  deleteActivity: async (activityId) => {
+    try {
+      await AxiosConnect.delete(`/activity/deleteDraft/${activityId}`);
+    } catch (error) {
+      console.log(error);
+    }
+  },
 }));
 
 export const useThemeStore = create((set) => ({
   themes: [],
-  isLoading: false,
+  isThemeLoading: false,
   getThemes: async () => {
     try {
-      set({ isLoading: true });
+      set({ isThemeLoading: true });
       const response = await AxiosConnect.get("/activity/getThemes");
       set({ themes: response.data });
-      set({ isLoading: false });
+      set({ isThemeLoading: false });
     } catch (error) {
       console.error(error);
     }
@@ -229,14 +258,14 @@ export const useThemeStore = create((set) => ({
 export const useVendorStore = create((set) => ({
   vendors: [],
   vendor: null,
-  isLoading: false,
+  isVendorLoading: false,
   vendorTypes: {},
   getVendors: async () => {
     try {
-      set({ isLoading: true });
+      set({ isVendorLoading: true });
       const response = await AxiosConnect.get("/vendor/viewAllVendors");
       set({ vendors: response.data });
-      set({ isLoading: false });
+      set({ isVendorLoading: false });
     } catch (error) {
       console.error(error);
     }
@@ -269,7 +298,7 @@ export const useVendorStore = create((set) => ({
   vendorTypesFetcher: async () => {
     try {
       const response = await AxiosConnect.get(
-        "/gleek/vendor/getAllVendorTypes",
+        "/gleek/vendor/getAllVendorTypes"
       );
       const data = response.data;
       set({ vendorTypes: data.VendorTypeEnum });
@@ -320,7 +349,7 @@ export const useClientStore = create((set) => ({
     try {
       set({ isLoading: true });
       const response = await AxiosConnect.get(
-        `/client/getClientDetails/${clientId}`,
+        `/client/getClientDetails/${clientId}`
       );
       set({ clientDetails: response.data });
       set({ isLoading: false });
