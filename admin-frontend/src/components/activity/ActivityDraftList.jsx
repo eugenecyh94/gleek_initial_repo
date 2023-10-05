@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import EditNoteIcon from "@mui/icons-material/EditNote";
+import AddIcon from "@mui/icons-material/Add";
 import TaskIcon from "@mui/icons-material/Task";
 import { Badge, Box, Button, Tab, Tabs, Typography } from "@mui/material";
 import { DataGrid, GridToolbarFilterButton } from "@mui/x-data-grid";
@@ -67,6 +68,9 @@ const ActivityDraftList = ({
     }
   }, [activities, selectedTab]);
 
+  const handleCreateButtonClick = () => {
+    navigate("/createActivity");
+  };
   const handleEditButton = (activity) => {
     navigate(`/editActivityDraft/${activity._id}`);
   };
@@ -241,7 +245,40 @@ const ActivityDraftList = ({
             }
           />
         </Tabs>
-        {selectedTab === "draftTab" && selectedRows.length > 0 && (
+        <Box display="flex">
+          {selectedTab === "draftTab" && selectedRows.length > 0 && (
+            <Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              alignItems="center"
+              paddingRight={2}
+            >
+              <Button
+                variant="contained"
+                color="error"
+                onClick={handleBulkDelete}
+                style={{
+                  justifyContent: "center",
+                  paddingLeft: 2,
+                  paddingRight: 6,
+                }}
+              >
+                <Typography
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                  component="div"
+                  color="white"
+                  fontSize={"0.875rem"}
+                >
+                  <DeleteIcon fontSize="small" />
+                  Delete
+                </Typography>
+              </Button>
+            </Box>
+          )}
           <Box
             display="flex"
             flexDirection="column"
@@ -251,14 +288,31 @@ const ActivityDraftList = ({
           >
             <Button
               variant="contained"
-              color="error"
-              onClick={handleBulkDelete}
+              color="light_purple"
+              onClick={handleCreateButtonClick}
+              style={{
+                paddingLeft: 2,
+                justifyContent: "center",
+                paddingRight: 6,
+              }}
             >
-              Delete
+              <Typography
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                component="div"
+                color="white"
+                fontSize={"0.875rem"}
+              >
+                <AddIcon fontSize="small" />
+                Create
+              </Typography>
             </Button>
           </Box>
-        )}
+        </Box>
       </Box>
+
       <div style={{ height: 500, width: "99%" }}>
         <DataGrid
           checkboxSelection={selectedTab === "draftTab"}
