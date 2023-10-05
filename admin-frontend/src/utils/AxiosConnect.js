@@ -45,12 +45,13 @@ AxiosConnect.postMultiPart = (command, req) => {
   return axios(options);
 };
 
-AxiosConnect.delete = (command) => {
+AxiosConnect.delete = (command, payload) => {
   console.log("axios delete command::", `${uri}${command}`);
   const options = {
     method: "DELETE",
     url: `${uri}${command}`,
     withCredentials: true,
+    data: payload,
   };
   return axios(options);
 };

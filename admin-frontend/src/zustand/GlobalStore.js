@@ -175,6 +175,10 @@ export const useActivityStore = create((set) => ({
   isLoading: false,
   newActivity: null,
   activityDetails: {},
+  selectedTab: "publishedTab",
+  setSelectedTab: (thing) => {
+    set({ selectedTab: thing });
+  },
   getActivity: async () => {
     try {
       set({ isLoading: true });
@@ -233,7 +237,27 @@ export const useActivityStore = create((set) => ({
   },
   deleteActivity: async (activityId) => {
     try {
-      await AxiosConnect.delete(`/activity/deleteDraft/${activityId}`);
+      const updatedActivities = await AxiosConnect.delete(
+        `/activity/deleteDraft/${activityId}`
+      );
+      set({ activities: updatedActivities.data.activity });
+      set({ selectedTab: "draftTab" });
+      return updatedActivities.data.message;
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  bulkDeleteActivity: async (activityIds) => {
+    try {
+      const updatedActivities = await AxiosConnect.delete(
+        "/activity/bulkDelete",
+        activityIds
+      );
+      set({
+        activities: updatedActivities.data.activity,
+        selectedTab: "draftTab",
+      });
+      return updatedActivities.data.message;
     } catch (error) {
       console.log(error);
     }
@@ -252,6 +276,18 @@ export const useThemeStore = create((set) => ({
     } catch (error) {
       console.error(error);
     }
+  },
+}));
+
+export const useSnackbarStore = create((set) => ({
+  isOpen: false,
+  message: "",
+  type: "success",
+  openSnackbar: (message, type = "success") => {
+    set({ isOpen: true, message, type });
+  },
+  closeSnackbar: () => {
+    set({ isOpen: false, message: "", type: "success" });
   },
 }));
 
