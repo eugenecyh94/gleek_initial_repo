@@ -24,6 +24,9 @@ const theme = createTheme({
     error: {
       main: "#D32F2F",
     },
+    unselected: {
+      main: "#919191",
+    },
   },
   typography: {
     fontFamily: "Fredoka",
