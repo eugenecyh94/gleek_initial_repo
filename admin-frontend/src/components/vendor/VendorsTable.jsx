@@ -13,7 +13,7 @@ import {
   GridToolbarFilterButton,
 } from "@mui/x-data-grid";
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const StyledButton = styled(Button)`
@@ -33,14 +33,13 @@ const StyledDiv = styled("div")(({ theme }) => ({
 }));
 
 const VendorsTable = ({ vendors, updateVendor }) => {
-  console.log(vendors);
   const handleStatusUpdate = async (id, row, newStatus) => {
     const approvedRow = { ...row, status: newStatus };
     await updateVendor(id, approvedRow);
   };
 
   const badgeNumber = vendors.filter(
-    (vendor) => vendor.status === "PENDING",
+    (vendor) => vendor.status === "PENDING"
   ).length;
 
   const filterCriteria = {
@@ -52,7 +51,7 @@ const VendorsTable = ({ vendors, updateVendor }) => {
   const [selectedTab, setSelectedTab] = useState("approvedTab");
   const [currentTabRows, setCurrentTabRows] = useState(() => {
     return vendors.filter(
-      (vendors) => vendors.status === filterCriteria[selectedTab].status,
+      (vendors) => vendors.status === filterCriteria[selectedTab].status
     );
   });
 
@@ -60,20 +59,14 @@ const VendorsTable = ({ vendors, updateVendor }) => {
     setSelectedTab(newValue);
     setCurrentTabRows(
       vendors.filter(
-        (vendors) => vendors.status === filterCriteria[newValue].status,
-      ),
+        (vendors) => vendors.status === filterCriteria[newValue].status
+      )
     );
   };
 
   const navigate = useNavigate();
-  // const { vendors } = vendors;
-  const [searchedRows, setSearchedRows] = useState([]);
-  useEffect(() => {
-    setSearchedRows(vendors);
-  }, [vendors]);
 
   const handleRowClick = (vendor) => {
-    console.log(vendor);
     navigate(`/viewVendor/${vendor._id}`);
   };
 

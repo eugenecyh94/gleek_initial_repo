@@ -1,12 +1,23 @@
+import styled from "@emotion/styled";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import TaskIcon from "@mui/icons-material/Task";
-import { Box, Button, Tab, Tabs, Typography } from "@mui/material";
+import { Badge, Box, Button, Tab, Tabs, Typography } from "@mui/material";
 import { DataGrid, GridToolbarFilterButton } from "@mui/x-data-grid";
 import PropTypes from "prop-types";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+const StyledBadge = styled(Badge)(({ theme }) => ({
+  "& .MuiBadge-badge": {
+    right: -3,
+    top: 13,
+    border: `2px solid ${theme.palette.background.paper}`,
+    padding: "0 4px",
+    color: "white",
+  },
+}));
 
 const ActivityDraftList = ({ activities, deleteActivity }) => {
   const navigate = useNavigate();
@@ -42,9 +53,19 @@ const ActivityDraftList = ({ activities, deleteActivity }) => {
     navigate(`/editActivityDraft/${activity._id}`);
   };
   const handleDeleteButton = (activity) => {
-    console.log("delete button clicked!");
     deleteActivity(activity?._id);
   };
+  const publishedBadgeNumber = Array.isArray(activities)
+    ? activities.filter((activity) => activity.approvalStatus === "Published")
+        .length
+    : null;
+  const draftBadgeNumber = Array.isArray(activities)
+    ? activities.filter(
+        (activity) =>
+          activity.isDraft === true &&
+          activity.approvalStatus === "Pending Approval"
+      ).length
+    : null;
 
   const columns = [
     {
@@ -164,8 +185,34 @@ const ActivityDraftList = ({ activities, deleteActivity }) => {
   return (
     <Box>
       <Tabs value={selectedTab} onChange={handleTabChange} centered>
-        <Tab label="Published" value="publishedTab" icon={<TaskIcon />} />
-        <Tab label="Drafts" value="draftTab" icon={<EditNoteIcon />} />
+        <Tab
+          label="Published"
+          value="publishedTab"
+          icon={
+            <StyledBadge
+              color={
+                selectedTab === "publishedTab" ? "light_purple" : "unselected"
+              }
+              badgeContent={publishedBadgeNumber}
+              showZero
+            >
+              <TaskIcon />
+            </StyledBadge>
+          }
+        />
+        <Tab
+          label="Drafts"
+          value="draftTab"
+          icon={
+            <StyledBadge
+              color={selectedTab === "draftTab" ? "light_purple" : "unselected"}
+              badgeContent={draftBadgeNumber}
+              showZero
+            >
+              <EditNoteIcon />
+            </StyledBadge>
+          }
+        />
       </Tabs>
       <div style={{ height: 500, width: "99%" }}>
         <DataGrid
