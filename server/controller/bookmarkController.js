@@ -1,5 +1,6 @@
 import Bookmark from "../model/bookmarkModel.js";
 import { prepareActivityMinimumPricePerPaxAndSingleImage } from "../service/activityService.js";
+import { prepareCompanyLogoImage } from "../service/vendorService.js";
 import { BookmarkEnum } from "../util/gleek/bookmarkEnum.js";
 
 export const fetchBookmarks = async (req, res) => {
@@ -23,6 +24,9 @@ export const fetchBookmarks = async (req, res) => {
     const preSignedPromises = bookmarks.map(async (bm) => {
       if (bm.activity) {
         await prepareActivityMinimumPricePerPaxAndSingleImage(bm.activity);
+      }
+      else if (bm.vendor) {
+        await prepareCompanyLogoImage(bm.vendor);
       }
     });
 
@@ -147,7 +151,7 @@ export const updateVendorBookmark = async (req, res) => {
   try {
     const { vendorId } = req.params;
     const { isBookmarked } = req.body;
-    
+
     const vendor = vendorId;
     const client = req.user;
     let update = {
