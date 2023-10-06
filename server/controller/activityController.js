@@ -4,23 +4,30 @@ import ThemeModel from "../model/themeModel.js";
 import { s3GetImages } from "../service/s3ImageServices.js";
 import mongoose from "mongoose";
 
+// yt: this endpoint retrieves and returns PUBLISHED & PENDING APPROVAL activities only
 export const getAllActivities = async (req, res) => {
   try {
     const activities = await ActivityModel.find()
       .populate("activityPricingRules")
+      .populate("linkedVendor")
       .populate("theme")
       .populate("subtheme");
-    const filteredActivities = activities.filter((row) => {
+    const publishedActivities = activities.filter((row) => {
       return row.approvalStatus === "Published" && row.isDraft === false;
     });
+    const pendingApprovalActivities = activities.filter((row) => {
+      return row.approvalStatus === "Pending Approval" && row.isDraft === false;
+    });
     res.status(200).json({
-      data: filteredActivities,
+      publishedActivities,
+      pendingApprovalActivities,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
+// yt: this endpoint retrieves ALL activities (both drafts and published) for an admin
 export const getAllActivitiesForAdmin = async (req, res) => {
   try {
     const adminId = req.params.id;
@@ -105,6 +112,8 @@ export const getActivitiesByVendorId = async (req, res) => {
 };
 
 export const addActivity = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     console.log("add activity body:", req.body);
     const {
@@ -133,34 +142,34 @@ export const addActivity = async (req, res) => {
     const newActivity = new ActivityModel({
       ...activity,
     });
-    const savedActivity = await newActivity.save();
-    const imageFiles = req.files;
+    const savedActivity = await newActivity.save({ session });
+    // const imageFiles = req.files;
 
-    //To update url of uploaded images path to s3 in created activity
-    const imagesPathArr = [];
+    // //To update url of uploaded images path to s3 in created activity
+    // const imagesPathArr = [];
 
-    if (imageFiles.length === 0 || imageFiles.length === undefined) {
-      console.log("No image files uploaded");
-    } else {
-      console.log("Retrieving uploaded images url");
-      let fileArray = req.files,
-        fileLocation;
-      for (let i = 0; i < fileArray.length; i++) {
-        fileLocation = fileArray[i].location;
-        console.log("file location:", fileLocation);
-        imagesPathArr.push(fileLocation);
-      }
-    }
+    // if (imageFiles.length === 0 || imageFiles.length === undefined) {
+    //   console.log("No image files uploaded");
+    // } else {
+    //   console.log("Retrieving uploaded images url");
+    //   let fileArray = req.files,
+    //     fileLocation;
+    //   for (let i = 0; i < fileArray.length; i++) {
+    //     fileLocation = fileArray[i].location;
+    //     console.log("file location:", fileLocation);
+    //     imagesPathArr.push(fileLocation);
+    //   }
+    // }
 
-    await ActivityModel.findByIdAndUpdate(
-      { _id: savedActivity._id },
-      { images: imagesPathArr },
-      { new: true }
-    );
+    // await ActivityModel.findByIdAndUpdate(
+    //   { _id: savedActivity._id },
+    //   { images: imagesPathArr },
+    //   { new: true }
+    // );
 
     const activitypriceobjects = [];
     if (Array.isArray(activityPricingRules)) {
-      activityPricingRules.forEach((jsonString, index) => {
+      for (const jsonString of activityPricingRules) {
         try {
           const pricingObject = JSON.parse(jsonString);
 
@@ -173,9 +182,9 @@ export const addActivity = async (req, res) => {
           };
           activitypriceobjects.push(activitypriceobject);
         } catch (error) {
-          console.error(`Error parsing JSON: ${error}`);
+          throw new Error(`Error parsing JSON: ${error}`);
         }
-      });
+      }
     } else {
       const pricingObject = JSON.parse(activityPricingRules);
 
@@ -188,34 +197,43 @@ export const addActivity = async (req, res) => {
       };
       activitypriceobjects.push(activitypriceobject);
     }
-
-    activitypriceobjects.map(async (pricingRule) => {
-      ActivityPricingRulesModel.create(pricingRule).then(
-        async (newPricingRule) => {
+    await Promise.all(
+      activitypriceobjects.map(async (pricingRule) => {
+        try {
+          const newPricingRule = await ActivityPricingRulesModel.create(
+            [{ ...pricingRule }],
+            {
+              session,
+            }
+          );
           await ActivityModel.findByIdAndUpdate(
             savedActivity._id,
             {
               $push: {
-                activityPricingRules: {
-                  ...newPricingRule,
-                },
+                activityPricingRules: newPricingRule[0]._id,
               },
             },
-            { new: true, useFindAndModify: false }
+            { new: true, session }
           );
+        } catch (error) {
+          throw new Error("Error when creating activity pricing rules!");
         }
-      );
-    });
+      })
+    );
+
+    await session.commitTransaction();
 
     res.status(201).json({
       message: "Activity added successfully",
       activity: savedActivity,
     });
   } catch (error) {
-    console.log(error);
+    await session.abortTransaction();
     res
       .status(500)
       .json({ error: "Activity cannot be added", message: error.message });
+  } finally {
+    session.endSession();
   }
 };
 
