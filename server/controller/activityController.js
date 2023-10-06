@@ -143,29 +143,29 @@ export const addActivity = async (req, res) => {
       ...activity,
     });
     const savedActivity = await newActivity.save({ session });
-    // const imageFiles = req.files;
 
-    // //To update url of uploaded images path to s3 in created activity
-    // const imagesPathArr = [];
-
-    // if (imageFiles.length === 0 || imageFiles.length === undefined) {
-    //   console.log("No image files uploaded");
-    // } else {
-    //   console.log("Retrieving uploaded images url");
-    //   let fileArray = req.files,
-    //     fileLocation;
-    //   for (let i = 0; i < fileArray.length; i++) {
-    //     fileLocation = fileArray[i].location;
-    //     console.log("file location:", fileLocation);
-    //     imagesPathArr.push(fileLocation);
-    //   }
-    // }
-
-    // await ActivityModel.findByIdAndUpdate(
-    //   { _id: savedActivity._id },
-    //   { images: imagesPathArr },
-    //   { new: true }
-    // );
+    //To update url of uploaded images path to s3 in created activity
+    const imageFiles = req.files ?? [];
+    try {
+      const imagesPathArr = [];
+      if (imageFiles.length === 0 || imageFiles.length === undefined) {
+        console.log("No image files uploaded");
+      } else {
+        let fileArray = req.files,
+          fileLocation;
+        for (let i = 0; i < fileArray.length; i++) {
+          fileLocation = fileArray[i].location;
+          imagesPathArr.push(fileLocation);
+        }
+        await ActivityModel.findByIdAndUpdate(
+          { _id: savedActivity._id },
+          { images: imagesPathArr },
+          { new: true, session }
+        );
+      }
+    } catch (error) {
+      throw new Error("Error uploading images!");
+    }
 
     const activitypriceobjects = [];
     if (Array.isArray(activityPricingRules)) {

@@ -176,14 +176,22 @@ export const useActivityStore = create((set) => ({
   newActivity: null,
   activityDetails: {},
   selectedTab: "publishedTab",
+  pendingApprovalActivities: [],
+  selectedActivityTab: "publishedTab",
   setSelectedTab: (thing) => {
     set({ selectedTab: thing });
+  },
+  setSelectedActivityTab: (thing) => {
+    set({ selectedActivityTab: thing });
   },
   getActivity: async () => {
     try {
       set({ isLoading: true });
       const response = await AxiosConnect.get("/activity/all");
-      set({ activities: response.data });
+      set({
+        activities: response.data.publishedActivities,
+        pendingApprovalActivities: response.data.pendingApprovalActivities,
+      });
       set({ isLoading: false });
     } catch (error) {
       console.error(error);
@@ -209,7 +217,8 @@ export const useActivityStore = create((set) => ({
       );
       set({ newActivity: response.data.activity });
     } catch (error) {
-      console.log(error);
+      console.error("Unexpected Server Error!", error);
+      throw new Error("Unexpected Server Error!");
     }
   },
   getSingleActivity: async (activityId) => {
