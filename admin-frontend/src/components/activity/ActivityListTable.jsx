@@ -97,6 +97,13 @@ const columns = [
     field: "description",
     headerName: "Description",
     flex: 1,
+    valueFormatter: (params) => {
+      const maxLength = 70;
+      if (params.value && params.value.length > maxLength) {
+        return params.value.substring(0, maxLength) + "...";
+      }
+      return params.value;
+    },
   },
   {
     field: "duration",
@@ -168,7 +175,6 @@ const ActivityListTable = (allActivities) => {
     navigate("/createActivity");
   };
   const handleRowClick = (activity) => {
-    console.log("clicked", activity._id);
     navigate(`/viewActivity/${activity._id}`);
   };
 

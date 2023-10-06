@@ -1,4 +1,4 @@
-import { s3ImageGetService } from "./s3ImageGetService.js";
+import { s3GetImages } from "./s3ImageServices.js";
 
 export async function findMinimumPricePerPax(foundActivity) {
   let minPricePerPax = Infinity;
@@ -13,7 +13,7 @@ export async function findMinimumPricePerPax(foundActivity) {
 export async function prepareActivityMinimumPricePerPaxAndSingleImage(activity) {
   activity.minimumPricePerPax = await findMinimumPricePerPax(activity);
   if (activity.images && activity.images.length > 0) {
-    const preSignedUrlArr = await s3ImageGetService([activity.images[0]]);
+    const preSignedUrlArr = await s3GetImages([activity.images[0]]);
     activity.preSignedImages = preSignedUrlArr;
   }
 }

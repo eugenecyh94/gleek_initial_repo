@@ -3,21 +3,25 @@ import CreateIcon from "@mui/icons-material/Create";
 import { CircularProgress, Typography, useTheme } from "@mui/material";
 import { useEffect } from "react";
 import {
+  useActivityStore,
   useAdminStore,
   useThemeStore,
   useVendorStore,
 } from "../../zustand/GlobalStore";
 import MainBodyContainer from "../common/MainBodyContainer";
 import CreateActivityForm from "./CreateActivityForm";
+import { useParams } from "react-router-dom";
 
 const StyledPage = styled("div")(({ theme }) => ({
   backgroundColor: theme.palette.grey.pale_grey,
 }));
 
-const CreateActivityPage = () => {
+const EditActivityDraftPage = () => {
   const theme = useTheme();
+  const { activityId } = useParams();
+  const { getSingleActivity, activityDetails, isLoading } = useActivityStore();
   const { themes, getThemes, isThemeLoading } = useThemeStore();
-  const { vendors, getVendors } = useVendorStore();
+  const { vendors, getVendors, isVendorLoading } = useVendorStore();
   const { admin } = useAdminStore();
 
   const themesList = themes.data;
@@ -27,6 +31,7 @@ const CreateActivityPage = () => {
     const fetchData = async () => {
       await getThemes();
       await getVendors();
+      await getSingleActivity(activityId);
     };
     fetchData();
   }, [getThemes]);
@@ -35,9 +40,9 @@ const CreateActivityPage = () => {
     <StyledPage>
       <MainBodyContainer
         hasBackButton={true}
-        breadcrumbNames={["View Published Activities"]}
-        breadcrumbLinks={["/viewPublishedActivities"]}
-        currentBreadcrumbName={"Create Activity"}
+        breadcrumbNames={["View My Activities"]}
+        breadcrumbLinks={["/viewActivityDrafts"]}
+        currentBreadcrumbName={"Edit Activity Draft"}
       >
         <Typography
           alignItems={"center"}
@@ -52,9 +57,9 @@ const CreateActivityPage = () => {
           }}
         >
           <CreateIcon sx={{ marginRight: 1 }} />
-          Create Activity
+          Edit Activity Draft
         </Typography>
-        {isThemeLoading ? (
+        {isLoading || isThemeLoading || isVendorLoading ? (
           <CircularProgress sx={{ margin: "auto", marginTop: "32px" }} />
         ) : (
           <CreateActivityForm
@@ -62,10 +67,11 @@ const CreateActivityPage = () => {
             theme={theme}
             vendors={vendors}
             admin={admin}
+            activity={activityDetails}
           ></CreateActivityForm>
         )}
       </MainBodyContainer>
     </StyledPage>
   );
 };
-export default CreateActivityPage;
+export default EditActivityDraftPage;

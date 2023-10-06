@@ -5,7 +5,7 @@ import {
   findMinimumPricePerPax,
   prepareActivityMinimumPricePerPaxAndSingleImage,
 } from "../service/activityService.js";
-import { s3ImageGetService } from "../service/s3ImageGetService.js";
+import { s3GetImages} from "../service/s3ImageServices.js";
 import { VendorTypeEnum } from "../util/vendorTypeEnum.js";
 import mongoose from "mongoose";
 
@@ -15,6 +15,29 @@ export const getAllActivities = async (req, res) => {
       .populate("activityPricingRules")
       .populate("theme")
       .populate("subtheme");
+    const filteredActivities = activities.filter((row) => {
+      return row.approvalStatus === "Published" && row.isDraft === false;
+    });
+    res.status(200).json({
+      data: filteredActivities,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getAllActivitiesForAdmin = async (req, res) => {
+  try {
+    const adminId = req.params.id;
+    const activities = await ActivityModel.find()
+      .populate({
+        path: "adminCreated",
+        match: { _id: adminId },
+      })
+      .populate("activityPricingRules")
+      .populate("theme")
+      .populate("subtheme")
+      .populate("linkedVendor");
     res.status(200).json({
       data: activities,
     });
@@ -30,7 +53,7 @@ export const getActivity = async (req, res) => {
       .populate("linkedVendor")
       .populate("theme")
       .populate("subtheme");
-    let preSignedUrlArr = await s3ImageGetService(foundActivity.images);
+    let preSignedUrlArr = await s3GetImages(foundActivity.images);
     foundActivity.preSignedImages = preSignedUrlArr;
     console.log("each push:", foundActivity.preSignedImages);
 
@@ -38,8 +61,8 @@ export const getActivity = async (req, res) => {
     foundActivity.minimumPricePerPax =
       await findMinimumPricePerPax(foundActivity);
     if (foundActivity.linkedVendor && foundActivity.linkedVendor.companyLogo) {
-      let preSignedUrl = await s3ImageGetService(
-        foundActivity.linkedVendor.companyLogo,
+      let preSignedUrl = await s3GetImages(
+        foundActivity.linkedVendor.companyLogo
       );
       foundActivity.linkedVendor.preSignedPhoto = preSignedUrl;
     }
@@ -102,7 +125,9 @@ export const addActivity = async (req, res) => {
       amount: parsedOffline?.amount,
       isDiscount: parsedOffline?.isDiscount,
     };
-    const newActivity = new ActivityModel({ ...activity });
+    const newActivity = new ActivityModel({
+      ...activity,
+    });
     const savedActivity = await newActivity.save();
     const imageFiles = req.files;
 
@@ -125,7 +150,7 @@ export const addActivity = async (req, res) => {
     await ActivityModel.findByIdAndUpdate(
       { _id: savedActivity._id },
       { images: imagesPathArr },
-      { new: true },
+      { new: true }
     );
 
     const activitypriceobjects = [];
@@ -139,6 +164,7 @@ export const addActivity = async (req, res) => {
             end: pricingObject.end,
             pricePerPax: pricingObject.pricePerPax,
             clientPrice: pricingObject.clientPrice,
+            activity: savedActivity._id,
           };
           activitypriceobjects.push(activitypriceobject);
         } catch (error) {
@@ -153,6 +179,7 @@ export const addActivity = async (req, res) => {
         end: pricingObject.end,
         pricePerPax: pricingObject.pricePerPax,
         clientPrice: pricingObject.clientPrice,
+        activity: savedActivity._id,
       };
       activitypriceobjects.push(activitypriceobject);
     }
@@ -169,9 +196,9 @@ export const addActivity = async (req, res) => {
                 },
               },
             },
-            { new: true, useFindAndModify: false },
+            { new: true, useFindAndModify: false }
           );
-        },
+        }
       );
     });
 
@@ -185,6 +212,272 @@ export const addActivity = async (req, res) => {
       .status(500)
       .json({ error: "Activity cannot be added", message: error.message });
   }
+};
+
+export const saveActivity = async (req, res) => {
+  try {
+    console.log("save activity body:", req.body);
+    const {
+      activityPricingRules,
+      weekendPricing,
+      onlinePricing,
+      offlinePricing,
+      activityId,
+      title,
+      description,
+      location,
+      approvalStatus,
+      activityType,
+      isFood,
+      maxParticipants,
+      minparticipants,
+      clientMarkupPercentage,
+      duration,
+      theme,
+      bookingNotice,
+      startTime,
+      endTime,
+      capacity,
+      dayAvailabilities,
+      subtheme,
+      sdg,
+      popupItemsSold,
+      foodCertDate,
+      foodCategory,
+      isFoodCertPending,
+      linkedVendor,
+      pendingCertificateType,
+      ...remainderActivity
+    } = req.body;
+    const parsedWeekend = JSON.parse(weekendPricing);
+    const parsedOnline = JSON.parse(onlinePricing);
+    const parsedOffline = JSON.parse(offlinePricing);
+    const activity = {
+      ...remainderActivity,
+      title: title ?? null,
+      description: description ?? null,
+      location: location ?? [],
+      approvalStatus,
+      activityType: activityType ?? null,
+      isFood: isFood ?? null,
+      maxParticipants: maxParticipants ?? null,
+      minparticipants: minparticipants ?? null,
+      clientMarkupPercentage: clientMarkupPercentage ?? null,
+      duration: duration ?? null,
+      theme: theme ?? null,
+      bookingNotice,
+      startTime: startTime ?? null,
+      endTime: endTime ?? null,
+      capacity: capacity ?? null,
+      dayAvailabilities: dayAvailabilities ?? [],
+      subtheme: subtheme ?? [],
+      sdg: sdg ?? [],
+      popupItemsSold: popupItemsSold ?? null,
+      foodCertDate: foodCertDate ?? null,
+      foodCategory: foodCategory ?? [],
+      isFoodCertPending: isFoodCertPending ?? null,
+      linkedVendor: linkedVendor ?? null,
+      pendingCertificateType: pendingCertificateType ?? null,
+      modifiedDate: Date.now(),
+    };
+
+    activity["weekendPricing"] = {
+      amount: parsedWeekend?.amount,
+      isDiscount: parsedWeekend?.isDiscount,
+    };
+    activity["onlinePricing"] = {
+      amount: parsedOnline?.amount,
+      isDiscount: parsedOnline?.isDiscount,
+    };
+    activity["offlinePricing"] = {
+      amount: parsedOffline?.amount,
+      isDiscount: parsedOffline?.isDiscount,
+    };
+    let savedActivity;
+    if (activityId) {
+      try {
+        const foundActivity = await ActivityModel.findById(activityId);
+        if (!foundActivity) {
+          res.status(500).json({
+            error: "Activity draft you are trying to save does not exist!",
+            message: error.message,
+          });
+        } else {
+          savedActivity = await ActivityModel.findByIdAndUpdate(
+            { _id: activityId },
+            { ...activity },
+            {
+              new: true,
+            }
+          );
+        }
+      } catch (e) {
+        res.status(500).json({
+          error: "Error when trying to update activity draft: ",
+          message: error.message,
+        });
+      }
+    } else {
+      const newActivity = new ActivityModel({
+        ...activity,
+      });
+      savedActivity = await newActivity.save({ validateBeforeSave: false });
+    }
+
+    console.log("Saved Activity is: ", savedActivity);
+    const imageFiles = req.files;
+
+    //To update url of uploaded images path to s3 in created activity
+    const imagesPathArr = [];
+
+    if (imageFiles.length === 0 || imageFiles.length === undefined) {
+      console.log("No image files uploaded");
+    } else {
+      console.log("Retrieving uploaded images url");
+      let fileArray = req.files,
+        fileLocation;
+      for (let i = 0; i < fileArray.length; i++) {
+        fileLocation = fileArray[i].location;
+        console.log("file location:", fileLocation);
+        imagesPathArr.push(fileLocation);
+      }
+    }
+
+    await ActivityModel.findByIdAndUpdate(
+      { _id: savedActivity._id },
+      { images: imagesPathArr },
+      { new: true }
+    );
+
+    await ActivityPricingRulesModel.deleteMany({ activity: activityId });
+
+    const activitypriceobjects = [];
+    if (activityPricingRules) {
+      if (Array.isArray(activityPricingRules)) {
+        activityPricingRules.forEach((jsonString, index) => {
+          try {
+            const pricingObject = JSON.parse(jsonString);
+
+            const activitypriceobject = {
+              start: pricingObject.start,
+              end: pricingObject.end,
+              pricePerPax: pricingObject.pricePerPax,
+              clientPrice: pricingObject.clientPrice,
+              activity: savedActivity._id,
+            };
+            activitypriceobjects.push(activitypriceobject);
+          } catch (error) {
+            console.error(`Error parsing JSON: ${error}`);
+          }
+        });
+      } else {
+        const pricingObject = JSON.parse(activityPricingRules);
+        const activitypriceobject = {
+          start: pricingObject.start,
+          end: pricingObject.end,
+          pricePerPax: pricingObject.pricePerPax,
+          clientPrice: pricingObject.clientPrice,
+          activity: activityId,
+        };
+        activitypriceobjects.push(activitypriceobject);
+      }
+      const apr = await Promise.all(
+        activitypriceobjects.map(async (pricingRule) => {
+          const newPricingRule = new ActivityPricingRulesModel(pricingRule);
+          return await newPricingRule.save({ validateBeforeSave: false });
+        })
+      );
+      savedActivity = await ActivityModel.findByIdAndUpdate(
+        savedActivity._id,
+        {
+          $set: {
+            activityPricingRules: apr,
+          },
+        },
+        { new: true, useFindAndModify: false }
+      );
+    } else {
+      savedActivity = await ActivityModel.findByIdAndUpdate(
+        savedActivity._id,
+        {
+          $set: {
+            activityPricingRules: [],
+          },
+        },
+        { new: true, useFindAndModify: false }
+      );
+    }
+
+    res.status(201).json({
+      message: "Activity saved successfully",
+      activity: savedActivity,
+    });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: "Activity cannot be added", message: error.message });
+  }
+};
+
+export const deleteActivityDraft = async (req, res) => {
+  try {
+    const activityId = req.params.id;
+    const deletedActivity = await ActivityModel.findOneAndDelete({
+      _id: activityId,
+    });
+    await ActivityPricingRulesModel.deleteMany({ activity: activityId });
+    const activities = await retrieveActivities(deletedActivity.adminCreated);
+    res.status(201).json({
+      message: "Activity draft deleted successfully!",
+      activity: activities,
+    });
+  } catch (e) {
+    res.status(500).json({
+      error: "Error when deleting activity draft!",
+      message: e.message,
+    });
+  }
+};
+
+export const bulkDeleteActivityDraft = async (req, res) => {
+  try {
+    console.log("bulkDeleteActivityDraft", req.body);
+    const activityIds = req.body;
+    const deletedActivity = await ActivityModel.findOne({ _id: activityIds });
+    const { deletedCount } = await ActivityModel.deleteMany({
+      _id: activityIds,
+    });
+    await ActivityPricingRulesModel.deleteMany({
+      activity: { $in: activityIds },
+    });
+
+    const activities = await retrieveActivities(deletedActivity.adminCreated);
+
+    res.status(201).json({
+      message: `Deleted ${deletedCount} Activity${
+        deletedCount > 1 ? " Drafts" : " Draft"
+      } successfully!`,
+      activity: activities,
+    });
+  } catch (e) {
+    res.status(500).json({
+      error: "Error when bulk deleting activity drafts!",
+      message: e.message,
+    });
+  }
+};
+
+const retrieveActivities = async (adminId) => {
+  return await ActivityModel.find()
+    .populate({
+      path: "adminCreated",
+      match: { _id: adminId },
+    })
+    .populate("activityPricingRules")
+    .populate("theme")
+    .populate("subtheme")
+    .populate("linkedVendor");
 };
 
 export const bulkAddThemes = async (req, res) => {
@@ -284,7 +577,7 @@ export const getActivitiesWithFilters = async (req, res) => {
 
     // Convert string IDs to ObjectId instances
     const subthemeIds = filter.themes.map(
-      (id) => new mongoose.Types.ObjectId(id),
+      (id) => new mongoose.Types.ObjectId(id)
     );
 
     if (subthemeIds.length > 0) {
@@ -352,7 +645,7 @@ export const getActivitiesWithFilters = async (req, res) => {
     // Populate the minimum price per pax for each activity
     for (const activity of activities) {
       activity.minimumPricePerPax = await findMinimumPricePerPax(activity);
-      activity.preSignedImages = await s3ImageGetService(activity.images);
+      activity.preSignedImages = await s3GetImages(activity.images);
     }
     // console.log(
     //   "********************************************************************************"
@@ -375,7 +668,7 @@ export const getAllActivitiesNames = async (req, res) => {
     // Query the collection to get titles of all documents
     const activityTitles = await ActivityModel.find(
       { isDraft: false },
-      "title",
+      "title"
     );
 
     // Extract the titles from the result
@@ -395,7 +688,7 @@ export const getAllActivitiesNames = async (req, res) => {
 export const getMinAndMaxPricePerPax = async (req, res) => {
   try {
     const activities = await ActivityModel.find({}).populate(
-      "activityPricingRules",
+      "activityPricingRules"
     );
     if (activities.length === 0) {
       return res.status(200).send({
@@ -407,7 +700,7 @@ export const getMinAndMaxPricePerPax = async (req, res) => {
     }
 
     const pricingRules = activities.flatMap(
-      (activity) => activity.activityPricingRules,
+      (activity) => activity.activityPricingRules
     );
 
     if (pricingRules.length === 0) {
