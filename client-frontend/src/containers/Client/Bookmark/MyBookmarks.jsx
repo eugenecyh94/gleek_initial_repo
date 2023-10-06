@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Box,
   CircularProgress,
@@ -10,9 +11,8 @@ import {
   Tabs,
   Typography,
 } from "@mui/material";
-
-import DeleteIcon from "@mui/icons-material/Delete";
 import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import ActivityCardItem from "../../../components/ActivityCardItem";
 import VendorProfileItem from "../../../components/Vendor/VendorProfileItem";
@@ -31,14 +31,17 @@ const DeleteIconButtonActivity = styled(IconButton)`
 const DeleteIconButtonVendor = styled(IconButton)`
   position: absolute;
   top: 50%; /* Center vertically */
-  right: 5px ;
-  transform: translateY(-50%); 
+  right: 5px;
+  transform: translateY(-50%);
   background-color: ${({ theme }) => theme.palette.background.paper};
   border-radius: 50%;
   z-index: 1;
 `;
 
 function MyBookmarks() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") || "activity";
+
   const {
     activityBookmarks,
     vendorBookmarks,
@@ -48,7 +51,14 @@ function MyBookmarks() {
     removeVendorBookmark,
   } = useBookmarkStore();
   const { openSnackbar } = useSnackbarStore();
-  const [selectedTab, setSelectedTab] = useState("activity");
+  const [selectedTab, setSelectedTab] = useState(initialTab);
+
+  const handleTabChange = (event, newValue) => {
+    setSelectedTab(newValue);
+
+    // Update the query parameter with the selected tab
+    setSearchParams({ tab: newValue });
+  };
 
   useEffect(() => {
     const fetchBookmarks = async () => {
@@ -56,11 +66,7 @@ function MyBookmarks() {
     };
 
     fetchBookmarks();
-  }, []);
-
-  const handleTabChange = (event, newValue) => {
-    setSelectedTab(newValue);
-  };
+  }, [getBookmarks]);
 
   const handleDeleteBookmark = async (bm) => {
     try {
@@ -150,7 +156,7 @@ function MyBookmarks() {
         >
           {vendorBookmarks.map((vendorBookmark) => (
             <Grid
-              spacing={5}
+             
               item
               key={vendorBookmark._id}
               xs={4}
