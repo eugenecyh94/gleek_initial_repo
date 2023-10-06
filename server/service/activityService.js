@@ -3,8 +3,8 @@ import { s3GetImages } from "./s3ImageServices.js";
 export async function findMinimumPricePerPax(foundActivity) {
   let minPricePerPax = Infinity;
   for (const pricingRule of foundActivity.activityPricingRules) {
-    if (pricingRule.pricePerPax < minPricePerPax) {
-      minPricePerPax = pricingRule.pricePerPax;
+    if (pricingRule.clientPrice < minPricePerPax) {
+      minPricePerPax = pricingRule.clientPrice;
     }
   }
   return minPricePerPax;
