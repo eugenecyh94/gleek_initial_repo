@@ -2,6 +2,7 @@ import express from "express";
 import {
   addActivity,
   bulkAddThemes,
+  bulkDeleteActivityDraft,
   deleteActivityDraft,
   getActivity,
   getAllActivities,
@@ -28,4 +29,5 @@ router.get("/viewActivity/:id", getActivity);
 router.post("/addThemes", bulkAddThemes);
 router.get("/getThemes", getAllThemes);
 router.delete("/deleteDraft/:id", deleteActivityDraft);
+router.delete("/bulkDelete", bulkDeleteActivityDraft);
 export default router;

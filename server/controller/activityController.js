@@ -2,7 +2,6 @@ import ActivityModel from "../model/activityModel.js";
 import ActivityPricingRulesModel from "../model/activityPricingRules.js";
 import ThemeModel from "../model/themeModel.js";
 import { s3GetImages } from "../service/s3ImageServices.js";
-import { VendorTypeEnum } from "../util/vendorTypeEnum.js";
 import mongoose from "mongoose";
 
 export const getAllActivities = async (req, res) => {
@@ -67,7 +66,7 @@ export const getActivity = async (req, res) => {
       await findMinimumPricePerPax(foundActivity);
     if (foundActivity.linkedVendor && foundActivity.linkedVendor.companyLogo) {
       let preSignedUrl = await s3GetImages(
-        foundActivity.linkedVendor.companyLogo,
+        foundActivity.linkedVendor.companyLogo
       );
       foundActivity.linkedVendor.preSignedPhoto = preSignedUrl;
     }
@@ -156,7 +155,7 @@ export const addActivity = async (req, res) => {
     await ActivityModel.findByIdAndUpdate(
       { _id: savedActivity._id },
       { images: imagesPathArr },
-      { new: true },
+      { new: true }
     );
 
     const activitypriceobjects = [];
@@ -202,9 +201,9 @@ export const addActivity = async (req, res) => {
                 },
               },
             },
-            { new: true, useFindAndModify: false },
+            { new: true, useFindAndModify: false }
           );
-        },
+        }
       );
     });
 
@@ -369,7 +368,7 @@ export const saveActivity = async (req, res) => {
               end: pricingObject.end,
               pricePerPax: pricingObject.pricePerPax,
               clientPrice: pricingObject.clientPrice,
-              activity: activityId,
+              activity: savedActivity._id,
             };
             activitypriceobjects.push(activitypriceobject);
           } catch (error) {
@@ -394,7 +393,7 @@ export const saveActivity = async (req, res) => {
         })
       );
       savedActivity = await ActivityModel.findByIdAndUpdate(
-        activityId,
+        savedActivity._id,
         {
           $set: {
             activityPricingRules: apr,
@@ -404,7 +403,7 @@ export const saveActivity = async (req, res) => {
       );
     } else {
       savedActivity = await ActivityModel.findByIdAndUpdate(
-        activityId,
+        savedActivity._id,
         {
           $set: {
             activityPricingRules: [],
@@ -432,8 +431,11 @@ export const deleteActivityDraft = async (req, res) => {
     const deletedActivity = await ActivityModel.findOneAndDelete({
       _id: activityId,
     });
-    res.status(200).json({
-      message: "Activity draft deleted successfully",
+    await ActivityPricingRulesModel.deleteMany({ activity: activityId });
+    const activities = await retrieveActivities(deletedActivity.adminCreated);
+    res.status(201).json({
+      message: "Activity draft deleted successfully!",
+      activity: activities,
     });
   } catch (e) {
     res.status(500).json({
@@ -441,6 +443,46 @@ export const deleteActivityDraft = async (req, res) => {
       message: e.message,
     });
   }
+};
+
+export const bulkDeleteActivityDraft = async (req, res) => {
+  try {
+    console.log("bulkDeleteActivityDraft", req.body);
+    const activityIds = req.body;
+    const deletedActivity = await ActivityModel.findOne({ _id: activityIds });
+    const { deletedCount } = await ActivityModel.deleteMany({
+      _id: activityIds,
+    });
+    await ActivityPricingRulesModel.deleteMany({
+      activity: { $in: activityIds },
+    });
+
+    const activities = await retrieveActivities(deletedActivity.adminCreated);
+
+    res.status(201).json({
+      message: `Deleted ${deletedCount} Activity${
+        deletedCount > 1 ? " Drafts" : " Draft"
+      } successfully!`,
+      activity: activities,
+    });
+  } catch (e) {
+    res.status(500).json({
+      error: "Error when bulk deleting activity drafts!",
+      message: e.message,
+    });
+  }
+};
+
+const retrieveActivities = async (adminId) => {
+  return await ActivityModel.find()
+    .populate({
+      path: "adminCreated",
+      match: { _id: adminId },
+    })
+    .populate("activityPricingRules")
+    .populate("theme")
+    .populate("subtheme")
+    .populate("linkedVendor");
 };
 
 export const bulkAddThemes = async (req, res) => {
@@ -540,7 +582,7 @@ export const getActivitiesWithFilters = async (req, res) => {
 
     // Convert string IDs to ObjectId instances
     const subthemeIds = filter.themes.map(
-      (id) => new mongoose.Types.ObjectId(id),
+      (id) => new mongoose.Types.ObjectId(id)
     );
 
     if (subthemeIds.length > 0) {
@@ -631,7 +673,7 @@ export const getAllActivitiesNames = async (req, res) => {
     // Query the collection to get titles of all documents
     const activityTitles = await ActivityModel.find(
       { isDraft: false },
-      "title",
+      "title"
     );
 
     // Extract the titles from the result
@@ -651,7 +693,7 @@ export const getAllActivitiesNames = async (req, res) => {
 export const getMinAndMaxPricePerPax = async (req, res) => {
   try {
     const activities = await ActivityModel.find({}).populate(
-      "activityPricingRules",
+      "activityPricingRules"
     );
     if (activities.length === 0) {
       return res.status(200).send({
@@ -663,7 +705,7 @@ export const getMinAndMaxPricePerPax = async (req, res) => {
     }
 
     const pricingRules = activities.flatMap(
-      (activity) => activity.activityPricingRules,
+      (activity) => activity.activityPricingRules
     );
 
     if (pricingRules.length === 0) {

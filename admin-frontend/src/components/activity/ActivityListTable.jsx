@@ -175,7 +175,6 @@ const ActivityListTable = (allActivities) => {
     navigate("/createActivity");
   };
   const handleRowClick = (activity) => {
-    console.log("clicked", activity._id);
     navigate(`/viewActivity/${activity._id}`);
   };
 

@@ -6,8 +6,13 @@ import { useEffect } from "react";
 
 const ViewActivityDrafts = () => {
   const theme = useTheme();
-  const { activities, getActivityForAdmin, isLoading, deleteActivity } =
-    useActivityStore();
+  const {
+    activities,
+    getActivityForAdmin,
+    isLoading,
+    deleteActivity,
+    bulkDeleteActivity,
+  } = useActivityStore();
   const { admin } = useAdminStore();
   useEffect(() => {
     const fetchData = async () => {
@@ -37,6 +42,7 @@ const ViewActivityDrafts = () => {
         <ActivityDraftList
           activities={activities}
           deleteActivity={deleteActivity}
+          bulkDeleteActivity={bulkDeleteActivity}
         />
       )}
     </MainBodyContainer>

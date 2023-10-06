@@ -2,12 +2,14 @@ import styled from "@emotion/styled";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import EditNoteIcon from "@mui/icons-material/EditNote";
+import AddIcon from "@mui/icons-material/Add";
 import TaskIcon from "@mui/icons-material/Task";
 import { Badge, Box, Button, Tab, Tabs, Typography } from "@mui/material";
 import { DataGrid, GridToolbarFilterButton } from "@mui/x-data-grid";
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useActivityStore, useSnackbarStore } from "../../zustand/GlobalStore";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -19,13 +21,19 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   },
 }));
 
-const ActivityDraftList = ({ activities, deleteActivity }) => {
+const ActivityDraftList = ({
+  activities,
+  deleteActivity,
+  bulkDeleteActivity,
+}) => {
   const navigate = useNavigate();
+  const { selectedTab, setSelectedTab } = useActivityStore();
+  const { openSnackbar } = useSnackbarStore();
   const filterCriteria = {
     publishedTab: { approvalStatus: "Published", isDraft: false },
     draftTab: { approvalStatus: "Pending Approval", isDraft: true },
   };
-  const [selectedTab, setSelectedTab] = useState("publishedTab");
+  const [selectedRows, setSelectedRows] = useState([]);
   const [currentTabRows, setCurrentTabRows] = useState(() => {
     if (Array.isArray(activities)) {
       return activities?.filter(
@@ -48,12 +56,32 @@ const ActivityDraftList = ({ activities, deleteActivity }) => {
       )
     );
   };
+  useEffect(() => {
+    if (Array.isArray(activities)) {
+      const filteredRows = activities.filter(
+        (activity) =>
+          activity.approvalStatus ===
+            filterCriteria[selectedTab].approvalStatus &&
+          activity.isDraft === filterCriteria[selectedTab].isDraft
+      );
+      setCurrentTabRows(filteredRows);
+    }
+  }, [activities, selectedTab]);
 
+  const handleCreateButtonClick = () => {
+    navigate("/createActivity");
+  };
   const handleEditButton = (activity) => {
     navigate(`/editActivityDraft/${activity._id}`);
   };
-  const handleDeleteButton = (activity) => {
-    deleteActivity(activity?._id);
+  const handleDeleteButton = async (activity) => {
+    const snackbarMessage = await deleteActivity(activity?._id);
+    openSnackbar(snackbarMessage);
+  };
+  const handleBulkDelete = async () => {
+    const snackbarMessage = await bulkDeleteActivity(selectedRows);
+    setSelectedRows([]);
+    openSnackbar(snackbarMessage);
   };
   const publishedBadgeNumber = Array.isArray(activities)
     ? activities.filter((activity) => activity.approvalStatus === "Published")
@@ -184,39 +212,114 @@ const ActivityDraftList = ({ activities, deleteActivity }) => {
   }
   return (
     <Box>
-      <Tabs value={selectedTab} onChange={handleTabChange} centered>
-        <Tab
-          label="Published"
-          value="publishedTab"
-          icon={
-            <StyledBadge
-              color={
-                selectedTab === "publishedTab" ? "light_purple" : "unselected"
-              }
-              badgeContent={publishedBadgeNumber}
-              showZero
+      <Box display={"flex"} justifyContent={"space-between"}>
+        <Tabs value={selectedTab} onChange={handleTabChange} centered>
+          <Tab
+            label="Published"
+            value="publishedTab"
+            icon={
+              <StyledBadge
+                color={
+                  selectedTab === "publishedTab" ? "light_purple" : "unselected"
+                }
+                badgeContent={publishedBadgeNumber}
+                showZero
+              >
+                <TaskIcon />
+              </StyledBadge>
+            }
+          />
+          <Tab
+            label="Drafts"
+            value="draftTab"
+            icon={
+              <StyledBadge
+                color={
+                  selectedTab === "draftTab" ? "light_purple" : "unselected"
+                }
+                badgeContent={draftBadgeNumber}
+                showZero
+              >
+                <EditNoteIcon />
+              </StyledBadge>
+            }
+          />
+        </Tabs>
+        <Box display="flex">
+          {selectedTab === "draftTab" && selectedRows.length > 0 && (
+            <Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              alignItems="center"
+              paddingRight={2}
             >
-              <TaskIcon />
-            </StyledBadge>
-          }
-        />
-        <Tab
-          label="Drafts"
-          value="draftTab"
-          icon={
-            <StyledBadge
-              color={selectedTab === "draftTab" ? "light_purple" : "unselected"}
-              badgeContent={draftBadgeNumber}
-              showZero
+              <Button
+                variant="contained"
+                color="error"
+                onClick={handleBulkDelete}
+                style={{
+                  justifyContent: "center",
+                  paddingLeft: 2,
+                  paddingRight: 6,
+                }}
+              >
+                <Typography
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                  component="div"
+                  color="white"
+                  fontSize={"0.875rem"}
+                >
+                  <DeleteIcon fontSize="small" />
+                  Delete
+                </Typography>
+              </Button>
+            </Box>
+          )}
+          <Box
+            display="flex"
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
+            paddingRight={2}
+          >
+            <Button
+              variant="contained"
+              color="light_purple"
+              onClick={handleCreateButtonClick}
+              style={{
+                paddingLeft: 2,
+                justifyContent: "center",
+                paddingRight: 6,
+              }}
             >
-              <EditNoteIcon />
-            </StyledBadge>
-          }
-        />
-      </Tabs>
+              <Typography
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                component="div"
+                color="white"
+                fontSize={"0.875rem"}
+              >
+                <AddIcon fontSize="small" />
+                Create
+              </Typography>
+            </Button>
+          </Box>
+        </Box>
+      </Box>
+
       <div style={{ height: 500, width: "99%" }}>
         <DataGrid
           checkboxSelection={selectedTab === "draftTab"}
+          rowSelectionModel={selectedRows}
+          onRowSelectionModelChange={(rows) => {
+            setSelectedRows(rows);
+          }}
           initialState={{
             pagination: {
               paginationModel: { pageSize: 25, page: 0 },
@@ -237,5 +340,6 @@ const ActivityDraftList = ({ activities, deleteActivity }) => {
 ActivityDraftList.propTypes = {
   activities: PropTypes.array.isRequired,
   deleteActivity: PropTypes.func.isRequired,
+  bulkDeleteActivity: PropTypes.func.isRequired,
 };
 export default ActivityDraftList;
