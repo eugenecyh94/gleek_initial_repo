@@ -5,9 +5,10 @@ import {
   Grid,
   IconButton,
   Link,
+  Paper,
   Tab,
   Tabs,
-  Typography
+  Typography,
 } from "@mui/material";
 
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -29,8 +30,9 @@ const DeleteIconButtonActivity = styled(IconButton)`
 
 const DeleteIconButtonVendor = styled(IconButton)`
   position: absolute;
-  top: 8px;
-  right: 5px;
+  top: 50%; /* Center vertically */
+  right: 5px ;
+  transform: translateY(-50%); 
   background-color: ${({ theme }) => theme.palette.background.paper};
   border-radius: 50%;
   z-index: 1;
@@ -108,13 +110,7 @@ function MyBookmarks() {
         <Tab label="Activity" value="activity" />
         <Tab label="Vendor" value="vendor" />
       </Tabs>
-      <TabPanel
-        value={selectedTab}
-        index="activity"
-        minHeight="calc(100vh - 140px)"
-      >
-        {" "}
-        {/* Set the min-height here */}
+      <TabPanel value={selectedTab} index="activity">
         <Grid
           container
           spacing={{ xs: 2, md: 3 }}
@@ -164,14 +160,22 @@ function MyBookmarks() {
               xl={4}
             >
               {vendorBookmark?.vendor && (
-                <div style={{ position: "relative" }}>
+                <Paper
+                  sx={{
+                    position: "relative",
+                    padding: 2,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
                   <DeleteIconButtonVendor
                     onClick={() => handleDeleteVendorBookmark(vendorBookmark)}
                   >
                     <DeleteIcon />
                   </DeleteIconButtonVendor>
                   <VendorProfileItem vendor={vendorBookmark?.vendor} />
-                </div>
+                </Paper>
               )}
             </Grid>
           ))}

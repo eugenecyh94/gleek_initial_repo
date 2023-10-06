@@ -6,8 +6,15 @@ function VendorProfileItem({ vendor }) {
   const vendorLink = `/shop/vendor/${vendor._id}`;
 
   return (
-    <Link to={vendorLink} style={{ textDecoration: "none" }}>
-      <Box display="flex" alignItems="center" mb={3}>
+    <Link
+      to={vendorLink}
+      style={{
+        textDecoration: "none",
+        display: "inline-block",
+        margin: 0, 
+      }}
+    >
+      <Box display="flex" alignItems="center">
         {vendor.preSignedPhoto ? (
           <Avatar alt={vendor.companyName} src={vendor.preSignedPhoto} />
         ) : (
