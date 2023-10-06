@@ -3,6 +3,8 @@ import shopRoutes from "./shop.js";
 import authRoutes from "./auth.js";
 import clientRoutes from "./client.js";
 import vendorRoutes from "./vendor.js";
+import bookingRoutes from "./booking.js";
+import timeslotRoutes from "./timeslot.js";
 import bookmarkRoutes from "./bookmark.js";
 import activityRoutes from "./activity.js";
 import { userRouter } from "../../controller/gleekUserRouterController.js";
@@ -20,6 +22,10 @@ router.use("/shop", shopRoutes);
 router.use("/client", clientRoutes);
 // /gleek/vendor
 router.use("/vendor", vendorRoutes);
+// /gleek/booking
+router.use("/booking", bookingRoutes);
+// /gleek/timeslot
+router.use("/timeslot", timeslotRoutes);
 // /gleek/validate-token
 router.post("/validateToken", userRouter);
 // /gleek/bookmark
