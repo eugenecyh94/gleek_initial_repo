@@ -1,26 +1,27 @@
-import React, { useEffect } from "react";
-import useShopStore from "../../zustand/ShopStore";
-import { useParams } from "react-router-dom";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination, Navigation } from "swiper/modules";
 import {
   Box,
-  Typography,
+  Button,
+  CircularProgress,
+  Divider,
   Grid,
   Paper,
-  Divider,
   TextField,
-  Button,
-  Avatar,
-  CircularProgress,
+  Typography
 } from "@mui/material";
-import { useTheme, lighten } from "@mui/material/styles";
+import { lighten, useTheme } from "@mui/material/styles";
+import React, { useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { Navigation, Pagination } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
 import notFound from "../../assets/not_found.png";
+import useShopStore from "../../zustand/ShopStore";
 // Import Swiper styles
 import "swiper/css";
-import "swiper/css/pagination";
 import "swiper/css/navigation";
+import "swiper/css/pagination";
 
+import ActivityBookmarkButton from "../../components/Bookmark/ActivityBookmarkButton";
+import VendorProfileItem from "../../components/Vendor/VendorProfileItem";
 import "./styles.css";
 
 const ActivityDetailsPage = () => {
@@ -46,35 +47,25 @@ const ActivityDetailsPage = () => {
       {!currentActivityLoading && (
         <Grid container spacing={2} p={5}>
           <Grid item xs={12} sm={12} md={12} lg={12}>
-            <Box mb={2}>
-              <Typography color={accent} fontWeight="700" variant="h4">
-                {currentActivity?.title}
-              </Typography>
-            </Box>
-            {currentActivity?.linkedVendor && (
-              <Box
-                display="flex" // Set to flex display
-                alignItems="center" // Center the content vertically
-                mb={3}
-              >
-                {currentActivity?.linkedVendor.preSignedPhoto ? (
-                  <Avatar
-                    alt={currentActivity?.linkedVendor.companyName}
-                    src={currentActivity?.linkedVendor.preSignedPhoto}
-                  />
-                ) : (
-                  <Avatar alt="Empty Avatar" />
-                )}
-                <Typography
-                  color={primary}
-                  fontWeight="700"
-                  variant="h6"
-                  sx={{ marginLeft: "10px" }}
-                >
-                  {currentActivity?.linkedVendor.companyName}
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={2}
+              p={1}
+            >
+              <Box>
+                <Typography color={accent} fontWeight="700" variant="h4" mb={2}>
+                  {currentActivity?.title}
                 </Typography>
+                {currentActivity?.linkedVendor && (
+                  <VendorProfileItem vendor={currentActivity?.linkedVendor} />
+                )}
               </Box>
-            )}
+          
+                <ActivityBookmarkButton activityId={activityId} />
+             
+            </Box>
           </Grid>
           <Grid
             item
@@ -109,7 +100,7 @@ const ActivityDetailsPage = () => {
                     <SwiperSlide key={index}>
                       <img
                         src={image}
-                        alt={`Image ${index}`}
+                        alt={`Img ${index}`}
                         style={{
                           height: "100%",
                           maxWidth: "100%",

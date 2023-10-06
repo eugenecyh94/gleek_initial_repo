@@ -1,45 +1,100 @@
+import styled from "@emotion/styled";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
-  Avatar,
   Box,
+  CircularProgress,
   Grid,
+  IconButton,
   Link,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
+  Paper,
   Tab,
   Tabs,
   Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import ActivityCardItem from "../../../components/ActivityCardItem";
-import AxiosConnect from "../../../utils/AxiosConnect";
+import VendorProfileItem from "../../../components/Vendor/VendorProfileItem";
+import useBookmarkStore from "../../../zustand/BookmarkStore";
+import useSnackbarStore from "../../../zustand/SnackbarStore";
+
+const DeleteIconButtonActivity = styled(IconButton)`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: ${({ theme }) => theme.palette.background.paper};
+  border-radius: 50%;
+  z-index: 1;
+`;
+
+const DeleteIconButtonVendor = styled(IconButton)`
+  position: absolute;
+  top: 50%; /* Center vertically */
+  right: 5px;
+  transform: translateY(-50%);
+  background-color: ${({ theme }) => theme.palette.background.paper};
+  border-radius: 50%;
+  z-index: 1;
+`;
 
 function MyBookmarks() {
-  const [activityBookmarks, setActivityBookmarks] = useState([]);
-  const [vendorBookmarks, setVendorBookmarks] = useState([]);
-  const [selectedTab, setSelectedTab] = useState("activity");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") || "activity";
 
-  useEffect(() => {
-    const fetchBookmarks = async () => {
-      const response = await AxiosConnect.get(`/gleek/bookmark`);
-      const data = response.data;
-      const activityBookmarks = data.filter(
-        (bookmark) => bookmark.type === "ACTIVITY",
-      );
-      const vendorBookmarks = data.filter(
-        (bookmark) => bookmark.type === "VENDOR",
-      );
-      setActivityBookmarks(activityBookmarks);
-      setVendorBookmarks(vendorBookmarks);
-    };
-
-    fetchBookmarks();
-  }, []);
+  const {
+    activityBookmarks,
+    vendorBookmarks,
+    isLoadingBookmarks,
+    getBookmarks,
+    removeActivityBookmark,
+    removeVendorBookmark,
+  } = useBookmarkStore();
+  const { openSnackbar } = useSnackbarStore();
+  const [selectedTab, setSelectedTab] = useState(initialTab);
 
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue);
+
+    // Update the query parameter with the selected tab
+    setSearchParams({ tab: newValue });
   };
+
+  useEffect(() => {
+    const fetchBookmarks = async () => {
+      await getBookmarks();
+    };
+
+    fetchBookmarks();
+  }, [getBookmarks]);
+
+  const handleDeleteBookmark = async (bm) => {
+    try {
+      await removeActivityBookmark(bm.activity._id, bm);
+      openSnackbar("Removed activity bookmark.", "success");
+    } catch (error) {
+      console.log(error);
+      openSnackbar("Error", "error");
+    }
+  };
+
+  const handleDeleteVendorBookmark = async (bm) => {
+    try {
+      await removeVendorBookmark(bm);
+      openSnackbar("Removed vendor bookmark.", "success");
+    } catch (error) {
+      console.log(error);
+      openSnackbar("Error", "error");
+    }
+  };
+
+  if (isLoadingBookmarks) {
+    return (
+      <Box display="flex" alignItems="center" justifyContent="center">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -67,26 +122,41 @@ function MyBookmarks() {
           spacing={{ xs: 2, md: 3 }}
           columns={{ xs: 4, sm: 8, md: 12, lg: 12, xl: 16 }}
         >
-          {activityBookmarks.map((bm) => (
-            <Grid item key={bm._id} xs={4} sm={4} md={4} lg={4} xl={4}>
-              <Link
-                href={`/shop/activity/${bm.activity._id}`}
-                style={{ textDecoration: "none" }}
-              >
-                <ActivityCardItem activity={bm.activity} />
-              </Link>
-            </Grid>
-          ))}
+          {activityBookmarks.map((bm) => {
+            return bm.activity ? (
+              <Grid item key={bm._id} xs={4} sm={4} md={4} lg={4} xl={4}>
+                <div style={{ position: "relative" }}>
+                  <DeleteIconButtonActivity
+                    onClick={() => handleDeleteBookmark(bm)}
+                  >
+                    <DeleteIcon />
+                  </DeleteIconButtonActivity>
+                  <Link
+                    href={`/shop/activity/${bm.activity._id}`}
+                    style={{ textDecoration: "none" }}
+                  >
+                    <ActivityCardItem activity={bm.activity} />
+                  </Link>
+                </div>
+              </Grid>
+            ) : null;
+          })}
         </Grid>
       </TabPanel>
-      <TabPanel value={selectedTab} index="vendor">
+      <TabPanel
+        value={selectedTab}
+        index="vendor"
+        minHeight="calc(100vh - 140px)"
+      >
         <Grid
           container
-          spacing={{ xs: 2, md: 3 }}
+          p={5}
+          spacing={{ xs: 6, md: 8 }}
           columns={{ xs: 4, sm: 8, md: 12, lg: 12, xl: 16 }}
         >
           {vendorBookmarks.map((vendorBookmark) => (
             <Grid
+             
               item
               key={vendorBookmark._id}
               xs={4}
@@ -95,31 +165,24 @@ function MyBookmarks() {
               lg={4}
               xl={4}
             >
-              <Link
-                href={`/shop/vendor/${vendorBookmark.vendor._id}`}
-                style={{ textDecoration: "none" }}
-              >
-                <ListItem>
-                  <ListItemAvatar>
-                    <Avatar>
-                      {vendorBookmark.vendor.preSignedPhoto ? (
-                        <img
-                          src={vendorBookmark.vendor.preSignedPhoto}
-                          alt="Vendor Avatar"
-                        />
-                      ) : (
-                        vendorBookmark?.vendor?.companyName
-                          .charAt(0)
-                          .toUpperCase()
-                      )}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={vendorBookmark.vendor.companyName}
-                    secondary={vendorBookmark.vendor.vendorType}
-                  />
-                </ListItem>
-              </Link>
+              {vendorBookmark?.vendor && (
+                <Paper
+                  sx={{
+                    position: "relative",
+                    padding: 2,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <DeleteIconButtonVendor
+                    onClick={() => handleDeleteVendorBookmark(vendorBookmark)}
+                  >
+                    <DeleteIcon />
+                  </DeleteIconButtonVendor>
+                  <VendorProfileItem vendor={vendorBookmark?.vendor} />
+                </Paper>
+              )}
             </Grid>
           ))}
         </Grid>
@@ -129,11 +192,11 @@ function MyBookmarks() {
 }
 
 function TabPanel(props) {
-  const { children, value, index } = props;
+  const { children, value, index, minHeight } = props;
   return (
     <div hidden={value !== index}>
       {value === index && (
-        <Box pt={3} pb={3}>
+        <Box pt={3} pb={3} style={{ minHeight: minHeight }}>
           {children}
         </Box>
       )}
