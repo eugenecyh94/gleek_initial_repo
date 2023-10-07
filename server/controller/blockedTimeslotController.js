@@ -51,12 +51,21 @@ export const addBlockedTimeslot = async (req, res) => {
 // 1 timeslot for multiple activities
 export const addBlockedTimeslotMultipleActivities = async (req, res) => {
   try {
+    const vendor = req.user;
+
     const session = await mongoose.startSession();
     session.startTransaction();
     const { activityIds, blockedStartDateTime, blockedEndDateTime } = req.body;
     let blockedTimeslots = [];
 
     for (const activityId of activityIds) {
+      const updateActivity = await ActivityModel.findById(activityId);
+      if (!updateActivity.linkedVendor.equals(vendor._id)) {
+        console.log(updateActivity.linkedVendor)
+        console.log(vendor._id)
+        throw Error("Activity does not belong to you.");
+      }
+
       const createdBlockedTimeslot = await addBlockedTimeslotForActivity(
         activityId,
         blockedStartDateTime,
@@ -64,9 +73,9 @@ export const addBlockedTimeslotMultipleActivities = async (req, res) => {
       );
 
       console.log("createdBlockedTimeslot", createdBlockedTimeslot);
-      const updateActivity = await ActivityModel.findById(activityId);
-      updateActivity.blockedTimeslots.push({ _id: activityId });
-      updateActivity.save()
+
+      updateActivity.blockedTimeslots.push({ _id: createdBlockedTimeslot._id });
+      updateActivity.save();
 
       blockedTimeslots.push(createdBlockedTimeslot);
     }

@@ -99,7 +99,6 @@ export const getActivitiesByVendorId = async (req, res) => {
   }
 };
 
-
 export const addActivity = async (req, res) => {
   try {
     console.log("add activity body:", req.body);
@@ -731,25 +730,28 @@ export const getMinAndMaxPricePerPax = async (req, res) => {
   }
 };
 
-
 /**
- * For Gleek Vendor application
+ * App: Gleek Vendor
+ * Retrieve activities associated with a vendor.
+ *
  */
 
-export const getActivitiesByVendorIdWithBlockedTimeslots = async (req, res) => {
+export const getVendorActivities = async (req, res) => {
   try {
-    const { vendorId } = req.params;
-    console.log(vendorId);
+    const vendor = req.user;
+    const vendorId = vendor._id;
+    console.log("getVendorActivities vendor _id", vendorId);
 
-    const activities = await Activity.find({ linkedVendor: vendorId })
+    const activities = await ActivityModel.find({ linkedVendor: vendorId })
       .populate("activityPricingRules")
       .populate("theme")
       .populate("subtheme")
       .populate("linkedVendor")
-      .populate("blockedtimeslots"); // Include blockedTimeslots
+      .populate("blockedTimeslots");
 
+    console.log(activities[0].blockedTimeslots);
     const preSignedPromises = activities.map(async (activity) => {
-      await prepareActivityMinimumPricePerPaxAndSingleImage(activity);
+      await findMinimumPricePerPax(activity);
     });
 
     await Promise.all(preSignedPromises);
