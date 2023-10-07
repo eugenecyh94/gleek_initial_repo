@@ -2,6 +2,7 @@ import express from "express";
 import {
   getBlockedTimeslotsByActivityId,
   addBlockedTimeslot,
+  addBlockedTimeslotMultipleActivities,
 } from "../../controller/blockedTimeslotController.js";
 import verifyToken from "../../middleware/vendorAuth.js";
 
@@ -13,5 +14,9 @@ router.get(
   getBlockedTimeslotsByActivityId
 );
 router.post("/addBlockedTimeslot", verifyToken, addBlockedTimeslot);
+
+// Add 1 blockout timeslot to 1 or several activities
+router.post("/blockout/activities", verifyToken, addBlockedTimeslotMultipleActivities);
+
 
 export default router;

@@ -127,7 +127,6 @@ export const postRegister = async (req, res) => {
       createdClient.id,
       acceptTermsAndConditions,
       session,
-      session,
     );
 
     const token = await generateJwtToken(createdClient.id);

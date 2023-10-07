@@ -32,6 +32,8 @@ import PrivacyVendor from "./containers/Vendor/PrivacyVendor";
 import VendorForgotPassword from "./containers/Vendor/Password/VendorForgotPassword";
 import VendorResetPassword from "./containers/Vendor/Password/ResetPassword";
 import VendorDetails from "./containers/Client/Activity/VendorDetails";
+import BlockoutDashboard from "./containers/Vendor/Blockout/BlockoutDashboard";
+import BlockoutMultipleActivities from "./containers/Vendor/Blockout/BlockoutMultipleActivities";
 
 function App() {
   const { isLoading, clientError, login } = useClientStore();
@@ -255,6 +257,24 @@ function App() {
             exact
             path="/vendor/resetPassword"
             element={<VendorResetPassword />}
+          />
+          <Route
+            exact
+            path="/vendor/blockout"
+            element={
+              <VendorProtectedRoute>
+                <BlockoutDashboard />
+              </VendorProtectedRoute>
+            }
+          />
+           <Route
+            exact
+            path="/vendor/blockout/create"
+            element={
+              <VendorProtectedRoute>
+                <BlockoutMultipleActivities />
+              </VendorProtectedRoute>
+            }
           />
         </Routes>
       </Layout>

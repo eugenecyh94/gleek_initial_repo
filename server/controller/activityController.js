@@ -5,7 +5,7 @@ import {
   findMinimumPricePerPax,
   prepareActivityMinimumPricePerPaxAndSingleImage,
 } from "../service/activityService.js";
-import { s3GetImages} from "../service/s3ImageServices.js";
+import { s3GetImages } from "../service/s3ImageServices.js";
 import { VendorTypeEnum } from "../util/vendorTypeEnum.js";
 import mongoose from "mongoose";
 
@@ -62,7 +62,7 @@ export const getActivity = async (req, res) => {
       await findMinimumPricePerPax(foundActivity);
     if (foundActivity.linkedVendor && foundActivity.linkedVendor.companyLogo) {
       let preSignedUrl = await s3GetImages(
-        foundActivity.linkedVendor.companyLogo
+        foundActivity.linkedVendor.companyLogo,
       );
       foundActivity.linkedVendor.preSignedPhoto = preSignedUrl;
     }
@@ -98,6 +98,7 @@ export const getActivitiesByVendorId = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
 
 export const addActivity = async (req, res) => {
   try {
@@ -150,7 +151,7 @@ export const addActivity = async (req, res) => {
     await ActivityModel.findByIdAndUpdate(
       { _id: savedActivity._id },
       { images: imagesPathArr },
-      { new: true }
+      { new: true },
     );
 
     const activitypriceobjects = [];
@@ -196,9 +197,9 @@ export const addActivity = async (req, res) => {
                 },
               },
             },
-            { new: true, useFindAndModify: false }
+            { new: true, useFindAndModify: false },
           );
-        }
+        },
       );
     });
 
@@ -308,7 +309,7 @@ export const saveActivity = async (req, res) => {
             { ...activity },
             {
               new: true,
-            }
+            },
           );
         }
       } catch (e) {
@@ -346,7 +347,7 @@ export const saveActivity = async (req, res) => {
     await ActivityModel.findByIdAndUpdate(
       { _id: savedActivity._id },
       { images: imagesPathArr },
-      { new: true }
+      { new: true },
     );
 
     await ActivityPricingRulesModel.deleteMany({ activity: activityId });
@@ -385,7 +386,7 @@ export const saveActivity = async (req, res) => {
         activitypriceobjects.map(async (pricingRule) => {
           const newPricingRule = new ActivityPricingRulesModel(pricingRule);
           return await newPricingRule.save({ validateBeforeSave: false });
-        })
+        }),
       );
       savedActivity = await ActivityModel.findByIdAndUpdate(
         savedActivity._id,
@@ -394,7 +395,7 @@ export const saveActivity = async (req, res) => {
             activityPricingRules: apr,
           },
         },
-        { new: true, useFindAndModify: false }
+        { new: true, useFindAndModify: false },
       );
     } else {
       savedActivity = await ActivityModel.findByIdAndUpdate(
@@ -404,7 +405,7 @@ export const saveActivity = async (req, res) => {
             activityPricingRules: [],
           },
         },
-        { new: true, useFindAndModify: false }
+        { new: true, useFindAndModify: false },
       );
     }
 
@@ -577,7 +578,7 @@ export const getActivitiesWithFilters = async (req, res) => {
 
     // Convert string IDs to ObjectId instances
     const subthemeIds = filter.themes.map(
-      (id) => new mongoose.Types.ObjectId(id)
+      (id) => new mongoose.Types.ObjectId(id),
     );
 
     if (subthemeIds.length > 0) {
@@ -668,7 +669,7 @@ export const getAllActivitiesNames = async (req, res) => {
     // Query the collection to get titles of all documents
     const activityTitles = await ActivityModel.find(
       { isDraft: false },
-      "title"
+      "title",
     );
 
     // Extract the titles from the result
@@ -688,7 +689,7 @@ export const getAllActivitiesNames = async (req, res) => {
 export const getMinAndMaxPricePerPax = async (req, res) => {
   try {
     const activities = await ActivityModel.find({}).populate(
-      "activityPricingRules"
+      "activityPricingRules",
     );
     if (activities.length === 0) {
       return res.status(200).send({
@@ -700,7 +701,7 @@ export const getMinAndMaxPricePerPax = async (req, res) => {
     }
 
     const pricingRules = activities.flatMap(
-      (activity) => activity.activityPricingRules
+      (activity) => activity.activityPricingRules,
     );
 
     if (pricingRules.length === 0) {
@@ -727,5 +728,35 @@ export const getMinAndMaxPricePerPax = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Server error", message: error.message });
+  }
+};
+
+
+/**
+ * For Gleek Vendor application
+ */
+
+export const getActivitiesByVendorIdWithBlockedTimeslots = async (req, res) => {
+  try {
+    const { vendorId } = req.params;
+    console.log(vendorId);
+
+    const activities = await Activity.find({ linkedVendor: vendorId })
+      .populate("activityPricingRules")
+      .populate("theme")
+      .populate("subtheme")
+      .populate("linkedVendor")
+      .populate("blockedtimeslots"); // Include blockedTimeslots
+
+    const preSignedPromises = activities.map(async (activity) => {
+      await prepareActivityMinimumPricePerPaxAndSingleImage(activity);
+    });
+
+    await Promise.all(preSignedPromises);
+
+    res.status(200).json(activities);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
   }
 };
