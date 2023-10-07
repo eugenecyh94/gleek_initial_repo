@@ -3,7 +3,7 @@ import ActivityModel from "../model/activityModel.js";
 import BlockedTimeslotModel from "../model/blockedTimeslotModel.js";
 import { addBlockedTimeslotForActivity } from "../service/blokedTImeslotService.js";
 
-// GET /gleek/timeslot/getBlockedTimeslotsByActivityId/:activityId
+
 export const getBlockedTimeslotsByActivityId = async (req, res) => {
   try {
     const { activityId } = req.params;
@@ -20,18 +20,12 @@ export const getBlockedTimeslotsByActivityId = async (req, res) => {
   }
 };
 
-// POST /gleek/timeslot/addBlockedTimeslot
-// Request body expects:
-// {
-//   "activityId": "60b9a9f9f0a6a93c4c0e4e8d",
-//   "blockedStartDateTime": "2021-06-06T00:00:00.000Z",
-//   "blockedEndDateTime": "2021-06-06T01:00:00.000Z"
-// }
+
 export const addBlockedTimeslot = async (req, res) => {
   try {
     const { activityId, blockedStartDateTime, blockedEndDateTime } = req.body;
     const blockedTimeslot = new BlockedTimeslotModel({
-      activity: activityId,
+      activityId,
       blockedStartDateTime,
       blockedEndDateTime,
     });
@@ -48,6 +42,7 @@ export const addBlockedTimeslot = async (req, res) => {
     });
   }
 };
+
 // 1 timeslot for multiple activities
 export const addBlockedTimeslotMultipleActivities = async (req, res) => {
   try {

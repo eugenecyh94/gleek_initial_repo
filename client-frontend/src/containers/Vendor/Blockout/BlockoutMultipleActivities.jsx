@@ -4,11 +4,18 @@ import { DateTimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import useBlockoutStore from "../../../zustand/BlockoutStore";
 
 function BlockoutMultipleActivities() {
   const [blockedStartDateTime, setBlockedStartDateTime] = useState(null);
   const [blockedEndDateTime, setBlockedEndDateTime] = useState(null);
   const [activityIds, setActivityIds] = useState([]);
+
+  const {
+    getActivitiesWithBlockouts,
+    isLoadingactivitiesWithBlockouts,
+    activitiesWithBlockouts,
+  } = useBlockoutStore();
 
   const handleStartDateTimeChange = (date) => {
     setBlockedStartDateTime(date);

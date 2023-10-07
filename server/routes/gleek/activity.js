@@ -9,7 +9,5 @@ const router = express.Router();
 // /gleek/activity/vendor/vendorId
 router.get("/vendor/:vendorId", getActivitiesByVendorId);
 
-// /gleek/activity/myActivities
-router.get("/myActivities", vendorVerifyToken, getVendorActivities);
 
 export default router;
