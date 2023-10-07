@@ -269,7 +269,7 @@ function App() {
           />
            <Route
             exact
-            path="/vendor/blockout/create"
+            path="/vendor/blockout/create/mass"
             element={
               <VendorProtectedRoute>
                 <BlockoutMultipleActivities />
