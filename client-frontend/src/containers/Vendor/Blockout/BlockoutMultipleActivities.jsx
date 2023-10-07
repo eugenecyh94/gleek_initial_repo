@@ -5,7 +5,7 @@ import {
   Divider,
   Stack,
   TextField,
-  Typography
+  Typography,
 } from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -101,7 +101,7 @@ function BlockoutMultipleActivities() {
                 )}
                 format="YYYY/MM/DD hh:mm a"
               />
-              -
+              <div>-</div>
               <DateTimePicker
                 label="End Date and Time"
                 value={blockedEndDateTime}
