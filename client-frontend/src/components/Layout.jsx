@@ -34,7 +34,7 @@ const Layout = ({ children }) => {
   return (
     <Box
       bgcolor={backgroundColor}
-      minHeight="100vh"
+   
       flexDirection="column"
       display="flex"
     >
@@ -45,9 +45,10 @@ const Layout = ({ children }) => {
         display="flex"
         flexDirection="row"
         justifyContent="space-evenly"
-        alignItems="center"
+        alignItems="stretch"
+        minHeight="100vh"
       >
-        <Box flex={1} mt={8}>
+        <Box flex={1} mt={5} >
           {children}
         </Box>
       </Box>

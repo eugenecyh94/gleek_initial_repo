@@ -1,5 +1,6 @@
 import Vendor from "../model/vendorModel.js";
 import bcrypt from "bcryptjs";
+import { s3GetImages } from "./s3ImageServices.js";
 
 export const vendorExists = async (companyEmail) => {
   const oldVendor = await Vendor.findOne({ companyEmail });
@@ -25,3 +26,10 @@ export const encryptUserPassword = async (vendor, password) => {
   vendor.password = await bcrypt.hash(password, salt);
   return vendor.save();
 };
+
+export async function prepareCompanyLogoImage(vendor) {
+  if (vendor.companyLogo) {
+    const preSignedUrl = await s3GetImages(vendor.companyLogo);
+    vendor.preSignedPhoto = preSignedUrl;
+  }
+}

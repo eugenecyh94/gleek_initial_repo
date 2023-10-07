@@ -19,6 +19,8 @@ import AddAdminPage from "./components/admin/AddAdminPage";
 import ViewAllAdmins from "./components/admin/ViewAllAdmins";
 import VendorDetails from "./components/vendor/VendorDetails";
 import ActivityDetails from "./components/activity/ActivityDetails";
+import ViewActivityDrafts from "./components/activity/ViewActivityDrafts";
+import EditActivityDraftPage from "./components/activity/EditActivityDraftPage";
 
 function App() {
   return (
@@ -47,10 +49,28 @@ function App() {
           />
           <Route
             exact
+            path="/viewActivityDrafts"
+            element={
+              <ProtectedRoute>
+                <ViewActivityDrafts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
             path="/viewActivity/:activityId"
             element={
               <ProtectedRoute>
                 <ActivityDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/editActivityDraft/:activityId"
+            element={
+              <ProtectedRoute>
+                <EditActivityDraftPage />
               </ProtectedRoute>
             }
           />

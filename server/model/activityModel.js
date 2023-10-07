@@ -4,17 +4,19 @@ import { ActivityDayAvailabilityEnum } from "../util/activityDayAvailabilityEnum
 import { LOCATION, PPT_REQUIRED, SIZE, TYPE } from "../util/activityTagEnum.js";
 import { FoodCategoryEnum } from "../util/foodCategoryEnum.js";
 import { SustainableDevelopmentGoalsEnum } from "../util/sdgEnum.js";
+import ActivityPricingRulesModel from "./activityPricingRules.js";
 
 const activitySchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   clientMarkupPercentage: { type: Number, required: true },
   maxParticipants: { type: Number },
+  minParticipants: { type: Number },
   theme: { type: mongoose.Schema.Types.ObjectId, ref: "Theme" },
   subtheme: [{ type: mongoose.Schema.Types.ObjectId, ref: "Theme" }],
   activityType: { type: String, enum: TYPE, required: true },
   duration: { type: Number, required: true },
-  location: { type: String, enum: LOCATION, required: true },
+  location: { type: [String], enum: LOCATION, required: true },
   size: { type: String, enum: SIZE },
   sdg: {
     type: [String],
@@ -34,11 +36,12 @@ const activitySchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Vendor",
   },
+  // published date
   createdDate: {
     type: Date,
     default: Date.now,
   },
-  updatedDate: Date,
+  modifiedDate: Date,
   approvedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Admin",
@@ -71,6 +74,42 @@ const activitySchema = new mongoose.Schema({
   preSignedImages: {
     type: Array,
   },
+  capacity: { type: Number, required: true },
+  bookingNotice: { type: Number, required: true },
+  startTime: { type: Date },
+  endTime: { type: Date },
+  // addon pricing
+  weekendPricing: {
+    amount: {
+      type: Number,
+    },
+    isDiscount: {
+      type: Boolean,
+    },
+  },
+  offlinePricing: {
+    amount: {
+      type: Number,
+      default: null,
+    },
+    isDiscount: {
+      type: Boolean,
+    },
+  },
+  onlinePricing: {
+    amount: {
+      type: Number,
+    },
+    isDiscount: {
+      type: Boolean,
+    },
+  },
+  minimumPricePerPax: { type: Number },
+});
+
+activitySchema.pre("findOneAndDelete", async function (next) {
+  await ActivityPricingRulesModel.deleteMany({ activity: this._id });
+  next();
 });
 
 const ActivityModel = mongoose.model("Activity", activitySchema, "activities");

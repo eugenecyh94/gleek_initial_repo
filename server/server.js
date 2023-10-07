@@ -7,6 +7,7 @@ import gleekRoutes from "./routes/gleek/gleek.js";
 import activityRoutes from "./routes/gleekAdmin/activityRoute.js";
 import gleekAdminRoutes from "./routes/gleekAdmin/gleekAdmin.js";
 import vendorRoutes from "./routes/gleekAdmin/vendorRoute.js";
+import bookingRoutes from "./routes/gleekAdmin/bookingRoute.js";
 import client from "./routes/gleekAdmin/client.js";
 import activityTestController from "./controller/activityTestController.js";
 import pdf from "html-pdf";
@@ -43,6 +44,7 @@ app.use("/gleekAdmin", gleekAdminRoutes);
 app.use("/vendor", vendorRoutes);
 app.use("/activity", activityRoutes);
 app.use("/client", client);
+app.use("/booking", bookingRoutes);
 
 app.use("/gleek", gleekRoutes);
 //for activity image upload test
