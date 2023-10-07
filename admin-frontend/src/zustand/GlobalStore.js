@@ -178,6 +178,12 @@ export const useActivityStore = create((set) => ({
   selectedTab: "publishedTab",
   pendingApprovalActivities: [],
   selectedActivityTab: "publishedTab",
+  setActivities: (activities) => {
+    set({ activities });
+  },
+  setPendingApprovalActivities: (pendingApprovalActivities) => {
+    set({ pendingApprovalActivities });
+  },
   setSelectedTab: (thing) => {
     set({ selectedTab: thing });
   },
@@ -241,7 +247,7 @@ export const useActivityStore = create((set) => ({
       );
       set({ newActivity: response.data.activity });
     } catch (error) {
-      console.log(error);
+      throw new Error("Unexpected Server Error!");
     }
   },
   deleteActivity: async (activityId) => {
@@ -269,6 +275,37 @@ export const useActivityStore = create((set) => ({
       return updatedActivities.data.message;
     } catch (error) {
       console.log(error);
+    }
+  },
+  approveActivity: async (activityId) => {
+    try {
+      const updatedActivities = await AxiosConnect.patch(
+        "/activity/approveActivity",
+        activityId
+      );
+      set({
+        selectedActivityTab: "pendingApprovalTab",
+      });
+      return updatedActivities.data.message;
+    } catch (error) {
+      console.log(error);
+      throw new Error(error.message);
+    }
+  },
+  rejectActivity: async (activityId, rejectionReason) => {
+    try {
+      const updatedActivities = await AxiosConnect.patch(
+        "/activity/rejectActivity",
+        activityId,
+        rejectionReason
+      );
+      set({
+        selectedActivityTab: "pendingApprovalTab",
+      });
+      return updatedActivities.data.message;
+    } catch (error) {
+      console.log(error);
+      throw new Error(error.message);
     }
   },
 }));

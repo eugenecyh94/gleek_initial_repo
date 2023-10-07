@@ -13,7 +13,7 @@ import { useSelectedNavItemStore } from "../../zustand/GlobalStore";
 
 const drawerWidth = 240;
 const activityManagementList = [
-  { "View Published Activities": "/viewPublishedActivities" },
+  { "Activity Approvals": "/viewPublishedActivities" },
   { "View My Activities": "/viewActivityDrafts" },
 ];
 const userManagementList = [

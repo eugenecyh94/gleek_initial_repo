@@ -78,6 +78,7 @@ const activitySchema = new mongoose.Schema({
   bookingNotice: { type: Number, required: true },
   startTime: { type: Date },
   endTime: { type: Date },
+  rejectionReason: { type: String },
   // addon pricing
   weekendPricing: {
     amount: {

@@ -79,8 +79,6 @@ const errorTextEndInterval = "Please fill in end interval!";
 const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
   const { createActivity, saveActivity } = useActivityStore();
   const { openSnackbar } = useSnackbarStore();
-  const [isDraftOpen, setIsDraftOpen] = useState(false);
-  const [isDraftError, setDraftError] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState(
     activity?.theme?._id ?? null
   );
