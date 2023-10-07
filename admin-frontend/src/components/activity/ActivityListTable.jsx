@@ -340,7 +340,17 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
                     Reject
                   </Typography>
                 </Button>
-                <Dialog open={rejectModalOpen} onClose={handleCloseRejectModal}>
+                <Dialog
+                  open={rejectModalOpen}
+                  onClose={handleCloseRejectModal}
+                  sx={{
+                    "& .MuiDialog-paper": {
+                      border: "3px solid #D32F2F",
+                      borderRadius: "10px",
+                      boxShadow: "none",
+                    },
+                  }}
+                >
                   <DialogTitle sx={{ paddingBottom: 0 }}>
                     <div style={{ display: "flex" }}>
                       <Typography fontSize={"1.25rem"}>
