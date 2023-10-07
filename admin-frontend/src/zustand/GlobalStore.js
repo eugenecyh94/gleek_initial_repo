@@ -277,11 +277,12 @@ export const useActivityStore = create((set) => ({
       console.log(error);
     }
   },
-  approveActivity: async (activityId) => {
+  approveActivity: async (activityId, adminId) => {
     try {
       const updatedActivities = await AxiosConnect.patch(
         "/activity/approveActivity",
-        activityId
+        activityId,
+        { adminId: adminId }
       );
       set({
         selectedActivityTab: "pendingApprovalTab",
@@ -292,12 +293,12 @@ export const useActivityStore = create((set) => ({
       throw new Error(error.message);
     }
   },
-  rejectActivity: async (activityId, rejectionReason) => {
+  rejectActivity: async (activityId, rejectionReason, adminId) => {
     try {
       const updatedActivities = await AxiosConnect.patch(
         "/activity/rejectActivity",
         activityId,
-        rejectionReason
+        { rejectionReason: rejectionReason, adminId: adminId }
       );
       set({
         selectedActivityTab: "pendingApprovalTab",

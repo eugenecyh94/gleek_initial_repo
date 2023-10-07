@@ -19,7 +19,11 @@ import { DataGrid, GridToolbarFilterButton } from "@mui/x-data-grid";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useActivityStore, useSnackbarStore } from "../../zustand/GlobalStore";
+import {
+  useActivityStore,
+  useAdminStore,
+  useSnackbarStore,
+} from "../../zustand/GlobalStore";
 import TaskIcon from "@mui/icons-material/Task";
 import QueryBuilderIcon from "@mui/icons-material/QueryBuilder";
 import DoneIcon from "@mui/icons-material/Done";
@@ -69,6 +73,7 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
     setPendingApprovalActivities,
   } = useActivityStore();
   const { openSnackbar } = useSnackbarStore();
+  const { admin } = useAdminStore();
   const filterCriteria = {
     publishedTab: { approvalStatus: "Published" },
     pendingApprovalTab: { approvalStatus: "Pending Approval" },
@@ -100,7 +105,7 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
     setCurrentTabRows(filteredRows);
   };
   const handleApproveButton = async (activity) => {
-    const successMessage = await approveActivity(activity._id);
+    const successMessage = await approveActivity(activity._id, admin._id);
     setPendingApprovalActivities(
       pendingApprovalActivities.filter((a) => a._id !== activity._id)
     );
@@ -109,7 +114,8 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
   const handleSubmitRejectButton = async () => {
     const successMessage = await rejectActivity(
       activityToReject._id,
-      rejectionReason
+      rejectionReason,
+      admin._id
     );
     setPendingApprovalActivities(
       pendingApprovalActivities.filter((a) => a._id !== activityToReject._id)
@@ -334,11 +340,7 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
                     Reject
                   </Typography>
                 </Button>
-                <Dialog
-                  open={rejectModalOpen}
-                  onClose={handleCloseRejectModal}
-                  
-                >
+                <Dialog open={rejectModalOpen} onClose={handleCloseRejectModal}>
                   <DialogTitle sx={{ paddingBottom: 0 }}>
                     <div style={{ display: "flex" }}>
                       <Typography fontSize={"1.25rem"}>

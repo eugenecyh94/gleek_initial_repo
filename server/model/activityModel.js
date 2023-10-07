@@ -79,6 +79,9 @@ const activitySchema = new mongoose.Schema({
   startTime: { type: Date },
   endTime: { type: Date },
   rejectionReason: { type: String },
+  approvalStatusChangeLog: [
+    { type: mongoose.Schema.Types.ObjectId, ref: "ApprovalStatusChangeLog" },
+  ],
   // addon pricing
   weekendPricing: {
     amount: {

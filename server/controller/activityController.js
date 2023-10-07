@@ -4,6 +4,7 @@ import ThemeModel from "../model/themeModel.js";
 import { s3GetImages } from "../service/s3ImageServices.js";
 import mongoose from "mongoose";
 import { ActivityApprovalStatusEnum } from "../util/activityApprovalStatusEnum.js";
+import ApprovalStatusChangeLog from "../model/approvalStatusChangeLog.js";
 
 // yt: this endpoint retrieves and returns PUBLISHED & PENDING APPROVAL activities only
 export const getAllActivities = async (req, res) => {
@@ -256,6 +257,29 @@ const saveActivityPricingRules = async (
   );
 };
 
+const saveApprovalStatusChangeLog = async (
+  approvalStatus,
+  rejectionReason,
+  activityId,
+  adminId,
+  session
+) => {
+  try {
+    const newChangeLogEntry = new ApprovalStatusChangeLog({
+      approvalStatus,
+      date: Date.now(),
+      rejectionReason,
+      activity: activityId,
+      admin: adminId,
+    });
+    const thing = await newChangeLogEntry.save({ session });
+    return thing;
+  } catch (error) {
+    console.error("Error saving Change Log", error);
+    throw new Error("Error saving Change Log");
+  }
+};
+
 //yt: this endpoint is for when admin saves/edits an activity draft
 export const saveActivity = async (req, res) => {
   const session = await mongoose.startSession();
@@ -430,49 +454,95 @@ export const saveActivity = async (req, res) => {
 };
 
 export const approveActivity = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     console.log("approve activity body:", req.params.id);
     const { activityId } = req.params;
+    const { adminId } = req.body;
+
+    const approvalStatusChangeLog = await saveApprovalStatusChangeLog(
+      ActivityApprovalStatusEnum.READY_TO_PUBLISH,
+      null,
+      activityId,
+      adminId
+    );
     const savedActivity = await ActivityModel.findByIdAndUpdate(
       activityId,
-      { approvalStatus: ActivityApprovalStatusEnum.READY_TO_PUBLISH },
+      {
+        approvalStatus: ActivityApprovalStatusEnum.READY_TO_PUBLISH,
+        approvedDate: Date.now(),
+        $push: {
+          approvalStatusChangeLog: approvalStatusChangeLog._id,
+        },
+      },
       {
         new: true,
+        session,
       }
     );
+
+    await session.commitTransaction();
+
     res.status(201).json({
       message: `${savedActivity.title} Activity approved successfully`,
       activity: savedActivity,
     });
   } catch (error) {
+    await session.abortTransaction();
     res.status(500).json({
       error: "Unexpected Server Error occured!",
       message: error.message,
     });
+  } finally {
+    session.endSession();
   }
 };
 
 export const rejectActivity = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
-    console.log("reject activity body:", req.params.id);
+    console.log("reject activity body:", req.params.activityId);
     const { activityId } = req.params;
-    const { rejectionReason } = req.body;
+    const { rejectionReason, adminId } = req.body;
+
+    const approvalStatusChangeLog = await saveApprovalStatusChangeLog(
+      ActivityApprovalStatusEnum.REJECTED,
+      rejectionReason,
+      activityId,
+      adminId
+    );
+
     const savedActivity = await ActivityModel.findByIdAndUpdate(
       activityId,
-      { approvalStatus: ActivityApprovalStatusEnum.REJECTED, rejectionReason },
+      {
+        approvalStatus: ActivityApprovalStatusEnum.REJECTED,
+        rejectionReason,
+        $push: {
+          approvalStatusChangeLog: approvalStatusChangeLog._id,
+        },
+      },
       {
         new: true,
+        session,
       }
     );
+
+    await session.commitTransaction();
+
     res.status(201).json({
       message: `${savedActivity.title} rejected successfully`,
       activity: savedActivity,
     });
   } catch (error) {
+    await session.abortTransaction();
     res.status(500).json({
       error: "Unexpected Server Error occured!",
       message: error.message,
     });
+  } finally {
+    session.endSession();
   }
 };
 
