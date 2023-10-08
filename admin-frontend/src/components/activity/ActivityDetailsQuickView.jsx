@@ -249,7 +249,8 @@ const ActivityDetailsQuickView = ({ activity }) => {
                 </Select>
               </FormControl>
 
-              {activity.activityType === ActivityTypeEnum.POPUP && (
+              {(activity.activityType === "Popups (Food)" ||
+                activity.activityType === "Popups (Non-food)") && (
                 <Grid paddingBottom={2} paddingTop={2}>
                   <Grid item xs={6}>
                     <FormControl>
@@ -258,18 +259,17 @@ const ActivityDetailsQuickView = ({ activity }) => {
                       </FormLabel>
                       <RadioGroup
                         aria-labelledby="demo-radio-buttons-group-label"
-                        defaultValue="yes"
+                        defaultValue={activity.isFood.toString()}
                         name="radio-buttons-group"
-                        value={activity.isFood.toString()}
                       >
                         <FormControlLabel
                           value="true"
-                          control={<Radio />}
+                          control={<Radio readOnly />}
                           label="Yes"
                         />
                         <FormControlLabel
                           value="false"
-                          control={<Radio />}
+                          control={<Radio readOnly />}
                           label="No"
                         />
                       </RadioGroup>
@@ -282,41 +282,40 @@ const ActivityDetailsQuickView = ({ activity }) => {
                       }}
                       required
                       variant="standard"
-                      id="popupItems"
                       name="popupItems"
                       placeholder="Popup items sold"
                       label="Popup items sold"
                       fullWidth
+                      defaultValue={activity.popupItemsSold}
                     />
                   </Grid>
                 </Grid>
               )}
             </Grid>
             <Grid item xs={3} paddingTop={2}>
-              {activity.activityType === ActivityTypeEnum.POPUP &&
-                activity.isFood && (
-                  <FormGroup>
-                    <InputLabel id="foodCategory" required>
-                      Food Category
-                    </InputLabel>
-                    {foodCategories.map((label) => (
-                      <FormControlLabel
-                        key={label}
-                        control={
-                          <Checkbox
-                            checked={activity.foodCatgory.includes(label)}
-                            name={label}
-                            disabled
-                          />
-                        }
-                        label={label}
-                      />
-                    ))}
-                  </FormGroup>
-                )}
+              {activity.activityType === "Popups (Food)" && activity.isFood && (
+                <FormGroup>
+                  <InputLabel id="foodCategory" required>
+                    Food Category
+                  </InputLabel>
+                  {foodCategories.map((label) => (
+                    <FormControlLabel
+                      key={label}
+                      control={
+                        <Checkbox
+                          checked={activity.foodCategory.includes(label)}
+                          name={label}
+                          readOnly
+                        />
+                      }
+                      label={label}
+                    />
+                  ))}
+                </FormGroup>
+              )}
             </Grid>
             <Grid item xs={3} paddingTop={2}>
-              {activity.activityType === ActivityTypeEnum.POPUP &&
+              {activity.activityType === "Popups (Food)" &&
                 activity.isFood === true && (
                   <FormControl>
                     <FormLabel id="popupIsFood">
@@ -360,6 +359,7 @@ const ActivityDetailsQuickView = ({ activity }) => {
                                     />
                                   )}
                                   readOnly={true}
+                                  defaultValue={dayjs(activity.foodCertDate)}
                                 />
                               </LocalizationProvider>
                             </FormControl>
