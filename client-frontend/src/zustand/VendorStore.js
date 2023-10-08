@@ -23,6 +23,20 @@ const useVendorStore = create((set) => ({
   //     alert(error.response.data);
   //   }
   // },
+  getVendorDetails: async (vendorId) => {
+    try {
+      set({ isLoading: true });
+
+      const response = await AxiosConnect.get(
+        `/gleek/vendor/viewVendor/${vendorId}`,
+      );
+
+      set({ vendor: response.data });
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
   registerVendor: async (userData) => {
     try {
       const response = await AxiosConnect.post(

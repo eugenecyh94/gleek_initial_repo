@@ -208,11 +208,27 @@ export const useActivityStore = create((set) => ({
    isLoading: false,
    newActivity: null,
    activityDetails: {},
+   selectedTab: "publishedTab",
+   setSelectedTab: (thing) => {
+      set({ selectedTab: thing });
+   },
    getActivity: async () => {
       try {
          set({ isLoading: true });
          const response = await AxiosConnect.get("/activity/all");
          set({ activities: response.data });
+         set({ isLoading: false });
+      } catch (error) {
+         console.error(error);
+      }
+   },
+   getActivityForAdmin: async (adminId) => {
+      try {
+         set({ isLoading: true });
+         const response = await AxiosConnect.get(
+            `/activity/myActivities/${adminId}`
+         );
+         set({ activities: response.data.data });
          set({ isLoading: false });
       } catch (error) {
          console.error(error);
@@ -235,41 +251,90 @@ export const useActivityStore = create((set) => ({
          const response = await AxiosConnect.get(
             `/activity/viewActivity/${activityId}`
          );
-         console.log("HUEHUE", response);
          set({ activityDetails: response.data.data });
          set({ isLoading: false });
       } catch (error) {
          console.error(error);
       }
    },
+   saveActivity: async (activityDraftData) => {
+      try {
+         const response = await AxiosConnect.postMultiPart(
+            "/activity/saveActivity",
+            activityDraftData
+         );
+         set({ newActivity: response.data.activity });
+      } catch (error) {
+         console.log(error);
+      }
+   },
+   deleteActivity: async (activityId) => {
+      try {
+         const updatedActivities = await AxiosConnect.delete(
+            `/activity/deleteDraft/${activityId}`
+         );
+         set({ activities: updatedActivities.data.activity });
+         set({ selectedTab: "draftTab" });
+         return updatedActivities.data.message;
+      } catch (error) {
+         console.log(error);
+      }
+   },
+   bulkDeleteActivity: async (activityIds) => {
+      try {
+         const updatedActivities = await AxiosConnect.delete(
+            "/activity/bulkDelete",
+            activityIds
+         );
+         set({
+            activities: updatedActivities.data.activity,
+            selectedTab: "draftTab",
+         });
+         return updatedActivities.data.message;
+      } catch (error) {
+         console.log(error);
+      }
+   },
 }));
 
 export const useThemeStore = create((set) => ({
    themes: [],
-   isLoading: false,
+   isThemeLoading: false,
    getThemes: async () => {
       try {
-         set({ isLoading: true });
+         set({ isThemeLoading: true });
          const response = await AxiosConnect.get("/activity/getThemes");
          set({ themes: response.data });
-         set({ isLoading: false });
+         set({ isThemeLoading: false });
       } catch (error) {
          console.error(error);
       }
    },
 }));
 
+export const useSnackbarStore = create((set) => ({
+   isOpen: false,
+   message: "",
+   type: "success",
+   openSnackbar: (message, type = "success") => {
+      set({ isOpen: true, message, type });
+   },
+   closeSnackbar: () => {
+      set({ isOpen: false, message: "", type: "success" });
+   },
+}));
+
 export const useVendorStore = create((set) => ({
    vendors: [],
    vendor: null,
-   isLoading: false,
+   isVendorLoading: false,
    vendorTypes: {},
    getVendors: async () => {
       try {
-         set({ isLoading: true });
+         set({ isVendorLoading: true });
          const response = await AxiosConnect.get("/vendor/viewAllVendors");
          set({ vendors: response.data });
-         set({ isLoading: false });
+         set({ isVendorLoading: false });
       } catch (error) {
          console.error(error);
       }
@@ -369,10 +434,8 @@ export const useClientStore = create((set) => ({
 }));
 
 export const useImageUploadTestStore = create((set) => ({
-   imageList: [],
-   setImageList: (newImageList) => {
-      set({ imageList: newImageList });
-      console.log(useImageUploadTestStore.getState());
+   testActivities: [],
+   setTestActivities: (newActivityList) => {
+      set({ testActivities: newActivityList });
    },
-   vendors: [],
 }));

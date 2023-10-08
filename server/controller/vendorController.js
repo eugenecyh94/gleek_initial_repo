@@ -10,7 +10,7 @@ import {
 import { validationResult } from "express-validator";
 import { createVendorConsent } from "../service/consentService.js";
 import bcrypt from "bcryptjs";
-import { s3ImageGetService } from "../service/s3ImageGetService.js";
+import { s3GetImages } from "../service/s3ImageServices.js";
 import {
   createVendorWelcomeMailOptions,
   createResendVerifyEmailOptionsVendor,
@@ -216,7 +216,7 @@ export const postLogin = async (req, res) => {
           .send({ msg: "Your Vendor registration has been rejected." });
       }
       if (vendor.companyLogo) {
-        const preSignedUrl = await s3ImageGetService(vendor.companyLogo);
+        const preSignedUrl = await s3GetImages(vendor.companyLogo);
         vendor.preSignedPhoto = preSignedUrl;
       }
       // Convert the Map to a plain JavaScript object
@@ -254,7 +254,7 @@ export const validateToken = async (req, res) => {
     }
 
     if (vendor.companyLogo) {
-      const preSignedUrl = await s3ImageGetService(vendor.companyLogo);
+      const preSignedUrl = await s3GetImages(vendor.companyLogo);
       vendor.preSignedPhoto = preSignedUrl;
     }
 
@@ -346,7 +346,11 @@ export const getVendor = async (req, res) => {
   try {
     console.log(req.params.id);
     const vendor = await VendorModel.findById(req.params.id);
-    return res.status(201).json(vendor);
+    if (vendor.companyLogo) {
+      const preSignedUrl = await s3GetImages(vendor.companyLogo);
+      vendor.preSignedPhoto = preSignedUrl;
+    }
+    return res.status(200).json(vendor);
   } catch (e) {
     console.log(e);
     res.status(500).json("Server Error");
@@ -403,7 +407,7 @@ export const updateCompanyLogo = async (req, res) => {
     );
 
     if (updatedVendor.companyLogo) {
-      const preSignedUrl = await s3ImageGetService(updatedVendor.companyLogo);
+      const preSignedUrl = await s3GetImages(updatedVendor.companyLogo);
       updatedVendor.preSignedPhoto = preSignedUrl;
     }
 

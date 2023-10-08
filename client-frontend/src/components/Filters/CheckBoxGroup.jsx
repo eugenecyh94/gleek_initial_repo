@@ -36,9 +36,9 @@ const CheckBoxGroup = (props) => {
                 key={key}
                 control={
                   <Checkbox
-                    checked={props.state[key]}
+                    checked={props.state[value]}
                     onChange={props.handleChange}
-                    name={key}
+                    name={value}
                   />
                 }
                 label={value}
