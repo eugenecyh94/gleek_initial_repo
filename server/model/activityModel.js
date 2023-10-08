@@ -109,6 +109,12 @@ const activitySchema = new mongoose.Schema({
     },
   },
   minimumPricePerPax: { type: Number },
+  blockedTimeslots: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'BlockedTimeslot',
+    },
+  ],
 });
 
 activitySchema.pre("findOneAndDelete", async function (next) {

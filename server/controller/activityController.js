@@ -3,9 +3,10 @@ import ActivityPricingRulesModel from "../model/activityPricingRules.js";
 import ThemeModel from "../model/themeModel.js";
 import {
   findMinimumPricePerPax,
+  getAllVendorActivities,
   prepareActivityMinimumPricePerPaxAndSingleImage,
 } from "../service/activityService.js";
-import { s3GetImages} from "../service/s3ImageServices.js";
+import { s3GetImages } from "../service/s3ImageServices.js";
 import { VendorTypeEnum } from "../util/vendorTypeEnum.js";
 import mongoose from "mongoose";
 import { ActivityApprovalStatusEnum } from "../util/activityApprovalStatusEnum.js";
@@ -71,7 +72,7 @@ export const getActivity = async (req, res) => {
       await findMinimumPricePerPax(foundActivity);
     if (foundActivity.linkedVendor && foundActivity.linkedVendor.companyLogo) {
       let preSignedUrl = await s3GetImages(
-        foundActivity.linkedVendor.companyLogo
+        foundActivity.linkedVendor.companyLogo,
       );
       foundActivity.linkedVendor.preSignedPhoto = preSignedUrl;
     }
@@ -698,7 +699,7 @@ export const getActivitiesWithFilters = async (req, res) => {
 
     // Convert string IDs to ObjectId instances
     const subthemeIds = filter.themes.map(
-      (id) => new mongoose.Types.ObjectId(id)
+      (id) => new mongoose.Types.ObjectId(id),
     );
 
     if (subthemeIds.length > 0) {
@@ -789,7 +790,7 @@ export const getAllActivitiesNames = async (req, res) => {
     // Query the collection to get titles of all documents
     const activityTitles = await ActivityModel.find(
       { isDraft: false },
-      "title"
+      "title",
     );
 
     // Extract the titles from the result
@@ -809,7 +810,7 @@ export const getAllActivitiesNames = async (req, res) => {
 export const getMinAndMaxPricePerPax = async (req, res) => {
   try {
     const activities = await ActivityModel.find({}).populate(
-      "activityPricingRules"
+      "activityPricingRules",
     );
     if (activities.length === 0) {
       return res.status(200).send({
@@ -821,7 +822,7 @@ export const getMinAndMaxPricePerPax = async (req, res) => {
     }
 
     const pricingRules = activities.flatMap(
-      (activity) => activity.activityPricingRules
+      (activity) => activity.activityPricingRules,
     );
 
     if (pricingRules.length === 0) {
@@ -848,5 +849,31 @@ export const getMinAndMaxPricePerPax = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Server error", message: error.message });
+  }
+};
+
+/**
+ * App: Gleek Vendor
+ * Retrieve activities associated with a vendor.
+ *
+ */
+
+export const getVendorActivities = async (req, res) => {
+  try {
+    const vendor = req.user;
+    const vendorId = vendor._id;
+    console.log("getVendorActivities vendor _id", vendorId);
+
+    const activities = await getAllVendorActivities(vendorId)
+    const preSignedPromises = activities.map(async (activity) => {
+      await findMinimumPricePerPax(activity);
+    });
+
+    await Promise.all(preSignedPromises);
+
+    res.status(200).json(activities);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
   }
 };
