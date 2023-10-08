@@ -55,6 +55,18 @@ export const getAllActivitiesForAdmin = async (req, res) => {
   }
 };
 
+export const getPreSignedImgs = async (req, res) => {
+  try {
+    const foundActivity = await ActivityModel.findById(req.params.id);
+    let preSignedUrlArr = await s3GetImages(foundActivity.images);
+    res.status(200).json({
+      data: preSignedUrlArr,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const getActivity = async (req, res) => {
   try {
     const foundActivity = await ActivityModel.findById(req.params.id)
@@ -71,7 +83,7 @@ export const getActivity = async (req, res) => {
       await findMinimumPricePerPax(foundActivity);
     if (foundActivity.linkedVendor && foundActivity.linkedVendor.companyLogo) {
       let preSignedUrl = await s3GetImages(
-        foundActivity.linkedVendor.companyLogo,
+        foundActivity.linkedVendor.companyLogo
       );
       foundActivity.linkedVendor.preSignedPhoto = preSignedUrl;
     }
@@ -105,87 +117,6 @@ export const getActivitiesByVendorId = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
-  }
-};
-
-//yt: this endpoint is for when admin creates a new activity
-export const addActivity = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-  try {
-    console.log("add activity body:", req.body);
-    const {
-      activityPricingRules,
-      weekendPricing,
-      onlinePricing,
-      offlinePricing,
-      ...activity
-    } = req.body;
-    const parsedWeekend = JSON.parse(weekendPricing);
-    const parsedOnline = JSON.parse(onlinePricing);
-    const parsedOffline = JSON.parse(offlinePricing);
-
-    activity["weekendPricing"] = {
-      amount: parsedWeekend?.amount,
-      isDiscount: parsedWeekend?.isDiscount,
-    };
-    activity["onlinePricing"] = {
-      amount: parsedOnline?.amount,
-      isDiscount: parsedOnline?.isDiscount,
-    };
-    activity["offlinePricing"] = {
-      amount: parsedOffline?.amount,
-      isDiscount: parsedOffline?.isDiscount,
-    };
-    const newActivity = new ActivityModel({
-      ...activity,
-    });
-    const savedActivity = await newActivity.save({ session });
-
-    //To update url of uploaded images path to s3 in created activity
-    const imageFiles = req.files ?? [];
-    try {
-      const imagesPathArr = [];
-      if (imageFiles.length === 0 || imageFiles.length === undefined) {
-        console.log("No image files uploaded");
-      } else {
-        let fileArray = req.files,
-          fileLocation;
-        for (let i = 0; i < fileArray.length; i++) {
-          fileLocation = fileArray[i].location;
-          imagesPathArr.push(fileLocation);
-        }
-        await ActivityModel.findByIdAndUpdate(
-          { _id: savedActivity._id },
-          { images: imagesPathArr },
-          { new: true, session }
-        );
-      }
-    } catch (error) {
-      throw new Error("Error uploading images!");
-    }
-
-    await saveActivityPricingRules(
-      activityPricingRules,
-      session,
-      savedActivity,
-      true
-    );
-
-    await session.commitTransaction();
-
-    res.status(201).json({
-      message: "Activity added successfully",
-      activity: savedActivity,
-    });
-  } catch (error) {
-    console.error("Error caught", error);
-    await session.abortTransaction();
-    res
-      .status(500)
-      .json({ error: "Activity cannot be added", message: error.message });
-  } finally {
-    session.endSession();
   }
 };
 
@@ -275,7 +206,7 @@ const saveApprovalStatusChangeLog = async (
   }
 };
 
-//yt: this endpoint is for when admin saves/edits an activity draft
+//yt: this endpoint is for when admin saves/edits/submits an activity draft
 export const saveActivity = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -718,7 +649,7 @@ export const getActivitiesWithFilters = async (req, res) => {
 
     // Convert string IDs to ObjectId instances
     const subthemeIds = filter.themes.map(
-      (id) => new mongoose.Types.ObjectId(id),
+      (id) => new mongoose.Types.ObjectId(id)
     );
 
     if (subthemeIds.length > 0) {
@@ -809,7 +740,7 @@ export const getAllActivitiesNames = async (req, res) => {
     // Query the collection to get titles of all documents
     const activityTitles = await ActivityModel.find(
       { isDraft: false },
-      "title",
+      "title"
     );
 
     // Extract the titles from the result
@@ -829,7 +760,7 @@ export const getAllActivitiesNames = async (req, res) => {
 export const getMinAndMaxPricePerPax = async (req, res) => {
   try {
     const activities = await ActivityModel.find({}).populate(
-      "activityPricingRules",
+      "activityPricingRules"
     );
     if (activities.length === 0) {
       return res.status(200).send({
@@ -841,7 +772,7 @@ export const getMinAndMaxPricePerPax = async (req, res) => {
     }
 
     const pricingRules = activities.flatMap(
-      (activity) => activity.activityPricingRules,
+      (activity) => activity.activityPricingRules
     );
 
     if (pricingRules.length === 0) {
@@ -883,7 +814,7 @@ export const getVendorActivities = async (req, res) => {
     const vendorId = vendor._id;
     console.log("getVendorActivities vendor _id", vendorId);
 
-    const activities = await getAllVendorActivities(vendorId)
+    const activities = await getAllVendorActivities(vendorId);
     const preSignedPromises = activities.map(async (activity) => {
       await findMinimumPricePerPax(activity);
     });

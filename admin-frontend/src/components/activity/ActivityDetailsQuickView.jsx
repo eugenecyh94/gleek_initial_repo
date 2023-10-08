@@ -10,6 +10,9 @@ import {
   FormHelperText,
   FormLabel,
   Grid,
+  ImageList,
+  ImageListItem,
+  ImageListItemBar,
   InputAdornment,
   InputLabel,
   MenuItem,
@@ -69,7 +72,7 @@ const StyledChip = styled(Chip)`
   }
 `;
 
-const ActivityDetailsQuickView = ({ activity }) => {
+const ActivityDetailsQuickView = ({ activity, imgs }) => {
   const theme = useTheme();
   const foodCategories = Object.values(FoodCategoryEnum);
 
@@ -815,6 +818,37 @@ const ActivityDetailsQuickView = ({ activity }) => {
           </Grid>
         </StyledContainer>
         <StyledContainer elevation={3}>
+          <Grid container spacing={1} alignItems="left" justifyContent="left">
+            <Grid item xs={12}>
+              <Typography
+                color={theme.palette.primary.main}
+                component="div"
+                paddingTop={2}
+                paddingBottom={2}
+                fontSize={"1.25rem"}
+              >
+                Activity Images
+              </Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <ImageList>
+                {imgs?.map((image, index) => {
+                  return (
+                    <ImageListItem key={index}>
+                      <img src={image} loading="lazy" />
+                      <ImageListItemBar
+                        sx={{ background: "none" }}
+                        position="top"
+                        actionPosition="left"
+                      />
+                    </ImageListItem>
+                  );
+                })}
+              </ImageList>
+            </Grid>
+          </Grid>
+        </StyledContainer>
+        <StyledContainer elevation={3}>
           <Grid container spacing={2} alignItems="left" justifyContent="left">
             <Grid item xs={12}>
               <Typography
@@ -834,5 +868,6 @@ const ActivityDetailsQuickView = ({ activity }) => {
 };
 ActivityDetailsQuickView.propTypes = {
   activity: PropTypes.object.isRequired,
+  imgs: PropTypes.array.isRequired,
 };
 export default ActivityDetailsQuickView;

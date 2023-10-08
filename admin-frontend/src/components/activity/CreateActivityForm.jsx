@@ -762,6 +762,11 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     event.preventDefault();
     const formData = new FormData();
     formData.append("adminCreated", admin._id);
+    if (activity) {
+      formData.append("activityId", activity._id);
+    }
+    formData.append("isDraft", false);
+    formData.append("approvalStatus", "Published");
     formData.append("title", title);
     formData.append("description", description);
     formData.append(
@@ -830,7 +835,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
 
     if (validateForm()) {
       try {
-        await createActivity(formData);
+        await saveActivity(formData);
         openSnackbar("Activity Created Successfully!");
         resetForm();
       } catch (error) {
