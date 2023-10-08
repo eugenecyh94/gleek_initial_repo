@@ -1,8 +1,6 @@
-import mongoose from "mongoose";
 import ActivityModel from "../model/activityModel.js";
 import BlockedTimeslotModel from "../model/blockedTimeslotModel.js";
 import { addBlockedTimeslotForActivity } from "../service/blokedTImeslotService.js";
-import { getAllVendorActivities } from "../service/activityService.js";
 
 export const getBlockedTimeslotsByActivityId = async (req, res) => {
   try {
@@ -46,7 +44,6 @@ export const addBlockedTimeslot = async (req, res) => {
 export const addBlockedTimeslotMultipleActivities = async (req, res) => {
   try {
     const vendor = req.user;
-    //BlockedTimeslotModel.collection.drop()
 
     // const session = await mongoose.startSession();
     // session.startTransaction();
@@ -67,10 +64,10 @@ export const addBlockedTimeslotMultipleActivities = async (req, res) => {
         blockedEndDateTime,
       );
 
-      console.log("createdBlockedTimeslot", createdBlockedTimeslot);
+      //console.log("createdBlockedTimeslot", createdBlockedTimeslot);
 
       updateActivity.blockedTimeslots.push({ _id: createdBlockedTimeslot._id });
-      updateActivity.save();
+      await updateActivity.save();
 
       blockedTimeslots.push(createdBlockedTimeslot);
     }
