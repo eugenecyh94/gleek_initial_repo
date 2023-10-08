@@ -33,7 +33,7 @@ import QueryBuilderIcon from "@mui/icons-material/QueryBuilder";
 import DoneIcon from "@mui/icons-material/Done";
 import CloseIcon from "@mui/icons-material/Close";
 import React from "react";
-import ActivityDetailsQuickView from "./ActivityDetailsQuickView";
+import ActivityDetailsQuickView from "./ActivityDetailsQuickView.jsx";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
