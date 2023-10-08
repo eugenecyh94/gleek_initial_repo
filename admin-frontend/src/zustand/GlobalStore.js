@@ -176,14 +176,28 @@ export const useActivityStore = create((set) => ({
   newActivity: null,
   activityDetails: {},
   selectedTab: "publishedTab",
+  pendingApprovalActivities: [],
+  selectedActivityTab: "publishedTab",
+  setActivities: (activities) => {
+    set({ activities });
+  },
+  setPendingApprovalActivities: (pendingApprovalActivities) => {
+    set({ pendingApprovalActivities });
+  },
   setSelectedTab: (thing) => {
     set({ selectedTab: thing });
+  },
+  setSelectedActivityTab: (thing) => {
+    set({ selectedActivityTab: thing });
   },
   getActivity: async () => {
     try {
       set({ isLoading: true });
       const response = await AxiosConnect.get("/activity/all");
-      set({ activities: response.data });
+      set({
+        activities: response.data.publishedActivities,
+        pendingApprovalActivities: response.data.pendingApprovalActivities,
+      });
       set({ isLoading: false });
     } catch (error) {
       console.error(error);
@@ -209,7 +223,8 @@ export const useActivityStore = create((set) => ({
       );
       set({ newActivity: response.data.activity });
     } catch (error) {
-      console.log(error);
+      console.error("Unexpected Server Error!", error);
+      throw new Error("Unexpected Server Error!");
     }
   },
   getSingleActivity: async (activityId) => {
@@ -232,7 +247,7 @@ export const useActivityStore = create((set) => ({
       );
       set({ newActivity: response.data.activity });
     } catch (error) {
-      console.log(error);
+      throw new Error("Unexpected Server Error!");
     }
   },
   deleteActivity: async (activityId) => {
@@ -260,6 +275,38 @@ export const useActivityStore = create((set) => ({
       return updatedActivities.data.message;
     } catch (error) {
       console.log(error);
+    }
+  },
+  approveActivity: async (activityId, adminId) => {
+    try {
+      const updatedActivities = await AxiosConnect.patch(
+        "/activity/approveActivity",
+        activityId,
+        { adminId: adminId }
+      );
+      set({
+        selectedActivityTab: "pendingApprovalTab",
+      });
+      return updatedActivities.data.message;
+    } catch (error) {
+      console.log(error);
+      throw new Error(error.message);
+    }
+  },
+  rejectActivity: async (activityId, rejectionReason, adminId) => {
+    try {
+      const updatedActivities = await AxiosConnect.patch(
+        "/activity/rejectActivity",
+        activityId,
+        { rejectionReason: rejectionReason, adminId: adminId }
+      );
+      set({
+        selectedActivityTab: "pendingApprovalTab",
+      });
+      return updatedActivities.data.message;
+    } catch (error) {
+      console.log(error);
+      throw new Error(error.message);
     }
   },
 }));

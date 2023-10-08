@@ -1,6 +1,7 @@
 import express from "express";
 import {
   addActivity,
+  approveActivity,
   bulkAddThemes,
   bulkDeleteActivityDraft,
   deleteActivityDraft,
@@ -8,6 +9,7 @@ import {
   getAllActivities,
   getAllActivitiesForAdmin,
   getAllThemes,
+  rejectActivity,
   saveActivity,
 } from "../../controller/activityController.js";
 import { uploadS3ActivityImages } from "../../middleware/multer.js";
@@ -30,4 +32,6 @@ router.post("/addThemes", bulkAddThemes);
 router.get("/getThemes", getAllThemes);
 router.delete("/deleteDraft/:id", deleteActivityDraft);
 router.delete("/bulkDelete", bulkDeleteActivityDraft);
+router.patch("/approveActivity/:activityId", approveActivity);
+router.patch("/rejectActivity/:activityId", rejectActivity);
 export default router;

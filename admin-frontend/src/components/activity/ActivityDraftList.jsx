@@ -215,6 +215,7 @@ const ActivityDraftList = ({
       <Box display={"flex"} justifyContent={"space-between"}>
         <Tabs value={selectedTab} onChange={handleTabChange} centered>
           <Tab
+            sx={{ left: 10 }}
             label="Published"
             value="publishedTab"
             icon={
@@ -332,6 +333,12 @@ const ActivityDraftList = ({
             toolbar: GridToolbarFilterButton,
           }}
           getRowHeight={() => "auto"}
+          sx={{
+            borderRadius: "10px",
+            boxShadow: "4px 4px 0px 0px rgb(159 145 204 / 40%)",
+            border: "none",
+            backgroundColor: "white",
+          }}
         />
       </div>
     </Box>

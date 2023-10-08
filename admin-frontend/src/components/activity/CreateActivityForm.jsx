@@ -2,7 +2,6 @@
 import styled from "@emotion/styled";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import {
-  Alert,
   Avatar,
   Box,
   Button,
@@ -29,7 +28,6 @@ import InputAdornment from "@mui/material/InputAdornment";
 import Paper from "@mui/material/Paper";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
-import Snackbar from "@mui/material/Snackbar";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -49,7 +47,7 @@ import {
   LocationEnum,
   SustainableDevelopmentGoalsEnum,
 } from "../../utils/TypeEnum";
-import { useActivityStore } from "../../zustand/GlobalStore";
+import { useActivityStore, useSnackbarStore } from "../../zustand/GlobalStore";
 import ImageAndFileUpload from "./ImageAndFileUpload";
 
 const StyledButton = styled(Button)`
@@ -59,7 +57,7 @@ const StyledButton = styled(Button)`
 const StyledChip = styled(Chip)`
   &.Mui-disabled {
     color: #ffffff;
-    background-color: #5c4b99;
+    background-color: #9f91cc;
     opacity: 1;
   }
 `;
@@ -80,10 +78,7 @@ const errorTextEndInterval = "Please fill in end interval!";
 
 const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
   const { createActivity, saveActivity } = useActivityStore();
-  const [isOpen, setIsOpen] = useState(false);
-  const [isDraftOpen, setIsDraftOpen] = useState(false);
-  const [isError, setError] = useState(false);
-  const [isDraftError, setDraftError] = useState(false);
+  const { openSnackbar } = useSnackbarStore();
   const [selectedTheme, setSelectedTheme] = useState(
     activity?.theme?._id ?? null
   );
@@ -229,16 +224,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     const endIndex = startIndex + optionsPerColumn;
     columnsArray.push(sdgList.slice(startIndex, endIndex));
   }
-
-  const handleClose = (event, reason) => {
-    if (reason === "clickaway") {
-      setIsOpen(false);
-      setIsDraftOpen(false);
-      setError(false);
-      setDraftError(false);
-      return;
-    }
-  };
 
   const handleThemeChange = (event) => {
     const themeId = event.target.value;
@@ -810,13 +795,16 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     if (validateForm()) {
       try {
         await createActivity(formData);
+        openSnackbar("Activity Created Successfully!");
         resetForm();
-        setIsOpen(true);
       } catch (error) {
-        setError(true);
+        openSnackbar(error, "error");
       }
     } else {
-      setError(true);
+      openSnackbar(
+        "Error creating form! Please fill in required fields.",
+        "error"
+      );
     }
   };
 
@@ -944,12 +932,15 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     if (validateDraft()) {
       try {
         await saveActivity(formData);
-        setIsDraftOpen(true);
+        openSnackbar("Activity Draft Saved Successfully!");
       } catch (error) {
-        setDraftError(true);
+        openSnackbar("Unexpected Server Error occured!", "error");
       }
     } else {
-      setDraftError(true);
+      openSnackbar(
+        "Error saving draft! Please resolve highlighted errors before saving.",
+        "error"
+      );
     }
   };
 
@@ -2038,39 +2029,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
           </Button>
         </Grid>
       </Grid>
-
-      <Snackbar open={isOpen} autoHideDuration={6000} onClose={handleClose}>
-        <Alert severity="success" sx={{ width: "100%" }}>
-          Activity Created Successfully!
-        </Alert>
-      </Snackbar>
-      <Snackbar
-        open={isDraftOpen}
-        autoHideDuration={6000}
-        onClose={handleClose}
-      >
-        <Alert severity="success" sx={{ width: "100%" }}>
-          Activity Saved Successfully!
-        </Alert>
-      </Snackbar>
-      <Snackbar open={isError} autoHideDuration={6000} onClose={handleClose}>
-        <Alert severity="error" sx={{ width: "100%" }}>
-          {!formErrors
-            ? "Error creating form!"
-            : "Error creating form! Please fill in required fields."}
-        </Alert>
-      </Snackbar>
-      <Snackbar
-        open={isDraftError}
-        autoHideDuration={6000}
-        onClose={handleClose}
-      >
-        <Alert severity="error" sx={{ width: "100%" }}>
-          {
-            "Error saving draft! Please resolve highlighted errors before saving."
-          }
-        </Alert>
-      </Snackbar>
     </form>
   );
 };

@@ -1,10 +1,9 @@
 import { useTheme } from "@emotion/react";
-import { CircularProgress, Toolbar, Typography } from "@mui/material";
+import { CircularProgress, Typography } from "@mui/material";
 import { useEffect } from "react";
 import { useVendorStore } from "../../zustand/GlobalStore";
-import Layout from "../Layout";
-import VendorsTable from "./VendorsTable";
 import MainBodyContainer from "../common/MainBodyContainer";
+import VendorsTable from "./VendorsTable";
 
 const ViewAllVendors = () => {
   const theme = useTheme();
