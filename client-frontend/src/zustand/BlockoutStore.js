@@ -21,9 +21,8 @@ const useBlockoutStore = create((set) => ({
     blockedEndDateTime,
     activityIds,
   ) => {
-    console.log(activityIds);
-
     try {
+      // Make the API call to add blockout timings
       const response = await AxiosConnect.post(
         `/gleekVendor/timeslot/blockout/activities`,
         {
@@ -32,10 +31,13 @@ const useBlockoutStore = create((set) => ({
           activityIds,
         },
       );
-      const activitiesWithBlockouts = response.data;
-      console.log(activitiesWithBlockouts);
 
-      set({ isLoadingactivitiesWithBlockouts: false, activitiesWithBlockouts });
+      const activities = response.data.activities;
+
+      set({
+        isLoadingactivitiesWithBlockouts: false,
+        activitiesWithBlockouts: activities,
+      });
     } catch (error) {
       throw error;
     }

@@ -3,6 +3,7 @@ import ActivityPricingRulesModel from "../model/activityPricingRules.js";
 import ThemeModel from "../model/themeModel.js";
 import {
   findMinimumPricePerPax,
+  getAllVendorActivities,
   prepareActivityMinimumPricePerPaxAndSingleImage,
 } from "../service/activityService.js";
 import { s3GetImages } from "../service/s3ImageServices.js";
@@ -742,14 +743,7 @@ export const getVendorActivities = async (req, res) => {
     const vendorId = vendor._id;
     console.log("getVendorActivities vendor _id", vendorId);
 
-    const activities = await ActivityModel.find({ linkedVendor: vendorId })
-      .populate("activityPricingRules")
-      .populate("theme")
-      .populate("subtheme")
-      .populate("linkedVendor")
-      .populate("blockedTimeslots");
-
-    console.log(activities[0].blockedTimeslots);
+    const activities = await getAllVendorActivities(vendorId)
     const preSignedPromises = activities.map(async (activity) => {
       await findMinimumPricePerPax(activity);
     });

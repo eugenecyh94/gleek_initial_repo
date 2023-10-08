@@ -35,7 +35,6 @@ function BlockoutMultipleActivities() {
   const handleCloseModal = () => {
     setOpenModal(false);
   };
-
   const handleCreateBlockouts = async () => {
     try {
       await addBlockoutToActivities(
@@ -44,6 +43,9 @@ function BlockoutMultipleActivities() {
         selectedRows,
       );
       openSnackbar("Saved successfully.");
+
+      setSelectedRows([]);
+      setSelectedActivity(null);
     } catch (error) {
       console.log(error);
     }
@@ -59,7 +61,7 @@ function BlockoutMultipleActivities() {
       }
     };
     subscribeVendor();
-  }, []);
+  }, [getActivitiesWithBlockouts]);
 
   const handleStartDateTimeChange = (date) => {
     setBlockedStartDateTime(date);
