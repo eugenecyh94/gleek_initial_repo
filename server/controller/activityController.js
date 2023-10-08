@@ -9,24 +9,33 @@ import {
 import { s3GetImages } from "../service/s3ImageServices.js";
 import { VendorTypeEnum } from "../util/vendorTypeEnum.js";
 import mongoose from "mongoose";
+import { ActivityApprovalStatusEnum } from "../util/activityApprovalStatusEnum.js";
+import ApprovalStatusChangeLog from "../model/approvalStatusChangeLog.js";
 
+// yt: this endpoint retrieves and returns PUBLISHED & PENDING APPROVAL activities only
 export const getAllActivities = async (req, res) => {
   try {
     const activities = await ActivityModel.find()
       .populate("activityPricingRules")
+      .populate("linkedVendor")
       .populate("theme")
       .populate("subtheme");
-    const filteredActivities = activities.filter((row) => {
+    const publishedActivities = activities.filter((row) => {
       return row.approvalStatus === "Published" && row.isDraft === false;
     });
+    const pendingApprovalActivities = activities.filter((row) => {
+      return row.approvalStatus === "Pending Approval" && row.isDraft === false;
+    });
     res.status(200).json({
-      data: filteredActivities,
+      publishedActivities,
+      pendingApprovalActivities,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
+// yt: this endpoint retrieves ALL activities (both drafts and published) for an admin
 export const getAllActivitiesForAdmin = async (req, res) => {
   try {
     const adminId = req.params.id;
@@ -100,7 +109,10 @@ export const getActivitiesByVendorId = async (req, res) => {
   }
 };
 
+//yt: this endpoint is for when admin creates a new activity
 export const addActivity = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     console.log("add activity body:", req.body);
     const {
@@ -129,93 +141,145 @@ export const addActivity = async (req, res) => {
     const newActivity = new ActivityModel({
       ...activity,
     });
-    const savedActivity = await newActivity.save();
-    const imageFiles = req.files;
+    const savedActivity = await newActivity.save({ session });
 
     //To update url of uploaded images path to s3 in created activity
-    const imagesPathArr = [];
-
-    if (imageFiles.length === 0 || imageFiles.length === undefined) {
-      console.log("No image files uploaded");
-    } else {
-      console.log("Retrieving uploaded images url");
-      let fileArray = req.files,
-        fileLocation;
-      for (let i = 0; i < fileArray.length; i++) {
-        fileLocation = fileArray[i].location;
-        console.log("file location:", fileLocation);
-        imagesPathArr.push(fileLocation);
+    const imageFiles = req.files ?? [];
+    try {
+      const imagesPathArr = [];
+      if (imageFiles.length === 0 || imageFiles.length === undefined) {
+        console.log("No image files uploaded");
+      } else {
+        let fileArray = req.files,
+          fileLocation;
+        for (let i = 0; i < fileArray.length; i++) {
+          fileLocation = fileArray[i].location;
+          imagesPathArr.push(fileLocation);
+        }
+        await ActivityModel.findByIdAndUpdate(
+          { _id: savedActivity._id },
+          { images: imagesPathArr },
+          { new: true, session }
+        );
       }
+    } catch (error) {
+      throw new Error("Error uploading images!");
     }
 
-    await ActivityModel.findByIdAndUpdate(
-      { _id: savedActivity._id },
-      { images: imagesPathArr },
-      { new: true },
+    await saveActivityPricingRules(
+      activityPricingRules,
+      session,
+      savedActivity,
+      true
     );
 
-    const activitypriceobjects = [];
-    if (Array.isArray(activityPricingRules)) {
-      activityPricingRules.forEach((jsonString, index) => {
-        try {
-          const pricingObject = JSON.parse(jsonString);
-
-          const activitypriceobject = {
-            start: pricingObject.start,
-            end: pricingObject.end,
-            pricePerPax: pricingObject.pricePerPax,
-            clientPrice: pricingObject.clientPrice,
-            activity: savedActivity._id,
-          };
-          activitypriceobjects.push(activitypriceobject);
-        } catch (error) {
-          console.error(`Error parsing JSON: ${error}`);
-        }
-      });
-    } else {
-      const pricingObject = JSON.parse(activityPricingRules);
-
-      const activitypriceobject = {
-        start: pricingObject.start,
-        end: pricingObject.end,
-        pricePerPax: pricingObject.pricePerPax,
-        clientPrice: pricingObject.clientPrice,
-        activity: savedActivity._id,
-      };
-      activitypriceobjects.push(activitypriceobject);
-    }
-
-    activitypriceobjects.map(async (pricingRule) => {
-      ActivityPricingRulesModel.create(pricingRule).then(
-        async (newPricingRule) => {
-          await ActivityModel.findByIdAndUpdate(
-            savedActivity._id,
-            {
-              $push: {
-                activityPricingRules: {
-                  ...newPricingRule,
-                },
-              },
-            },
-            { new: true, useFindAndModify: false },
-          );
-        },
-      );
-    });
+    await session.commitTransaction();
 
     res.status(201).json({
       message: "Activity added successfully",
       activity: savedActivity,
     });
   } catch (error) {
-    console.log(error);
+    console.log("Erorr caught", error);
+    await session.abortTransaction();
     res
       .status(500)
       .json({ error: "Activity cannot be added", message: error.message });
+  } finally {
+    session.endSession();
   }
 };
 
+const saveActivityPricingRules = async (
+  activityPricingRules,
+  session,
+  savedActivity,
+  validateBeforeSave
+) => {
+  const activitypriceobjects = [];
+  if (Array.isArray(activityPricingRules)) {
+    for (const jsonString of activityPricingRules) {
+      try {
+        const pricingObject = JSON.parse(jsonString);
+
+        const activitypriceobject = {
+          start: pricingObject.start,
+          end: pricingObject.end,
+          pricePerPax: pricingObject.pricePerPax,
+          clientPrice: pricingObject.clientPrice,
+          activity: savedActivity._id,
+        };
+        activitypriceobjects.push(activitypriceobject);
+      } catch (error) {
+        throw new Error(`Error parsing activity pricing rules`);
+      }
+    }
+  } else {
+    console.log(activityPricingRules);
+    const pricingObject = JSON.parse(activityPricingRules);
+
+    const activitypriceobject = {
+      start: pricingObject.start,
+      end: pricingObject.end,
+      pricePerPax: pricingObject.pricePerPax,
+      clientPrice: pricingObject.clientPrice,
+      activity: savedActivity._id,
+    };
+    activitypriceobjects.push(activitypriceobject);
+  }
+  await Promise.all(
+    activitypriceobjects.map(async (pricingRule) => {
+      try {
+        const newPricingRule = await ActivityPricingRulesModel.create(
+          [{ ...pricingRule }],
+          {
+            session,
+            validateBeforeSave,
+          }
+        );
+        await ActivityModel.findByIdAndUpdate(
+          savedActivity._id,
+          {
+            $push: {
+              activityPricingRules: newPricingRule[0]._id,
+            },
+          },
+          { new: true, session }
+        );
+      } catch (error) {
+        throw new Error("Error when creating activity pricing rules!");
+      }
+    })
+  );
+};
+
+const saveApprovalStatusChangeLog = async (
+  approvalStatus,
+  rejectionReason,
+  activityId,
+  adminId,
+  session
+) => {
+  try {
+    const newChangeLogEntry = new ApprovalStatusChangeLog({
+      approvalStatus,
+      date: Date.now(),
+      rejectionReason,
+      activity: activityId,
+      admin: adminId,
+    });
+    const thing = await newChangeLogEntry.save({ session });
+    return thing;
+  } catch (error) {
+    console.error("Error saving Change Log", error);
+    throw new Error("Error saving Change Log");
+  }
+};
+
+//yt: this endpoint is for when admin saves/edits an activity draft
 export const saveActivity = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     console.log("save activity body:", req.body);
     const {
@@ -297,127 +361,184 @@ export const saveActivity = async (req, res) => {
     let savedActivity;
     if (activityId) {
       try {
-        const foundActivity = await ActivityModel.findById(activityId);
+        const foundActivity =
+          await ActivityModel.findById(activityId).session(session);
+        console.log("foundActivity", foundActivity);
         if (!foundActivity) {
-          res.status(500).json({
-            error: "Activity draft you are trying to save does not exist!",
-            message: error.message,
-          });
+          throw new Error(
+            "Activity draft you are trying to save does not exist!"
+          );
         } else {
           savedActivity = await ActivityModel.findByIdAndUpdate(
-            { _id: activityId },
+            activityId,
             { ...activity },
             {
               new: true,
-            },
+              session,
+            }
           );
         }
-      } catch (e) {
+      } catch (error) {
+        console.error(error);
         res.status(500).json({
-          error: "Error when trying to update activity draft: ",
-          message: error.message,
+          error: "Error when trying to update activity draft",
+          message: "Invalid activity Id!",
         });
       }
     } else {
       const newActivity = new ActivityModel({
         ...activity,
       });
-      savedActivity = await newActivity.save({ validateBeforeSave: false });
+      savedActivity = await newActivity.save({
+        validateBeforeSave: false,
+        session,
+      });
     }
 
     console.log("Saved Activity is: ", savedActivity);
-    const imageFiles = req.files;
 
     //To update url of uploaded images path to s3 in created activity
-    const imagesPathArr = [];
+    // const imageFiles = req.files;
+    // const imagesPathArr = [];
 
-    if (imageFiles.length === 0 || imageFiles.length === undefined) {
-      console.log("No image files uploaded");
-    } else {
-      console.log("Retrieving uploaded images url");
-      let fileArray = req.files,
-        fileLocation;
-      for (let i = 0; i < fileArray.length; i++) {
-        fileLocation = fileArray[i].location;
-        console.log("file location:", fileLocation);
-        imagesPathArr.push(fileLocation);
-      }
-    }
+    // if (imageFiles.length === 0 || imageFiles.length === undefined) {
+    //   console.log("No image files uploaded");
+    // } else {
+    //   console.log("Retrieving uploaded images url");
+    //   let fileArray = req.files,
+    //     fileLocation;
+    //   for (let i = 0; i < fileArray.length; i++) {
+    //     fileLocation = fileArray[i].location;
+    //     console.log("file location:", fileLocation);
+    //     imagesPathArr.push(fileLocation);
+    //   }
+    // }
 
-    await ActivityModel.findByIdAndUpdate(
-      { _id: savedActivity._id },
-      { images: imagesPathArr },
-      { new: true },
+    // await ActivityModel.findByIdAndUpdate(
+    //   { _id: savedActivity._id },
+    //   { images: imagesPathArr },
+    //   { new: true }
+    // );
+
+    await ActivityPricingRulesModel.deleteMany(
+      { activity: activityId },
+      { session }
     );
-
-    await ActivityPricingRulesModel.deleteMany({ activity: activityId });
-
-    const activitypriceobjects = [];
     if (activityPricingRules) {
-      if (Array.isArray(activityPricingRules)) {
-        activityPricingRules.forEach((jsonString, index) => {
-          try {
-            const pricingObject = JSON.parse(jsonString);
-
-            const activitypriceobject = {
-              start: pricingObject.start,
-              end: pricingObject.end,
-              pricePerPax: pricingObject.pricePerPax,
-              clientPrice: pricingObject.clientPrice,
-              activity: savedActivity._id,
-            };
-            activitypriceobjects.push(activitypriceobject);
-          } catch (error) {
-            console.error(`Error parsing JSON: ${error}`);
-          }
-        });
-      } else {
-        const pricingObject = JSON.parse(activityPricingRules);
-        const activitypriceobject = {
-          start: pricingObject.start,
-          end: pricingObject.end,
-          pricePerPax: pricingObject.pricePerPax,
-          clientPrice: pricingObject.clientPrice,
-          activity: activityId,
-        };
-        activitypriceobjects.push(activitypriceobject);
-      }
-      const apr = await Promise.all(
-        activitypriceobjects.map(async (pricingRule) => {
-          const newPricingRule = new ActivityPricingRulesModel(pricingRule);
-          return await newPricingRule.save({ validateBeforeSave: false });
-        }),
-      );
-      savedActivity = await ActivityModel.findByIdAndUpdate(
-        savedActivity._id,
-        {
-          $set: {
-            activityPricingRules: apr,
-          },
-        },
-        { new: true, useFindAndModify: false },
-      );
-    } else {
-      savedActivity = await ActivityModel.findByIdAndUpdate(
-        savedActivity._id,
-        {
-          $set: {
-            activityPricingRules: [],
-          },
-        },
-        { new: true, useFindAndModify: false },
+      await saveActivityPricingRules(
+        activityPricingRules,
+        session,
+        savedActivity,
+        false
       );
     }
 
+    await session.commitTransaction();
     res.status(201).json({
-      message: "Activity saved successfully",
+      message: "Activity draft saved successfully",
       activity: savedActivity,
     });
   } catch (error) {
-    console.log(error);
+    console.log("Error caught", error);
+    await session.abortTransaction();
     res
       .status(500)
       .json({ error: "Activity cannot be added", message: error.message });
+  } finally {
+    session.endSession();
+  }
+};
+
+export const approveActivity = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    console.log("approve activity body:", req.params.id);
+    const { activityId } = req.params;
+    const { adminId } = req.body;
+
+    const approvalStatusChangeLog = await saveApprovalStatusChangeLog(
+      ActivityApprovalStatusEnum.READY_TO_PUBLISH,
+      null,
+      activityId,
+      adminId
+    );
+    const savedActivity = await ActivityModel.findByIdAndUpdate(
+      activityId,
+      {
+        approvalStatus: ActivityApprovalStatusEnum.READY_TO_PUBLISH,
+        approvedDate: Date.now(),
+        $push: {
+          approvalStatusChangeLog: approvalStatusChangeLog._id,
+        },
+      },
+      {
+        new: true,
+        session,
+      }
+    );
+
+    await session.commitTransaction();
+
+    res.status(201).json({
+      message: `${savedActivity.title} Activity approved successfully`,
+      activity: savedActivity,
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    res.status(500).json({
+      error: "Unexpected Server Error occured!",
+      message: error.message,
+    });
+  } finally {
+    session.endSession();
+  }
+};
+
+export const rejectActivity = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    console.log("reject activity body:", req.params.activityId);
+    const { activityId } = req.params;
+    const { rejectionReason, adminId } = req.body;
+
+    const approvalStatusChangeLog = await saveApprovalStatusChangeLog(
+      ActivityApprovalStatusEnum.REJECTED,
+      rejectionReason,
+      activityId,
+      adminId
+    );
+
+    const savedActivity = await ActivityModel.findByIdAndUpdate(
+      activityId,
+      {
+        approvalStatus: ActivityApprovalStatusEnum.REJECTED,
+        rejectionReason,
+        $push: {
+          approvalStatusChangeLog: approvalStatusChangeLog._id,
+        },
+      },
+      {
+        new: true,
+        session,
+      }
+    );
+
+    await session.commitTransaction();
+
+    res.status(201).json({
+      message: `${savedActivity.title} rejected successfully`,
+      activity: savedActivity,
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    res.status(500).json({
+      error: "Unexpected Server Error occured!",
+      message: error.message,
+    });
+  } finally {
+    session.endSession();
   }
 };
 
