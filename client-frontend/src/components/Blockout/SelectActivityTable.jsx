@@ -136,6 +136,20 @@ const SelectActivityTable = ({
       },
     },
     {
+      field: "approvalStatus",
+      headerName: "Approval Status",
+      flex: 1,
+    },
+    {
+      field: "isDraft",
+      headerName: "Draft",
+      flex: 1,
+      valueFormatter: (params) => {
+        const val = params.value;
+        return val ? "Yes" : "No";
+      },
+    },
+    {
       field: "viewBlockouts",
       headerName: "Blockout Timings",
       type: "actions",
@@ -157,8 +171,7 @@ const SelectActivityTable = ({
   ];
 
   return (
-    <Box maxWidth={"99%"} paddingTop={2} >
-      
+    <Box maxWidth={"99%"} paddingTop={2}>
       <DataGrid
         checkboxSelection
         rowSelectionModel={selectedRows}
