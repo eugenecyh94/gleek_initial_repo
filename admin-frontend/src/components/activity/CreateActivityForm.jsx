@@ -57,7 +57,7 @@ const StyledButton = styled(Button)`
 const StyledChip = styled(Chip)`
   &.Mui-disabled {
     color: #ffffff;
-    background-color: #5c4b99;
+    background-color: #9f91cc;
     opacity: 1;
   }
 `;

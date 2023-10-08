@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import AddIcon from "@mui/icons-material/Add";
 import {
+  AppBar,
   Badge,
   Button,
   Dialog,
@@ -8,9 +9,12 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  IconButton,
+  Slide,
   Tab,
   Tabs,
   TextField,
+  Toolbar,
   Typography,
   alpha,
 } from "@mui/material";
@@ -28,6 +32,12 @@ import TaskIcon from "@mui/icons-material/Task";
 import QueryBuilderIcon from "@mui/icons-material/QueryBuilder";
 import DoneIcon from "@mui/icons-material/Done";
 import CloseIcon from "@mui/icons-material/Close";
+import React from "react";
+import ActivityDetailsQuickView from "./ActivityDetailsQuickView";
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 const StyledButton = styled(Button)`
   padding-left: 6px;
@@ -65,6 +75,8 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [activityToReject, setActivityToReject] = useState();
   const [rejectionReason, setRejectionReason] = useState();
+  const [openViewModal, setOpenViewModal] = useState(false);
+  const [selectedActivity, setSelectedActivity] = useState();
   const {
     selectedActivityTab,
     setSelectedActivityTab,
@@ -94,7 +106,9 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
     navigate("/createActivity");
   };
   const handleRowClick = (activity) => {
-    navigate(`/viewActivity/${activity._id}`);
+    // navigate(`/viewActivity/${activity._id}`);
+    setOpenViewModal(true);
+    setSelectedActivity(activity);
   };
   const handleTabChange = (event, newValue) => {
     setSelectedActivityTab(newValue);
@@ -131,6 +145,9 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
   };
   const handleRejectReasonChange = (event) => {
     setRejectionReason(event.target.value);
+  };
+  const handleCloseViewModal = () => {
+    setOpenViewModal(false);
   };
   const publishedBadgeNumber = Array.isArray(activities)
     ? activities.length
@@ -485,6 +502,67 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
             },
           }}
         />
+        <Dialog
+          fullScreen
+          open={openViewModal}
+          onClose={handleCloseViewModal}
+          TransitionComponent={Transition}
+          sx={{
+            "& .MuiDialog-paper": {
+              backgroundColor: "#FAFAFA",
+            },
+          }}
+        >
+          <AppBar sx={{ position: "sticky", backgroundColor: "#9f91cc" }}>
+            <Toolbar sx={{ justifyContent: "space-between" }}>
+              <div style={{ display: "flex" }}>
+                <IconButton
+                  edge="start"
+                  color="inherit"
+                  onClick={handleCloseViewModal}
+                  aria-label="close"
+                >
+                  <CloseIcon />
+                </IconButton>
+                <Typography sx={{ alignSelf: "center" }}>
+                  {selectedActivityTab === "publishedTab"
+                    ? "View Published Activity"
+                    : "Review Pending Activity"}
+                </Typography>
+              </div>
+
+              {selectedActivityTab === "pendingApprovalTab" && (
+                <div style={{ display: "flex" }}>
+                  <div style={{ paddingRight: 2 }}>
+                    <Button
+                      variant="contained"
+                      color="success"
+                      onClick={() => handleApproveButton(selectedActivity)}
+                      sx={{ boxShadow: "none" }}
+                    >
+                      <DoneIcon fontSize="small" sx={{ color: "white" }} />
+                      <Typography sx={{ color: "white" }} fontSize={"0.875rem"}>
+                        Approve
+                      </Typography>
+                    </Button>
+                  </div>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    sx={{ minWidth: 0, boxShadow: "none" }}
+                    onClick={() => handleOpenRejectModal(selectedActivity)}
+                  >
+                    <CloseIcon fontSize="small" />
+                    <Typography sx={{ color: "white" }} fontSize={"0.875rem"}>
+                      Reject
+                    </Typography>
+                  </Button>
+                </div>
+              )}
+            </Toolbar>
+          </AppBar>
+          <ActivityDetailsQuickView activity={selectedActivity} />
+        </Dialog>
       </div>
     </Box>
   );
