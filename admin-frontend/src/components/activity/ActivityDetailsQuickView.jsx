@@ -171,11 +171,11 @@ const ActivityDetailsQuickView = ({ activity }) => {
                   labelId="themeLabel"
                   label="Theme"
                   placeholder="Theme"
-                  defaultValue={activity.theme.name}
+                  defaultValue={activity?.theme?.name}
                   inputProps={{ readOnly: true }}
                 >
-                  <MenuItem value={activity.theme.name}>
-                    {activity.theme.name}
+                  <MenuItem value={activity.theme?.name}>
+                    {activity.theme?.name}
                   </MenuItem>
                 </Select>
               </FormControl>
@@ -188,12 +188,12 @@ const ActivityDetailsQuickView = ({ activity }) => {
                   label="Sub-Theme"
                   placeholder="Learning Points"
                   multiple
-                  defaultValue={activity.subtheme.map((s) => s.name)}
+                  defaultValue={activity.subtheme.map((s) => s?.name)}
                   readOnly={true}
                 >
                   {activity.subtheme?.map((subtheme) => (
-                    <MenuItem key={subtheme._id} value={subtheme.name}>
-                      {subtheme.name}
+                    <MenuItem key={subtheme?._id} value={subtheme?.name}>
+                      {subtheme?.name}
                     </MenuItem>
                   ))}
                 </Select>
