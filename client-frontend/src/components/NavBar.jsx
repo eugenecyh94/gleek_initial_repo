@@ -401,6 +401,14 @@ function NavBar(props) {
                   }}
                 >
                   My Activities
+                </MenuItem>{" "}
+                <MenuItem
+                  sx={{ px: "32px" }}
+                  onClick={() => {
+                    navigate("/vendor/blockout");
+                  }}
+                >
+                  Blockouts
                 </MenuItem>
                 <MenuItem sx={{ px: "32px" }} onClick={logout}>
                   Log out
