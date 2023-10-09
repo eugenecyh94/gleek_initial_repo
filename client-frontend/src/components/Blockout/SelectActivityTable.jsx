@@ -19,10 +19,11 @@ const SelectActivityTable = ({
   activities,
   selectedRows,
   setSelectedRows,
-  setOpenModal,
-  openModal,
   selectedActivity,
   setSelectedActivity,
+  setOpenModal,
+  openModal,
+
 }) => {
   const navigate = useNavigate();
 
@@ -171,7 +172,7 @@ const SelectActivityTable = ({
   ];
 
   return (
-    <Box maxWidth={"99%"} paddingTop={2}>
+    <Box maxWidth={"99%"} paddingTop={2} paddingLeft={2} height={"80%"}>
       <DataGrid
         checkboxSelection
         rowSelectionModel={selectedRows}

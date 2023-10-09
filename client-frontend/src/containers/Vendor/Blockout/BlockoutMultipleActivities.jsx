@@ -7,6 +7,9 @@ import {
   FormHelperText,
   Stack,
   Typography,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -18,15 +21,15 @@ import BlockedTimingsDisplayModal from "../../../components/Blockout/BlockedTimi
 import SelectActivityTable from "../../../components/Blockout/SelectActivityTable";
 import useBlockoutStore from "../../../zustand/BlockoutStore";
 import useSnackbarStore from "../../../zustand/SnackbarStore";
+import { GridExpandMoreIcon } from "@mui/x-data-grid";
 
 function BlockoutMultipleActivities() {
   const [blockedStartDateTime, setBlockedStartDateTime] = useState(null);
   const [blockedEndDateTime, setBlockedEndDateTime] = useState(null);
-  const [selectedRows, setSelectedRows] = useState([]); // list of activityId
+  const [selectedRows, setSelectedRows] = useState([]);
 
-  const [startError, setStartError] = useState(null); // Start date validation error
-  const [endError, setEndError] = useState(null); // End date validation error
-  const [endMinDate, setEndMinDate] = useState(null);
+  const [startError, setStartError] = useState(null);
+  const [endError, setEndError] = useState(null);
 
   const { openSnackbar } = useSnackbarStore();
   const {
@@ -54,12 +57,17 @@ function BlockoutMultipleActivities() {
   const handleCloseModal = () => {
     setOpenModal(false);
   };
+  const [isAccordionExpanded, setIsAccordionExpanded] = useState(true);
+
+  const handleAccordionToggle = () => {
+    setIsAccordionExpanded((prevExpanded) => !prevExpanded);
+  };
 
   const handleCreateBlockouts = async () => {
     try {
       if (!blockedStartDateTime || !blockedEndDateTime) {
         openSnackbar("Please select a start/end datetime.", "error");
-        return; // Prevent blockout creation if validation fails
+        return;
       }
 
       if (selectedRows.length === 0) {
@@ -67,12 +75,12 @@ function BlockoutMultipleActivities() {
           "Please select the activities to apply the blockout to.",
           "error",
         );
-        return; // Prevent blockout creation if validation fails
+        return;
       }
 
       if (blockedStartDateTime >= blockedEndDateTime) {
         openSnackbar("Start datetime must be before end datetime.", "error");
-        return; // Prevent blockout creation if validation fails
+        return;
       }
       await addBlockoutToActivities(
         blockedStartDateTime,
@@ -90,27 +98,25 @@ function BlockoutMultipleActivities() {
 
   const handleStartDateTimeChange = (date) => {
     setBlockedStartDateTime(date);
-    // Validate start date
+
     if (blockedEndDateTime && date >= blockedEndDateTime) {
       setEndError("End datetime must be after start datetime.");
     } else {
       setEndError(null);
-      // Update the minDateTime for endDateTimePicker
-      if (date) {
-        setEndMinDate(date.add(1, "minute"));
-      }
     }
   };
 
   const handleEndDateTimeChange = (date) => {
     setBlockedEndDateTime(date);
-    // Validate end date
+
     if (date <= blockedStartDateTime) {
       setEndError("End datetime must be after start datetime.");
     } else {
       setEndError(null);
     }
   };
+
+
   return (
     <Box
       display="flex"
@@ -120,79 +126,108 @@ function BlockoutMultipleActivities() {
       width={"100%"}
     >
       <Typography color="secondary" variant="h3">
-        Create Blockout Timings
+        Blockout Timings
       </Typography>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        spacing={2}
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="left"
+        width={"100%"}
+        position="sticky"
+        top="0"
+        zIndex="999"
+        backgroundColor="#FCFCFC99"
       >
-        <Stack spacing={2}>
-          <Typography color="primary" variant="h5">
-            Select Timing
-          </Typography>
-          <BlockedTimingItem
-            blockedTimeslot={{ blockedStartDateTime, blockedEndDateTime }}
-          ></BlockedTimingItem>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <Stack direction="row" alignItems="center" spacing={2}>
-              <FormControl
-                fullWidth
-                error={!!startError}
-                sx={{ minHeight: "100px" }}
-              >
-                <DateTimePicker
-                  label="Start Date and Time"
-                  value={blockedStartDateTime}
-                  onChange={handleStartDateTimeChange}
-                  format="YYYY/MM/DD hh:mm a"
-                  minDate={dayjs()}
-                />
-
-                <FormHelperText>{startError}</FormHelperText>
-              </FormControl>
-
-              <FormControl
-                fullWidth
-                error={!!endError}
-                sx={{ minHeight: "100px" }}
-              >
-                <DateTimePicker
-                  label="End Date and Time"
-                  value={blockedEndDateTime}
-                  onChange={handleEndDateTimeChange}
-                  format="YYYY/MM/DD hh:mm a"
-                  minDateTime={
-                    blockedStartDateTime
-                      ? blockedStartDateTime.add(1, "minute")
-                      : null
-                  } // Set the minDate to prevent selecting earlier dates
-                />
-                <FormHelperText>{endError}</FormHelperText>
-              </FormControl>
-            </Stack>
-          </LocalizationProvider>
-        </Stack>
-        <Box>
-          <Button
-            startIcon={<Add />}
-            variant="contained"
-            size="large"
-            color="secondary"
-            onClick={handleCreateBlockouts}
-            disabled={startError || endError}
+        <Accordion
+          expanded={isAccordionExpanded}
+          onChange={handleAccordionToggle}
+          sx={{}}
+        >
+          <AccordionSummary
+            elevation={1}
+            expandIcon={<GridExpandMoreIcon />}
+            sx={{
+              backgroundColor: "#fcfcfc",
+            }}
           >
-            Apply
-          </Button>
-        </Box>
-      </Stack>
-      <Box mb={3}>
+            <Typography color="primary" variant="h6">
+              Select Timing
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails
+            sx={{
+              backgroundColor: "#FCFCFC50",
+              borderRadius: "8px",
+            }}
+          >
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              spacing={2}
+            >
+              <Stack spacing={2} paddingTop={2}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <Stack direction="row" alignItems="center" spacing={2}>
+                    <FormControl
+                      fullWidth
+                      error={!!startError}
+                      sx={{ minHeight: "100px", backgroundColor: "white" }}
+                    >
+                      <DateTimePicker
+                        label="Start Date and Time"
+                        value={blockedStartDateTime}
+                        onChange={handleStartDateTimeChange}
+                        format="YYYY/MM/DD hh:mm a"
+                        minDate={dayjs()}
+                      />
+                      <FormHelperText>{startError}</FormHelperText>
+                    </FormControl>
+
+                    <FormControl
+                      fullWidth
+                      error={!!endError}
+                      sx={{ minHeight: "100px", backgroundColor: "white" }}
+                    >
+                      <DateTimePicker
+                        label="End Date and Time"
+                        value={blockedEndDateTime}
+                        onChange={handleEndDateTimeChange}
+                        format="YYYY/MM/DD hh:mm a"
+                        minDateTime={
+                          blockedStartDateTime
+                            ? blockedStartDateTime.add(1, "minute")
+                            : null
+                        }
+                      />
+                      <FormHelperText>{endError}</FormHelperText>
+                    </FormControl>
+                  </Stack>
+                </LocalizationProvider>
+              </Stack>
+              <BlockedTimingItem
+                blockedTimeslot={{ blockedStartDateTime, blockedEndDateTime }}
+              ></BlockedTimingItem>
+              <Box>
+                <Button
+                  startIcon={<Add />}
+                  variant="contained"
+                  size="large"
+                  color="secondary"
+                  onClick={handleCreateBlockouts}
+                  disabled={startError || endError}
+                >
+                  Apply
+                </Button>
+              </Box>
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
+      </Box>
+
+      <Box mb={3} mt={3}>
         <Divider></Divider>
       </Box>
-      <Typography color="primary" variant="h5">
-        Your Activities
-      </Typography>
 
       <SelectActivityTable
         activities={activitiesWithBlockouts}
@@ -203,6 +238,7 @@ function BlockoutMultipleActivities() {
         setOpenModal={setOpenModal}
         openModal={openModal}
       />
+
       <BlockedTimingsDisplayModal
         open={openModal}
         handleClose={handleCloseModal}

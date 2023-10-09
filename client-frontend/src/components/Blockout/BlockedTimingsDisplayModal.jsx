@@ -35,11 +35,8 @@ const BlockedTimingsDisplayModal = ({
         </Typography>
         <Grid container spacing={2} width="100%">
           {timeslots.map((timeslot) => (
-            <Grid item xs={4}>
-              <BlockedTimingItem
-                key={timeslot._id}
-                blockedTimeslot={timeslot}
-              />
+            <Grid item xs={4} key={timeslot._id}>
+              <BlockedTimingItem blockedTimeslot={timeslot} />
             </Grid>
           ))}
         </Grid>
