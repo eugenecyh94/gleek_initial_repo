@@ -75,6 +75,28 @@ const useBlockoutStore = create((set) => ({
       throw error;
     }
   },
+  addBlockout: async (
+    blockedStartDateTime,
+    blockedEndDateTime,
+    activityId,
+  ) => {
+    try {
+      set({ isLoadingBlockoutsForActivity: true });
+      const response = await AxiosConnect.post(
+        `/gleekVendor/timeslot/blockout/activity`,
+        {
+          blockedStartDateTime,
+          blockedEndDateTime,
+          activityId,
+        },
+      );
+
+      const blockoutsForActivity = response.data.blockedTimeslots;
+      set({ isLoadingBlockoutsForActivity: false, blockoutsForActivity });
+    } catch (error) {
+      throw error;
+    }
+  },
 }));
 
 export default useBlockoutStore;

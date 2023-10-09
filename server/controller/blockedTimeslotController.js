@@ -30,9 +30,14 @@ export const addBlockedTimeslot = async (req, res) => {
     });
 
     await blockedTimeslot.save();
+
+    const blockedTimeslots = await BlockedTimeslotModel.find({
+      activityId,
+    }).sort({ blockedStartDateTime: 1 });
+
     res.status(200).json({
-      message: "Blocked timeslot added successfully.",
-      blockedTimeslot,
+      message: "Blocked timing added successfully.",
+      blockedTimeslots,
     });
   } catch (error) {
     console.log(error);
@@ -84,7 +89,7 @@ export const addBlockedTimeslotMultipleActivities = async (req, res) => {
       .populate("linkedVendor")
       .populate({
         path: "blockedTimeslots",
-        options: { sort: { blockedStartDateTime: 1 } }, 
+        options: { sort: { blockedStartDateTime: 1 } },
       });
 
     res.status(200).json({
