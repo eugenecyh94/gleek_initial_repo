@@ -1,3 +1,5 @@
+
+import MoreTimeIcon from "@mui/icons-material/MoreTime";
 import {
   Box,
   Button,
@@ -8,9 +10,9 @@ import {
 import React, { useEffect, useState } from "react";
 import BlockedTimingsDisplayModal from "../../../components/Blockout/BlockedTimingsDisplayModal";
 import ViewActivitiesBlockoutTable from "../../../components/Blockout/ViewActivitiesBlockoutTable";
+import MainBodyContainer from "../../../components/Common/MainBodyContainer";
 import useBlockoutStore from "../../../zustand/BlockoutStore";
 import useSnackbarStore from "../../../zustand/SnackbarStore";
-import MoreTimeIcon from "@mui/icons-material/MoreTime";
 
 function BlockoutDashboard() {
   const { openSnackbar } = useSnackbarStore();
@@ -58,43 +60,50 @@ function BlockoutDashboard() {
   }
 
   return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      alignItems="left"
-      p={5}
-      width={"100%"}
+    <MainBodyContainer
+      hasBackButton={false}
+      breadcrumbNames={[]}
+      breadcrumbLinks={[]}
+      currentBreadcrumbName={"Blockout Dashboard"}
     >
-      <Typography color="secondary" variant="h3" marginBottom={2}>
-        Manage Blockout Timings
-      </Typography>
-      <Stack spacing={2}>
-      <Box display="flex" flexDirection="row-reverse" alignItems="center">
-          <Button
-            variant="outlined"
-            href="/vendor/blockout/create/mass"
-            startIcon={<MoreTimeIcon />}
-          >
-            Apply Blockouts to Multiple Activities
-          </Button>
-        </Box>
-        <Typography color="primary" variant="h5">
-          Activity Blockouts
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="left"
+        p={5}
+        width={"100%"}
+      >
+        <Typography color="secondary" variant="h3" marginBottom={2}>
+          Blockout Dashboard
         </Typography>
-        <ViewActivitiesBlockoutTable
-          activities={activitiesWithBlockouts}
-          selectedActivity={selectedActivity}
-          setSelectedActivity={setSelectedActivity}
-          setOpenModal={setOpenModal}
-          openModal={openModal}
-        />
-        <BlockedTimingsDisplayModal
-          open={openModal}
-          handleClose={handleCloseModal}
-          selectedActivity={selectedActivity}
-        />
-      </Stack>
-    </Box>
+        <Stack spacing={2}>
+          <Box display="flex" flexDirection="row-reverse" alignItems="center">
+            <Button
+              variant="outlined"
+              href="/vendor/blockout/create/mass"
+              startIcon={<MoreTimeIcon />}
+            >
+              Apply Blockouts to Multiple Activities
+            </Button>
+          </Box>
+          <Typography color="primary" variant="h5">
+            Activity Blockouts
+          </Typography>
+          <ViewActivitiesBlockoutTable
+            activities={activitiesWithBlockouts}
+            selectedActivity={selectedActivity}
+            setSelectedActivity={setSelectedActivity}
+            setOpenModal={setOpenModal}
+            openModal={openModal}
+          />
+          <BlockedTimingsDisplayModal
+            open={openModal}
+            handleClose={handleCloseModal}
+            selectedActivity={selectedActivity}
+          />
+        </Stack>
+      </Box>
+    </MainBodyContainer>
   );
 }
 
