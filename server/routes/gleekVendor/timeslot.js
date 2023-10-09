@@ -4,6 +4,7 @@ import {
   addBlockedTimeslot,
   addBlockedTimeslotMultipleActivities,
   deleteBlockedTimeslot,
+  deleteMultipleBlockedTimeslots,
 } from "../../controller/blockedTimeslotController.js";
 import vendorVerifyToken from "../../middleware/vendorAuth.js";
 
@@ -51,4 +52,15 @@ router.delete(
   vendorVerifyToken,
   deleteBlockedTimeslot,
 );
+
+/**
+ * POST /gleekVendor/timeslot/blockout/delete
+ * Delete multiple blockedTiming records
+ */
+router.post(
+  "/blockout/delete",
+  vendorVerifyToken,
+  deleteMultipleBlockedTimeslots,
+);
+
 export default router;

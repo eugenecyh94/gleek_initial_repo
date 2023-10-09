@@ -41,13 +41,13 @@ export const s3GetImages = async (images) => {
       );
       preSignedImagesArr.push(formatUrl(preSignedUrl));
     }
-    console.log("presigned images url arr:", preSignedImagesArr);
+    //console.log("presigned images url arr:", preSignedImagesArr);
     return preSignedImagesArr;
   } else {
     let preSignedUrl = await presigner.presign(
       new HttpRequest(parseUrl(images)),
     );
-    console.log("presigned image url: ", formatUrl(preSignedUrl));
+    //console.log("presigned image url: ", formatUrl(preSignedUrl));
     return formatUrl(preSignedUrl);
   }
 };

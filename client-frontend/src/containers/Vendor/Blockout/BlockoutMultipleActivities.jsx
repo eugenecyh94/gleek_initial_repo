@@ -43,7 +43,7 @@ function BlockoutMultipleActivities() {
   const [openModal, setOpenModal] = useState(false);
 
   useEffect(() => {
-    const subscribeVendor = async () => {
+    const subscribeActivities = async () => {
       try {
         const response = await getActivitiesWithBlockouts();
       } catch (err) {
@@ -51,12 +51,13 @@ function BlockoutMultipleActivities() {
         openSnackbar("Error retrieving your activities.", "error");
       }
     };
-    subscribeVendor();
+    subscribeActivities();
   }, [getActivitiesWithBlockouts, openSnackbar]);
 
   const handleCloseModal = () => {
     setOpenModal(false);
   };
+
   const [isAccordionExpanded, setIsAccordionExpanded] = useState(true);
 
   const handleAccordionToggle = () => {
@@ -115,7 +116,6 @@ function BlockoutMultipleActivities() {
       setEndError(null);
     }
   };
-
 
   return (
     <Box

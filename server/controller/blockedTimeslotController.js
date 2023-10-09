@@ -6,10 +6,10 @@ import mongoose from "mongoose";
 export const getBlockedTimeslotsByActivityId = async (req, res) => {
   try {
     const { activityId } = req.params;
-    const blockedTimeslots = await BlockedTimeslotModel.find({ activityId });
-    res.status(200).json({
-      blockedTimeslots,
-    });
+    const blockedTimeslots = await BlockedTimeslotModel.find({
+      activityId,
+    }).sort({ blockedStartDateTime: 1 });
+    res.status(200).json(blockedTimeslots);
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -22,11 +22,13 @@ export const getBlockedTimeslotsByActivityId = async (req, res) => {
 export const addBlockedTimeslot = async (req, res) => {
   try {
     const { activityId, blockedStartDateTime, blockedEndDateTime } = req.body;
+    console.log(blockedStartDateTime, blockedEndDateTime);
     const blockedTimeslot = new BlockedTimeslotModel({
       activityId,
       blockedStartDateTime,
       blockedEndDateTime,
     });
+
     await blockedTimeslot.save();
     res.status(200).json({
       message: "Blocked timeslot added successfully.",
@@ -49,6 +51,7 @@ export const addBlockedTimeslotMultipleActivities = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
     const { activityIds, blockedStartDateTime, blockedEndDateTime } = req.body;
+    console.log(blockedStartDateTime, blockedEndDateTime);
     let blockedTimeslots = [];
 
     for (const activityId of activityIds) {
@@ -79,7 +82,10 @@ export const addBlockedTimeslotMultipleActivities = async (req, res) => {
       .populate("theme")
       .populate("subtheme")
       .populate("linkedVendor")
-      .populate("blockedTimeslots");
+      .populate({
+        path: "blockedTimeslots",
+        options: { sort: { blockedStartDateTime: 1 } }, 
+      });
 
     res.status(200).json({
       message: "Blocked timeslots added successfully.",
@@ -119,17 +125,43 @@ export const deleteBlockedTimeslot = async (req, res) => {
       });
     }
 
-    const deletedBlockedTiming =
+    const deleted =
       await BlockedTimeslotModel.findByIdAndDelete(blockedTimingId);
 
     res.status(200).json({
       message: "Blocked timing deleted successfully.",
-      deletedBlockedTiming,
+      deleted,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
       error: "Server Error! Blocked timing cannot be deleted.",
+      message: error.message,
+    });
+  }
+};
+
+// Delete multiple blocked timeslots
+export const deleteMultipleBlockedTimeslots = async (req, res) => {
+  try {
+    const { blockedTimingIds, activityId } = req.body;
+
+    const deletedStatus = await BlockedTimeslotModel.deleteMany({
+      _id: { $in: blockedTimingIds },
+    });
+    const blockedTimeslots = await BlockedTimeslotModel.find({
+      activityId,
+    }).sort({ blockedStartDateTime: 1 });
+
+    res.status(200).json({
+      message: "Blocked timings deleted successfully.",
+      deletedStatus,
+      blockedTimeslots,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: "Server Error! Blocked timings cannot be deleted.",
       message: error.message,
     });
   }

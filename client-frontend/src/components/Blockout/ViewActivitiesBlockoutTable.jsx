@@ -3,11 +3,10 @@ import { Box, Button, Stack } from "@mui/material";
 import { DataGrid, GridToolbarFilterButton } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import EditIcon from "@mui/icons-material/Edit";
 
 const ViewActivitiesBlockoutTable = ({
   activities,
-  selectedRows,
-  setSelectedRows,
   selectedActivity,
   setSelectedActivity,
   setOpenModal,
@@ -25,10 +24,6 @@ const ViewActivitiesBlockoutTable = ({
     }
   }, [activities]);
 
-  // const handleViewButton = (activity) => {
-  //   navigate(`/vendor/activity/${activity._id}`);
-  // };
-
   const handleViewButton = (activity) => {
     setSelectedActivity(activity);
     setOpenModal(true);
@@ -40,12 +35,7 @@ const ViewActivitiesBlockoutTable = ({
       headerName: "Title",
       flex: 1,
     },
-    // {
-    //   field: "activityType",
-    //   headerName: "Activity Type",
-    //   flex: 1,
-    //   renderCell: (params) => <WrappedTextCell {...params} />,
-    // },
+
     {
       field: "theme",
       headerName: "Theme",
@@ -119,8 +109,21 @@ const ViewActivitiesBlockoutTable = ({
       type: "actions",
       flex: 1,
       renderCell: (params) => {
+        const handleEditClick = () => {
+          const activityId = params.row._id;
+          navigate(`/vendor/activity/${activityId}/blockout`);
+        };
+
         return (
           <Stack direction={"row"}>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<EditIcon />}
+              onClick={handleEditClick}
+            >
+              Edit
+            </Button>
             <Button
               variant="contained"
               color="primary"
@@ -135,13 +138,9 @@ const ViewActivitiesBlockoutTable = ({
   ];
 
   return (
-    <Box maxWidth={"99%"} paddingTop={2} paddingLeft={2} height={"80%"}>
+    <Box maxWidth={"98%"} paddingTop={2} paddingLeft={2} height={"80%"}>
       <DataGrid
-        checkboxSelection
-        rowSelectionModel={selectedRows}
-        onRowSelectionModelChange={(rows) => {
-          setSelectedRows(rows);
-        }}
+        checkboxSelection={false}
         initialState={{
           pagination: {
             paginationModel: { pageSize: 25, page: 0 },

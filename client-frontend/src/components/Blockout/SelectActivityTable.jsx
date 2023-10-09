@@ -28,10 +28,6 @@ const SelectActivityTable = ({
     }
   }, [activities]);
 
-  // const handleViewButton = (activity) => {
-  //   navigate(`/vendor/activity/${activity._id}`);
-  // };
-
   const handleViewButton = (activity) => {
     setSelectedActivity(activity);
     setOpenModal(true);
