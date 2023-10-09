@@ -47,8 +47,8 @@ const VendorBookmarkButton = ({ vendorId }) => {
         onClick={toggleBookmark}
         variant={
           currentBookmark && currentBookmark.isBookmarked
-            ? "contained" 
-            : "outlined" 
+            ? "contained"
+            : "outlined"
         }
         color="secondary"
         startIcon={

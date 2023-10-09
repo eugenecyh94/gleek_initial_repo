@@ -6,7 +6,7 @@ import {
   Grid,
   Paper,
   TextField,
-  Typography
+  Typography,
 } from "@mui/material";
 import { lighten, useTheme } from "@mui/material/styles";
 import React, { useEffect } from "react";
@@ -62,9 +62,8 @@ const ActivityDetailsPage = () => {
                   <VendorProfileItem vendor={currentActivity?.linkedVendor} />
                 )}
               </Box>
-          
-                <ActivityBookmarkButton activityId={activityId} />
-             
+
+              <ActivityBookmarkButton activityId={activityId} />
             </Box>
           </Grid>
           <Grid

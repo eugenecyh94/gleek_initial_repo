@@ -95,9 +95,7 @@ const VendorDetails = () => {
             alignItems="center"
             spacing={2}
           >
-    
-            <Stack direction="row"   justifyContent="center"
-  alignItems="center">
+            <Stack direction="row" justifyContent="center" alignItems="center">
               <Avatar
                 sx={{
                   bgcolor: primary,

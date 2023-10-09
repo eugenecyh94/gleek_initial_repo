@@ -39,7 +39,7 @@ const VendorsTable = ({ vendors, updateVendor }) => {
   };
 
   const badgeNumber = vendors.filter(
-    (vendor) => vendor.status === "PENDING"
+    (vendor) => vendor.status === "PENDING",
   ).length;
 
   const filterCriteria = {
@@ -51,7 +51,7 @@ const VendorsTable = ({ vendors, updateVendor }) => {
   const [selectedTab, setSelectedTab] = useState("approvedTab");
   const [currentTabRows, setCurrentTabRows] = useState(() => {
     return vendors.filter(
-      (vendors) => vendors.status === filterCriteria[selectedTab].status
+      (vendors) => vendors.status === filterCriteria[selectedTab].status,
     );
   });
 
@@ -59,8 +59,8 @@ const VendorsTable = ({ vendors, updateVendor }) => {
     setSelectedTab(newValue);
     setCurrentTabRows(
       vendors.filter(
-        (vendors) => vendors.status === filterCriteria[newValue].status
-      )
+        (vendors) => vendors.status === filterCriteria[newValue].status,
+      ),
     );
   };
 

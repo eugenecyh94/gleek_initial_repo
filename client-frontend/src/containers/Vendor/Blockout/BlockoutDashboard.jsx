@@ -14,14 +14,12 @@ function BlockoutDashboard() {
         Manage Blockout Timings
       </Typography>
       <Box>
-        
         <Button variant="outlined" href="/vendor/blockout/create/mass">
           Apply Blockouts to Multiple Activities
         </Button>
         <Typography color="primary" variant="h5">
           Manage Blockouts for Activity
         </Typography>
-      
       </Box>
     </Box>
   );

@@ -104,7 +104,7 @@ function getTimeslotCapacities(
   capacity,
   bookings,
   blockedTimeslots,
-  duration
+  duration,
 ) {
   // Create a hashmap to store capacities for each starttime slot
   const capacities = new Map(startTimes.map((slot) => [slot, capacity]));
@@ -154,12 +154,12 @@ function generateAllTimeslots(
   capacity,
   bookings,
   blockedTimeslots,
-  duration
+  duration,
 ) {
   const startTimes = generateStartTimes(
     earliestStartTime,
     latestStartTime,
-    interval
+    interval,
   );
 
   const timeslotCapacities = getTimeslotCapacities(
@@ -167,7 +167,7 @@ function generateAllTimeslots(
     capacity,
     bookings,
     blockedTimeslots,
-    duration
+    duration,
   );
 
   const allTimeslots = startTimes.map((startTime, index) => {
@@ -243,7 +243,7 @@ export const getAvailableBookingTimeslots = async (req, res) => {
     const minDate = new Date(
       today.getFullYear(),
       today.getMonth(),
-      today.getDate() + daysInAdvance
+      today.getDate() + daysInAdvance,
     );
     if (dateParam < minDate) {
       return res.status(400).json({
@@ -262,24 +262,24 @@ export const getAvailableBookingTimeslots = async (req, res) => {
       activity.startTime.getHours(),
       activity.startTime.getMinutes(),
       0,
-      0
+      0,
     );
     const latestStartTime = new Date(dateParam);
     latestStartTime.setHours(
       activity.endTime.getHours(),
       activity.endTime.getMinutes(),
       0,
-      0
+      0,
     );
     console.log(
       "EARLIEST START TIME: ",
       earliestStartTime.toLocaleDateString(),
-      earliestStartTime.toLocaleTimeString()
+      earliestStartTime.toLocaleTimeString(),
     );
     console.log(
       "LATEST START TIME: ",
       latestStartTime.toLocaleDateString(),
-      latestStartTime.toLocaleTimeString()
+      latestStartTime.toLocaleTimeString(),
     );
 
     const interval = 30; // 30 minutes
@@ -315,7 +315,7 @@ export const getAvailableBookingTimeslots = async (req, res) => {
       activity.capacity,
       bookings,
       blockedTimeslots,
-      activity.duration
+      activity.duration,
     );
 
     res.status(200).json({
@@ -408,12 +408,12 @@ export const createBooking = async (req, res) => {
     console.log(
       "SELECTED STARTTIME: ",
       selectedStartDateTime.toLocaleDateString(),
-      selectedStartDateTime.toLocaleTimeString()
+      selectedStartDateTime.toLocaleTimeString(),
     );
     console.log(
       "SELECTED ENDTIME: ",
       selectedEndDateTime.toLocaleDateString(),
-      selectedEndDateTime.toLocaleTimeString()
+      selectedEndDateTime.toLocaleTimeString(),
     );
 
     const earliestStartTime = new Date(startDateTime);
@@ -421,24 +421,24 @@ export const createBooking = async (req, res) => {
       activity.startTime.getHours(),
       activity.startTime.getMinutes(),
       0,
-      0
+      0,
     );
     const latestStartTime = new Date(startDateTime);
     latestStartTime.setHours(
       activity.endTime.getHours(),
       activity.endTime.getMinutes(),
       0,
-      0
+      0,
     );
     console.log(
       "EARLIEST START TIME: ",
       earliestStartTime.toLocaleDateString(),
-      earliestStartTime.toLocaleTimeString()
+      earliestStartTime.toLocaleTimeString(),
     );
     console.log(
       "LATEST START TIME: ",
       latestStartTime.toLocaleDateString(),
-      latestStartTime.toLocaleTimeString()
+      latestStartTime.toLocaleTimeString(),
     );
 
     const interval = 30; // 30 minutes
@@ -474,14 +474,14 @@ export const createBooking = async (req, res) => {
       activity.capacity,
       bookings,
       blockedTimeslots,
-      activity.duration
+      activity.duration,
     );
 
     // If selected timeslot is not available, return error
     const timeslot = allTimeslots.find(
       (timeslot) =>
         timeslot.startTime.getTime() === selectedStartDateTime.getTime() &&
-        timeslot.endTime.getTime() === selectedEndDateTime.getTime()
+        timeslot.endTime.getTime() === selectedEndDateTime.getTime(),
     );
     console.log("Selected timeslot: ", timeslot);
 

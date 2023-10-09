@@ -18,12 +18,12 @@ const router = express.Router();
 router.post(
   "/addActivity",
   uploadS3ActivityImages.array("images", 5),
-  addActivity
+  addActivity,
 );
 router.post(
   "/saveActivity",
   uploadS3ActivityImages.array("images", 5),
-  saveActivity
+  saveActivity,
 );
 router.get("/all", getAllActivities);
 router.get("/myActivities/:id", getAllActivitiesForAdmin);

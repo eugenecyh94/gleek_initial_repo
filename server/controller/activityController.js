@@ -159,7 +159,7 @@ export const addActivity = async (req, res) => {
         await ActivityModel.findByIdAndUpdate(
           { _id: savedActivity._id },
           { images: imagesPathArr },
-          { new: true, session }
+          { new: true, session },
         );
       }
     } catch (error) {
@@ -170,7 +170,7 @@ export const addActivity = async (req, res) => {
       activityPricingRules,
       session,
       savedActivity,
-      true
+      true,
     );
 
     await session.commitTransaction();
@@ -194,7 +194,7 @@ const saveActivityPricingRules = async (
   activityPricingRules,
   session,
   savedActivity,
-  validateBeforeSave
+  validateBeforeSave,
 ) => {
   const activitypriceobjects = [];
   if (Array.isArray(activityPricingRules)) {
@@ -235,7 +235,7 @@ const saveActivityPricingRules = async (
           {
             session,
             validateBeforeSave,
-          }
+          },
         );
         await ActivityModel.findByIdAndUpdate(
           savedActivity._id,
@@ -244,12 +244,12 @@ const saveActivityPricingRules = async (
               activityPricingRules: newPricingRule[0]._id,
             },
           },
-          { new: true, session }
+          { new: true, session },
         );
       } catch (error) {
         throw new Error("Error when creating activity pricing rules!");
       }
-    })
+    }),
   );
 };
 
@@ -258,7 +258,7 @@ const saveApprovalStatusChangeLog = async (
   rejectionReason,
   activityId,
   adminId,
-  session
+  session,
 ) => {
   try {
     const newChangeLogEntry = new ApprovalStatusChangeLog({
@@ -366,7 +366,7 @@ export const saveActivity = async (req, res) => {
         console.log("foundActivity", foundActivity);
         if (!foundActivity) {
           throw new Error(
-            "Activity draft you are trying to save does not exist!"
+            "Activity draft you are trying to save does not exist!",
           );
         } else {
           savedActivity = await ActivityModel.findByIdAndUpdate(
@@ -375,7 +375,7 @@ export const saveActivity = async (req, res) => {
             {
               new: true,
               session,
-            }
+            },
           );
         }
       } catch (error) {
@@ -422,14 +422,14 @@ export const saveActivity = async (req, res) => {
 
     await ActivityPricingRulesModel.deleteMany(
       { activity: activityId },
-      { session }
+      { session },
     );
     if (activityPricingRules) {
       await saveActivityPricingRules(
         activityPricingRules,
         session,
         savedActivity,
-        false
+        false,
       );
     }
 
@@ -461,7 +461,7 @@ export const approveActivity = async (req, res) => {
       ActivityApprovalStatusEnum.READY_TO_PUBLISH,
       null,
       activityId,
-      adminId
+      adminId,
     );
     const savedActivity = await ActivityModel.findByIdAndUpdate(
       activityId,
@@ -475,7 +475,7 @@ export const approveActivity = async (req, res) => {
       {
         new: true,
         session,
-      }
+      },
     );
 
     await session.commitTransaction();
@@ -507,7 +507,7 @@ export const rejectActivity = async (req, res) => {
       ActivityApprovalStatusEnum.REJECTED,
       rejectionReason,
       activityId,
-      adminId
+      adminId,
     );
 
     const savedActivity = await ActivityModel.findByIdAndUpdate(
@@ -522,7 +522,7 @@ export const rejectActivity = async (req, res) => {
       {
         new: true,
         session,
-      }
+      },
     );
 
     await session.commitTransaction();
@@ -864,7 +864,7 @@ export const getVendorActivities = async (req, res) => {
     const vendorId = vendor._id;
     console.log("getVendorActivities vendor _id", vendorId);
 
-    const activities = await getAllVendorActivities(vendorId)
+    const activities = await getAllVendorActivities(vendorId);
     const preSignedPromises = activities.map(async (activity) => {
       await findMinimumPricePerPax(activity);
     });
