@@ -735,7 +735,7 @@ export const getActivitiesWithFilters = async (req, res) => {
 
     if (filter.priceRange[0] !== null && filter.priceRange[1] !== null) {
       const pricingRules = await ActivityPricingRulesModel.find({
-        pricePerPax: {
+        clientPrice: {
           $gte: filter.priceRange[0], // Greater than or equal to minPrice
           $lte: filter.priceRange[1], // Less than or equal to maxPrice
         },
@@ -757,8 +757,8 @@ export const getActivitiesWithFilters = async (req, res) => {
     async function findMinimumPricePerPax(activity) {
       let minPricePerPax = Infinity;
       for (const pricingRule of activity.activityPricingRules) {
-        if (pricingRule.pricePerPax < minPricePerPax) {
-          minPricePerPax = pricingRule.pricePerPax;
+        if (pricingRule.clientPrice < minPricePerPax) {
+          minPricePerPax = pricingRule.clientPrice;
         }
       }
       return minPricePerPax;
@@ -834,8 +834,8 @@ export const getMinAndMaxPricePerPax = async (req, res) => {
       });
     }
 
-    const minPrice = Math.min(...pricingRules.map((rule) => rule.pricePerPax));
-    const maxPrice = Math.max(...pricingRules.map((rule) => rule.pricePerPax));
+    const minPrice = Math.min(...pricingRules.map((rule) => rule.clientPrice));
+    const maxPrice = Math.max(...pricingRules.map((rule) => rule.clientPrice));
 
     // console.log("Minimum Price Per Pax:", minPrice);
     // console.log("Maximum Price Per Pax:", maxPrice);
