@@ -94,12 +94,15 @@ const useShopStore = create((set) => ({
       const response = await AxiosConnect.get(
         "/gleek/shop/getAllActivitiesNames",
       );
-      set({ suggestions: response.data.data });
+      set({ initialSuggestions: response.data.data });
     } catch (error) {
       console.error(error);
     }
   },
   suggestions: [],
+  initialSuggestions: [],
+  setInitialSuggestions: (newInitialSuggestions) =>
+    set({ initialSuggestions: newInitialSuggestions }),
   setSuggestions: (newSuggestions) => set({ suggestions: newSuggestions }),
   minPriceValue: null,
   maxPriceValue: null,
