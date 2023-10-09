@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import styled from "@emotion/styled";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Avatar,
   Box,
@@ -9,6 +10,10 @@ import {
   FormControl,
   FormHelperText,
   Grid,
+  IconButton,
+  ImageList,
+  ImageListItem,
+  ImageListItemBar,
   InputLabel,
   MenuItem,
   Select,
@@ -52,6 +57,13 @@ import ImageAndFileUpload from "./ImageAndFileUpload";
 
 const StyledButton = styled(Button)`
   padding-left: 6px;
+`;
+
+const DeleteIconButton = styled(IconButton)`
+  background-color: white;
+  border-radius: 50%;
+  left: 5px;
+  top: 5px;
 `;
 
 const StyledChip = styled(Chip)`
@@ -102,7 +114,12 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     activity?.clientMarkupPercentage ?? null,
   );
   const [activityType, setActivityType] = useState(
-    activity?.activityType ?? "",
+    activity?.activityType === null
+      ? null
+      : activity?.activityType === "Popups (Food)" ||
+        activity?.activityType === "Popups (Non-food)"
+      ? ActivityTypeEnum.POPUP
+      : activity?.activityType
   );
   const [title, setTitle] = useState(activity?.title ?? null);
   const [description, setDescription] = useState(activity?.description ?? null);
@@ -113,7 +130,9 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
       pricePerPax: pricingRule.pricePerPax,
       clientPrice: pricingRule.clientPrice,
     })) || [];
-  const [pricingRanges, setPricingRanges] = useState(extractedFields);
+  const [pricingRanges, setPricingRanges] = useState(
+    extractedFields.slice().sort((a, b) => a.start - b.start)
+  );
   const initialPricingRangeErrors = activity?.activityPricingRules?.map(() => ({
     range: "",
     pricePerPax: null,
@@ -180,7 +199,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     activity?.linkedVendor?._id ?? null,
   );
   const [pendingCertType, setPendingCertType] = useState(
-    activity?.pendingCertType ?? null,
+    activity?.pendingCertificationType ?? null
   );
   const [activeStep, setActiveStep] = useState(
     activity?.offlinePricing?.amount ||
@@ -199,6 +218,10 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
   const [startTime, setStartTime] = useState(activity?.startTime ?? null);
   const [endTime, setEndTime] = useState(activity?.endTime ?? null);
   const [capacity, setCapacity] = useState(activity?.capacity ?? null);
+  const [imageListToEdit, setImageListToEdit] = useState([]);
+  const [existingImageList, setExistingImageList] = useState(
+    activity?.preSignedImages ?? []
+  );
 
   const foodCategories = Object.values(FoodCategoryEnum);
   const sdgList = Object.values(SustainableDevelopmentGoalsEnum);
@@ -374,6 +397,17 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     };
     setPricingAddons(newPricingAddons);
   };
+  const handleRemoveImage = (image) => {
+    setImageListToEdit((oldState) =>
+      oldState.filter((item) => item.src !== image.src)
+    );
+    const updatedList = [...activityImages];
+    updatedList.splice(activityImages.indexOf(image.file), 1);
+    setActivityImages(updatedList);
+  };
+  const handleRemoveExistingImage = (id) => {
+    setExistingImageList((oldState) => oldState.filter((item) => item !== id));
+  };
 
   const handleBack = () => {
     if (activeStep === 1) {
@@ -467,7 +501,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
   };
 
   const handleFoodCertDateChange = (date) => {
-    setFoodCertDate(date);
+    setFoodCertDate(date?.toISOString());
   };
 
   const handleStartTimeChange = (date) => {
@@ -728,6 +762,11 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     event.preventDefault();
     const formData = new FormData();
     formData.append("adminCreated", admin._id);
+    if (activity) {
+      formData.append("activityId", activity._id);
+    }
+    formData.append("isDraft", false);
+    formData.append("approvalStatus", "Published");
     formData.append("title", title);
     formData.append("description", description);
     formData.append(
@@ -739,6 +778,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
         : activityType,
     );
     formData.append("maxParticipants", maxParticipants);
+    formData.append("minParticipants", minParticipants);
     formData.append("clientMarkupPercentage", markup);
     formData.append("duration", duration);
     formData.append("theme", selectedTheme);
@@ -775,12 +815,13 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
       {
         formData.append("popupItemsSold", popupitems);
         if (isFood) {
+          formData.append("isFood", isFood);
           formData.append("isFoodCertPending", isFoodCertPending);
+          selectedFoodCat.forEach((obj) => {
+            formData.append("foodCategory", obj);
+          });
           if (isFoodCertPending) {
-            formData.append("foodCertDate", foodCertDate?.toISOString());
-            selectedFoodCat.forEach((obj) => {
-              formData.append("foodCategory", obj);
-            });
+            formData.append("foodCertDate", foodCertDate);
           }
         }
       }
@@ -794,7 +835,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
 
     if (validateForm()) {
       try {
-        await createActivity(formData);
+        await saveActivity(formData);
         openSnackbar("Activity Created Successfully!");
         resetForm();
       } catch (error) {
@@ -839,6 +880,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     if (minParticipants) {
       formData.append("minParticipants", minParticipants);
     }
+    formData.append("isFood", isFood);
 
     if (markup) {
       formData.append("clientMarkupPercentage", markup);
@@ -904,7 +946,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
       if (isFood) {
         if (isFoodCertPending) {
           if (foodCertDate) {
-            formData.append("foodCertDate", foodCertDate.toISOString());
+            formData.append("foodCertDate", foodCertDate);
           }
           if (selectedFoodCat) {
             selectedFoodCat.forEach((obj) => {
@@ -929,6 +971,12 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     for (const key in pricingAddons) {
       formData.append(key, JSON.stringify(pricingAddons[key]));
     }
+    for (let i = 0; i < activityImages.length; i++) {
+      formData.append("images", activityImages[i]);
+    }
+    existingImageList.forEach((item) =>
+      formData.append("updatedImageList[]", item)
+    );
     if (validateDraft()) {
       try {
         await saveActivity(formData);
@@ -960,6 +1008,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                 color={theme.palette.primary.main}
                 paddingTop={2}
                 component="div"
+                fontSize={"1.25rem"}
               >
                 Basic Information
               </Typography>
@@ -1056,6 +1105,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                 color={theme.palette.primary.main}
                 paddingTop={2}
                 component="div"
+                fontSize={"1.25rem"}
               >
                 Vendor Details
               </Typography>
@@ -1122,6 +1172,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                 color={theme.palette.primary.main}
                 paddingTop={2}
                 component="div"
+                fontSize={"1.25rem"}
               >
                 More details on activity
               </Typography>
@@ -1161,7 +1212,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                       </FormLabel>
                       <RadioGroup
                         aria-labelledby="demo-radio-buttons-group-label"
-                        defaultValue="yes"
+                        defaultValue="false"
                         name="radio-buttons-group"
                         value={isFood.toString()}
                         onChange={handleIsFoodChange}
@@ -1195,6 +1246,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                         (popupitems !== null && popupitems?.length === 0) ||
                         formErrors?.popupitems?.length > 0
                       }
+                      value={popupitems}
                     />
                   </Grid>
                 </Grid>
@@ -1263,6 +1315,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                               pendingCertType === "" ||
                               formErrors?.pendingCertType?.length > 0
                             }
+                            value={pendingCertType}
                           />
                         </Grid>
                         <Grid item paddingTop={2}>
@@ -1272,6 +1325,9 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                           >
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                               <DatePicker
+                                value={
+                                  foodCertDate ? dayjs(foodCertDate) : null
+                                }
                                 error={formErrors?.foodCertDate?.length > 0}
                                 label="Expected certified date"
                                 onChange={handleFoodCertDateChange}
@@ -1501,6 +1557,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                 color={theme.palette.primary.main}
                 component="div"
                 paddingTop={2}
+                fontSize={"1.25rem"}
               >
                 Participants and Pricing
               </Typography>
@@ -1975,28 +2032,84 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
           ></Grid>
         </StyledContainer>
         <StyledContainer elevation={3}>
-          <Grid item xs={12}>
-            <Typography
-              color={theme.palette.primary.main}
-              component="div"
-              paddingTop={2}
-              paddingBottom={2}
-            >
-              Upload activity images
-            </Typography>
-            <FormGroup>
-              <ImageAndFileUpload
-                limit={4}
-                name={"idk"}
-                size={5000000}
-                setActivityImages={setActivityImages}
-                activityImages={activityImages}
-                error={formErrors?.activityImages?.length > 0}
-              />
-              <FormHelperText error>
-                {formErrors?.activityImages}
-              </FormHelperText>
-            </FormGroup>
+          <Grid container spacing={1} alignItems="left" justifyContent="left">
+            <Grid item xs={12}>
+              <Typography
+                color={theme.palette.primary.main}
+                component="div"
+                paddingTop={2}
+                paddingBottom={2}
+                fontSize={"1.25rem"}
+              >
+                Upload activity images
+              </Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <ImageList>
+                {existingImageList?.map((image, index) => {
+                  return (
+                    <ImageListItem key={index}>
+                      <img src={image} loading="lazy" />
+                      <ImageListItemBar
+                        sx={{
+                          background: "none",
+                        }}
+                        position="top"
+                        actionIcon={
+                          <DeleteIconButton
+                            sx={{
+                              backgroundColor: "white",
+                              color: "#D32F2F",
+                            }}
+                            onClick={() => handleRemoveExistingImage(image)}
+                          >
+                            <DeleteIcon />
+                          </DeleteIconButton>
+                        }
+                        actionPosition="left"
+                      />
+                    </ImageListItem>
+                  );
+                })}
+                {imageListToEdit?.map((image, index) => {
+                  return (
+                    <ImageListItem key={index}>
+                      <img src={image.src} loading="lazy" />
+                      <ImageListItemBar
+                        sx={{ background: "none" }}
+                        position="top"
+                        actionIcon={
+                          <DeleteIconButton
+                            sx={{ backgroundColor: "white", color: "#D32F2F" }}
+                            onClick={() => handleRemoveImage(image)}
+                          >
+                            <DeleteIcon />
+                          </DeleteIconButton>
+                        }
+                        actionPosition="left"
+                      />
+                    </ImageListItem>
+                  );
+                })}
+              </ImageList>
+            </Grid>
+            <Grid item xs={12}>
+              <FormGroup>
+                <ImageAndFileUpload
+                  limit={4}
+                  name={"idk"}
+                  size={5000000}
+                  setActivityImages={setActivityImages}
+                  activityImages={activityImages}
+                  error={formErrors?.activityImages?.length > 0}
+                  setImageListToEdit={setImageListToEdit}
+                  existingImageList={existingImageList}
+                />
+                <FormHelperText error>
+                  {formErrors?.activityImages}
+                </FormHelperText>
+              </FormGroup>
+            </Grid>
           </Grid>
         </StyledContainer>
       </div>

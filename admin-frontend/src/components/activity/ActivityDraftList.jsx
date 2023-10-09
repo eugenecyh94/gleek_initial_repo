@@ -4,13 +4,31 @@ import EditIcon from "@mui/icons-material/Edit";
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import AddIcon from "@mui/icons-material/Add";
 import TaskIcon from "@mui/icons-material/Task";
-import { Badge, Box, Button, Tab, Tabs, Typography } from "@mui/material";
+import {
+  AppBar,
+  Badge,
+  Box,
+  Button,
+  Dialog,
+  IconButton,
+  Slide,
+  Tab,
+  Tabs,
+  Toolbar,
+  Typography,
+} from "@mui/material";
 import { DataGrid, GridToolbarFilterButton } from "@mui/x-data-grid";
 import PropTypes from "prop-types";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useActivityStore, useSnackbarStore } from "../../zustand/GlobalStore";
+import AxiosConnect from "../../utils/AxiosConnect";
+import ActivityDetailsQuickView from "./ActivityDetailsQuickView";
+import CloseIcon from "@mui/icons-material/Close";
 
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
     right: -3,
@@ -33,6 +51,10 @@ const ActivityDraftList = ({
     publishedTab: { approvalStatus: "Published", isDraft: false },
     draftTab: { approvalStatus: "Pending Approval", isDraft: true },
   };
+  const [openViewModal, setOpenViewModal] = useState(false);
+  const [selectedActivity, setSelectedActivity] = useState();
+  const [imgs, setImgs] = useState([]);
+  const [vendorProfile, setVendorProfile] = useState();
   const [selectedRows, setSelectedRows] = useState([]);
   const [currentTabRows, setCurrentTabRows] = useState(() => {
     if (Array.isArray(activities)) {
@@ -40,7 +62,7 @@ const ActivityDraftList = ({
         (activity) =>
           activity.approvalStatus ===
             filterCriteria[selectedTab].approvalStatus &&
-          activity.isDraft === filterCriteria[selectedTab].isDraft,
+          activity.isDraft === filterCriteria[selectedTab].isDraft
       );
     } else {
       return [];
@@ -52,8 +74,8 @@ const ActivityDraftList = ({
       activities?.filter(
         (activity) =>
           activity.approvalStatus === filterCriteria[newValue].approvalStatus &&
-          activity.isDraft === filterCriteria[newValue].isDraft,
-      ),
+          activity.isDraft === filterCriteria[newValue].isDraft
+      )
     );
   };
   useEffect(() => {
@@ -62,7 +84,7 @@ const ActivityDraftList = ({
         (activity) =>
           activity.approvalStatus ===
             filterCriteria[selectedTab].approvalStatus &&
-          activity.isDraft === filterCriteria[selectedTab].isDraft,
+          activity.isDraft === filterCriteria[selectedTab].isDraft
       );
       setCurrentTabRows(filteredRows);
     }
@@ -83,6 +105,18 @@ const ActivityDraftList = ({
     setSelectedRows([]);
     openSnackbar(snackbarMessage);
   };
+  const handleRowClick = async (activity) => {
+    if (selectedTab === "publishedTab") {
+      const res = await AxiosConnect.get(`/activity/getImages/${activity._id}`);
+      setImgs(res.data.activityImages);
+      setVendorProfile(res.data.vendorProfileImage);
+      setOpenViewModal(true);
+      setSelectedActivity(activity);
+    }
+  };
+  const handleCloseViewModal = () => {
+    setOpenViewModal(false);
+  };
   const publishedBadgeNumber = Array.isArray(activities)
     ? activities.filter((activity) => activity.approvalStatus === "Published")
         .length
@@ -91,7 +125,7 @@ const ActivityDraftList = ({
     ? activities.filter(
         (activity) =>
           activity.isDraft === true &&
-          activity.approvalStatus === "Pending Approval",
+          activity.approvalStatus === "Pending Approval"
       ).length
     : null;
 
@@ -339,7 +373,42 @@ const ActivityDraftList = ({
             border: "none",
             backgroundColor: "white",
           }}
+          onRowClick={(params) => handleRowClick(params.row)}
         />
+        <Dialog
+          fullScreen
+          open={openViewModal}
+          onClose={handleCloseViewModal}
+          TransitionComponent={Transition}
+          sx={{
+            "& .MuiDialog-paper": {
+              backgroundColor: "#FAFAFA",
+            },
+          }}
+        >
+          <AppBar sx={{ position: "sticky", backgroundColor: "#9f91cc" }}>
+            <Toolbar sx={{ justifyContent: "space-between" }}>
+              <div style={{ display: "flex" }}>
+                <IconButton
+                  edge="start"
+                  color="inherit"
+                  onClick={handleCloseViewModal}
+                  aria-label="close"
+                >
+                  <CloseIcon />
+                </IconButton>
+                <Typography sx={{ alignSelf: "center" }}>
+                  View Published Activity
+                </Typography>
+              </div>
+            </Toolbar>
+          </AppBar>
+          <ActivityDetailsQuickView
+            activity={selectedActivity}
+            imgs={imgs}
+            vendorProfile={vendorProfile}
+          />
+        </Dialog>
       </div>
     </Box>
   );
