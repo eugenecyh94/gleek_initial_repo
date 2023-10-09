@@ -5,7 +5,7 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
-  Typography
+  Typography,
 } from "@mui/material";
 import React from "react";
 import BlockedTimingItem from "./BlockedTimingItem";
@@ -49,7 +49,9 @@ const BlockedTimingsDisplayModal = ({
 
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xl">
-      <DialogTitle variant="h4">Blocked Timeslots for {selectedActivity?.title}</DialogTitle>
+      <DialogTitle variant="h4">
+        Blocked Timeslots for {selectedActivity?.title}
+      </DialogTitle>
       <DialogContent>
         {renderTimeslotSection(upcomingTimeslots, "Upcoming")}
         {renderTimeslotSection(pastTimeslots, "Past")}

@@ -94,7 +94,7 @@ const useBookmarkStore = create((set) => ({
   },
   removeVendorBookmark: async (bm) => {
     try {
-      console.log(bm.vendor._id)
+      console.log(bm.vendor._id);
       const response = await AxiosConnect.post(
         `/gleek/bookmark/vendor/${bm.vendor._id}`,
         {

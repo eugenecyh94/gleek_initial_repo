@@ -18,5 +18,4 @@ const router = express.Router();
 // // Add 1 blockout timeslot to 1 or several activities
 // router.post("/blockout/activities", vendorVerifyToken, addBlockedTimeslotMultipleActivities);
 
-
 export default router;

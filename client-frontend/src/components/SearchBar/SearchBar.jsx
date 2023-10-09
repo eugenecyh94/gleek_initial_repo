@@ -18,22 +18,23 @@ const SearchBar = (props) => {
     searchValue,
     suggestions,
     setSuggestions,
+    initialSuggestions,
     getInitialSuggestions,
   } = useShopStore();
 
   // Define your data source for suggestions here
   const getSuggestions = (value) => {
     getInitialSuggestions();
-    return suggestions.filter((option) =>
-      option.toLowerCase().includes(value.toLowerCase()),
-    );
+    // maximum of 5 suggestions at a time
+    const filteredSuggestions = initialSuggestions
+      .filter((option) => option.toLowerCase().includes(value.toLowerCase()))
+      .slice(0, 5);
+    return filteredSuggestions;
   };
-
   const onSuggestionsFetchRequested = ({ value }) => {
     setSuggestions(getSuggestions(value));
     setIsMenuOpen(true); // Open the menu when suggestions are available
   };
-
   const onSuggestionsClearRequested = () => {
     setSuggestions([]);
     setIsMenuOpen(false); // Close the menu when there are no suggestions
@@ -56,7 +57,6 @@ const SearchBar = (props) => {
       </Box>
     );
   };
-
   return (
     <div style={{ position: "relative" }}>
       <Autosuggest
@@ -79,5 +79,4 @@ const SearchBar = (props) => {
     </div>
   );
 };
-
 export default SearchBar;

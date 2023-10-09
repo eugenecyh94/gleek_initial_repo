@@ -267,7 +267,7 @@ function App() {
               </VendorProtectedRoute>
             }
           />
-           <Route
+          <Route
             exact
             path="/vendor/blockout/create/mass"
             element={

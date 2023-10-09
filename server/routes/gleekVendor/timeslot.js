@@ -12,13 +12,11 @@ const router = express.Router();
  *  Blocked Timings
  */
 
-
-
 /**
  * GET /gleekVendor/timeslot/blockout/activity/:activityId
  * Get Blocked Timeslots by Activity ID
- * 
- * 
+ *
+ *
  */
 router.get("/blockout/activity/:activityId", getBlockedTimeslotsByActivityId);
 

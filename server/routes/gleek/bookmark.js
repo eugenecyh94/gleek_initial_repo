@@ -14,10 +14,13 @@ const router = express.Router();
 router.get("/", verifyToken, fetchBookmarks);
 router.post("/", verifyToken, updateBookmark);
 
-
 router.post("/activity/:activityId", verifyToken, updateActivityBookmark);
 router.get("/activity/:activityId", verifyToken, getActivityBookmark);
-router.get("/activity/:activityId/status", verifyToken, getActivityBookmarkStatus);
+router.get(
+  "/activity/:activityId/status",
+  verifyToken,
+  getActivityBookmarkStatus,
+);
 
 router.post("/vendor/:vendorId", verifyToken, updateVendorBookmark);
 router.get("/vendor/:vendorId", verifyToken, getVendorBookmark);
