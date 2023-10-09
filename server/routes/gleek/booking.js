@@ -11,7 +11,11 @@ const router = express.Router();
 router.get(
   "/getAvailableBookingTimeslots/:activityId/:selectedDate",
   verifyToken,
+<<<<<<< HEAD
   getAvailableBookingTimeslots
+=======
+  getAvailableBookingTimeslots,
+>>>>>>> develop-2
 );
 router.post("/createBooking", verifyToken, createBooking);
 

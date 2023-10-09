@@ -6,6 +6,7 @@ import "./loadEnvironment.js";
 import gleekRoutes from "./routes/gleek/gleek.js";
 import activityRoutes from "./routes/gleekAdmin/activityRoute.js";
 import gleekAdminRoutes from "./routes/gleekAdmin/gleekAdmin.js";
+import gleekVendorRoutes from "./routes/gleekVendor/gleekVendor.js";
 import vendorRoutes from "./routes/gleekAdmin/vendorRoute.js";
 import bookingRoutes from "./routes/gleekAdmin/bookingRoute.js";
 import client from "./routes/gleekAdmin/client.js";
@@ -44,7 +45,15 @@ app.use("/activity", activityRoutes);
 app.use("/client", client);
 app.use("/booking", bookingRoutes);
 
+/**
+ * For Client application
+ */
 app.use("/gleek", gleekRoutes);
+
+/**
+ * For Vendor application
+ */
+app.use("/gleekVendor", gleekVendorRoutes);
 //for activity image upload test
 app.use("/testActivity", activityTestController);
 

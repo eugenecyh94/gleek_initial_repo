@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   MenuList,
@@ -9,39 +9,44 @@ import {
 } from "@mui/material"; // Import Typography
 import Autosuggest from "react-autosuggest";
 import "./searchbar.css";
+import useShopStore from "../../zustand/ShopStore";
 
 const SearchBar = (props) => {
-  const [value, setValue] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const {
+    setSearchValue,
+    searchValue,
+    suggestions,
+    setSuggestions,
+    initialSuggestions,
+    getInitialSuggestions,
+  } = useShopStore();
 
   // Define your data source for suggestions here
   const getSuggestions = (value) => {
-    // Elastic Search Recommendations
-    // Past search queries
-    const suggestions = ["Option 1", "Option 2", "Option 3"];
-    return suggestions.filter((option) =>
-      option.toLowerCase().includes(value.toLowerCase()),
-    );
+    getInitialSuggestions();
+    // maximum of 5 suggestions at a time
+    const filteredSuggestions = initialSuggestions
+      .filter((option) => option.toLowerCase().includes(value.toLowerCase()))
+      .slice(0, 5);
+    return filteredSuggestions;
   };
-
   const onSuggestionsFetchRequested = ({ value }) => {
     setSuggestions(getSuggestions(value));
     setIsMenuOpen(true); // Open the menu when suggestions are available
   };
-
   const onSuggestionsClearRequested = () => {
     setSuggestions([]);
     setIsMenuOpen(false); // Close the menu when there are no suggestions
   };
 
   const onChange = (event, { newValue }) => {
-    setValue(newValue);
+    setSearchValue(newValue);
   };
 
   const inputProps = {
     placeholder: "Search Gleek.com",
-    value,
+    value: searchValue,
     onChange,
   };
 
@@ -52,7 +57,6 @@ const SearchBar = (props) => {
       </Box>
     );
   };
-
   return (
     <div style={{ position: "relative" }}>
       <Autosuggest
@@ -75,5 +79,4 @@ const SearchBar = (props) => {
     </div>
   );
 };
-
 export default SearchBar;

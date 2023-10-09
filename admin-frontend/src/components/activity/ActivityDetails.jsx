@@ -66,9 +66,9 @@ const ActivityDetails = () => {
   return (
     <MainBodyContainer
       hasBackButton={false}
-      breadcrumbNames={[]}
-      breadcrumbLinks={[]}
-      currentBreadcrumbName={"View Published Activities"}
+      breadcrumbNames={["View Published Activities"]}
+      breadcrumbLinks={["/viewPublishedActivities"]}
+      currentBreadcrumbName={"View Activity Details"}
     >
       {isLoading ? (
         <CircularProgress sx={{ margin: "auto", marginTop: "32px" }} />
@@ -235,7 +235,8 @@ const ActivityDetails = () => {
                   {activityDetails?.preSignedImages?.map((item, index) => (
                     <ImageListItem key={index}>
                       <img
-                        srcSet={`${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                        // srcSet={`${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                        size={"w=164&h=164&fit=crop&auto=format&dpr=2 2x"}
                         src={item}
                         loading="lazy"
                       />

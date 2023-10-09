@@ -1,19 +1,78 @@
+import mongoose from "mongoose";
 import ActivityModel from "../model/activityModel.js";
 import ActivityPricingRulesModel from "../model/activityPricingRules.js";
+import ApprovalStatusChangeLog from "../model/approvalStatusChangeLog.js";
 import ThemeModel from "../model/themeModel.js";
-import { s3ImageGetService } from "../service/s3ImageGetService.js";
+import {
+  findMinimumPricePerPax,
+  getAllVendorActivities,
+  prepareActivityMinimumPricePerPaxAndSingleImage,
+} from "../service/activityService.js";
+import { s3GetImages, s3RemoveImages } from "../service/s3ImageServices.js";
+import { ActivityApprovalStatusEnum } from "../util/activityApprovalStatusEnum.js";
 
+// yt: this endpoint retrieves and returns PUBLISHED & PENDING APPROVAL activities only
 export const getAllActivities = async (req, res) => {
   try {
     const activities = await ActivityModel.find()
       .populate("activityPricingRules")
+      .populate("linkedVendor")
       .populate("theme")
       .populate("subtheme");
+    const publishedActivities = activities.filter((row) => {
+      return row.approvalStatus === "Published" && row.isDraft === false;
+    });
+    const pendingApprovalActivities = activities.filter((row) => {
+      return row.approvalStatus === "Pending Approval" && row.isDraft === false;
+    });
+    res.status(200).json({
+      publishedActivities,
+      pendingApprovalActivities,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// yt: this endpoint retrieves ALL activities (both drafts and published) for an admin
+export const getAllActivitiesForAdmin = async (req, res) => {
+  try {
+    const adminId = req.params.id;
+    const activities = await ActivityModel.find()
+      .populate({
+        path: "adminCreated",
+        match: { _id: adminId },
+      })
+      .populate("activityPricingRules")
+      .populate("theme")
+      .populate("subtheme")
+      .populate("linkedVendor");
     res.status(200).json({
       data: activities,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+export const getPreSignedImgs = async (req, res) => {
+  try {
+    const foundActivity = await ActivityModel.findById(req.params.id).populate(
+      "linkedVendor"
+    );
+    let preSignedUrlArr = await s3GetImages(foundActivity.images);
+    let vendorProfile;
+    if (foundActivity.linkedVendor.companyLogo) {
+      vendorProfile = await s3GetImages(foundActivity.linkedVendor.companyLogo);
+    } else {
+      vendorProfile = null
+    }
+    res.status(200).json({
+      activityImages: preSignedUrlArr,
+      vendorProfileImage: vendorProfile,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -24,9 +83,20 @@ export const getActivity = async (req, res) => {
       .populate("linkedVendor")
       .populate("theme")
       .populate("subtheme");
-    let preSignedUrlArr = await s3ImageGetService(foundActivity.images);
+    let preSignedUrlArr = await s3GetImages(foundActivity.images);
     foundActivity.preSignedImages = preSignedUrlArr;
     console.log("each push:", foundActivity.preSignedImages);
+
+    // Populate the minimum price per pax for each activity
+    foundActivity.minimumPricePerPax =
+      await findMinimumPricePerPax(foundActivity);
+    if (foundActivity.linkedVendor && foundActivity.linkedVendor.companyLogo) {
+      let preSignedUrl = await s3GetImages(
+        foundActivity.linkedVendor.companyLogo
+      );
+      foundActivity.linkedVendor.preSignedPhoto = preSignedUrl;
+    }
+
     res.status(200).json({
       data: foundActivity,
     });
@@ -46,12 +116,11 @@ export const getActivitiesByVendorId = async (req, res) => {
       .populate("subtheme")
       .populate("linkedVendor");
 
-    // Use the first image of each activity
-    const imagesToGet = activities.map((activity) => activity.images[0]);
-    const preSignedUrlArr = await s3ImageGetService(imagesToGet);
-    activities.forEach((activity, index) => {
-      activity.preSignedImages = [preSignedUrlArr[index]];
+    const preSignedPromises = activities.map(async (activity) => {
+      await prepareActivityMinimumPricePerPaxAndSingleImage(activity);
     });
+
+    await Promise.all(preSignedPromises);
 
     res.status(200).json(activities);
   } catch (error) {
@@ -60,19 +129,162 @@ export const getActivitiesByVendorId = async (req, res) => {
   }
 };
 
-export const addActivity = async (req, res) => {
+const saveActivityPricingRules = async (
+  activityPricingRules,
+  session,
+  savedActivity,
+  validateBeforeSave
+) => {
+  const activitypriceobjects = [];
+  if (Array.isArray(activityPricingRules)) {
+    for (const jsonString of activityPricingRules) {
+      try {
+        const pricingObject = JSON.parse(jsonString);
+
+        const activitypriceobject = {
+          start: pricingObject.start,
+          end: pricingObject.end,
+          pricePerPax: pricingObject.pricePerPax,
+          clientPrice: pricingObject.clientPrice,
+          activity: savedActivity._id,
+        };
+        activitypriceobjects.push(activitypriceobject);
+      } catch (error) {
+        throw new Error(`Error parsing activity pricing rules`);
+      }
+    }
+  } else {
+    console.log(activityPricingRules);
+    const pricingObject = JSON.parse(activityPricingRules);
+
+    const activitypriceobject = {
+      start: pricingObject.start,
+      end: pricingObject.end,
+      pricePerPax: pricingObject.pricePerPax,
+      clientPrice: pricingObject.clientPrice,
+      activity: savedActivity._id,
+    };
+    activitypriceobjects.push(activitypriceobject);
+  }
+  await Promise.all(
+    activitypriceobjects.map(async (pricingRule) => {
+      try {
+        const newPricingRule = await ActivityPricingRulesModel.create(
+          [{ ...pricingRule }],
+          {
+            session,
+            validateBeforeSave,
+          }
+        );
+        await ActivityModel.findByIdAndUpdate(
+          savedActivity._id,
+          {
+            $push: {
+              activityPricingRules: newPricingRule[0]._id,
+            },
+          },
+          { new: true, session }
+        );
+      } catch (error) {
+        throw new Error("Error when creating activity pricing rules!");
+      }
+    })
+  );
+};
+
+const saveApprovalStatusChangeLog = async (
+  approvalStatus,
+  rejectionReason,
+  activityId,
+  adminId,
+  session
+) => {
   try {
-    console.log("add activity body:", req.body);
+    const newChangeLogEntry = new ApprovalStatusChangeLog({
+      approvalStatus,
+      date: Date.now(),
+      rejectionReason,
+      activity: activityId,
+      admin: adminId,
+    });
+    const thing = await newChangeLogEntry.save({ session });
+    return thing;
+  } catch (error) {
+    console.error("Error saving Change Log", error);
+    throw new Error("Error saving Change Log");
+  }
+};
+
+//yt: this endpoint is for when admin saves/edits/submits an activity draft
+export const saveActivity = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    console.log("save activity body:", req.body);
     const {
       activityPricingRules,
       weekendPricing,
       onlinePricing,
       offlinePricing,
-      ...activity
+      activityId,
+      title,
+      description,
+      location,
+      approvalStatus,
+      activityType,
+      isFood,
+      maxParticipants,
+      minparticipants,
+      clientMarkupPercentage,
+      duration,
+      theme,
+      bookingNotice,
+      startTime,
+      endTime,
+      capacity,
+      dayAvailabilities,
+      subtheme,
+      sdg,
+      popupItemsSold,
+      foodCertDate,
+      foodCategory,
+      isFoodCertPending,
+      linkedVendor,
+      pendingCertificateType,
+      updatedImageList,
+      ...remainderActivity
     } = req.body;
     const parsedWeekend = JSON.parse(weekendPricing);
     const parsedOnline = JSON.parse(onlinePricing);
     const parsedOffline = JSON.parse(offlinePricing);
+    const activity = {
+      ...remainderActivity,
+      title: title ?? null,
+      description: description ?? null,
+      location: location ?? [],
+      approvalStatus,
+      activityType: activityType ?? null,
+      isFood: isFood ?? null,
+      maxParticipants: maxParticipants ?? null,
+      minparticipants: minparticipants ?? null,
+      clientMarkupPercentage: clientMarkupPercentage ?? null,
+      duration: duration ?? null,
+      theme: theme ?? null,
+      bookingNotice,
+      startTime: startTime ?? null,
+      endTime: endTime ?? null,
+      capacity: capacity ?? null,
+      dayAvailabilities: dayAvailabilities ?? [],
+      subtheme: subtheme ?? [],
+      sdg: sdg ?? [],
+      popupItemsSold: popupItemsSold ?? null,
+      foodCertDate: foodCertDate ?? null,
+      foodCategory: foodCategory ?? [],
+      isFoodCertPending: isFoodCertPending ?? null,
+      linkedVendor: linkedVendor ?? null,
+      pendingCertificateType: pendingCertificateType ?? null,
+      modifiedDate: Date.now(),
+    };
 
     activity["weekendPricing"] = {
       amount: parsedWeekend?.amount,
@@ -86,89 +298,267 @@ export const addActivity = async (req, res) => {
       amount: parsedOffline?.amount,
       isDiscount: parsedOffline?.isDiscount,
     };
-    const newActivity = new ActivityModel({ ...activity });
-    const savedActivity = await newActivity.save();
-    const imageFiles = req.files;
+    let savedActivity;
+    if (activityId) {
+      try {
+        const foundActivity =
+          await ActivityModel.findById(activityId).session(session);
+        if (!foundActivity) {
+          throw new Error(
+            "Activity draft you are trying to save does not exist!"
+          );
+        } else {
+          savedActivity = await ActivityModel.findByIdAndUpdate(
+            activityId,
+            { ...activity, activityPricingRules: [] },
+            {
+              new: true,
+              session,
+            }
+          );
+        }
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({
+          error: "Error when trying to update activity draft",
+          message: "Invalid activity Id!",
+        });
+      }
+    } else {
+      const newActivity = new ActivityModel({
+        ...activity,
+      });
+      savedActivity = await newActivity.save({
+        validateBeforeSave: false,
+        session,
+      });
+    }
 
-    //To update url of uploaded images path to s3 in created activity
+    console.log("Saved Activity is: ", savedActivity);
+
+    const processedS3ImageUrlToBeKept = [];
+
+    if (updatedImageList !== undefined && updatedImageList.length > 0) {
+      for (let i = 0; i < updatedImageList.length; i++) {
+        processedS3ImageUrlToBeKept.push(updatedImageList[i].split("?")[0]);
+      }
+    }
+
+    const srcS3ToBeKeptImageList = savedActivity.images.filter((item) =>
+      processedS3ImageUrlToBeKept.includes(item)
+    );
+    const srcS3ToBeRemovedImageList = savedActivity.images.filter(
+      (item) => !processedS3ImageUrlToBeKept.includes(item)
+    );
+
+    const fileBody = req.files;
     const imagesPathArr = [];
 
-    if (imageFiles.length === 0 || imageFiles.length === undefined) {
+    if (fileBody.length !== 0 || fileBody.length !== undefined) {
+      await s3RemoveImages(srcS3ToBeRemovedImageList);
+    }
+
+    if (fileBody.length === 0 || fileBody.length === undefined) {
       console.log("No image files uploaded");
     } else {
-      console.log("Retrieving uploaded images url");
       let fileArray = req.files,
         fileLocation;
       for (let i = 0; i < fileArray.length; i++) {
         fileLocation = fileArray[i].location;
-        console.log("file location:", fileLocation);
         imagesPathArr.push(fileLocation);
       }
     }
 
-    await ActivityModel.findByIdAndUpdate(
-      { _id: savedActivity._id },
-      { images: imagesPathArr },
-      { new: true }
-    );
-
-    const activitypriceobjects = [];
-    if (Array.isArray(activityPricingRules)) {
-      activityPricingRules.forEach((jsonString, index) => {
-        try {
-          const pricingObject = JSON.parse(jsonString);
-
-          const activitypriceobject = {
-            start: pricingObject.start,
-            end: pricingObject.end,
-            pricePerPax: pricingObject.pricePerPax,
-            clientPrice: pricingObject.clientPrice,
-          };
-          activitypriceobjects.push(activitypriceobject);
-        } catch (error) {
-          console.error(`Error parsing JSON: ${error}`);
-        }
-      });
-    } else {
-      const pricingObject = JSON.parse(activityPricingRules);
-
-      const activitypriceobject = {
-        start: pricingObject.start,
-        end: pricingObject.end,
-        pricePerPax: pricingObject.pricePerPax,
-        clientPrice: pricingObject.clientPrice,
-      };
-      activitypriceobjects.push(activitypriceobject);
+    for (let i = 0; i < imagesPathArr.length; i++) {
+      srcS3ToBeKeptImageList.push(imagesPathArr[i]);
     }
 
-    activitypriceobjects.map(async (pricingRule) => {
-      ActivityPricingRulesModel.create(pricingRule).then(
-        async (newPricingRule) => {
-          await ActivityModel.findByIdAndUpdate(
-            savedActivity._id,
-            {
-              $push: {
-                activityPricingRules: {
-                  ...newPricingRule,
-                },
-              },
-            },
-            { new: true, useFindAndModify: false }
-          );
-        }
-      );
-    });
+    await ActivityModel.findByIdAndUpdate(
+      savedActivity._id,
+      { images: srcS3ToBeKeptImageList },
+      { new: true, session }
+    );
 
+    await ActivityPricingRulesModel.deleteMany(
+      { activity: activityId },
+      { session }
+    );
+    if (activityPricingRules) {
+      await saveActivityPricingRules(
+        activityPricingRules,
+        session,
+        savedActivity,
+        false
+      );
+    }
+
+    await session.commitTransaction();
     res.status(201).json({
-      message: "Activity added successfully",
+      message: "Activity draft saved successfully",
       activity: savedActivity,
     });
   } catch (error) {
-    console.log(error);
+    console.log("Error caught", error);
+    await session.abortTransaction();
     res
       .status(500)
       .json({ error: "Activity cannot be added", message: error.message });
+  } finally {
+    session.endSession();
   }
+};
+
+export const approveActivity = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    console.log("approve activity body:", req.params.id);
+    const { activityId } = req.params;
+    const { adminId } = req.body;
+
+    const approvalStatusChangeLog = await saveApprovalStatusChangeLog(
+      ActivityApprovalStatusEnum.READY_TO_PUBLISH,
+      null,
+      activityId,
+      adminId
+    );
+    const savedActivity = await ActivityModel.findByIdAndUpdate(
+      activityId,
+      {
+        approvalStatus: ActivityApprovalStatusEnum.READY_TO_PUBLISH,
+        approvedDate: Date.now(),
+        $push: {
+          approvalStatusChangeLog: approvalStatusChangeLog._id,
+        },
+      },
+      {
+        new: true,
+        session,
+      }
+    );
+
+    await session.commitTransaction();
+
+    res.status(201).json({
+      message: `${savedActivity.title} Activity approved successfully`,
+      activity: savedActivity,
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    res.status(500).json({
+      error: "Unexpected Server Error occured!",
+      message: error.message,
+    });
+  } finally {
+    session.endSession();
+  }
+};
+
+export const rejectActivity = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    console.log("reject activity body:", req.params.activityId);
+    const { activityId } = req.params;
+    const { rejectionReason, adminId } = req.body;
+
+    const approvalStatusChangeLog = await saveApprovalStatusChangeLog(
+      ActivityApprovalStatusEnum.REJECTED,
+      rejectionReason,
+      activityId,
+      adminId
+    );
+
+    const savedActivity = await ActivityModel.findByIdAndUpdate(
+      activityId,
+      {
+        approvalStatus: ActivityApprovalStatusEnum.REJECTED,
+        rejectionReason,
+        $push: {
+          approvalStatusChangeLog: approvalStatusChangeLog._id,
+        },
+      },
+      {
+        new: true,
+        session,
+      }
+    );
+
+    await session.commitTransaction();
+
+    res.status(201).json({
+      message: `${savedActivity.title} rejected successfully`,
+      activity: savedActivity,
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    res.status(500).json({
+      error: "Unexpected Server Error occured!",
+      message: error.message,
+    });
+  } finally {
+    session.endSession();
+  }
+};
+
+export const deleteActivityDraft = async (req, res) => {
+  try {
+    const activityId = req.params.id;
+    const deletedActivity = await ActivityModel.findOneAndDelete({
+      _id: activityId,
+    });
+    await ActivityPricingRulesModel.deleteMany({ activity: activityId });
+    const activities = await retrieveActivities(deletedActivity.adminCreated);
+    res.status(201).json({
+      message: "Activity draft deleted successfully!",
+      activity: activities,
+    });
+  } catch (e) {
+    res.status(500).json({
+      error: "Error when deleting activity draft!",
+      message: e.message,
+    });
+  }
+};
+
+export const bulkDeleteActivityDraft = async (req, res) => {
+  try {
+    console.log("bulkDeleteActivityDraft", req.body);
+    const activityIds = req.body;
+    const deletedActivity = await ActivityModel.findOne({ _id: activityIds });
+    const { deletedCount } = await ActivityModel.deleteMany({
+      _id: activityIds,
+    });
+    await ActivityPricingRulesModel.deleteMany({
+      activity: { $in: activityIds },
+    });
+
+    const activities = await retrieveActivities(deletedActivity.adminCreated);
+
+    res.status(201).json({
+      message: `Deleted ${deletedCount} Activity${
+        deletedCount > 1 ? " Drafts" : " Draft"
+      } successfully!`,
+      activity: activities,
+    });
+  } catch (e) {
+    res.status(500).json({
+      error: "Error when bulk deleting activity drafts!",
+      message: e.message,
+    });
+  }
+};
+
+const retrieveActivities = async (adminId) => {
+  return await ActivityModel.find()
+    .populate({
+      path: "adminCreated",
+      match: { _id: adminId },
+    })
+    .populate("activityPricingRules")
+    .populate("theme")
+    .populate("subtheme")
+    .populate("linkedVendor");
 };
 
 export const bulkAddThemes = async (req, res) => {
@@ -241,5 +631,208 @@ export const getAllThemes = async (req, res) => {
     res
       .status(500)
       .json({ error: "Themes cannot be added", message: error.message });
+  }
+};
+
+export const getActivitiesWithFilters = async (req, res) => {
+  try {
+    const { filter, searchValue } = req.body;
+
+    // Initialize the query
+    const query = {};
+
+    if (searchValue != null && searchValue.length > 0) {
+      // If searchValue is provided, add title search to the query
+      query.title = {
+        $regex: new RegExp(searchValue, "i"), // "i" makes the regex case-insensitive
+      };
+      console.log(searchValue);
+    }
+
+    if (filter.locations.length > 0) {
+      // Add location filter when locations is not empty
+      query.location = {
+        $in: filter.locations,
+      };
+    }
+
+    // Convert string IDs to ObjectId instances
+    const subthemeIds = filter.themes.map(
+      (id) => new mongoose.Types.ObjectId(id)
+    );
+
+    if (subthemeIds.length > 0) {
+      // Add subtheme filter when subthemes is not empty
+      query.subtheme = {
+        $in: subthemeIds,
+      };
+    }
+
+    if (filter.sgs.length > 0) {
+      query.sdg = {
+        $in: filter.sgs,
+      };
+    }
+
+    if (filter.daysAvailability.length > 0) {
+      query.dayAvailabilities = {
+        $in: filter.daysAvailability,
+      };
+    }
+
+    if (filter.activityType.length > 0) {
+      query.activityType = {
+        $in: filter.activityType,
+      };
+    }
+
+    if (filter.duration.length > 0) {
+      query.duration = {
+        $in: filter.duration,
+      };
+    }
+
+    if (filter.priceRange[0] !== null && filter.priceRange[1] !== null) {
+      const pricingRules = await ActivityPricingRulesModel.find({
+        clientPrice: {
+          $gte: filter.priceRange[0], // Greater than or equal to minPrice
+          $lte: filter.priceRange[1], // Less than or equal to maxPrice
+        },
+      });
+      const pricingRuleIds = pricingRules.map((rule) => rule._id);
+      query.activityPricingRules = {
+        $in: pricingRuleIds,
+      };
+    }
+
+    // Add the condition for isDraft to be false
+    query.isDraft = false;
+
+    const activities = await ActivityModel.find(query)
+      .populate("activityPricingRules")
+      .populate("linkedVendor");
+
+    // Create a function to find the minimum price per pax for each activity
+    async function findMinimumPricePerPax(activity) {
+      let minPricePerPax = Infinity;
+      for (const pricingRule of activity.activityPricingRules) {
+        if (pricingRule.clientPrice < minPricePerPax) {
+          minPricePerPax = pricingRule.clientPrice;
+        }
+      }
+      return minPricePerPax;
+    }
+
+    // Populate the minimum price per pax for each activity
+    for (const activity of activities) {
+      activity.minimumPricePerPax = await findMinimumPricePerPax(activity);
+      activity.preSignedImages = await s3GetImages(activity.images);
+    }
+    // console.log(
+    //   "********************************************************************************"
+    // );
+    // console.log(activities);
+
+    return res.status(200).json({
+      success: true,
+      message: "Filtered activities fetched!",
+      activities: activities,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: true, msg: "Server error" });
+  }
+};
+
+export const getAllActivitiesNames = async (req, res) => {
+  try {
+    // Query the collection to get titles of all documents
+    const activityTitles = await ActivityModel.find(
+      { isDraft: false },
+      "title"
+    );
+
+    // Extract the titles from the result
+    const titles = activityTitles.map((activity) => activity.title);
+
+    res.status(200).json({
+      success: true,
+      data: titles,
+      message: "Activity titles fetched!",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: true, msg: "Server error" });
+  }
+};
+
+export const getMinAndMaxPricePerPax = async (req, res) => {
+  try {
+    const activities = await ActivityModel.find({}).populate(
+      "activityPricingRules"
+    );
+    if (activities.length === 0) {
+      return res.status(200).send({
+        success: true,
+        msg: "No activities found!",
+        minPrice: null,
+        maxPrice: null,
+      });
+    }
+
+    const pricingRules = activities.flatMap(
+      (activity) => activity.activityPricingRules
+    );
+
+    if (pricingRules.length === 0) {
+      return res.status(200).send({
+        success: true,
+        msg: "No pricing rules found!",
+        minPrice: null,
+        maxPrice: null,
+      });
+    }
+
+    const minPrice = Math.min(...pricingRules.map((rule) => rule.clientPrice));
+    const maxPrice = Math.max(...pricingRules.map((rule) => rule.clientPrice));
+
+    // console.log("Minimum Price Per Pax:", minPrice);
+    // console.log("Maximum Price Per Pax:", maxPrice);
+
+    res.status(200).json({
+      success: true,
+      message: "Maximum and minimum prices fetched!",
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Server error", message: error.message });
+  }
+};
+
+/**
+ * App: Gleek Vendor
+ * Retrieve activities associated with a vendor.
+ *
+ */
+
+export const getVendorActivities = async (req, res) => {
+  try {
+    const vendor = req.user;
+    const vendorId = vendor._id;
+    console.log("getVendorActivities vendor _id", vendorId);
+
+    const activities = await getAllVendorActivities(vendorId);
+    const preSignedPromises = activities.map(async (activity) => {
+      await findMinimumPricePerPax(activity);
+    });
+
+    await Promise.all(preSignedPromises);
+
+    res.status(200).json(activities);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
   }
 };

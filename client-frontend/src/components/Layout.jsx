@@ -32,12 +32,7 @@ const Layout = ({ children }) => {
   const theme = useTheme();
   const backgroundColor = theme.palette.backgroundColor.main;
   return (
-    <Box
-      bgcolor={backgroundColor}
-      minHeight="100vh"
-      flexDirection="column"
-      display="flex"
-    >
+    <Box bgcolor={backgroundColor} flexDirection="column" display="flex">
       <CustomSnackbar />
       <NavBar />
       <Box
@@ -46,6 +41,7 @@ const Layout = ({ children }) => {
         flexDirection="row"
         justifyContent="space-evenly"
         alignItems="stretch"
+        minHeight="100vh"
       >
         <Box flex={1} mt={5}>
           {children}

@@ -27,7 +27,7 @@ AxiosConnect.patch = (command, param, req) => {
   console.log("axios patch command::", `http://${uri}/${command}/${param}`);
   const options = {
     method: "PATCH",
-    url: `${uri}/${command}/${param}`,
+    url: `${uri}${command}/${param}`,
     data: req,
     withCredentials: true,
   };
@@ -37,6 +37,28 @@ AxiosConnect.patch = (command, param, req) => {
 AxiosConnect.postMultiPart = (command, req) => {
   const options = {
     method: "POST",
+    url: `${uri}${command}`,
+    data: req,
+    withCredentials: true,
+    headers: { "Content-Type": "multipart/form-data" },
+  };
+  return axios(options);
+};
+
+AxiosConnect.delete = (command, payload) => {
+  console.log("axios delete command::", `${uri}${command}`);
+  const options = {
+    method: "DELETE",
+    url: `${uri}${command}`,
+    withCredentials: true,
+    data: payload,
+  };
+  return axios(options);
+};
+
+AxiosConnect.patchMultiPart = (command, req) => {
+  const options = {
+    method: "PATCH",
     url: `${uri}${command}`,
     data: req,
     withCredentials: true,

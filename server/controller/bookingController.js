@@ -104,7 +104,11 @@ function getTimeslotCapacities(
   capacity,
   bookings,
   blockedTimeslots,
+<<<<<<< HEAD
   duration
+=======
+  duration,
+>>>>>>> develop-2
 ) {
   // Create a hashmap to store capacities for each starttime slot
   const capacities = new Map(startTimes.map((slot) => [slot, capacity]));
@@ -154,12 +158,20 @@ function generateAllTimeslots(
   capacity,
   bookings,
   blockedTimeslots,
+<<<<<<< HEAD
   duration
+=======
+  duration,
+>>>>>>> develop-2
 ) {
   const startTimes = generateStartTimes(
     earliestStartTime,
     latestStartTime,
+<<<<<<< HEAD
     interval
+=======
+    interval,
+>>>>>>> develop-2
   );
 
   const timeslotCapacities = getTimeslotCapacities(
@@ -167,7 +179,11 @@ function generateAllTimeslots(
     capacity,
     bookings,
     blockedTimeslots,
+<<<<<<< HEAD
     duration
+=======
+    duration,
+>>>>>>> develop-2
   );
 
   const allTimeslots = startTimes.map((startTime, index) => {
@@ -243,7 +259,11 @@ export const getAvailableBookingTimeslots = async (req, res) => {
     const minDate = new Date(
       today.getFullYear(),
       today.getMonth(),
+<<<<<<< HEAD
       today.getDate() + daysInAdvance
+=======
+      today.getDate() + daysInAdvance,
+>>>>>>> develop-2
     );
     if (dateParam < minDate) {
       return res.status(400).json({
@@ -262,24 +282,40 @@ export const getAvailableBookingTimeslots = async (req, res) => {
       activity.startTime.getHours(),
       activity.startTime.getMinutes(),
       0,
+<<<<<<< HEAD
       0
+=======
+      0,
+>>>>>>> develop-2
     );
     const latestStartTime = new Date(dateParam);
     latestStartTime.setHours(
       activity.endTime.getHours(),
       activity.endTime.getMinutes(),
       0,
+<<<<<<< HEAD
       0
+=======
+      0,
+>>>>>>> develop-2
     );
     console.log(
       "EARLIEST START TIME: ",
       earliestStartTime.toLocaleDateString(),
+<<<<<<< HEAD
       earliestStartTime.toLocaleTimeString()
+=======
+      earliestStartTime.toLocaleTimeString(),
+>>>>>>> develop-2
     );
     console.log(
       "LATEST START TIME: ",
       latestStartTime.toLocaleDateString(),
+<<<<<<< HEAD
       latestStartTime.toLocaleTimeString()
+=======
+      latestStartTime.toLocaleTimeString(),
+>>>>>>> develop-2
     );
 
     const interval = 30; // 30 minutes
@@ -315,7 +351,11 @@ export const getAvailableBookingTimeslots = async (req, res) => {
       activity.capacity,
       bookings,
       blockedTimeslots,
+<<<<<<< HEAD
       activity.duration
+=======
+      activity.duration,
+>>>>>>> develop-2
     );
 
     res.status(200).json({
@@ -408,12 +448,20 @@ export const createBooking = async (req, res) => {
     console.log(
       "SELECTED STARTTIME: ",
       selectedStartDateTime.toLocaleDateString(),
+<<<<<<< HEAD
       selectedStartDateTime.toLocaleTimeString()
+=======
+      selectedStartDateTime.toLocaleTimeString(),
+>>>>>>> develop-2
     );
     console.log(
       "SELECTED ENDTIME: ",
       selectedEndDateTime.toLocaleDateString(),
+<<<<<<< HEAD
       selectedEndDateTime.toLocaleTimeString()
+=======
+      selectedEndDateTime.toLocaleTimeString(),
+>>>>>>> develop-2
     );
 
     const earliestStartTime = new Date(startDateTime);
@@ -421,24 +469,40 @@ export const createBooking = async (req, res) => {
       activity.startTime.getHours(),
       activity.startTime.getMinutes(),
       0,
+<<<<<<< HEAD
       0
+=======
+      0,
+>>>>>>> develop-2
     );
     const latestStartTime = new Date(startDateTime);
     latestStartTime.setHours(
       activity.endTime.getHours(),
       activity.endTime.getMinutes(),
       0,
+<<<<<<< HEAD
       0
+=======
+      0,
+>>>>>>> develop-2
     );
     console.log(
       "EARLIEST START TIME: ",
       earliestStartTime.toLocaleDateString(),
+<<<<<<< HEAD
       earliestStartTime.toLocaleTimeString()
+=======
+      earliestStartTime.toLocaleTimeString(),
+>>>>>>> develop-2
     );
     console.log(
       "LATEST START TIME: ",
       latestStartTime.toLocaleDateString(),
+<<<<<<< HEAD
       latestStartTime.toLocaleTimeString()
+=======
+      latestStartTime.toLocaleTimeString(),
+>>>>>>> develop-2
     );
 
     const interval = 30; // 30 minutes
@@ -474,14 +538,22 @@ export const createBooking = async (req, res) => {
       activity.capacity,
       bookings,
       blockedTimeslots,
+<<<<<<< HEAD
       activity.duration
+=======
+      activity.duration,
+>>>>>>> develop-2
     );
 
     // If selected timeslot is not available, return error
     const timeslot = allTimeslots.find(
       (timeslot) =>
         timeslot.startTime.getTime() === selectedStartDateTime.getTime() &&
+<<<<<<< HEAD
         timeslot.endTime.getTime() === selectedEndDateTime.getTime()
+=======
+        timeslot.endTime.getTime() === selectedEndDateTime.getTime(),
+>>>>>>> develop-2
     );
     console.log("Selected timeslot: ", timeslot);
 

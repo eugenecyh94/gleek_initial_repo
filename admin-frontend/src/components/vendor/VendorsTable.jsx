@@ -13,7 +13,7 @@ import {
   GridToolbarFilterButton,
 } from "@mui/x-data-grid";
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const StyledButton = styled(Button)`
@@ -33,7 +33,6 @@ const StyledDiv = styled("div")(({ theme }) => ({
 }));
 
 const VendorsTable = ({ vendors, updateVendor }) => {
-  console.log(vendors);
   const handleStatusUpdate = async (id, row, newStatus) => {
     const approvedRow = { ...row, status: newStatus };
     await updateVendor(id, approvedRow);
@@ -66,14 +65,8 @@ const VendorsTable = ({ vendors, updateVendor }) => {
   };
 
   const navigate = useNavigate();
-  // const { vendors } = vendors;
-  const [searchedRows, setSearchedRows] = useState([]);
-  useEffect(() => {
-    setSearchedRows(vendors);
-  }, [vendors]);
 
   const handleRowClick = (vendor) => {
-    console.log(vendor);
     navigate(`/viewVendor/${vendor._id}`);
   };
 

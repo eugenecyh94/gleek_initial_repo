@@ -4,12 +4,14 @@ import { ActivityDayAvailabilityEnum } from "../util/activityDayAvailabilityEnum
 import { LOCATION, PPT_REQUIRED, SIZE, TYPE } from "../util/activityTagEnum.js";
 import { FoodCategoryEnum } from "../util/foodCategoryEnum.js";
 import { SustainableDevelopmentGoalsEnum } from "../util/sdgEnum.js";
+import ActivityPricingRulesModel from "./activityPricingRules.js";
 
 const activitySchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   clientMarkupPercentage: { type: Number, required: true },
   maxParticipants: { type: Number },
+  minParticipants: { type: Number },
   theme: { type: mongoose.Schema.Types.ObjectId, ref: "Theme" },
   subtheme: [{ type: mongoose.Schema.Types.ObjectId, ref: "Theme" }],
   activityType: { type: String, enum: TYPE, required: true },
@@ -34,11 +36,12 @@ const activitySchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Vendor",
   },
+  // published date
   createdDate: {
     type: Date,
     default: Date.now,
   },
-  updatedDate: Date,
+  modifiedDate: Date,
   approvedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Admin",
@@ -60,6 +63,7 @@ const activitySchema = new mongoose.Schema({
   },
   // attributes for activity type "popup"
   isFoodCertPending: { type: Boolean },
+  isFood: { type: Boolean },
   pendingCertificationType: { type: String },
   foodCertDate: { type: Date },
   foodCategory: {
@@ -75,6 +79,10 @@ const activitySchema = new mongoose.Schema({
   bookingNotice: { type: Number, required: true },
   startTime: { type: Date },
   endTime: { type: Date },
+  rejectionReason: { type: String },
+  approvalStatusChangeLog: [
+    { type: mongoose.Schema.Types.ObjectId, ref: "ApprovalStatusChangeLog" },
+  ],
   // addon pricing
   weekendPricing: {
     amount: {
@@ -101,6 +109,18 @@ const activitySchema = new mongoose.Schema({
       type: Boolean,
     },
   },
+  minimumPricePerPax: { type: Number },
+  blockedTimeslots: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "BlockedTimeslot",
+    },
+  ],
+});
+
+activitySchema.pre("findOneAndDelete", async function (next) {
+  await ActivityPricingRulesModel.deleteMany({ activity: this._id });
+  next();
 });
 
 const ActivityModel = mongoose.model("Activity", activitySchema, "activities");

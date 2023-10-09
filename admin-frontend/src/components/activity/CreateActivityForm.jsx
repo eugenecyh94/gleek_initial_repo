@@ -1,7 +1,8 @@
 /* eslint-disable react/prop-types */
 import styled from "@emotion/styled";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
-  Alert,
   Avatar,
   Box,
   Button,
@@ -9,6 +10,10 @@ import {
   FormControl,
   FormHelperText,
   Grid,
+  IconButton,
+  ImageList,
+  ImageListItem,
+  ImageListItemBar,
   InputLabel,
   MenuItem,
   Select,
@@ -28,17 +33,18 @@ import InputAdornment from "@mui/material/InputAdornment";
 import Paper from "@mui/material/Paper";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
-import Snackbar from "@mui/material/Snackbar";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import { TimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { Fragment, useEffect, useState } from "react";
+import dayjs from "dayjs";
+import { Fragment, useState } from "react";
 import {
   ActivityDayAvailabilityEnum,
   ActivityTypeEnum,
@@ -46,19 +52,24 @@ import {
   LocationEnum,
   SustainableDevelopmentGoalsEnum,
 } from "../../utils/TypeEnum";
-import { useActivityStore } from "../../zustand/GlobalStore";
+import { useActivityStore, useSnackbarStore } from "../../zustand/GlobalStore";
 import ImageAndFileUpload from "./ImageAndFileUpload";
-import { TimePicker } from "@mui/x-date-pickers";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 
 const StyledButton = styled(Button)`
   padding-left: 6px;
 `;
 
+const DeleteIconButton = styled(IconButton)`
+  background-color: white;
+  border-radius: 50%;
+  left: 5px;
+  top: 5px;
+`;
+
 const StyledChip = styled(Chip)`
   &.Mui-disabled {
     color: #ffffff;
-    background-color: #5c4b99;
+    background-color: #9f91cc;
     opacity: 1;
   }
 `;
@@ -74,28 +85,88 @@ const StyledSubmitButton = styled(Button)`
   }
 `;
 
-const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
-  const { createActivity } = useActivityStore();
-  const [isOpen, setIsOpen] = useState(false);
-  const [isError, setError] = useState(false);
-  const [selectedTheme, setSelectedTheme] = useState();
-  const [selectedSubTheme, setSelectedSubTheme] = useState([]);
-  const [subthemes, setSubthemes] = useState([]);
+const errorTextPricePerPax = "Please fill in Price per Pax!";
+const errorTextEndInterval = "Please fill in end interval!";
 
-  const [maxParticipants, setMaxParticipants] = useState();
-  const [minParticipants, setMinParticipants] = useState();
-  const [markup, setMarkup] = useState();
-  const [activityType, setActivityType] = useState("");
-  const [title, setTitle] = useState();
-  const [description, setDescription] = useState();
+const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
+  const { createActivity, saveActivity } = useActivityStore();
+  const { openSnackbar } = useSnackbarStore();
+  const [selectedTheme, setSelectedTheme] = useState(
+    activity?.theme?._id ?? null,
+  );
+  const [selectedSubTheme, setSelectedSubTheme] = useState(
+    activity?.subtheme?.length > 0 ? activity?.subtheme?.map((x) => x._id) : [],
+  );
+  const [subthemes, setSubthemes] = useState(
+    activity?.theme?._id
+      ? themes?.find((theme) => theme.parent?._id === activity?.theme?._id)
+          ?.children
+      : [],
+  );
 
-  const [pricingRanges, setPricingRanges] = useState([]);
-  const [pricingRangeError, setPricingRangeError] = useState([]);
-  const [pricingRangeDone, setPricingRangeDone] = useState(false);
+  const [maxParticipants, setMaxParticipants] = useState(
+    activity?.maxParticipants ?? null,
+  );
+  const [minParticipants, setMinParticipants] = useState(
+    activity?.minParticipants ?? null,
+  );
+  const [markup, setMarkup] = useState(
+    activity?.clientMarkupPercentage ?? null,
+  );
+  const [activityType, setActivityType] = useState(
+    activity?.activityType === null
+      ? null
+      : activity?.activityType === "Popups (Food)" ||
+        activity?.activityType === "Popups (Non-food)"
+      ? ActivityTypeEnum.POPUP
+      : activity?.activityType
+  );
+  const [title, setTitle] = useState(activity?.title ?? null);
+  const [description, setDescription] = useState(activity?.description ?? null);
+  const extractedFields =
+    activity?.activityPricingRules?.map((pricingRule) => ({
+      start: pricingRule.start,
+      end: pricingRule.end,
+      pricePerPax: pricingRule.pricePerPax,
+      clientPrice: pricingRule.clientPrice,
+    })) || [];
+  const [pricingRanges, setPricingRanges] = useState(
+    extractedFields.slice().sort((a, b) => a.start - b.start)
+  );
+  const initialPricingRangeErrors = activity?.activityPricingRules?.map(() => ({
+    range: "",
+    pricePerPax: null,
+  }));
+  const [pricingRangeError, setPricingRangeError] = useState(
+    activity?.activityPricingRules?.length > 0 ? initialPricingRangeErrors : [],
+  );
+  const initialPricingRangeDone = activity?.activityPricingRules?.some(
+    (pricingRule) => {
+      return pricingRule?.end === activity?.maxParticipants;
+    },
+  );
+  const [pricingRangeDone, setPricingRangeDone] = useState(
+    activity?.activityPricingRules ? initialPricingRangeDone : false,
+  );
   const [pricingAddons, setPricingAddons] = useState({
-    weekendPricing: { amount: null, isDiscount: false },
-    offlinePricing: { amount: null, isDiscount: false },
-    onlinePricing: { amount: null, isDiscount: false },
+    weekendPricing: {
+      amount: activity?.weekendPricing?.amount ?? null,
+      isDiscount: activity?.weekendPricing?.amount
+        ? activity?.weekendPricing?.isDiscount
+        : false,
+    },
+    offlinePricing: {
+      amount: activity?.offlinePricing?.amount ?? null,
+      isDiscount: activity?.offlinePricing?.amount
+        ? activity?.offlinePricing?.isDiscount
+        : false,
+    },
+    onlinePricing: {
+      amount: activity?.onlinePricing?.amount ?? null,
+      isDiscount: activity?.onlinePricing?.amount
+        ? activity?.onlinePricing?.isDiscount
+        : false,
+    },
   });
   const steps = [
     "Select number of participants",
@@ -103,24 +174,54 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     "Input markup pricing",
     "Pricing addons / discounts",
   ];
-  const [isFood, setIsFood] = useState(false);
-  const [isFoodCertPending, setIsFoodCertPending] = useState(false);
-  const [selectedFoodCat, setSelectedFoodCat] = useState([]);
-  const [foodCertDate, setFoodCertDate] = useState(null);
-  const [location, setLocation] = useState([]);
-  const [popupitems, setPopupitems] = useState();
-  const [sdg, setSdg] = useState([]);
-  const [dayAvailabilities, setDayAvailabilities] = useState([]);
-  const [duration, setDuration] = useState();
+  const [isFood, setIsFood] = useState(activity?.isFood ?? false);
+  const [isFoodCertPending, setIsFoodCertPending] = useState(
+    activity?.isFoodCertPending ?? false,
+  );
+  const [selectedFoodCat, setSelectedFoodCat] = useState(
+    activity?.foodCategory ?? [],
+  );
+  const [foodCertDate, setFoodCertDate] = useState(
+    activity?.foodCertDate ?? null,
+  );
+  const [location, setLocation] = useState(activity?.location ?? []);
+  const [popupitems, setPopupitems] = useState(
+    activity?.popupItemsSold ?? null,
+  );
+  const [sdg, setSdg] = useState(activity?.sdg ?? []);
+  const [dayAvailabilities, setDayAvailabilities] = useState(
+    activity?.dayAvailabilities ?? [],
+  );
+  const [duration, setDuration] = useState(activity?.duration ?? null);
   const [formErrors, setFormErrors] = useState();
   const [activityImages, setActivityImages] = useState([]);
-  const [selectedVendor, setSelectedVendor] = useState();
-  const [pendingCertType, setPendingCertType] = useState();
-  const [activeStep, setActiveStep] = useState(0);
-  const [bookingNotice, setBookingNotice] = useState();
-  const [startTime, setStartTime] = useState(null);
-  const [endTime, setEndTime] = useState(null);
-  const [capacity, setCapacity] = useState();
+  const [selectedVendor, setSelectedVendor] = useState(
+    activity?.linkedVendor?._id ?? null,
+  );
+  const [pendingCertType, setPendingCertType] = useState(
+    activity?.pendingCertificationType ?? null
+  );
+  const [activeStep, setActiveStep] = useState(
+    activity?.offlinePricing?.amount ||
+      activity?.onlinePricing?.amount ||
+      activity?.weekendPricing?.amount
+      ? 3
+      : activity?.clientMarkupPercentage
+      ? 2
+      : activity?.activityPricingRules?.length > 0
+      ? 1
+      : 0,
+  );
+  const [bookingNotice, setBookingNotice] = useState(
+    activity?.bookingNotice ?? null,
+  );
+  const [startTime, setStartTime] = useState(activity?.startTime ?? null);
+  const [endTime, setEndTime] = useState(activity?.endTime ?? null);
+  const [capacity, setCapacity] = useState(activity?.capacity ?? null);
+  const [imageListToEdit, setImageListToEdit] = useState([]);
+  const [existingImageList, setExistingImageList] = useState(
+    activity?.preSignedImages ?? []
+  );
 
   const foodCategories = Object.values(FoodCategoryEnum);
   const sdgList = Object.values(SustainableDevelopmentGoalsEnum);
@@ -147,20 +248,13 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     columnsArray.push(sdgList.slice(startIndex, endIndex));
   }
 
-  const handleClose = (event, reason) => {
-    if (reason === "clickaway") {
-      setIsOpen(false);
-      setError(false);
-      return;
-    }
-  };
-
   const handleThemeChange = (event) => {
     const themeId = event.target.value;
     setSelectedTheme(themeId);
     setSubthemes(
-      themes?.find((theme) => theme.parent?._id === themeId)?.children
+      themes?.find((theme) => theme.parent?._id === themeId)?.children,
     );
+    setSelectedSubTheme([]);
   };
 
   const handleSubThemeChange = (event) => {
@@ -303,6 +397,17 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     };
     setPricingAddons(newPricingAddons);
   };
+  const handleRemoveImage = (image) => {
+    setImageListToEdit((oldState) =>
+      oldState.filter((item) => item.src !== image.src)
+    );
+    const updatedList = [...activityImages];
+    updatedList.splice(activityImages.indexOf(image.file), 1);
+    setActivityImages(updatedList);
+  };
+  const handleRemoveExistingImage = (id) => {
+    setExistingImageList((oldState) => oldState.filter((item) => item !== id));
+  };
 
   const handleBack = () => {
     if (activeStep === 1) {
@@ -339,11 +444,11 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
       let hasErrors = false;
       pricingRanges.map((row, index) => {
         if (!row.pricePerPax) {
-          errors[index]["pricePerPax"] = "Please fill in price per pax";
+          errors[index]["pricePerPax"] = errorTextPricePerPax;
           hasErrors = true;
         }
         if (!row.end) {
-          errors[index]["end"] = "Please fill in end interval";
+          errors[index]["end"] = errorTextEndInterval;
           hasErrors = true;
         }
       });
@@ -372,7 +477,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
       const { pricePerPax } = rule;
       const clientPrice = Math.ceil(
         parseFloat(pricePerPax) * (parseFloat(newMarkup) / 100) +
-          parseFloat(pricePerPax)
+          parseFloat(pricePerPax),
       );
       newClientPrice[index].clientPrice = clientPrice;
     });
@@ -396,15 +501,15 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
   };
 
   const handleFoodCertDateChange = (date) => {
-    setFoodCertDate(date);
+    setFoodCertDate(date?.toISOString());
   };
 
   const handleStartTimeChange = (date) => {
-    setStartTime(date);
+    setStartTime(date?.toISOString());
   };
 
   const handleEndTimeChange = (date) => {
-    setEndTime(date);
+    setEndTime(date?.toISOString());
   };
 
   const handleCapacityChange = (event) => {
@@ -471,7 +576,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     const priceError = {};
     pricingRanges.forEach((rule, rowIndex) => {
       if (rule.pricePerPax === null) {
-        priceError[rowIndex] = "Price per pax is required!";
+        priceError[rowIndex] = errorTextPricePerPax;
       }
     });
     if (Object.keys(priceError).length > 0) {
@@ -566,11 +671,21 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     }
 
     if (!startTime) {
-      errors.startTime = "Earliest Start time is required!";
+      errors.startTime = "Earliest Start Time is required!";
     }
 
     if (!endTime) {
       errors.endTime = "Latest Start Time is required!";
+    }
+
+    if (startTime && endTime) {
+      const time1 = new Date(startTime);
+      const time2 = new Date(endTime);
+      if (time1 > time2) {
+        errors.startTime =
+          "Earliest Start Time must be before Latest Start Time!";
+        errors.endTime = "Latest Start Time must be after Earliest Start Time!";
+      }
     }
 
     pricingRanges.map((row) => {
@@ -589,6 +704,22 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0 && !pricingRangeHasError();
+  };
+
+  const validateDraft = () => {
+    const errors = [...pricingRangeError];
+    if (pricingRanges?.length > 0) {
+      pricingRanges.map((row, index) => {
+        if (!row?.end) {
+          errors[index]["range"] = errorTextEndInterval;
+        }
+        if (!row?.pricePerPax) {
+          errors[index].pricePerPax = errorTextPricePerPax;
+        }
+      });
+      setPricingRangeError(errors);
+    }
+    return !pricingRangeHasError() && !isMaxSmallerThanMin();
   };
 
   const resetForm = () => {
@@ -619,8 +750,8 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     });
     setPricingRanges([]);
     setPricingRangeError([]);
-    setStartTime();
-    setEndTime();
+    setStartTime(null);
+    setEndTime(null);
     setBookingNotice();
     setActiveStep(0);
     setCapacity();
@@ -631,6 +762,11 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     event.preventDefault();
     const formData = new FormData();
     formData.append("adminCreated", admin._id);
+    if (activity) {
+      formData.append("activityId", activity._id);
+    }
+    formData.append("isDraft", false);
+    formData.append("approvalStatus", "Published");
     formData.append("title", title);
     formData.append("description", description);
     formData.append(
@@ -639,9 +775,10 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
         ? isFood
           ? "Popups (Food)"
           : "Popups (Non-food)"
-        : activityType
+        : activityType,
     );
     formData.append("maxParticipants", maxParticipants);
+    formData.append("minParticipants", minParticipants);
     formData.append("clientMarkupPercentage", markup);
     formData.append("duration", duration);
     formData.append("theme", selectedTheme);
@@ -651,8 +788,8 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
       formData.append("bookingNotice", 0);
     }
 
-    formData.append("startTime", startTime?.toISOString());
-    formData.append("endTime", endTime?.toISOString());
+    formData.append("startTime", startTime);
+    formData.append("endTime", endTime);
     formData.append("capacity", capacity);
     location.forEach((obj) => {
       formData.append("location", obj);
@@ -678,12 +815,13 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
       {
         formData.append("popupItemsSold", popupitems);
         if (isFood) {
+          formData.append("isFood", isFood);
           formData.append("isFoodCertPending", isFoodCertPending);
+          selectedFoodCat.forEach((obj) => {
+            formData.append("foodCategory", obj);
+          });
           if (isFoodCertPending) {
-            formData.append("foodCertDate", foodCertDate?.toISOString());
-            selectedFoodCat.forEach((obj) => {
-              formData.append("foodCategory", obj);
-            });
+            formData.append("foodCertDate", foodCertDate);
           }
         }
       }
@@ -697,22 +835,162 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
 
     if (validateForm()) {
       try {
-        await createActivity(formData);
+        await saveActivity(formData);
+        openSnackbar("Activity Created Successfully!");
         resetForm();
-        setIsOpen(true);
       } catch (error) {
-        setError(true);
+        openSnackbar(error, "error");
       }
     } else {
-      setError(true);
+      openSnackbar(
+        "Error creating form! Please fill in required fields.",
+        "error",
+      );
     }
   };
 
-  useEffect(() => {
-    if (selectedTheme && subthemes.length > 0) {
-      setSelectedSubTheme([subthemes[0]._id]);
+  const handleSaveDraft = async (event) => {
+    event.preventDefault();
+    const formData = new FormData();
+    formData.append("adminCreated", admin._id);
+    if (activity) {
+      formData.append("activityId", activity._id);
     }
-  }, [selectedTheme, subthemes]);
+    formData.append("isDraft", true);
+    formData.append("approvalStatus", "Pending Approval");
+    if (title) {
+      formData.append("title", title);
+    }
+    if (description) {
+      formData.append("description", description);
+    }
+    if (activityType) {
+      formData.append(
+        "activityType",
+        activityType === ActivityTypeEnum.POPUP
+          ? isFood
+            ? "Popups (Food)"
+            : "Popups (Non-food)"
+          : activityType,
+      );
+    }
+    if (maxParticipants) {
+      formData.append("maxParticipants", maxParticipants);
+    }
+    if (minParticipants) {
+      formData.append("minParticipants", minParticipants);
+    }
+    formData.append("isFood", isFood);
+
+    if (markup) {
+      formData.append("clientMarkupPercentage", markup);
+    }
+
+    if (duration) {
+      formData.append("duration", duration);
+    }
+
+    if (selectedTheme) {
+      formData.append("theme", selectedTheme);
+    }
+
+    if (bookingNotice) {
+      formData.append("bookingNotice", bookingNotice);
+    }
+
+    if (startTime) {
+      formData.append("startTime", startTime);
+    }
+    if (endTime) {
+      formData.append("endTime", endTime);
+    }
+
+    if (capacity) {
+      formData.append("capacity", capacity);
+    }
+
+    if (location.length > 0) {
+      location.forEach((obj) => {
+        formData.append("location", obj);
+      });
+    }
+
+    if (dayAvailabilities.length > 0) {
+      dayAvailabilities.forEach((obj) => {
+        formData.append("dayAvailabilities", obj);
+      });
+    }
+
+    if (selectedSubTheme.length > 0) {
+      selectedSubTheme.forEach((obj) => {
+        formData.append("subtheme", obj);
+      });
+    }
+
+    if (sdg) {
+      sdg.forEach((obj) => {
+        formData.append("sdg", obj);
+      });
+    }
+
+    if (pricingRanges.length > 0) {
+      pricingRanges.forEach((obj) => {
+        const pricingJSON = JSON.stringify(obj);
+        formData.append("activityPricingRules", pricingJSON);
+      });
+    }
+    if (activityType === ActivityTypeEnum.POPUP) {
+      if (popupitems) {
+        formData.append("popupItemsSold", popupitems);
+      }
+      if (isFood) {
+        if (isFoodCertPending) {
+          if (foodCertDate) {
+            formData.append("foodCertDate", foodCertDate);
+          }
+          if (selectedFoodCat) {
+            selectedFoodCat.forEach((obj) => {
+              formData.append("foodCategory", obj);
+            });
+          }
+        }
+        if (isFoodCertPending) {
+          formData.append("isFoodCertPending", isFoodCertPending);
+        }
+      }
+    }
+
+    if (selectedVendor) {
+      formData.append("linkedVendor", selectedVendor);
+    }
+
+    if (pendingCertType) {
+      formData.append("pendingCertificationType", pendingCertType);
+    }
+
+    for (const key in pricingAddons) {
+      formData.append(key, JSON.stringify(pricingAddons[key]));
+    }
+    for (let i = 0; i < activityImages.length; i++) {
+      formData.append("images", activityImages[i]);
+    }
+    existingImageList.forEach((item) =>
+      formData.append("updatedImageList[]", item)
+    );
+    if (validateDraft()) {
+      try {
+        await saveActivity(formData);
+        openSnackbar("Activity Draft Saved Successfully!");
+      } catch (error) {
+        openSnackbar("Unexpected Server Error occured!", "error");
+      }
+    } else {
+      openSnackbar(
+        "Error saving draft! Please resolve highlighted errors before saving.",
+        "error",
+      );
+    }
+  };
 
   return (
     <form>
@@ -730,6 +1008,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                 color={theme.palette.primary.main}
                 paddingTop={2}
                 component="div"
+                fontSize={"1.25rem"}
               >
                 Basic Information
               </Typography>
@@ -771,7 +1050,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                         <MenuItem key={index} value={item.parent._id}>
                           {item.parent.name}
                         </MenuItem>
-                      )
+                      ),
                   )}
                 </Select>
                 <FormHelperText error>{formErrors?.theme}</FormHelperText>
@@ -783,7 +1062,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                 <Select
                   labelId="subThemeLabel"
                   label="Sub-Theme"
-                  placeholder="Theme"
+                  placeholder="Learning Points"
                   multiple
                   onChange={handleSubThemeChange}
                   value={selectedSubTheme || ""}
@@ -826,6 +1105,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                 color={theme.palette.primary.main}
                 paddingTop={2}
                 component="div"
+                fontSize={"1.25rem"}
               >
                 Vendor Details
               </Typography>
@@ -892,6 +1172,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                 color={theme.palette.primary.main}
                 paddingTop={2}
                 component="div"
+                fontSize={"1.25rem"}
               >
                 More details on activity
               </Typography>
@@ -931,7 +1212,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                       </FormLabel>
                       <RadioGroup
                         aria-labelledby="demo-radio-buttons-group-label"
-                        defaultValue="yes"
+                        defaultValue="false"
                         name="radio-buttons-group"
                         value={isFood.toString()}
                         onChange={handleIsFoodChange}
@@ -965,6 +1246,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                         (popupitems !== null && popupitems?.length === 0) ||
                         formErrors?.popupitems?.length > 0
                       }
+                      value={popupitems}
                     />
                   </Grid>
                 </Grid>
@@ -1033,6 +1315,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                               pendingCertType === "" ||
                               formErrors?.pendingCertType?.length > 0
                             }
+                            value={pendingCertType}
                           />
                         </Grid>
                         <Grid item paddingTop={2}>
@@ -1042,6 +1325,9 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                           >
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                               <DatePicker
+                                value={
+                                  foodCertDate ? dayjs(foodCertDate) : null
+                                }
                                 error={formErrors?.foodCertDate?.length > 0}
                                 label="Expected certified date"
                                 onChange={handleFoodCertDateChange}
@@ -1120,7 +1406,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                       <MenuItem key={enumValue} value={enumValue}>
                         {enumValue}
                       </MenuItem>
-                    )
+                    ),
                   )}
                 </Select>
                 <FormHelperText error>
@@ -1148,6 +1434,8 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                   <MenuItem value={60}>60 min</MenuItem>
                   <MenuItem value={90}>90 min</MenuItem>
                   <MenuItem value={120}>120 min</MenuItem>
+                  <MenuItem value={150}>150 min</MenuItem>
+                  <MenuItem value={180}>180 min</MenuItem>
                 </Select>
                 <FormHelperText error>{formErrors?.duration}</FormHelperText>
               </FormControl>
@@ -1159,6 +1447,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                     label="Earliest Start Time"
                     minutesStep={30}
                     onChange={handleStartTimeChange}
+                    value={startTime ? dayjs(startTime) : null}
                   />
                 </LocalizationProvider>
                 <FormHelperText>{formErrors?.startTime}</FormHelperText>
@@ -1171,6 +1460,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                     label="Latest Start Time"
                     minutesStep={30}
                     onChange={handleEndTimeChange}
+                    value={endTime ? dayjs(endTime) : null}
                   />
                 </LocalizationProvider>
                 <FormHelperText>{formErrors?.endTime}</FormHelperText>
@@ -1267,6 +1557,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                 color={theme.palette.primary.main}
                 component="div"
                 paddingTop={2}
+                fontSize={"1.25rem"}
               >
                 Participants and Pricing
               </Typography>
@@ -1406,7 +1697,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                                         handlePricingRangesChange(
                                           e,
                                           rowIndex,
-                                          "end"
+                                          "end",
                                         )
                                       }
                                       value={
@@ -1444,7 +1735,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                                       handlePriceChange(
                                         e,
                                         rowIndex,
-                                        "pricePerPax"
+                                        "pricePerPax",
                                       )
                                     }
                                   />
@@ -1719,7 +2010,9 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                       disabled={
                         (!pricingRangeDone && activeStep === 1) ||
                         (activeStep === 0 &&
-                          (!maxParticipants || !minParticipants))
+                          (!maxParticipants ||
+                            !minParticipants ||
+                            isMaxSmallerThanMin()))
                       }
                       onClick={handleNext}
                     >
@@ -1739,28 +2032,84 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
           ></Grid>
         </StyledContainer>
         <StyledContainer elevation={3}>
-          <Grid item xs={12}>
-            <Typography
-              color={theme.palette.primary.main}
-              component="div"
-              paddingTop={2}
-              paddingBottom={2}
-            >
-              Upload activity images
-            </Typography>
-            <FormGroup>
-              <ImageAndFileUpload
-                limit={4}
-                name={"idk"}
-                size={5000000}
-                setActivityImages={setActivityImages}
-                activityImages={activityImages}
-                error={formErrors?.activityImages?.length > 0}
-              />
-              <FormHelperText error>
-                {formErrors?.activityImages}
-              </FormHelperText>
-            </FormGroup>
+          <Grid container spacing={1} alignItems="left" justifyContent="left">
+            <Grid item xs={12}>
+              <Typography
+                color={theme.palette.primary.main}
+                component="div"
+                paddingTop={2}
+                paddingBottom={2}
+                fontSize={"1.25rem"}
+              >
+                Upload activity images
+              </Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <ImageList>
+                {existingImageList?.map((image, index) => {
+                  return (
+                    <ImageListItem key={index}>
+                      <img src={image} loading="lazy" />
+                      <ImageListItemBar
+                        sx={{
+                          background: "none",
+                        }}
+                        position="top"
+                        actionIcon={
+                          <DeleteIconButton
+                            sx={{
+                              backgroundColor: "white",
+                              color: "#D32F2F",
+                            }}
+                            onClick={() => handleRemoveExistingImage(image)}
+                          >
+                            <DeleteIcon />
+                          </DeleteIconButton>
+                        }
+                        actionPosition="left"
+                      />
+                    </ImageListItem>
+                  );
+                })}
+                {imageListToEdit?.map((image, index) => {
+                  return (
+                    <ImageListItem key={index}>
+                      <img src={image.src} loading="lazy" />
+                      <ImageListItemBar
+                        sx={{ background: "none" }}
+                        position="top"
+                        actionIcon={
+                          <DeleteIconButton
+                            sx={{ backgroundColor: "white", color: "#D32F2F" }}
+                            onClick={() => handleRemoveImage(image)}
+                          >
+                            <DeleteIcon />
+                          </DeleteIconButton>
+                        }
+                        actionPosition="left"
+                      />
+                    </ImageListItem>
+                  );
+                })}
+              </ImageList>
+            </Grid>
+            <Grid item xs={12}>
+              <FormGroup>
+                <ImageAndFileUpload
+                  limit={4}
+                  name={"idk"}
+                  size={5000000}
+                  setActivityImages={setActivityImages}
+                  activityImages={activityImages}
+                  error={formErrors?.activityImages?.length > 0}
+                  setImageListToEdit={setImageListToEdit}
+                  existingImageList={existingImageList}
+                />
+                <FormHelperText error>
+                  {formErrors?.activityImages}
+                </FormHelperText>
+              </FormGroup>
+            </Grid>
           </Grid>
         </StyledContainer>
       </div>
@@ -1772,7 +2121,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
         alignItems="left"
         justifyContent="left"
       >
-        <Grid item xs={12}>
+        <Grid item xs={6}>
           <StyledSubmitButton
             onClick={handleSubmit}
             type="submit"
@@ -1782,20 +2131,17 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
             <Typography component="div">Submit</Typography>
           </StyledSubmitButton>
         </Grid>
+        <Grid item xs={6}>
+          <Button
+            onClick={handleSaveDraft}
+            type="submit"
+            variant="outlined"
+            fullWidth
+          >
+            <Typography component="div">Save draft</Typography>
+          </Button>
+        </Grid>
       </Grid>
-
-      <Snackbar open={isOpen} autoHideDuration={6000} onClose={handleClose}>
-        <Alert severity="success" sx={{ width: "100%" }}>
-          Activity Created Successfully!
-        </Alert>
-      </Snackbar>
-      <Snackbar open={isError} autoHideDuration={6000} onClose={handleClose}>
-        <Alert severity="error" sx={{ width: "100%" }}>
-          {!formErrors
-            ? "Error creating form!"
-            : "Error creating form! Please fill in required fields."}
-        </Alert>
-      </Snackbar>
     </form>
   );
 };

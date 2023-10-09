@@ -31,7 +31,7 @@ const bookmarkSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['ACTIVITY', 'VENDOR'],
+    enum: ["ACTIVITY", "VENDOR"],
     required: true,
   },
 });

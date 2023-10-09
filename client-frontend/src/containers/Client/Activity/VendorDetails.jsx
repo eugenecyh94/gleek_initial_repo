@@ -6,6 +6,8 @@ import {
   Divider,
   Grid,
   Link,
+  Paper,
+  Stack,
   Typography,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
@@ -15,6 +17,7 @@ import ActivityCardItem from "../../../components/ActivityCardItem";
 import AxiosConnect from "../../../utils/AxiosConnect";
 import useSnackbarStore from "../../../zustand/SnackbarStore";
 import useVendorStore from "../../../zustand/VendorStore";
+import VendorBookmarkButton from "../../../components/Bookmark/VendorBookmarkButton";
 
 const VendorDetails = () => {
   const { id } = useParams();
@@ -79,8 +82,6 @@ const VendorDetails = () => {
     >
       <Grid
         container
-      
-
         spacing={{ xs: 2, md: 2 }}
         columns={{ xs: 4, sm: 8, md: 12 }}
         justifyContents="center"
@@ -88,28 +89,36 @@ const VendorDetails = () => {
         sx={{ p: 5 }}
       >
         <Grid item xs={12}>
-          <Box display="flex" alignItems="center" justifyItems="center">
-            <Avatar
-              sx={{
-                bgcolor: primary,
-                width: 100,
-                height: 100,
-                fontSize: "80px", 
-              }}
-              src={vendor?.preSignedPhoto || ""}
-            >
-              {vendor?.preSignedPhoto
-                ? null
-                : vendor.companyName.charAt(0).toUpperCase()}
-            </Avatar>
-            <Typography
-              variant="h4"
-              color={theme.palette.primary.dark}
-              marginLeft={2}
-            >
-              {vendor.companyName}
-            </Typography>
-          </Box>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            spacing={2}
+          >
+            <Stack direction="row" justifyContent="center" alignItems="center">
+              <Avatar
+                sx={{
+                  bgcolor: primary,
+                  width: 100,
+                  height: 100,
+                  fontSize: "80px",
+                }}
+                src={vendor?.preSignedPhoto || ""}
+              >
+                {vendor?.preSignedPhoto
+                  ? null
+                  : vendor.companyName.charAt(0).toUpperCase()}
+              </Avatar>
+              <Typography
+                variant="h4"
+                color={theme.palette.primary.dark}
+                marginLeft={2}
+              >
+                {vendor.companyName}
+              </Typography>
+            </Stack>
+            <VendorBookmarkButton vendorId={id} />
+          </Stack>
         </Grid>
 
         <Grid item xs={4}>
