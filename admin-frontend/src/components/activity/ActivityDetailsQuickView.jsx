@@ -876,6 +876,6 @@ const ActivityDetailsQuickView = ({ activity, imgs, vendorProfile }) => {
 ActivityDetailsQuickView.propTypes = {
   activity: PropTypes.object.isRequired,
   imgs: PropTypes.array.isRequired,
-  vendorProfile: PropTypes.string.isRequired,
+  vendorProfile: PropTypes.string,
 };
 export default ActivityDetailsQuickView;

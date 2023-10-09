@@ -78,6 +78,8 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
   const [rejectionReason, setRejectionReason] = useState();
   const [openViewModal, setOpenViewModal] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState();
+  const [imgs, setImgs] = useState([]);
+  const [vendorProfile, setVendorProfile] = useState();
   const {
     selectedActivityTab,
     setSelectedActivityTab,
@@ -85,8 +87,7 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
     rejectActivity,
     setPendingApprovalActivities,
   } = useActivityStore();
-  const [imgs, setImgs] = useState([]);
-  const [vendorProfile, setVendorProfile] = useState();
+  
   const { openSnackbar } = useSnackbarStore();
   const { admin } = useAdminStore();
   const filterCriteria = {
