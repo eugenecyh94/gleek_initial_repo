@@ -4,9 +4,7 @@ import { DataGrid, GridToolbarFilterButton } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-
-
-const SelectActivityTable = ({
+const ViewActivitiesBlockoutTable = ({
   activities,
   selectedRows,
   setSelectedRows,
@@ -14,7 +12,6 @@ const SelectActivityTable = ({
   setSelectedActivity,
   setOpenModal,
   openModal,
-
 }) => {
   const navigate = useNavigate();
 
@@ -87,32 +84,7 @@ const SelectActivityTable = ({
       headerName: "Location",
       flex: 1,
     },
-    // {
-    //   field: "activityPricingRules",
-    //   headerName: "Price (Lowest)",
-    //   flex: 1,
-    //   valueFormatter: (params) => {
-    //     return `$${params.value}`;
-    //   },
-    //   valueGetter: (params) => {
-    //     const p = params.value;
-    //     p.sort((a, b) => a?.pricePerPax - b?.pricePerPax);
-    //     return p[0]?.pricePerPax;
-    //   },
-    // },
-    // {
-    //   field: "priceHighest",
-    //   headerName: "Price (Highest)",
-    //   flex: 1,
-    //   valueFormatter: (params) => {
-    //     return `$${params.value}`;
-    //   },
-    //   valueGetter: (params) => {
-    //     const p = params.row.activityPricingRules;
-    //     p.sort((a, b) => b?.pricePerPax - a?.pricePerPax);
-    //     return p[0]?.pricePerPax;
-    //   },
-    // },
+
     {
       field: "createdDate",
       headerName: "Date Created",
@@ -187,4 +159,4 @@ const SelectActivityTable = ({
   );
 };
 
-export default SelectActivityTable;
+export default ViewActivitiesBlockoutTable;

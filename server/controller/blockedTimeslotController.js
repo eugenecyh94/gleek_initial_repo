@@ -66,8 +66,6 @@ export const addBlockedTimeslotMultipleActivities = async (req, res) => {
         session,
       );
 
-      //console.log("createdBlockedTimeslot", createdBlockedTimeslot);
-
       updateActivity.blockedTimeslots.push({ _id: createdBlockedTimeslot._id });
       await updateActivity.save();
 
@@ -91,6 +89,47 @@ export const addBlockedTimeslotMultipleActivities = async (req, res) => {
     console.log(error);
     res.status(500).json({
       error: "Blocked timeslots cannot be added.",
+      message: error.message,
+    });
+  }
+};
+
+export const deleteBlockedTimeslot = async (req, res) => {
+  try {
+    const { blockedTimingId } = req.params;
+
+    const blockedTiming =
+      await BlockedTimeslotModel.findById(blockedTimingId).populate(
+        "activityId",
+      );
+
+    if (!blockedTiming) {
+      return res.status(404).json({
+        error: "Blocked timing not found.",
+      });
+    }
+
+    const user = req.user;
+    console.log(blockedTiming.activityId.linkedVendor);
+    console.log(user._id);
+
+    if (!blockedTiming.activityId.linkedVendor.equals(user._id)) {
+      return res.status(403).json({
+        error: "Forbidden. You do not own this activity.",
+      });
+    }
+
+    const deletedBlockedTiming =
+      await BlockedTimeslotModel.findByIdAndDelete(blockedTimingId);
+
+    res.status(200).json({
+      message: "Blocked timing deleted successfully.",
+      deletedBlockedTiming,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: "Server Error! Blocked timing cannot be deleted.",
       message: error.message,
     });
   }
