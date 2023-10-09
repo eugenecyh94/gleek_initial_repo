@@ -86,6 +86,7 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
     setPendingApprovalActivities,
   } = useActivityStore();
   const [imgs, setImgs] = useState([]);
+  const [vendorProfile, setVendorProfile] = useState();
   const { openSnackbar } = useSnackbarStore();
   const { admin } = useAdminStore();
   const filterCriteria = {
@@ -110,8 +111,8 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
   const handleRowClick = async (activity) => {
     // navigate(`/viewActivity/${activity._id}`);
     const res = await AxiosConnect.get(`/activity/getImages/${activity._id}`);
-    console.log(res.data);
-    setImgs(res.data.data);
+    setImgs(res.data.activityImages);
+    setVendorProfile(res.data.vendorProfileImage);
     setOpenViewModal(true);
     setSelectedActivity(activity);
   };
@@ -126,7 +127,7 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
   const handleApproveButton = async (activity) => {
     const successMessage = await approveActivity(activity._id, admin._id);
     setPendingApprovalActivities(
-      pendingApprovalActivities.filter((a) => a._id !== activity._id),
+      pendingApprovalActivities.filter((a) => a._id !== activity._id)
     );
     openSnackbar(successMessage);
   };
@@ -134,10 +135,10 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
     const successMessage = await rejectActivity(
       activityToReject._id,
       rejectionReason,
-      admin._id,
+      admin._id
     );
     setPendingApprovalActivities(
-      pendingApprovalActivities.filter((a) => a._id !== activityToReject._id),
+      pendingApprovalActivities.filter((a) => a._id !== activityToReject._id)
     );
     openSnackbar(successMessage);
   };
@@ -284,7 +285,7 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
             </div>
           );
         },
-      },
+      }
     );
   }
   if (selectedActivityTab === "pendingApprovalTab") {
@@ -424,7 +425,7 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
             </div>
           );
         },
-      },
+      }
     );
   }
 
@@ -566,7 +567,11 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
               )}
             </Toolbar>
           </AppBar>
-          <ActivityDetailsQuickView activity={selectedActivity} imgs={imgs}/>
+          <ActivityDetailsQuickView
+            activity={selectedActivity}
+            imgs={imgs}
+            vendorProfile={vendorProfile}
+          />
         </Dialog>
       </div>
     </Box>

@@ -41,7 +41,6 @@ import dayjs from "dayjs";
 import PropTypes from "prop-types";
 import {
   ActivityDayAvailabilityEnum,
-  ActivityTypeEnum,
   FoodCategoryEnum,
   LocationEnum,
   SustainableDevelopmentGoalsEnum,
@@ -72,7 +71,7 @@ const StyledChip = styled(Chip)`
   }
 `;
 
-const ActivityDetailsQuickView = ({ activity, imgs }) => {
+const ActivityDetailsQuickView = ({ activity, imgs, vendorProfile }) => {
   const theme = useTheme();
   const foodCategories = Object.values(FoodCategoryEnum);
 
@@ -115,10 +114,18 @@ const ActivityDetailsQuickView = ({ activity, imgs }) => {
         </Grid>
         <Grid item xs={12}>
           <StyledAvatar>
-            <Avatar
-              style={{ marginRight: 8, marginTop: 6 }}
-              {...stringAvatar(activity?.linkedVendor?.companyName, theme)}
-            />
+            {vendorProfile ? (
+              <Avatar
+                style={{ marginRight: 8, marginTop: 6 }}
+                src={vendorProfile}
+                alt="Avatar"
+              />
+            ) : (
+              <Avatar
+                style={{ marginRight: 8, marginTop: 6 }}
+                {...stringAvatar(activity?.linkedVendor?.companyName, theme)}
+              />
+            )}
             <Container>
               <Typography>
                 Vendor Partner
@@ -424,7 +431,7 @@ const ActivityDetailsQuickView = ({ activity, imgs }) => {
                       <MenuItem key={enumValue} value={enumValue}>
                         {enumValue}
                       </MenuItem>
-                    ),
+                    )
                   )}
                 </Select>
               </FormControl>
@@ -869,5 +876,6 @@ const ActivityDetailsQuickView = ({ activity, imgs }) => {
 ActivityDetailsQuickView.propTypes = {
   activity: PropTypes.object.isRequired,
   imgs: PropTypes.array.isRequired,
+  vendorProfile: PropTypes.string.isRequired,
 };
 export default ActivityDetailsQuickView;
