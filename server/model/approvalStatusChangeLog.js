@@ -24,6 +24,6 @@ const approvalStatusChangeLogSchema = new mongoose.Schema({
 });
 const ApprovalStatusChangeLog = mongoose.model(
   "ApprovalStatusChangeLog",
-  approvalStatusChangeLogSchema
+  approvalStatusChangeLogSchema,
 );
 export default ApprovalStatusChangeLog;

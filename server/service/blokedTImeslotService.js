@@ -12,7 +12,10 @@ export const addBlockedTimeslotForActivity = async (
     blockedEndDateTime,
   });
   if (session) {
-    const create = await BlockedTimeslotModel.create([blockedTimeslot], session);
+    const create = await BlockedTimeslotModel.create(
+      [blockedTimeslot],
+      session,
+    );
     return create[0];
   } else {
     const create = await blockedTimeslot.save();

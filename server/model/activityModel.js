@@ -113,7 +113,7 @@ const activitySchema = new mongoose.Schema({
   blockedTimeslots: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'BlockedTimeslot',
+      ref: "BlockedTimeslot",
     },
   ],
 });

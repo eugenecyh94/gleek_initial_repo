@@ -24,8 +24,7 @@ export const fetchBookmarks = async (req, res) => {
     const preSignedPromises = bookmarks.map(async (bm) => {
       if (bm.activity) {
         await prepareActivityMinimumPricePerPaxAndSingleImage(bm.activity);
-      }
-      else if (bm.vendor) {
+      } else if (bm.vendor) {
         await prepareCompanyLogoImage(bm.vendor);
       }
     });
