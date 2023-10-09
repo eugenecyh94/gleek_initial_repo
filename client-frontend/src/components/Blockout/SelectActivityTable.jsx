@@ -146,7 +146,7 @@ const SelectActivityTable = ({
         return (
           <Stack direction={"row"}>
             <Button
-              variant="contained"
+              variant="outlined"
               color="primary"
               onClick={() => handleViewButton(params.row)}
             >

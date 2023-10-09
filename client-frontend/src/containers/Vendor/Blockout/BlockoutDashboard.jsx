@@ -1,9 +1,16 @@
-import { Box, Button, Typography, CircularProgress } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Stack,
+  Typography,
+} from "@mui/material";
 import React, { useEffect, useState } from "react";
-import useSnackbarStore from "../../../zustand/SnackbarStore";
-import useBlockoutStore from "../../../zustand/BlockoutStore";
-import ViewActivitiesBlockoutTable from "../../../components/Blockout/ViewActivitiesBlockoutTable";
 import BlockedTimingsDisplayModal from "../../../components/Blockout/BlockedTimingsDisplayModal";
+import ViewActivitiesBlockoutTable from "../../../components/Blockout/ViewActivitiesBlockoutTable";
+import useBlockoutStore from "../../../zustand/BlockoutStore";
+import useSnackbarStore from "../../../zustand/SnackbarStore";
+import MoreTimeIcon from "@mui/icons-material/MoreTime";
 
 function BlockoutDashboard() {
   const { openSnackbar } = useSnackbarStore();
@@ -58,13 +65,19 @@ function BlockoutDashboard() {
       p={5}
       width={"100%"}
     >
-      <Typography color="secondary" variant="h3">
+      <Typography color="secondary" variant="h3" marginBottom={2}>
         Manage Blockout Timings
       </Typography>
-      <Box>
-        <Button variant="outlined" href="/vendor/blockout/create/mass">
-          Apply Blockouts to Multiple Activities
-        </Button>
+      <Stack spacing={2}>
+      <Box display="flex" flexDirection="row-reverse" alignItems="center">
+          <Button
+            variant="outlined"
+            href="/vendor/blockout/create/mass"
+            startIcon={<MoreTimeIcon />}
+          >
+            Apply Blockouts to Multiple Activities
+          </Button>
+        </Box>
         <Typography color="primary" variant="h5">
           Activity Blockouts
         </Typography>
@@ -80,7 +93,7 @@ function BlockoutDashboard() {
           handleClose={handleCloseModal}
           selectedActivity={selectedActivity}
         />
-      </Box>
+      </Stack>
     </Box>
   );
 }

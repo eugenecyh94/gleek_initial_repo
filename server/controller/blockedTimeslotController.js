@@ -87,9 +87,10 @@ export const addBlockedTimeslotMultipleActivities = async (req, res) => {
       .populate("theme")
       .populate("subtheme")
       .populate("linkedVendor")
+
       .populate({
         path: "blockedTimeslots",
-        options: { sort: { blockedStartDateTime: 1 } },
+        options: { sort: { blockedStartDateTime: -1 } },
       });
 
     res.status(200).json({

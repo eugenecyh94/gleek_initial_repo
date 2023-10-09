@@ -15,14 +15,15 @@ const BlockedTimingsDisplayModal = ({
   handleClose,
   selectedActivity,
 }) => {
+  console.log(selectedActivity)
   const currentDate = new Date();
 
   const upcomingTimeslots = selectedActivity?.blockedTimeslots?.filter(
-    (timeslot) => new Date(timeslot.blockedStartDateTime) >= currentDate,
+    (timeslot) => new Date(timeslot.blockedEndDateTime) >= currentDate,
   );
 
   const pastTimeslots = selectedActivity?.blockedTimeslots?.filter(
-    (timeslot) => new Date(timeslot.blockedStartDateTime) < currentDate,
+    (timeslot) => new Date(timeslot.blockedEndDateTime) < currentDate,
   );
 
   const renderTimeslotSection = (timeslots, title) => {

@@ -4,6 +4,7 @@ import { DataGrid, GridToolbarFilterButton } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import EditIcon from "@mui/icons-material/Edit";
+import InfoIcon from "@mui/icons-material/Info";
 
 const ViewActivitiesBlockoutTable = ({
   activities,
@@ -115,18 +116,19 @@ const ViewActivitiesBlockoutTable = ({
         };
 
         return (
-          <Stack direction={"row"}>
+          <Stack direction={"row"} spacing={1}>
             <Button
-              variant="contained"
+              variant="outlined"
               color="primary"
-              startIcon={<EditIcon />}
+           
               onClick={handleEditClick}
             >
               Edit
             </Button>
             <Button
-              variant="contained"
+              variant="outlined"
               color="primary"
+           
               onClick={() => handleViewButton(params.row)}
             >
               View
@@ -138,7 +140,7 @@ const ViewActivitiesBlockoutTable = ({
   ];
 
   return (
-    <Box maxWidth={"98%"} paddingTop={2} paddingLeft={2} height={"80%"}>
+    <Box paddingTop={2} marginLeft={2}>
       <DataGrid
         checkboxSelection={false}
         initialState={{
