@@ -27,3 +27,13 @@
   margin-left: auto;
   margin-right: auto;
 }
+
+.swiper-button-next,
+.swiper-button-prev {
+  color: #9f91cc;
+  width: 20px;
+  --swiper-navigation-size: 20px;
+}
+.swiper-pagination-bullet-active {
+  --swiper-theme-color: #9f91cc;
+}

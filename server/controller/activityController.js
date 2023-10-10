@@ -746,8 +746,10 @@ export const getActivitiesWithFilters = async (req, res) => {
       };
     }
 
-    // Add the condition for isDraft to be false
+    // Add the condition activities on client
     query.isDraft = false;
+    query.disabled = false;
+    query.approvalStatus = "Published";
 
     const activities = await ActivityModel.find(query)
       .populate("activityPricingRules")
@@ -790,6 +792,8 @@ export const getAllActivitiesNames = async (req, res) => {
     // Query the collection to get titles of all documents
     const activityTitles = await ActivityModel.find(
       { isDraft: false },
+      { disabled: false },
+      { approvalStatus: "Published" },
       "title",
     );
 
@@ -809,9 +813,11 @@ export const getAllActivitiesNames = async (req, res) => {
 
 export const getMinAndMaxPricePerPax = async (req, res) => {
   try {
-    const activities = await ActivityModel.find({}).populate(
-      "activityPricingRules",
-    );
+    const activities = await ActivityModel.find(
+      { isDraft: false },
+      { disabled: false },
+      { approvalStatus: "Published" },
+    ).populate("activityPricingRules");
     if (activities.length === 0) {
       return res.status(200).send({
         success: true,
