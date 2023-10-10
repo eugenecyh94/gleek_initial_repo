@@ -116,6 +116,56 @@ const ActivityDetailsPage = () => {
     return conditionsToCheck.some((condition) => condition);
   };
 
+  const clientPriceCalculated = (pax) => {
+    for (const pricingRule of currentActivity?.activityPricingRules) {
+      if (pax >= pricingRule.start && pax <= pricingRule.end) {
+        return pricingRule.clientPrice;
+      }
+    }
+  };
+
+  const totalPrice = () => {
+    let totalPriceCalculated = pax * clientPriceCalculated(pax);
+    if (
+      currentActivity.weekendPricing.amount !== null &&
+      (dayjs(selectedDate).day() == 0 || dayjs(selectedDate).day() == 6)
+    ) {
+      if (currentActivity.weekendPricing.isDiscount) {
+        totalPriceCalculated -= currentActivity.weekendPricing.amount;
+      } else {
+        totalPriceCalculated += currentActivity.weekendPricing.amount;
+      }
+    }
+
+    if (
+      currentActivity.offlinePricing.amount !== null &&
+      (location.toLowerCase().includes("off-site") ||
+        location.toLowerCase().includes("on-site"))
+    ) {
+      if (currentActivity.offlinePricing.isDiscount) {
+        totalPriceCalculated = totalPriceCalculated -=
+          currentActivity.offlinePricing.amount;
+      } else {
+        totalPriceCalculated =
+          totalPriceCalculated + currentActivity.offlinePricing.amount;
+      }
+    }
+
+    if (
+      currentActivity.onlinePricing.amount !== null &&
+      location.toLowerCase().includes("virtual")
+    ) {
+      if (currentActivity.onlinePricing.isDiscount) {
+        totalPriceCalculated = totalPriceCalculated -=
+          currentActivity.onlinePricing.amount;
+      } else {
+        totalPriceCalculated =
+          totalPriceCalculated + currentActivity.onlinePricing.amount;
+      }
+    }
+    return totalPriceCalculated?.toFixed(2);
+  };
+
   useEffect(() => {
     // Check if all three variables are defined
     if (pax.length !== 0 && selectedDate !== null && location.length !== 0) {
@@ -239,7 +289,7 @@ const ActivityDetailsPage = () => {
                       $
                     </Typography>
                     <Typography color={accent} variant="h5" fontWeight="700">
-                      {currentActivity?.minimumPricePerPax.toFixed(2)}
+                      {currentActivity?.minimumPricePerPax?.toFixed(2)}
                     </Typography>
                   </Box>
                   <Typography ml={1} color={accent} variant="h6">
@@ -362,6 +412,148 @@ const ActivityDetailsPage = () => {
                     </FormControl>
                   )}
                 </Box>
+                {selectedDate &&
+                  pax.length > 0 &&
+                  time.length > 0 &&
+                  location.length > 0 && (
+                    <Box mt={2}>
+                      <Typography variant="caption" color={accent}>
+                        Base Price
+                      </Typography>
+                      <Box
+                        display="flex"
+                        flexDirection="row"
+                        justifyContent="space-between"
+                      >
+                        <Typography>
+                          {pax} Adults X ${" "}
+                          {clientPriceCalculated(pax)?.toFixed(2)}
+                        </Typography>
+                        <Typography>
+                          ${(pax * clientPriceCalculated(pax))?.toFixed(2)}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  )}
+                {selectedDate &&
+                  pax.length > 0 &&
+                  time.length > 0 &&
+                  location.length > 0 &&
+                  ((currentActivity.weekendPricing.amount !== null &&
+                    (dayjs(selectedDate).day() == 0 ||
+                      dayjs(selectedDate).day() == 6)) ||
+                    (currentActivity.offlinePricing.amount !== null &&
+                      (location.toLowerCase().includes("off-site") ||
+                        location.toLowerCase().includes("on-site"))) ||
+                    (currentActivity.onlinePricing.amount !== null &&
+                      location.toLowerCase().includes("virtual"))) && (
+                    <Box mt={1}>
+                      <Typography variant="caption" color={accent}>
+                        Add-ons/Discounts
+                      </Typography>
+                      {(dayjs(selectedDate).day() == 0 ||
+                        dayjs(selectedDate).day() == 6) &&
+                        currentActivity.weekendPricing.amount !== null && (
+                          <Box
+                            display="flex"
+                            flexDirection="row"
+                            justifyContent="space-between"
+                          >
+                            <Typography>Weekend Pricing</Typography>
+                            <Box
+                              display="flex"
+                              flexDirection="row"
+                              alignItems="center"
+                            >
+                              <Typography>
+                                {currentActivity?.weekendPricing?.isDiscount
+                                  ? "-"
+                                  : ""}
+                              </Typography>
+                              <Typography>
+                                {currentActivity?.weekendPricing?.isDiscount
+                                  ? "-"
+                                  : ""}
+                                $
+                                {currentActivity?.weekendPricing?.amount?.toFixed(
+                                  2,
+                                )}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        )}
+                      {(location.toLowerCase().includes("off-site") ||
+                        location.toLowerCase().includes("on-site")) &&
+                        currentActivity.offlinePricing.amount !== null && (
+                          <Box
+                            display="flex"
+                            flexDirection="row"
+                            justifyContent="space-between"
+                          >
+                            <Typography>Offline Pricing</Typography>
+                            <Box>
+                              <Typography>
+                                {currentActivity?.offlinePricing?.isDiscount
+                                  ? "-"
+                                  : ""}
+                                {""}$
+                                {currentActivity?.offlinePricing?.amount?.toFixed(
+                                  2,
+                                )}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        )}
+                      {location.toLowerCase().includes("virtual") &&
+                        currentActivity.onlinePricing.amount !== null && (
+                          <Box
+                            display="flex"
+                            flexDirection="row"
+                            justifyContent="space-between"
+                          >
+                            <Typography>Online Pricing</Typography>
+                            <Box>
+                              <Typography>
+                                {currentActivity?.onlinePricing?.isDiscount
+                                  ? "-"
+                                  : ""}
+                                {""}$
+                                {currentActivity?.onlinePricing?.amount?.toFixed(
+                                  2,
+                                )}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        )}
+                    </Box>
+                  )}
+                {selectedDate &&
+                  pax.length > 0 &&
+                  time.length > 0 &&
+                  location.length > 0 && (
+                    <Box
+                      mt={2}
+                      display="flex"
+                      flexDirection="row"
+                      justifyContent="space-between"
+                    >
+                      <Typography
+                        color="secondary"
+                        variant="subtitle1"
+                        fontWeight="700"
+                      >
+                        Total Price
+                      </Typography>
+
+                      <Typography
+                        color="secondary"
+                        variant="subtitle1"
+                        fontWeight="700"
+                      >
+                        $ {totalPrice()}
+                      </Typography>
+                    </Box>
+                  )}
                 <Box mt={2}>
                   <Button
                     fullWidth
