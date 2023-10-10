@@ -65,7 +65,7 @@ export const getPreSignedImgs = async (req, res) => {
     if (foundActivity.linkedVendor.companyLogo) {
       vendorProfile = await s3GetImages(foundActivity.linkedVendor.companyLogo);
     } else {
-      vendorProfile = null
+      vendorProfile = null;
     }
     res.status(200).json({
       activityImages: preSignedUrlArr,
@@ -281,10 +281,12 @@ export const saveActivity = async (req, res) => {
       foodCertDate: foodCertDate ?? null,
       foodCategory: foodCategory ?? [],
       isFoodCertPending: isFoodCertPending ?? null,
-      linkedVendor: linkedVendor ?? null,
+      linkedVendor: linkedVendor ?? req.user._id,
       pendingCertificateType: pendingCertificateType ?? null,
       modifiedDate: Date.now(),
     };
+
+    console.log("linked vendor: ", req.user);
 
     activity["weekendPricing"] = {
       amount: parsedWeekend?.amount,
@@ -299,7 +301,50 @@ export const saveActivity = async (req, res) => {
       isDiscount: parsedOffline?.isDiscount,
     };
     let savedActivity;
-    if (activityId) {
+    if (approvalStatus === "Rejected") {
+      const foundActivity =
+        await ActivityModel.findById(activityId).session(session);
+
+      // this is a reject draft (child), update existing
+      if (!foundActivity.rejectedDraft && foundActivity.parent) {
+        const updatedRejectedDraft = await ActivityModel.findByIdAndUpdate(
+          activityId,
+          { ...activity, activityPricingRules: [] },
+          {
+            new: true,
+            session,
+          }
+        );
+        savedActivity = updatedRejectedDraft;
+
+        // this is a parent, create a new reject draft (child)
+      } else {
+        const a = foundActivity.toObject();
+        const thing = {
+          ...a,
+          ...activity,
+        };
+        const { _id, __v, ...rest } = thing;
+        rest.parent = activityId;
+        rest.activityPricingRules = [];
+        const newActivity = new ActivityModel(rest);
+        const rejectDraft = await newActivity.save({
+          validateBeforeSave: false,
+          session,
+        });
+        await ActivityModel.findByIdAndUpdate(
+          activityId,
+          { rejectedDraft: rejectDraft._id },
+          {
+            new: true,
+            session,
+          }
+        );
+        savedActivity = rejectDraft;
+        console.log("New saved activity", savedActivity);
+      }
+      // submit
+    } else if (activityId) {
       try {
         const foundActivity =
           await ActivityModel.findById(activityId).session(session);
@@ -308,13 +353,31 @@ export const saveActivity = async (req, res) => {
             "Activity draft you are trying to save does not exist!"
           );
         } else {
+          let parentId;
+          if (!foundActivity.rejectedDraft && foundActivity.parent) {
+            parentId = foundActivity.parent;
+            await ActivityModel.findByIdAndDelete(foundActivity._id, {
+              session,
+            });
+          } else {
+            parentId = activityId;
+          }
           savedActivity = await ActivityModel.findByIdAndUpdate(
-            activityId,
-            { ...activity, activityPricingRules: [] },
+            parentId,
+            {
+              ...activity,
+              activityPricingRules: [],
+              rejectedDraft: null,
+              parent: null,
+            },
             {
               new: true,
               session,
             }
+          );
+          await ActivityPricingRulesModel.deleteMany(
+            { activity: activityId },
+            { session }
           );
         }
       } catch (error) {
@@ -379,10 +442,6 @@ export const saveActivity = async (req, res) => {
       { new: true, session }
     );
 
-    await ActivityPricingRulesModel.deleteMany(
-      { activity: activityId },
-      { session }
-    );
     if (activityPricingRules) {
       await saveActivityPricingRules(
         activityPricingRules,
@@ -501,6 +560,44 @@ export const rejectActivity = async (req, res) => {
   }
 };
 
+export const publishActivity = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    console.log("publish activity body:", req.params.id);
+    const { id } = req.params;
+
+    const savedActivity = await ActivityModel.findByIdAndUpdate(
+      id,
+      {
+        approvalStatus: ActivityApprovalStatusEnum.PUBLISHED,
+        createdDate: Date.now(),
+      },
+      {
+        new: true,
+        session,
+      }
+    );
+
+    console.log("savedActivity", savedActivity);
+
+    await session.commitTransaction();
+
+    res.status(201).json({
+      message: `${savedActivity.title} published successfully`,
+      activity: savedActivity,
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    res.status(500).json({
+      error: "Unexpected Server Error occured!",
+      message: error.message,
+    });
+  } finally {
+    session.endSession();
+  }
+};
+
 export const deleteActivityDraft = async (req, res) => {
   try {
     const activityId = req.params.id;
@@ -508,7 +605,26 @@ export const deleteActivityDraft = async (req, res) => {
       _id: activityId,
     });
     await ActivityPricingRulesModel.deleteMany({ activity: activityId });
-    const activities = await retrieveActivities(deletedActivity.adminCreated);
+    let activities;
+    if (deletedActivity.adminCreated) {
+      activities = await retrieveActivities(deletedActivity.adminCreated);
+    } else {
+      if (deletedActivity.parent) {
+        const parentId = deletedActivity.parent;
+        const newParent = await ActivityModel.findByIdAndUpdate(
+          parentId,
+          {
+            rejectedDraft: null,
+          },
+          { new: true }
+        );
+        console.log("new parent", newParent);
+      }
+
+      console.log("Retrieving all vendor activities", req.user);
+      activities = await getAllVendorActivities(req.user._id);
+    }
+
     res.status(201).json({
       message: "Activity draft deleted successfully!",
       activity: activities,
@@ -526,6 +642,9 @@ export const bulkDeleteActivityDraft = async (req, res) => {
     console.log("bulkDeleteActivityDraft", req.body);
     const activityIds = req.body;
     const deletedActivity = await ActivityModel.findOne({ _id: activityIds });
+    const activitiesToDelete = await ActivityModel.find({
+      _id: { $in: activityIds },
+    });
     const { deletedCount } = await ActivityModel.deleteMany({
       _id: activityIds,
     });
@@ -533,7 +652,24 @@ export const bulkDeleteActivityDraft = async (req, res) => {
       activity: { $in: activityIds },
     });
 
-    const activities = await retrieveActivities(deletedActivity.adminCreated);
+    let activities;
+    if (deletedActivity.adminCreated) {
+      activities = await retrieveActivities(deletedActivity.adminCreated);
+    } else {
+      activitiesToDelete.forEach(async (deletedActivity) => {
+        if (deletedActivity.parent) {
+          const parentId = deletedActivity.parent;
+          await ActivityModel.findByIdAndUpdate(
+            parentId,
+            {
+              rejectedDraft: null,
+            },
+            { new: true }
+          );
+        }
+      });
+      activities = await getAllVendorActivities(req.user._id);
+    }
 
     res.status(201).json({
       message: `Deleted ${deletedCount} Activity${

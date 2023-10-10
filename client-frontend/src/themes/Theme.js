@@ -36,6 +36,18 @@ const theme = createTheme({
       A400: "#303030",
       A700: "#616161",
     },
+    light_purple: {
+      main: "#9F91CC",
+    },
+    dark_purple: {
+      main: "#3D246C",
+    },
+    error: {
+      main: "#D32F2F",
+    },
+    unselected: {
+      main: "#919191",
+    },
   },
   typography: {
     fontFamily: "Fredoka",
