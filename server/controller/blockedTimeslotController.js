@@ -63,7 +63,7 @@ export const addBlockedTimeslotMultipleActivities = async (req, res) => {
         activityId,
         blockedStartDateTime,
         blockedEndDateTime,
-        session,
+        session
       );
 
       //console.log("createdBlockedTimeslot", createdBlockedTimeslot);

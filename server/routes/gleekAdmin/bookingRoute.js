@@ -11,7 +11,7 @@ router.get("/getAllBookings", getAllBookings);
 router.get("/getBookingById/:id", getBookingById);
 router.get(
   "/getAllBookingsByActivityId/:activityId",
-  getAllBookingsByActivityId,
+  getAllBookingsByActivityId
 );
 router.delete("/deleteBooking/:id", deleteBooking);
 export default router;
