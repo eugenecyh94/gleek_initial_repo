@@ -6,14 +6,18 @@ const useCartStore = create((set) => ({
   setCartItems: (newCartItems) => set({ cartItems: newCartItems }),
   newCartItem: null,
   setNewCartItem: (newCartItem) => set({ newCartItem: newCartItem }),
-  getCurrentActivity: async (activityId) => {
+  getCartItems: async () => {
     try {
       const response = await AxiosConnect.get(
         `/gleek/cart/getCartItemsByClientId`,
       );
-      console.log(response.data.data);
-      set({ currentActivity: response.data.data });
-      set({ currentActivityLoading: false });
+      const data = response.data;
+      const combinedDataArray = data.map((item) => ({
+        ...item.cartItem,
+        isItemStillAvailable: item.isItemStillAvailable,
+      }));
+      console.log(combinedDataArray);
+      set({ cartItems: combinedDataArray });
     } catch (error) {
       console.error(error);
     }
