@@ -111,7 +111,7 @@ function NavBar(props) {
 
   useEffect(() => {
     fetchCart();
-  }, [newCartItem]);
+  }, [newCartItem, client]);
 
   const fetchCart = async () => {
     try {
