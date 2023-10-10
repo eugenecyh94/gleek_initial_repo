@@ -211,8 +211,6 @@ const ActivityDetailsPage = () => {
               </Box>
 
               <ActivityBookmarkButton activityId={activityId} />
-
-              <ActivityBookmarkButton activityId={activityId} />
             </Box>
           </Grid>
           <Grid
