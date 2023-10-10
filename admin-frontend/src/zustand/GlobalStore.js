@@ -448,3 +448,49 @@ export const useImageUploadTestStore = create((set) => ({
     set({ testActivities: newActivityList });
   },
 }));
+
+export const useNotificationStore = create((set) => ({
+  notifications: [],
+  unreadNotificationsCount: 0,
+  setReceivedNotifications: (allNotifications) => {
+    set({ notifications: allNotifications });
+    let unreadCount = 0;
+    allNotifications.map((notification) => {
+      notification.read === false ? unreadCount++ : unreadCount;
+    });
+    set({ unreadNotificationsCount: unreadCount });
+  },
+  // setNotificationRead: (notificationId) => {
+  // //To set in backend instead
+  //   set((state) => ({
+  //         notifications: state.notifications.map((notification) =>
+  //             notification._id === notificationId
+  //                 ? { ...notification, read: true }
+  //                 : notification),
+  //       })
+  //   )
+  // },
+  // setAllNotificationsRead: () => {
+  //   //To set in backend instead
+  //   set((state) => ({
+  //     notifications: state.notifications.map((notification) =>
+  //             notification.read === false
+  //                 ? {...notification, read: true}
+  //                 : notification),
+  //       })
+  //   )
+  // },
+
+  // adminGetAllNotifications: (id, role) => {
+  //   const params = {
+  //     adminId: id,
+  //     adminRole: role,
+  //   };
+  //   const {setReceivedNotifications} = useNotificationStore();
+  //   console.log("params for notification:", params);
+  //   AxiosConnect.getWithParams("/notification/adminAllNotifications", params).then((body) => {
+  //     console.log(body);
+  //     setReceivedNotifications(body);
+  //   });
+  //   },
+}));

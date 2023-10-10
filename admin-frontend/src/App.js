@@ -21,6 +21,7 @@ import VendorDetails from "./components/vendor/VendorDetails";
 import ActivityDetails from "./components/activity/ActivityDetails";
 import ViewActivityDrafts from "./components/activity/ViewActivityDrafts";
 import EditActivityDraftPage from "./components/activity/EditActivityDraftPage";
+import AdminNotificationPage from "./components/notification/AdminNotificationPage";
 
 function App() {
   return (
@@ -152,6 +153,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <ClientDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/notificationList"
+            element={
+              <ProtectedRoute>
+                <AdminNotificationPage />
               </ProtectedRoute>
             }
           />

@@ -22,6 +22,12 @@ import {
   createResetPasswordEmailOptions,
   createVerifyEmailOptions,
 } from "../util/sendMailOptions.js";
+import { Role } from "../util/roleEnum.js";
+import {
+  NotificationAction,
+  NotificationEvent,
+} from "../util/notificationRelatedEnum.js";
+import { createNotification } from "./notificationController.js";
 
 const secret = process.env.JWT_SECRET_ClIENT;
 
@@ -96,7 +102,8 @@ const setCookies = (res, token) => {
  * Handles user registration by creating a new client and associated consent.
  * If an error occurs during the process, the transaction will be rolled back.
  * Sends welcome to Gleek email.
- * Sends verify email email.
+ * Sends verify email.
+ * Test - sends notification to admin (To be removed subsequently)
  */
 export const postRegister = async (req, res) => {
   console.log("clientController postRegister(): req.body", req.body);
@@ -121,6 +128,16 @@ export const postRegister = async (req, res) => {
     const createdClient = await createClient(newClient, session);
 
     await encryptUserPassword(createdClient, newClient.password);
+
+    req.notificationReq = {
+      senderRole: Role.CLIENT,
+      sender: createdClient._id,
+      recipientRole: Role.ADMIN,
+      notificationEvent: NotificationEvent.REGISTER,
+      notificationAction: NotificationAction.CREATE,
+    };
+
+    createNotification(req.notificationReq, res);
 
     // Create the Consent model and link to Client
     await createClientConsent(
