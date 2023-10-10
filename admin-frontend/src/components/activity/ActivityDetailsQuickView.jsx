@@ -10,6 +10,9 @@ import {
   FormHelperText,
   FormLabel,
   Grid,
+  ImageList,
+  ImageListItem,
+  ImageListItemBar,
   InputAdornment,
   InputLabel,
   MenuItem,
@@ -38,7 +41,6 @@ import dayjs from "dayjs";
 import PropTypes from "prop-types";
 import {
   ActivityDayAvailabilityEnum,
-  ActivityTypeEnum,
   FoodCategoryEnum,
   LocationEnum,
   SustainableDevelopmentGoalsEnum,
@@ -69,7 +71,7 @@ const StyledChip = styled(Chip)`
   }
 `;
 
-const ActivityDetailsQuickView = ({ activity }) => {
+const ActivityDetailsQuickView = ({ activity, imgs, vendorProfile }) => {
   const theme = useTheme();
   const foodCategories = Object.values(FoodCategoryEnum);
 
@@ -112,10 +114,18 @@ const ActivityDetailsQuickView = ({ activity }) => {
         </Grid>
         <Grid item xs={12}>
           <StyledAvatar>
-            <Avatar
-              style={{ marginRight: 8, marginTop: 6 }}
-              {...stringAvatar(activity?.linkedVendor?.companyName, theme)}
-            />
+            {vendorProfile ? (
+              <Avatar
+                style={{ marginRight: 8, marginTop: 6 }}
+                src={vendorProfile}
+                alt="Avatar"
+              />
+            ) : (
+              <Avatar
+                style={{ marginRight: 8, marginTop: 6 }}
+                {...stringAvatar(activity?.linkedVendor?.companyName, theme)}
+              />
+            )}
             <Container>
               <Typography>
                 Vendor Partner
@@ -249,7 +259,8 @@ const ActivityDetailsQuickView = ({ activity }) => {
                 </Select>
               </FormControl>
 
-              {activity.activityType === ActivityTypeEnum.POPUP && (
+              {(activity.activityType === "Popups (Food)" ||
+                activity.activityType === "Popups (Non-food)") && (
                 <Grid paddingBottom={2} paddingTop={2}>
                   <Grid item xs={6}>
                     <FormControl>
@@ -258,18 +269,17 @@ const ActivityDetailsQuickView = ({ activity }) => {
                       </FormLabel>
                       <RadioGroup
                         aria-labelledby="demo-radio-buttons-group-label"
-                        defaultValue="yes"
+                        defaultValue={activity.isFood.toString()}
                         name="radio-buttons-group"
-                        value={activity.isFood.toString()}
                       >
                         <FormControlLabel
                           value="true"
-                          control={<Radio />}
+                          control={<Radio readOnly />}
                           label="Yes"
                         />
                         <FormControlLabel
                           value="false"
-                          control={<Radio />}
+                          control={<Radio readOnly />}
                           label="No"
                         />
                       </RadioGroup>
@@ -282,41 +292,40 @@ const ActivityDetailsQuickView = ({ activity }) => {
                       }}
                       required
                       variant="standard"
-                      id="popupItems"
                       name="popupItems"
                       placeholder="Popup items sold"
                       label="Popup items sold"
                       fullWidth
+                      defaultValue={activity.popupItemsSold}
                     />
                   </Grid>
                 </Grid>
               )}
             </Grid>
             <Grid item xs={3} paddingTop={2}>
-              {activity.activityType === ActivityTypeEnum.POPUP &&
-                activity.isFood && (
-                  <FormGroup>
-                    <InputLabel id="foodCategory" required>
-                      Food Category
-                    </InputLabel>
-                    {foodCategories.map((label) => (
-                      <FormControlLabel
-                        key={label}
-                        control={
-                          <Checkbox
-                            checked={activity.foodCatgory.includes(label)}
-                            name={label}
-                            disabled
-                          />
-                        }
-                        label={label}
-                      />
-                    ))}
-                  </FormGroup>
-                )}
+              {activity.activityType === "Popups (Food)" && activity.isFood && (
+                <FormGroup>
+                  <InputLabel id="foodCategory" required>
+                    Food Category
+                  </InputLabel>
+                  {foodCategories.map((label) => (
+                    <FormControlLabel
+                      key={label}
+                      control={
+                        <Checkbox
+                          checked={activity.foodCategory.includes(label)}
+                          name={label}
+                          readOnly
+                        />
+                      }
+                      label={label}
+                    />
+                  ))}
+                </FormGroup>
+              )}
             </Grid>
             <Grid item xs={3} paddingTop={2}>
-              {activity.activityType === ActivityTypeEnum.POPUP &&
+              {activity.activityType === "Popups (Food)" &&
                 activity.isFood === true && (
                   <FormControl>
                     <FormLabel id="popupIsFood">
@@ -360,6 +369,7 @@ const ActivityDetailsQuickView = ({ activity }) => {
                                     />
                                   )}
                                   readOnly={true}
+                                  defaultValue={dayjs(activity.foodCertDate)}
                                 />
                               </LocalizationProvider>
                             </FormControl>
@@ -815,6 +825,37 @@ const ActivityDetailsQuickView = ({ activity }) => {
           </Grid>
         </StyledContainer>
         <StyledContainer elevation={3}>
+          <Grid container spacing={1} alignItems="left" justifyContent="left">
+            <Grid item xs={12}>
+              <Typography
+                color={theme.palette.primary.main}
+                component="div"
+                paddingTop={2}
+                paddingBottom={2}
+                fontSize={"1.25rem"}
+              >
+                Activity Images
+              </Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <ImageList>
+                {imgs?.map((image, index) => {
+                  return (
+                    <ImageListItem key={index}>
+                      <img src={image} loading="lazy" />
+                      <ImageListItemBar
+                        sx={{ background: "none" }}
+                        position="top"
+                        actionPosition="left"
+                      />
+                    </ImageListItem>
+                  );
+                })}
+              </ImageList>
+            </Grid>
+          </Grid>
+        </StyledContainer>
+        <StyledContainer elevation={3}>
           <Grid container spacing={2} alignItems="left" justifyContent="left">
             <Grid item xs={12}>
               <Typography
@@ -834,5 +875,7 @@ const ActivityDetailsQuickView = ({ activity }) => {
 };
 ActivityDetailsQuickView.propTypes = {
   activity: PropTypes.object.isRequired,
+  imgs: PropTypes.array.isRequired,
+  vendorProfile: PropTypes.string,
 };
 export default ActivityDetailsQuickView;

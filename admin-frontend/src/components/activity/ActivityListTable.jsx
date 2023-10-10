@@ -34,6 +34,7 @@ import DoneIcon from "@mui/icons-material/Done";
 import CloseIcon from "@mui/icons-material/Close";
 import React from "react";
 import ActivityDetailsQuickView from "./ActivityDetailsQuickView.jsx";
+import AxiosConnect from "../../utils/AxiosConnect";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -77,6 +78,8 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
   const [rejectionReason, setRejectionReason] = useState();
   const [openViewModal, setOpenViewModal] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState();
+  const [imgs, setImgs] = useState([]);
+  const [vendorProfile, setVendorProfile] = useState();
   const {
     selectedActivityTab,
     setSelectedActivityTab,
@@ -84,6 +87,7 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
     rejectActivity,
     setPendingApprovalActivities,
   } = useActivityStore();
+  
   const { openSnackbar } = useSnackbarStore();
   const { admin } = useAdminStore();
   const filterCriteria = {
@@ -105,8 +109,11 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
   const handleCreateButtonClick = () => {
     navigate("/createActivity");
   };
-  const handleRowClick = (activity) => {
+  const handleRowClick = async (activity) => {
     // navigate(`/viewActivity/${activity._id}`);
+    const res = await AxiosConnect.get(`/activity/getImages/${activity._id}`);
+    setImgs(res.data.activityImages);
+    setVendorProfile(res.data.vendorProfileImage);
     setOpenViewModal(true);
     setSelectedActivity(activity);
   };
@@ -561,7 +568,11 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
               )}
             </Toolbar>
           </AppBar>
-          <ActivityDetailsQuickView activity={selectedActivity} />
+          <ActivityDetailsQuickView
+            activity={selectedActivity}
+            imgs={imgs}
+            vendorProfile={vendorProfile}
+          />
         </Dialog>
       </div>
     </Box>

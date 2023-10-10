@@ -6,6 +6,7 @@ import {
   Grid,
   TextField,
   Typography,
+  Typography,
   FormControl,
   FormHelperText,
   Select,
@@ -200,6 +201,8 @@ const ActivityDetailsPage = () => {
               </Box>
 
               <ActivityBookmarkButton activityId={activityId} />
+
+              <ActivityBookmarkButton activityId={activityId} />
             </Box>
           </Grid>
           <Grid
@@ -315,7 +318,7 @@ const ActivityDetailsPage = () => {
                           format="DD/MM/YYYY"
                           minDate={dayjs().add(
                             currentActivity?.bookingNotice,
-                            "days",
+                            "days"
                           )}
                           shouldDisableDate={shouldDisableDate}
                           sx={{ marginRight: "12px" }}
@@ -476,7 +479,7 @@ const ActivityDetailsPage = () => {
                                   : ""}
                                 $
                                 {currentActivity?.weekendPricing?.amount?.toFixed(
-                                  2,
+                                  2
                                 )}
                               </Typography>
                             </Box>
@@ -498,7 +501,7 @@ const ActivityDetailsPage = () => {
                                   : ""}
                                 {""}$
                                 {currentActivity?.offlinePricing?.amount?.toFixed(
-                                  2,
+                                  2
                                 )}
                               </Typography>
                             </Box>
@@ -519,7 +522,7 @@ const ActivityDetailsPage = () => {
                                   : ""}
                                 {""}$
                                 {currentActivity?.onlinePricing?.amount?.toFixed(
-                                  2,
+                                  2
                                 )}
                               </Typography>
                             </Box>
@@ -685,7 +688,7 @@ const ActivityDetailsPage = () => {
                         </Typography>
                       </Box>
                     </Grid>
-                  ),
+                  )
                 )}
               </Grid>
               {(currentActivity?.offlinePricing?.isDiscount ||

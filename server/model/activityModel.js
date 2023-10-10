@@ -63,6 +63,7 @@ const activitySchema = new mongoose.Schema({
   },
   // attributes for activity type "popup"
   isFoodCertPending: { type: Boolean },
+  isFood: { type: Boolean },
   pendingCertificationType: { type: String },
   foodCertDate: { type: Date },
   foodCategory: {

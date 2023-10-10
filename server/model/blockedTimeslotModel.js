@@ -19,6 +19,6 @@ const blockedTimeslotSchema = new mongoose.Schema({
 const BlockedTimeslotModel = mongoose.model(
   "BlockedTimeslot",
   blockedTimeslotSchema,
-  "blockedtimeslots",
+  "blockedtimeslots"
 );
 export default BlockedTimeslotModel;

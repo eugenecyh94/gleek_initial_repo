@@ -1,6 +1,5 @@
 import express from "express";
 import {
-  addActivity,
   approveActivity,
   bulkAddThemes,
   bulkDeleteActivityDraft,
@@ -9,6 +8,7 @@ import {
   getAllActivities,
   getAllActivitiesForAdmin,
   getAllThemes,
+  getPreSignedImgs,
   rejectActivity,
   saveActivity,
 } from "../../controller/activityController.js";
@@ -16,14 +16,9 @@ import { uploadS3ActivityImages } from "../../middleware/multer.js";
 
 const router = express.Router();
 router.post(
-  "/addActivity",
-  uploadS3ActivityImages.array("images", 5),
-  addActivity,
-);
-router.post(
   "/saveActivity",
   uploadS3ActivityImages.array("images", 5),
-  saveActivity,
+  saveActivity
 );
 router.get("/all", getAllActivities);
 router.get("/myActivities/:id", getAllActivitiesForAdmin);
@@ -34,4 +29,5 @@ router.delete("/deleteDraft/:id", deleteActivityDraft);
 router.delete("/bulkDelete", bulkDeleteActivityDraft);
 router.patch("/approveActivity/:activityId", approveActivity);
 router.patch("/rejectActivity/:activityId", rejectActivity);
+router.get("/getImages/:id", getPreSignedImgs);
 export default router;

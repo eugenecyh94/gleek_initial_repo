@@ -1,7 +1,7 @@
 import express from "express";
 import {
   getAvailableBookingTimeslots,
-  createBooking,
+  createBookings,
 } from "../../controller/bookingController.js";
 import { verifyToken } from "../../middleware/clientAuth.js";
 
@@ -13,6 +13,8 @@ router.get(
   verifyToken,
   getAvailableBookingTimeslots,
 );
-router.post("/createBooking", verifyToken, createBooking);
+
+// /gleek/booking/createBookings
+router.post("/createBookings", verifyToken, createBookings);
 
 export default router;
