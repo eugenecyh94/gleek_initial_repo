@@ -36,6 +36,7 @@ import BlockoutDashboard from "./containers/Vendor/Blockout/BlockoutDashboard";
 import BlockoutMultipleActivities from "./containers/Vendor/Blockout/BlockoutMultipleActivities";
 import CreateActivityPage from "./containers/Vendor/Activity/CreateActivityPage";
 import EditActivityDraftPage from "./containers/Vendor/Activity/EditActivityDraftPage";
+import BlockoutSingleActivity from "./containers/Vendor/Blockout/BlockoutSingleActivity";
 
 function App() {
   const { isLoading, clientError, login } = useClientStore();
@@ -282,6 +283,15 @@ function App() {
             element={
               <VendorProtectedRoute>
                 <BlockoutDashboard />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/vendor/activity/:activityId/blockout"
+            element={
+              <VendorProtectedRoute>
+                <BlockoutSingleActivity />
               </VendorProtectedRoute>
             }
           />

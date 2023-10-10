@@ -67,7 +67,7 @@ const bookingSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  billingPostalCode: {
+  billingOfficePostalCode: {
     type: String,
     required: true,
   },

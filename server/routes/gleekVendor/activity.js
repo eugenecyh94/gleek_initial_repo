@@ -1,7 +1,7 @@
 import express from "express";
 
 import vendorVerifyToken from "../../middleware/vendorAuth.js";
-import {
+import { getActivityTitle,
   bulkDeleteActivityDraft,
   deleteActivityDraft,
   getActivity,
@@ -32,5 +32,9 @@ router.post(
 router.get("/viewActivity/:id", vendorVerifyToken, getActivity);
 router.patch("/publishActivity/:id", vendorVerifyToken, publishActivity);
 router.get("/getImages/:id", vendorVerifyToken, getPreSignedImgs);
+
+
+router.get("/:activityId/title", vendorVerifyToken, getActivityTitle);
+
 
 export default router;
