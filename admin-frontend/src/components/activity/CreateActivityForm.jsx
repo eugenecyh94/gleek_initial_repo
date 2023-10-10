@@ -92,26 +92,26 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
   const { createActivity, saveActivity } = useActivityStore();
   const { openSnackbar } = useSnackbarStore();
   const [selectedTheme, setSelectedTheme] = useState(
-    activity?.theme?._id ?? null
+    activity?.theme?._id ?? null,
   );
   const [selectedSubTheme, setSelectedSubTheme] = useState(
-    activity?.subtheme?.length > 0 ? activity?.subtheme?.map((x) => x._id) : []
+    activity?.subtheme?.length > 0 ? activity?.subtheme?.map((x) => x._id) : [],
   );
   const [subthemes, setSubthemes] = useState(
     activity?.theme?._id
       ? themes?.find((theme) => theme.parent?._id === activity?.theme?._id)
           ?.children
-      : []
+      : [],
   );
 
   const [maxParticipants, setMaxParticipants] = useState(
-    activity?.maxParticipants ?? null
+    activity?.maxParticipants ?? null,
   );
   const [minParticipants, setMinParticipants] = useState(
-    activity?.minParticipants ?? null
+    activity?.minParticipants ?? null,
   );
   const [markup, setMarkup] = useState(
-    activity?.clientMarkupPercentage ?? null
+    activity?.clientMarkupPercentage ?? null,
   );
   const [activityType, setActivityType] = useState(
     activity?.activityType === null
@@ -119,7 +119,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
       : activity?.activityType === "Popups (Food)" ||
         activity?.activityType === "Popups (Non-food)"
       ? ActivityTypeEnum.POPUP
-      : activity?.activityType
+      : activity?.activityType,
   );
   const [title, setTitle] = useState(activity?.title ?? null);
   const [description, setDescription] = useState(activity?.description ?? null);
@@ -131,22 +131,22 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
       clientPrice: pricingRule.clientPrice,
     })) || [];
   const [pricingRanges, setPricingRanges] = useState(
-    extractedFields.slice().sort((a, b) => a.start - b.start)
+    extractedFields.slice().sort((a, b) => a.start - b.start),
   );
   const initialPricingRangeErrors = activity?.activityPricingRules?.map(() => ({
     range: "",
     pricePerPax: null,
   }));
   const [pricingRangeError, setPricingRangeError] = useState(
-    activity?.activityPricingRules?.length > 0 ? initialPricingRangeErrors : []
+    activity?.activityPricingRules?.length > 0 ? initialPricingRangeErrors : [],
   );
   const initialPricingRangeDone = activity?.activityPricingRules?.some(
     (pricingRule) => {
       return pricingRule?.end === activity?.maxParticipants;
-    }
+    },
   );
   const [pricingRangeDone, setPricingRangeDone] = useState(
-    activity?.activityPricingRules ? initialPricingRangeDone : false
+    activity?.activityPricingRules ? initialPricingRangeDone : false,
   );
   const [pricingAddons, setPricingAddons] = useState({
     weekendPricing: {
@@ -176,30 +176,30 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
   ];
   const [isFood, setIsFood] = useState(activity?.isFood ?? false);
   const [isFoodCertPending, setIsFoodCertPending] = useState(
-    activity?.isFoodCertPending ?? false
+    activity?.isFoodCertPending ?? false,
   );
   const [selectedFoodCat, setSelectedFoodCat] = useState(
-    activity?.foodCategory ?? []
+    activity?.foodCategory ?? [],
   );
   const [foodCertDate, setFoodCertDate] = useState(
-    activity?.foodCertDate ?? null
+    activity?.foodCertDate ?? null,
   );
   const [location, setLocation] = useState(activity?.location ?? []);
   const [popupitems, setPopupitems] = useState(
-    activity?.popupItemsSold ?? null
+    activity?.popupItemsSold ?? null,
   );
   const [sdg, setSdg] = useState(activity?.sdg ?? []);
   const [dayAvailabilities, setDayAvailabilities] = useState(
-    activity?.dayAvailabilities ?? []
+    activity?.dayAvailabilities ?? [],
   );
   const [duration, setDuration] = useState(activity?.duration ?? null);
   const [formErrors, setFormErrors] = useState();
   const [activityImages, setActivityImages] = useState([]);
   const [selectedVendor, setSelectedVendor] = useState(
-    activity?.linkedVendor?._id ?? null
+    activity?.linkedVendor?._id ?? null,
   );
   const [pendingCertType, setPendingCertType] = useState(
-    activity?.pendingCertificationType ?? null
+    activity?.pendingCertificationType ?? null,
   );
   const [activeStep, setActiveStep] = useState(
     activity?.offlinePricing?.amount ||
@@ -210,17 +210,17 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
       ? 2
       : activity?.activityPricingRules?.length > 0
       ? 1
-      : 0
+      : 0,
   );
   const [bookingNotice, setBookingNotice] = useState(
-    activity?.bookingNotice ?? null
+    activity?.bookingNotice ?? null,
   );
   const [startTime, setStartTime] = useState(activity?.startTime ?? null);
   const [endTime, setEndTime] = useState(activity?.endTime ?? null);
   const [capacity, setCapacity] = useState(activity?.capacity ?? null);
   const [imageListToEdit, setImageListToEdit] = useState([]);
   const [existingImageList, setExistingImageList] = useState(
-    activity?.preSignedImages ?? []
+    activity?.preSignedImages ?? [],
   );
 
   const foodCategories = Object.values(FoodCategoryEnum);
@@ -252,7 +252,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     const themeId = event.target.value;
     setSelectedTheme(themeId);
     setSubthemes(
-      themes?.find((theme) => theme.parent?._id === themeId)?.children
+      themes?.find((theme) => theme.parent?._id === themeId)?.children,
     );
     setSelectedSubTheme([]);
   };
@@ -399,7 +399,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
   };
   const handleRemoveImage = (image) => {
     setImageListToEdit((oldState) =>
-      oldState.filter((item) => item.src !== image.src)
+      oldState.filter((item) => item.src !== image.src),
     );
     const updatedList = [...activityImages];
     updatedList.splice(activityImages.indexOf(image.file), 1);
@@ -477,7 +477,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
       const { pricePerPax } = rule;
       const clientPrice = Math.ceil(
         parseFloat(pricePerPax) * (parseFloat(newMarkup) / 100) +
-          parseFloat(pricePerPax)
+          parseFloat(pricePerPax),
       );
       newClientPrice[index].clientPrice = clientPrice;
     });
@@ -775,7 +775,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
         ? isFood
           ? "Popups (Food)"
           : "Popups (Non-food)"
-        : activityType
+        : activityType,
     );
     formData.append("maxParticipants", maxParticipants);
     formData.append("minParticipants", minParticipants);
@@ -844,7 +844,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     } else {
       openSnackbar(
         "Error creating form! Please fill in required fields.",
-        "error"
+        "error",
       );
     }
   };
@@ -871,7 +871,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
           ? isFood
             ? "Popups (Food)"
             : "Popups (Non-food)"
-          : activityType
+          : activityType,
       );
     }
     if (maxParticipants) {
@@ -975,7 +975,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
       formData.append("images", activityImages[i]);
     }
     existingImageList.forEach((item) =>
-      formData.append("updatedImageList[]", item)
+      formData.append("updatedImageList[]", item),
     );
     if (validateDraft()) {
       try {
@@ -987,7 +987,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     } else {
       openSnackbar(
         "Error saving draft! Please resolve highlighted errors before saving.",
-        "error"
+        "error",
       );
     }
   };
@@ -1050,7 +1050,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                         <MenuItem key={index} value={item.parent._id}>
                           {item.parent.name}
                         </MenuItem>
-                      )
+                      ),
                   )}
                 </Select>
                 <FormHelperText error>{formErrors?.theme}</FormHelperText>
@@ -1406,7 +1406,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                       <MenuItem key={enumValue} value={enumValue}>
                         {enumValue}
                       </MenuItem>
-                    )
+                    ),
                   )}
                 </Select>
                 <FormHelperText error>
@@ -1697,7 +1697,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                                         handlePricingRangesChange(
                                           e,
                                           rowIndex,
-                                          "end"
+                                          "end",
                                         )
                                       }
                                       value={
@@ -1735,7 +1735,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                                       handlePriceChange(
                                         e,
                                         rowIndex,
-                                        "pricePerPax"
+                                        "pricePerPax",
                                       )
                                     }
                                   />

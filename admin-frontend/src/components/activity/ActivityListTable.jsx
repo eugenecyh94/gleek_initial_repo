@@ -87,7 +87,7 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
     rejectActivity,
     setPendingApprovalActivities,
   } = useActivityStore();
-  
+
   const { openSnackbar } = useSnackbarStore();
   const { admin } = useAdminStore();
   const filterCriteria = {

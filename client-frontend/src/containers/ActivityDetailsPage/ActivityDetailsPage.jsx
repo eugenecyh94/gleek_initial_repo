@@ -6,12 +6,12 @@ import {
   Grid,
   TextField,
   Typography,
-  Typography,
   FormControl,
   FormHelperText,
   Select,
   MenuItem,
   InputLabel,
+  Modal,
 } from "@mui/material";
 import { lighten, useTheme } from "@mui/material/styles";
 import React, { useEffect, useState } from "react";
@@ -65,6 +65,8 @@ const ActivityDetailsPage = () => {
   const [time, setTime] = useState("");
   const [location, setLocation] = useState("");
   const hd = new Holidays("SG");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [comments, setComments] = useState("");
 
   const handleTimeChange = (event) => {
     setTime(event.target.value);
@@ -165,6 +167,14 @@ const ActivityDetailsPage = () => {
       }
     }
     return totalPriceCalculated?.toFixed(2);
+  };
+
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
   };
 
   useEffect(() => {
@@ -318,7 +328,7 @@ const ActivityDetailsPage = () => {
                           format="DD/MM/YYYY"
                           minDate={dayjs().add(
                             currentActivity?.bookingNotice,
-                            "days"
+                            "days",
                           )}
                           shouldDisableDate={shouldDisableDate}
                           sx={{ marginRight: "12px" }}
@@ -479,7 +489,7 @@ const ActivityDetailsPage = () => {
                                   : ""}
                                 $
                                 {currentActivity?.weekendPricing?.amount?.toFixed(
-                                  2
+                                  2,
                                 )}
                               </Typography>
                             </Box>
@@ -501,7 +511,7 @@ const ActivityDetailsPage = () => {
                                   : ""}
                                 {""}$
                                 {currentActivity?.offlinePricing?.amount?.toFixed(
-                                  2
+                                  2,
                                 )}
                               </Typography>
                             </Box>
@@ -522,7 +532,7 @@ const ActivityDetailsPage = () => {
                                   : ""}
                                 {""}$
                                 {currentActivity?.onlinePricing?.amount?.toFixed(
-                                  2
+                                  2,
                                 )}
                               </Typography>
                             </Box>
@@ -557,6 +567,48 @@ const ActivityDetailsPage = () => {
                       </Typography>
                     </Box>
                   )}
+                <Modal open={isModalOpen} onClose={closeModal}>
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      width: "80%",
+                      bgcolor: "background.paper",
+                      boxShadow: 24,
+                      borderRadius: "25px",
+                      p: 4,
+                    }}
+                  >
+                    <Typography color="primary" variant="h5">
+                      Add Additional Comments
+                    </Typography>
+                    <TextField
+                      multiline
+                      rows={4}
+                      variant="outlined"
+                      fullWidth
+                      value={comments}
+                      onChange={(e) => setComments(e.target.value)}
+                      placeholder="Enter additional comments here"
+                    />
+                  </Box>
+                </Modal>
+                <Box mt={2}>
+                  <Button
+                    variant="outlined"
+                    disabled={
+                      selectedDate === null ||
+                      pax.length === 0 ||
+                      location.length === 0 ||
+                      time.length === 0
+                    }
+                    onClick={openModal}
+                  >
+                    Add Additional Comments
+                  </Button>
+                </Box>
                 <Box mt={2}>
                   <Button
                     fullWidth
@@ -564,7 +616,8 @@ const ActivityDetailsPage = () => {
                     disabled={
                       selectedDate === null ||
                       pax.length === 0 ||
-                      location.length === 0
+                      location.length === 0 ||
+                      time.length === 0
                     }
                     color="secondary"
                     style={{ color: "white" }}
@@ -579,7 +632,8 @@ const ActivityDetailsPage = () => {
                     disabled={
                       selectedDate === null ||
                       pax.length === 0 ||
-                      location.length === 0
+                      location.length === 0 ||
+                      time.length === 0
                     }
                   >
                     Download Quotation PDF
@@ -688,7 +742,7 @@ const ActivityDetailsPage = () => {
                         </Typography>
                       </Box>
                     </Grid>
-                  )
+                  ),
                 )}
               </Grid>
               {(currentActivity?.offlinePricing?.isDiscount ||

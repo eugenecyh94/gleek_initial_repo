@@ -103,10 +103,10 @@ export const getCartItemsByClientId = async (req, res) => {
     const updatedCartItems = await Promise.all(
       cartItems.map(async (cartItem) => {
         const isTimeslotAvailable = await isCartItemStillAvailable(
-          cartItem._id
+          cartItem._id,
         );
         return { cartItem, isItemStillAvailable: isTimeslotAvailable }; // Add the 'isAvailable' field to the updated cart items
-      })
+      }),
     );
 
     res.status(200).json(updatedCartItems);
@@ -165,14 +165,14 @@ export async function isCartItemStillAvailable(cartItemId) {
     activity.startTime.getHours(),
     activity.startTime.getMinutes(),
     0,
-    0
+    0,
   );
   const latestStartTime = new Date(cartItem.startDateTime);
   latestStartTime.setHours(
     activity.endTime.getHours(),
     activity.endTime.getMinutes(),
     0,
-    0
+    0,
   );
 
   const interval = 30; // 30 minutes
@@ -208,14 +208,14 @@ export async function isCartItemStillAvailable(cartItemId) {
     activity.capacity,
     bookings,
     blockedTimeslots,
-    activity.duration
+    activity.duration,
   );
 
   // use isTimeslotAvailable
   const isTimeslotAvailable = await getTimeslotAvailability(
     allTimeslots,
     cartItem.startDateTime,
-    cartItem.endDateTime
+    cartItem.endDateTime,
   );
   return isTimeslotAvailable;
 }
