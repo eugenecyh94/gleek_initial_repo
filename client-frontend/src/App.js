@@ -34,6 +34,7 @@ import VendorResetPassword from "./containers/Vendor/Password/ResetPassword";
 import VendorDetails from "./containers/Client/Activity/VendorDetails";
 import BlockoutDashboard from "./containers/Vendor/Blockout/BlockoutDashboard";
 import BlockoutMultipleActivities from "./containers/Vendor/Blockout/BlockoutMultipleActivities";
+import BlockoutSingleActivity from "./containers/Vendor/Blockout/BlockoutSingleActivity";
 
 function App() {
   const { isLoading, clientError, login } = useClientStore();
@@ -264,6 +265,15 @@ function App() {
             element={
               <VendorProtectedRoute>
                 <BlockoutDashboard />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/vendor/activity/:activityId/blockout"
+            element={
+              <VendorProtectedRoute>
+                <BlockoutSingleActivity />
               </VendorProtectedRoute>
             }
           />
