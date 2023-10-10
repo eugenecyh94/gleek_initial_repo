@@ -26,7 +26,10 @@ export async function getAllVendorActivities(vendorId) {
     .populate("activityPricingRules")
     .populate("theme")
     .populate("subtheme")
-    .populate("linkedVendor")
+    .populate({
+      path: "linkedVendor",
+      select: "-password",
+    })
     .populate({
       path: "blockedTimeslots",
       options: { sort: { blockedStartDateTime: 1 } },
