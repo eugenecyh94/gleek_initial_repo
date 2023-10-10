@@ -636,67 +636,70 @@ const ActivityDetailsQuickView = ({ activity, imgs, vendorProfile }) => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {activity.activityPricingRules.map((row, rowIndex) => (
-                      <TableRow key={rowIndex}>
-                        <TableCell>
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "space-evenly",
-                            }}
-                          >
-                            <Box width={"50%"}>{row.start}</Box>
-                            <Box width={"50%"} sx={{ whiteSpace: "nowrap" }}>
-                              to
-                            </Box>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <TextField
-                            sx={{ fontSize: "0.875rem" }}
-                            type="number"
-                            InputProps={{
-                              readOnly: true,
-                              style: { fontSize: "0.875rem" },
-                              endAdornment: (
-                                <InputAdornment position="end">
-                                  pax
-                                </InputAdornment>
-                              ),
-                            }}
-                            value={row.end}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <TextField
-                            sx={{ fontSize: "0.875rem" }}
-                            type="number"
-                            InputProps={{
-                              startAdornment: (
-                                <InputAdornment position="start">
-                                  $
-                                </InputAdornment>
-                              ),
-                              readOnly: true,
-                              style: { fontSize: "0.875rem" },
-                            }}
-                            value={row.pricePerPax}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "start",
-                            }}
-                          >
-                            <Box>$ {row.clientPrice}</Box>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {activity.activityPricingRules
+                      .slice()
+                      .sort((a, b) => a.start - b.start)
+                      .map((row, rowIndex) => (
+                        <TableRow key={rowIndex}>
+                          <TableCell>
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-evenly",
+                              }}
+                            >
+                              <Box width={"50%"}>{row.start}</Box>
+                              <Box width={"50%"} sx={{ whiteSpace: "nowrap" }}>
+                                to
+                              </Box>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              sx={{ fontSize: "0.875rem" }}
+                              type="number"
+                              InputProps={{
+                                readOnly: true,
+                                style: { fontSize: "0.875rem" },
+                                endAdornment: (
+                                  <InputAdornment position="end">
+                                    pax
+                                  </InputAdornment>
+                                ),
+                              }}
+                              value={row.end}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              sx={{ fontSize: "0.875rem" }}
+                              type="number"
+                              InputProps={{
+                                startAdornment: (
+                                  <InputAdornment position="start">
+                                    $
+                                  </InputAdornment>
+                                ),
+                                readOnly: true,
+                                style: { fontSize: "0.875rem" },
+                              }}
+                              value={row.pricePerPax}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "start",
+                              }}
+                            >
+                              <Box>$ {row.clientPrice}</Box>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               </TableContainer>

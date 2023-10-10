@@ -87,7 +87,7 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
     rejectActivity,
     setPendingApprovalActivities,
   } = useActivityStore();
-  
+
   const { openSnackbar } = useSnackbarStore();
   const { admin } = useAdminStore();
   const filterCriteria = {
@@ -138,6 +138,8 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
       rejectionReason,
       admin._id
     );
+    setRejectModalOpen(false);
+    setOpenViewModal(false);
     setPendingApprovalActivities(
       pendingApprovalActivities.filter((a) => a._id !== activityToReject._id)
     );
