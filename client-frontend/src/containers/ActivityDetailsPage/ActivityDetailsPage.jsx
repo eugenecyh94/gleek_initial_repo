@@ -33,6 +33,8 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import DiscountIcon from "@mui/icons-material/Discount";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import useSnackbarStore from "../../zustand/SnackbarStore";
+import useCartStore from "../../zustand/CartStore";
 // Import Swiper styles
 import "swiper/css";
 import "swiper/css/navigation";
@@ -52,6 +54,7 @@ const ActivityDetailsPage = () => {
     timeSlotsLoading,
     timeSlots,
   } = useShopStore();
+  const { addToCart, addToCartLoading } = useCartStore();
   const { activityId } = useParams();
   const theme = useTheme();
   const tertiaryLighter = lighten(theme.palette.tertiary.main, 0.4);
@@ -60,13 +63,12 @@ const ActivityDetailsPage = () => {
   const tertiary = theme.palette.tertiary.main;
   const [selectedDate, setSelectedDate] = useState(null);
   const [pax, setPax] = useState("");
-  const [dateError, setDateError] = useState(null);
-  const [paxError, setPaxError] = useState("");
   const [time, setTime] = useState("");
   const [location, setLocation] = useState("");
   const hd = new Holidays("SG");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [comments, setComments] = useState("");
+  const { openSnackbar } = useSnackbarStore();
 
   const handleTimeChange = (event) => {
     setTime(event.target.value);
@@ -127,45 +129,75 @@ const ActivityDetailsPage = () => {
     }
   };
 
-  const totalPrice = () => {
-    let totalPriceCalculated = pax * clientPriceCalculated(pax);
+  // Function to calculate the base price
+  const calculateBasePrice = (pax) => {
+    return pax * clientPriceCalculated(pax);
+  };
+
+  const calculateWeekendAddOn = (selectedDate, weekendPricing) => {
     if (
-      currentActivity.weekendPricing.amount !== null &&
-      (dayjs(selectedDate).day() == 0 || dayjs(selectedDate).day() == 6)
+      weekendPricing.amount !== null &&
+      (dayjs(selectedDate).day() === 0 || dayjs(selectedDate).day() === 6)
     ) {
-      if (currentActivity.weekendPricing.isDiscount) {
-        totalPriceCalculated -= currentActivity.weekendPricing.amount;
+      if (weekendPricing.isDiscount) {
+        return -weekendPricing.amount;
       } else {
-        totalPriceCalculated += currentActivity.weekendPricing.amount;
+        return weekendPricing.amount;
       }
     }
+    return 0;
+  };
 
+  const calculateOnlineAddOn = (location, onlinePricing) => {
     if (
-      currentActivity.offlinePricing.amount !== null &&
+      onlinePricing.amount !== null &&
       (location.toLowerCase().includes("off-site") ||
         location.toLowerCase().includes("on-site"))
     ) {
-      if (currentActivity.offlinePricing.isDiscount) {
-        totalPriceCalculated = totalPriceCalculated -=
-          currentActivity.offlinePricing.amount;
+      if (onlinePricing.isDiscount) {
+        return -onlinePricing.amount;
       } else {
-        totalPriceCalculated =
-          totalPriceCalculated + currentActivity.offlinePricing.amount;
+        return onlinePricing.amount;
       }
     }
+    return 0;
+  };
 
+  const calculateOfflineAddOn = (location, offlinePricing) => {
     if (
-      currentActivity.onlinePricing.amount !== null &&
+      offlinePricing.amount !== null &&
       location.toLowerCase().includes("virtual")
     ) {
-      if (currentActivity.onlinePricing.isDiscount) {
-        totalPriceCalculated = totalPriceCalculated -=
-          currentActivity.onlinePricing.amount;
+      if (offlinePricing.isDiscount) {
+        return -offlinePricing.amount;
       } else {
-        totalPriceCalculated =
-          totalPriceCalculated + currentActivity.onlinePricing.amount;
+        return offlinePricing.amount;
       }
     }
+    return 0;
+  };
+
+  // Combined function to calculate the total price
+  const totalPrice = () => {
+    let totalPriceCalculated = calculateBasePrice(pax);
+
+    const weekendAddOn = calculateWeekendAddOn(
+      selectedDate,
+      currentActivity.weekendPricing,
+    );
+
+    const onlineAddOn = calculateOnlineAddOn(
+      location,
+      currentActivity.offlinePricing,
+    );
+
+    const offlineAddOn = calculateOfflineAddOn(
+      location,
+      currentActivity.onlinePricing,
+    );
+
+    totalPriceCalculated =
+      totalPriceCalculated + weekendAddOn + onlineAddOn + offlineAddOn;
     return totalPriceCalculated?.toFixed(2);
   };
 
@@ -177,6 +209,59 @@ const ActivityDetailsPage = () => {
     setIsModalOpen(false);
   };
 
+  const handleAddToCart = async (event) => {
+    const weekendAddOn = calculateWeekendAddOn(
+      selectedDate,
+      currentActivity.weekendPricing,
+    );
+    const onlineAddOn = calculateOnlineAddOn(
+      location,
+      currentActivity.offlinePricing,
+    );
+    const offlineAddOn = calculateOfflineAddOn(
+      location,
+      currentActivity.onlinePricing,
+    );
+    const timeParts = time.split(",");
+    const cartItem = {
+      activityId: currentActivity._id,
+      totalPax: Number(pax),
+      basePricePerPax: clientPriceCalculated(pax),
+      eventLocationType: location,
+      additionalComments: comments,
+      weekendAddOnCost: weekendAddOn,
+      onlineAddOnCost: onlineAddOn,
+      offlineAddOnCost: offlineAddOn,
+      startDateTime: timeParts[0],
+      endDateTime: timeParts[1],
+    };
+    if (
+      cartItem.activityId !== null &&
+      cartItem.totalPax.length > 0 &&
+      cartItem.basePricePerPax !== null &&
+      cartItem.eventLocationType.length > 0
+    ) {
+      openSnackbar("There are errors in adding this booking to cart", "error");
+      return;
+    }
+    try {
+      const responseStatus = await addToCart(cartItem);
+      if (responseStatus) {
+        openSnackbar("Booking added to cart!", "success");
+        setSelectedDate(null);
+        setPax("");
+        setTime("");
+        setLocation("");
+        setComments("");
+      }
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.errors?.[0]?.msg ||
+        error?.response?.data ||
+        null;
+      openSnackbar(errorMessage, "error");
+    }
+  };
   useEffect(() => {
     // Check if all three variables are defined
     if (pax.length !== 0 && selectedDate !== null && location.length !== 0) {
@@ -319,7 +404,7 @@ const ActivityDetailsPage = () => {
                       dateAdapter={AdapterDayjs}
                       locale="en"
                     >
-                      <FormControl error={dateError}>
+                      <FormControl>
                         <DatePicker
                           value={selectedDate}
                           onChange={handleDateChange}
@@ -331,9 +416,6 @@ const ActivityDetailsPage = () => {
                           shouldDisableDate={shouldDisableDate}
                           sx={{ marginRight: "12px" }}
                         />
-                        {dateError && (
-                          <FormHelperText>{dateError}</FormHelperText>
-                        )}
                       </FormControl>
                     </LocalizationProvider>
                     <TextField
@@ -341,14 +423,12 @@ const ActivityDetailsPage = () => {
                       id="pax"
                       name="pax"
                       type="number"
-                      defaultValue={pax}
+                      value={pax}
                       onChange={handlePaxChange}
                       inputProps={{
                         min: currentActivity?.minParticipants,
                         max: currentActivity?.maxParticipants,
                       }}
-                      helperText={paxError}
-                      error={paxError.length > 0}
                     />
                   </Box>
                 </Box>
@@ -414,7 +494,10 @@ const ActivityDetailsPage = () => {
                         }}
                       >
                         {timeSlots?.map((timeSlot, index) => (
-                          <MenuItem key={index} value={timeSlot.startTime}>
+                          <MenuItem
+                            key={index}
+                            value={`${timeSlot.startTime},${timeSlot.endTime}`}
+                          >
                             {timeSlot.startTime.substring(11, 16)} -
                             {timeSlot.endTime.substring(11, 16)}
                           </MenuItem>
@@ -619,6 +702,7 @@ const ActivityDetailsPage = () => {
                     }
                     color="secondary"
                     style={{ color: "white" }}
+                    onClick={handleAddToCart}
                   >
                     Add to Cart
                   </Button>
