@@ -2,6 +2,7 @@ import { create } from "zustand";
 import AxiosConnect from "../utils/AxiosConnect";
 
 const useBlockoutStore = create((set) => ({
+  activityTitle: null,
   currentBlockout: null,
   blockoutsForActivity: null,
   isLoadingBlockoutsForActivity: true,
@@ -75,11 +76,7 @@ const useBlockoutStore = create((set) => ({
       throw error;
     }
   },
-  addBlockout: async (
-    blockedStartDateTime,
-    blockedEndDateTime,
-    activityId,
-  ) => {
+  addBlockout: async (blockedStartDateTime, blockedEndDateTime, activityId) => {
     try {
       set({ isLoadingBlockoutsForActivity: true });
       const response = await AxiosConnect.post(
@@ -94,6 +91,20 @@ const useBlockoutStore = create((set) => ({
       const blockoutsForActivity = response.data.blockedTimeslots;
       set({ isLoadingBlockoutsForActivity: false, blockoutsForActivity });
     } catch (error) {
+      throw error;
+    }
+  },
+  getActivityTitle: async (activityId) => {
+    try {
+      const response = await AxiosConnect.get(
+        `/gleekVendor/activity/${activityId}/title`,
+      );
+
+      const activityTitle = response.data;
+      console.log(activityTitle);
+      set({ activityTitle });
+    } catch (error) {
+      console.error(error);
       throw error;
     }
   },

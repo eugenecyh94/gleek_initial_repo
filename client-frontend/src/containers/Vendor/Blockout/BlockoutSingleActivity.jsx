@@ -42,6 +42,8 @@ function BlockoutSingleActivity() {
     blockoutsForActivity,
     deleteBlockouts,
     addBlockout,
+    activityTitle,
+    getActivityTitle,
   } = useBlockoutStore();
   const { openSnackbar } = useSnackbarStore();
   const { activityId } = useParams();
@@ -58,14 +60,15 @@ function BlockoutSingleActivity() {
   useEffect(() => {
     const subscribeBlockouts = async () => {
       try {
-        const response = await getBlockoutsByActivityId(activityId);
+        await getBlockoutsByActivityId(activityId);
+        await getActivityTitle(activityId);
       } catch (err) {
         console.error(err);
-        openSnackbar("Error retrieving your activities.", "error");
+        openSnackbar("Error retrieving your activity.", "error");
       }
     };
     subscribeBlockouts();
-  }, [getBlockoutsByActivityId, openSnackbar, activityId]);
+  }, [getBlockoutsByActivityId, openSnackbar, activityId, getActivityTitle]);
 
   const upcomingTimeslots = blockoutsForActivity?.filter(
     (timeslot) => new Date(timeslot.blockedEndDateTime) >= currentDate,
@@ -100,10 +103,8 @@ function BlockoutSingleActivity() {
   };
 
   const handleSelectItem = (itemId) => {
-    console.log("handleSelectItem", itemId);
     setSelectedItems((prevSelected) => {
       if (prevSelected.includes(itemId)) {
-        console.log("handleSelectItem", prevSelected, "?");
         return prevSelected.filter((id) => id !== itemId);
       } else {
         return [...prevSelected, itemId];
@@ -152,7 +153,7 @@ function BlockoutSingleActivity() {
       hasBackButton={true}
       breadcrumbNames={["Blockout Dashboard"]}
       breadcrumbLinks={["/vendor/blockout"]}
-      currentBreadcrumbName={"Manage Activity's Blockouts"}
+      currentBreadcrumbName={`Manage ${activityTitle} Blockouts`}
     >
       <Box
         display="flex"
@@ -162,9 +163,9 @@ function BlockoutSingleActivity() {
         width={"100%"}
       >
         <Typography color="secondary" variant="h3">
-          Manage Activity's Blockouts
+          Manage <b>{activityTitle}</b> Blockouts
         </Typography>
-        <Typography variant="h6" gutterBottom color="primary">
+        <Typography variant="h6" gutterBottom color="primary"   marginTop={2}>
           Add New Timing
         </Typography>
         <Stack
@@ -172,6 +173,7 @@ function BlockoutSingleActivity() {
           justifyContent="space-between"
           alignItems="center"
           spacing={2}
+        
         >
           <Stack spacing={2} paddingTop={2}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
