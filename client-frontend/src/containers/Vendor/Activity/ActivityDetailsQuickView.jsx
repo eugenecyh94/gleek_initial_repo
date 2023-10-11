@@ -51,6 +51,7 @@ import {
   LocationEnum,
   SustainableDevelopmentGoalsEnum,
 } from "../../../utils/TypeEnum";
+import FeedbackIcon from "@mui/icons-material/FeedbackOutlined";
 
 const StyledAvatar = styled("div")(() => ({
   display: "flex",
@@ -886,6 +887,26 @@ const ActivityDetailsQuickView = ({ activity, imgs, vendorProfile }) => {
                               }
                             )}`}
                           />
+                          {changelog.approvalStatus === "Rejected" && (
+                            <Divider
+                              orientation="vertical"
+                              flexItem
+                              sx={{ paddingLeft: 2 }}
+                            />
+                          )}
+                          <div
+                            style={{
+                              paddingLeft: 4,
+                              display: "flex",
+                            }}
+                          >
+                            {changelog.approvalStatus === "Rejected" && (
+                              <div style={{ paddingTop: 4, paddingRight: 2 }}>
+                                <FeedbackIcon fontSize="small" />
+                              </div>
+                            )}
+                            {changelog.rejectionReason}
+                          </div>
                         </ListItem>
                         <Divider variant="middle" component="li" />
                       </Fragment>

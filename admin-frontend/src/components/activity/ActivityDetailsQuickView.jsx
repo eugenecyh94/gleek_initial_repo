@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import FeedbackIcon from "@mui/icons-material/FeedbackOutlined";
 import {
   Avatar,
   Box,
@@ -936,7 +937,7 @@ const ActivityDetailsQuickView = ({
                                     day: "2-digit",
                                   }
                                 )}{" "}
-                                at
+                                at&nbsp;
                                 {new Date(changelog.date).toLocaleTimeString(
                                   undefined,
                                   {
@@ -948,6 +949,26 @@ const ActivityDetailsQuickView = ({
                               </Typography>
                             }
                           />
+                          {changelog.approvalStatus === "Rejected" && (
+                            <Divider
+                              orientation="vertical"
+                              flexItem
+                              sx={{ paddingLeft: 2 }}
+                            />
+                          )}
+                          <div
+                            style={{
+                              paddingLeft: 4,
+                              display: "flex",
+                            }}
+                          >
+                            {changelog.approvalStatus === "Rejected" && (
+                              <div style={{ paddingTop: 4, paddingRight: 2 }}>
+                                <FeedbackIcon fontSize="small" />
+                              </div>
+                            )}
+                            {changelog.rejectionReason}
+                          </div>
                         </ListItem>
                         <Divider variant="middle" component="li" />
                       </Fragment>
