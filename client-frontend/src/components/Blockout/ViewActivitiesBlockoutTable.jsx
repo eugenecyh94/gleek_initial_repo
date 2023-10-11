@@ -120,7 +120,6 @@ const ViewActivitiesBlockoutTable = ({
             <Button
               variant="outlined"
               color="primary"
-           
               onClick={handleEditClick}
             >
               Edit
@@ -128,7 +127,6 @@ const ViewActivitiesBlockoutTable = ({
             <Button
               variant="outlined"
               color="primary"
-           
               onClick={() => handleViewButton(params.row)}
             >
               View

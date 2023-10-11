@@ -438,7 +438,7 @@ const ActivityDetailsQuickView = ({ activity, imgs, vendorProfile }) => {
                       <MenuItem key={enumValue} value={enumValue}>
                         {enumValue}
                       </MenuItem>
-                    )
+                    ),
                   )}
                 </Select>
               </FormControl>
@@ -877,14 +877,14 @@ const ActivityDetailsQuickView = ({ activity, imgs, vendorProfile }) => {
                                 year: "2-digit",
                                 month: "2-digit",
                                 day: "2-digit",
-                              }
+                              },
                             )} at ${new Date(changelog.date).toLocaleTimeString(
                               undefined,
                               {
                                 hour: "numeric",
                                 minute: "numeric",
                                 hour12: true,
-                              }
+                              },
                             )}`}
                           />
                           {changelog.approvalStatus === "Rejected" && (

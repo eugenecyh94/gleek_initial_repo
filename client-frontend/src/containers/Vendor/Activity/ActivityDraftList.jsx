@@ -78,8 +78,8 @@ const ActivityDraftList = ({
         (activity) =>
           activity.isDraft === filterCriteria[selectedTab].isDraft &&
           filterCriteria[selectedTab].approvalStatus.includes(
-            activity.approvalStatus
-          )
+            activity.approvalStatus,
+          ),
       );
     } else {
       return [];
@@ -91,9 +91,9 @@ const ActivityDraftList = ({
       activities.filter(
         (activity) =>
           filterCriteria[newValue].approvalStatus.includes(
-            activity.approvalStatus
-          ) && activity.isDraft === filterCriteria[newValue].isDraft
-      )
+            activity.approvalStatus,
+          ) && activity.isDraft === filterCriteria[newValue].isDraft,
+      ),
     );
   };
   useEffect(() => {
@@ -101,8 +101,8 @@ const ActivityDraftList = ({
       const filteredRows = activities?.filter(
         (activity) =>
           filterCriteria[selectedTab].approvalStatus.includes(
-            activity.approvalStatus
-          ) && activity.isDraft === filterCriteria[selectedTab].isDraft
+            activity.approvalStatus,
+          ) && activity.isDraft === filterCriteria[selectedTab].isDraft,
       );
       setCurrentTabRows(filteredRows);
     }
@@ -151,7 +151,7 @@ const ActivityDraftList = ({
       selectedTab === "rejectedTab"
     ) {
       const res = await AxiosConnect.get(
-        `/gleekVendor/activity/getImages/${activity._id}`
+        `/gleekVendor/activity/getImages/${activity._id}`,
       );
       setImgs(res.data.activityImages);
       setVendorProfile(res.data.vendorProfileImage);
@@ -173,20 +173,20 @@ const ActivityDraftList = ({
     ? activities.filter(
         (activity) =>
           activity.isDraft === false &&
-          activity.approvalStatus === "Pending Approval"
+          activity.approvalStatus === "Pending Approval",
       ).length
     : null;
   const readyToPublishBadgeNumber = Array.isArray(activities)
     ? activities.filter(
         (activity) =>
           activity.isDraft === false &&
-          activity.approvalStatus === "Ready to Publish"
+          activity.approvalStatus === "Ready to Publish",
       ).length
     : null;
   const rejectedBadgeNumber = Array.isArray(activities)
     ? activities.filter(
         (activity) =>
-          activity.isDraft === false && activity.approvalStatus === "Rejected"
+          activity.isDraft === false && activity.approvalStatus === "Rejected",
       ).length
     : null;
 
@@ -282,7 +282,7 @@ const ActivityDraftList = ({
             </div>
           );
         },
-      }
+      },
     );
     columns.push({
       field: "action",
@@ -329,7 +329,7 @@ const ActivityDraftList = ({
         renderCell: (params) => {
           const list = params.row.approvalStatusChangeLog;
           const changeLog = list.find(
-            (item) => item.approvalStatus === "Ready to Publish"
+            (item) => item.approvalStatus === "Ready to Publish",
           );
           const date = new Date(changeLog?.date);
           const formattedDate = date.toLocaleDateString(undefined, {
@@ -376,7 +376,7 @@ const ActivityDraftList = ({
             </div>
           );
         },
-      }
+      },
     );
   }
   if (selectedTab === "rejectedTab") {
@@ -389,10 +389,10 @@ const ActivityDraftList = ({
         headerAlign: "left",
         renderCell: (params) => {
           const list = params.row.approvalStatusChangeLog.sort(
-            (a, b) => new Date(b?.date) - new Date(a?.date)
+            (a, b) => new Date(b?.date) - new Date(a?.date),
           );
           const changeLog = list.find(
-            (item) => item.approvalStatus === "Rejected"
+            (item) => item.approvalStatus === "Rejected",
           );
           const date = new Date(changeLog?.date);
           const formattedDate = date.toLocaleDateString(undefined, {
@@ -450,7 +450,7 @@ const ActivityDraftList = ({
             </div>
           );
         },
-      }
+      },
     );
   }
   return (

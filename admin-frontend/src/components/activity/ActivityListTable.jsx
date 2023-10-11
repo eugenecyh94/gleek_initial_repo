@@ -87,6 +87,7 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
     rejectActivity,
     setPendingApprovalActivities,
   } = useActivityStore();
+
   const [markup, setMarkup] = useState();
   const [pricingRanges, setPricingRanges] = useState();
 
@@ -131,16 +132,16 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
     if (!markup) {
       openSnackbar(
         "Please fill up markup percentage before approving!",
-        "error"
+        "error",
       );
     } else {
       const successMessage = await approveActivity(
         activity._id,
         admin._id,
-        markup
+        markup,
       );
       setPendingApprovalActivities(
-        pendingApprovalActivities.filter((a) => a._id !== activity._id)
+        pendingApprovalActivities.filter((a) => a._id !== activity._id),
       );
       setOpenViewModal(false);
       openSnackbar(successMessage);
@@ -286,7 +287,7 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
         renderCell: (params) => {
           const list = params.row.approvalStatusChangeLog;
           const changeLog = list.find(
-            (item) => item.approvalStatus === "Ready to Publish"
+            (item) => item.approvalStatus === "Ready to Publish",
           );
           const date = changeLog?.date ? new Date(changeLog?.date) : null;
           const formattedDate = date?.toLocaleDateString(undefined, {

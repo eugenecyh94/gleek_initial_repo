@@ -1,7 +1,8 @@
 import express from "express";
 
 import vendorVerifyToken from "../../middleware/vendorAuth.js";
-import { getActivityTitle,
+import {
+  getActivityTitle,
   bulkDeleteActivityDraft,
   deleteActivityDraft,
   getActivity,
@@ -27,14 +28,12 @@ router.post(
   "/saveActivity",
   vendorVerifyToken,
   uploadS3ActivityImages.array("images", 5),
-  saveActivity
+  saveActivity,
 );
 router.get("/viewActivity/:id", vendorVerifyToken, getActivity);
 router.patch("/publishActivity/:id", vendorVerifyToken, publishActivity);
 router.get("/getImages/:id", vendorVerifyToken, getPreSignedImgs);
 
-
 router.get("/:activityId/title", vendorVerifyToken, getActivityTitle);
-
 
 export default router;

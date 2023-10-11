@@ -2,8 +2,6 @@ import React from "react";
 import { Grid, Typography } from "@mui/material";
 import BlockedTimingItem from "./BlockedTimingItem";
 
-
-
 const BlockedTimingsSection = ({ timeslots, title }) => {
   if (!timeslots || timeslots.length === 0) return null;
 

@@ -48,7 +48,7 @@ const useActivityStore = create((set) => ({
     try {
       set({ isLoading: true });
       const response = await AxiosConnect.get(
-        `/gleekVendor/activity/viewActivity/${activityId}`
+        `/gleekVendor/activity/viewActivity/${activityId}`,
       );
       set({ activityDetails: response.data.data });
       set({ isLoading: false });
@@ -60,7 +60,7 @@ const useActivityStore = create((set) => ({
     try {
       const response = await AxiosConnect.postMultiPart(
         "/gleekVendor/activity/saveActivity",
-        activityDraftData
+        activityDraftData,
       );
       set({ newActivity: response.data.activity });
     } catch (error) {
@@ -70,7 +70,7 @@ const useActivityStore = create((set) => ({
   deleteActivity: async (activityId) => {
     try {
       const updatedActivities = await AxiosConnect.delete(
-        `/gleekVendor/activity/deleteDraft/${activityId}`
+        `/gleekVendor/activity/deleteDraft/${activityId}`,
       );
       console.log("updated activities", updatedActivities.data.activity);
       set({ activities: updatedActivities.data.activity });
@@ -84,7 +84,7 @@ const useActivityStore = create((set) => ({
     try {
       const updatedActivities = await AxiosConnect.delete(
         "/gleekVendor/activity/bulkDelete",
-        activityIds
+        activityIds,
       );
       set({
         activities: updatedActivities.data.activity,
@@ -98,7 +98,7 @@ const useActivityStore = create((set) => ({
   publishActivity: async (activityId) => {
     try {
       const response = await AxiosConnect.patch(
-        `/gleekVendor/activity/publishActivity/${activityId}`
+        `/gleekVendor/activity/publishActivity/${activityId}`,
       );
       set({
         selectedActivityTab: "readyToPublishTab",
@@ -114,7 +114,7 @@ const useActivityStore = create((set) => ({
       const updatedActivities = await AxiosConnect.patch(
         "/activity/rejectActivity",
         activityId,
-        { rejectionReason: rejectionReason, adminId: adminId }
+        { rejectionReason: rejectionReason, adminId: adminId },
       );
       set({
         selectedActivityTab: "pendingApprovalTab",
