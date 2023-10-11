@@ -129,6 +129,29 @@ const useShopStore = create((set) => ({
   priceFilterLoading: true,
   setPriceFilterLoading: (newPriceFilterLoading) =>
     set({ priceFilterLoading: newPriceFilterLoading }),
+  timeSlots: null,
+  setTimeSlots: (newTimeSlots) => set({ timeSlots: newTimeSlots }),
+  timeSlotsLoading: false,
+  setTimeSlotsLoading: (newTimeSlotsLoading) =>
+    set({ timeSlotsLoading: newTimeSlotsLoading }),
+  getTimeSlots: async (activityId, selectedDate) => {
+    set({ timeSlotsLoading: true });
+    try {
+      const response = await AxiosConnect.get(
+        `/gleek/booking/getAvailableBookingTimeslots/${activityId}/${selectedDate}`,
+      );
+      set({
+        timeSlots: response.data.allTimeslots.filter(
+          (timeslot) => timeslot.isAvailable === true,
+        ),
+      });
+      setTimeout(() => {
+        set({ timeSlotsLoading: false });
+      }, 200);
+    } catch (error) {
+      console.error(error);
+    }
+  },
 }));
 
 export default useShopStore;

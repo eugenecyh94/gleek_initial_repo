@@ -4,8 +4,6 @@ import { DataGrid, GridToolbarFilterButton } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-
-
 const SelectActivityTable = ({
   activities,
   selectedRows,
@@ -14,7 +12,6 @@ const SelectActivityTable = ({
   setSelectedActivity,
   setOpenModal,
   openModal,
-
 }) => {
   const navigate = useNavigate();
 

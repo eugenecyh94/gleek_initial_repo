@@ -13,7 +13,7 @@ const MainBodyContainer = ({
   const theme = useTheme();
 
   return (
-    <Box >
+    <Box>
       <BreadCrumbsBar
         hasBackButton={hasBackButton}
         breadcrumbNames={breadcrumbNames}

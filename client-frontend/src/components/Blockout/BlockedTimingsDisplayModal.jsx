@@ -15,7 +15,7 @@ const BlockedTimingsDisplayModal = ({
   handleClose,
   selectedActivity,
 }) => {
-  console.log(selectedActivity)
+  console.log(selectedActivity);
   const currentDate = new Date();
 
   const upcomingTimeslots = selectedActivity?.blockedTimeslots?.filter(

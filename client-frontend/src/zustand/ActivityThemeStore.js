@@ -7,7 +7,9 @@ const useThemeStore = create((set) => ({
   getThemes: async () => {
     try {
       set({ isThemeLoading: true });
-      const response = await AxiosConnect.get("/gleekVendor/activity/getThemes");
+      const response = await AxiosConnect.get(
+        "/gleekVendor/activity/getThemes",
+      );
       set({ themes: response.data });
       set({ isThemeLoading: false });
     } catch (error) {
