@@ -116,6 +116,8 @@ const activitySchema = new mongoose.Schema({
       ref: "BlockedTimeslot",
     },
   ],
+  rejectedDraft: { type: mongoose.Schema.Types.ObjectId, ref: "Activity" },
+  parent: { type: mongoose.Schema.Types.ObjectId, ref: "Activity" },
 });
 
 activitySchema.pre("findOneAndDelete", async function (next) {
