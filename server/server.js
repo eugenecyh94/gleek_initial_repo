@@ -33,7 +33,6 @@ const customCors = (req, callback) => {
       callback();
    }
 };
-
 app.use(cors(customCors));
 
 app.use(cookieParser());
@@ -51,12 +50,24 @@ app.use("/gleek", gleekRoutes);
 app.use("/testActivity", activityTestController);
 
 app.get("/pdf", (req, res, next) => {
-   const stream = res.writeHead(200, {
-      "Content-Type": "appplication/pdf",
-      "Content-Disposition": "attachment;filename=test.pdf",
-   });
+   const booking = {
+      client: {
+         name: "Yunus",
+      },
+      startDateTime: "2023-10-20T01:00:00.000+00:00",
+      endDateTime: "2023-10-20T04:00:00.000+00:00",
+      totalCost: 900,
+      totalPax: 20,
+      activityTitle: "Coffee Grounds",
+      vendorName: "Sustainability Project",
+      status: "PENDING_CONFIRMATION",
+      billingAddress: "test",
+      billingPostalCode: "1",
+   };
 
-   pdf.create(InvoiceTemplate("Yunus"), {}).toStream(function (err, stream) {
+   pdf.create(InvoiceTemplate(booking), {}).toStream(function (err, stream) {
+      res.setHeader("Content-Type", "appplication/pdf");
+      res.setHeader("Content-Disposition", "inline;filename=test.pdf");
       stream.pipe(res);
    });
 });

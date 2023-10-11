@@ -1,6 +1,25 @@
 import { header } from "./header.js";
 import { footer } from "./footer.js";
-export const InvoiceTemplate = (name) => {
+export const InvoiceTemplate = (booking) => {
+   let { startDateTime, endDateTime } = booking;
+
+   const getDateTime = (datetime) => {
+      datetime = new Date(datetime);
+      const date = datetime.toLocaleDateString(undefined, {
+         day: "2-digit",
+         month: "short",
+      });
+      const time = datetime.toLocaleTimeString(undefined, {
+         hour: "2-digit",
+         minute: "2-digit",
+         hour12: true,
+      });
+      return [date, time];
+   };
+
+   const [startDate, startTime] = getDateTime(startDateTime);
+   const [endDate, endTime] = getDateTime(endDateTime);
+
    return ` 
    <!doctype html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
@@ -47,11 +66,14 @@ export const InvoiceTemplate = (name) => {
                "
             >
                <p style="white-space: nowrap" class="ft12">
-                  <b>Attn: ${name}<br />Checkout APAC<br /></b>21 Tg Pagar
-                  Rd, #03-01/02<br />Singapore 088444
+                  <b>Attn: ${
+                     booking.client.companyName
+                  }<br />Checkout APAC<br /></b>${
+                     booking.billingAddress
+                  }<br />Singapore ${booking.billingPostalCode}
                </p>
-               <p style="white-space: nowrap; padding-top: 2.5%" class="ft14">
-                  October 10 2023
+               <p style="white-space: nowrap" class="ft12">
+                  <b>Status: ${booking.status}</b>
                </p>
             </div>
             <hr
@@ -74,17 +96,22 @@ export const InvoiceTemplate = (name) => {
                <tr>
                   <th class="ft113" style="width: 40%; text-align: left">
                      <b
-                        >Coffee Grounds Scrub Workshop by<br />The
-                        Sustainability Project</b
+                        >${booking.activityTitle} by<br />${
+                           booking.vendorName
+                        }</b
                      >
                      <ul style="padding-top: unset; line-height: 16px">
-                        <li class="ft110">Date: 10th Oct 2023</li>
-                        <li class="ft110">Time: 4pm to 5pm</li>
+                        <li class="ft110">Date: ${startDate}</li>
+                        <li class="ft110">Time: ${startTime} to ${endTime}</li>
                      </ul>
                   </th>
-                  <th class="ft113" style="width: 20%">20</th>
-                  <th class="ft113" style="width: 20%">$45</th>
-                  <th class="ft113" style="width: 20%">$900</th>
+                  <th class="ft113" style="width: 20%">${booking.totalPax}</th>
+                  <th class="ft113" style="width: 20%">$${
+                     booking.totalCost / booking.totalPax
+                  }</th>
+                  <th class="ft113" style="width: 20%">$${
+                     booking.totalCost
+                  }</th>
                </tr>
             </table>
             <hr
@@ -106,7 +133,7 @@ export const InvoiceTemplate = (name) => {
                   style="white-space: nowrap; align-self: flex-end"
                   class="ft15"
                >
-                  <b>$900.00</b>
+                  <b>$${booking.totalCost}</b>
                </p>
             </div>
          </div>
