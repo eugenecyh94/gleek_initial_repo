@@ -113,9 +113,10 @@ export const getActivity = async (req, res) => {
 export const getActivitiesByVendorId = async (req, res) => {
   try {
     const { vendorId } = req.params;
-    console.log(vendorId);
-
-    const activities = await ActivityModel.find({ linkedVendor: vendorId })
+    const activities = await ActivityModel.find({
+      linkedVendor: vendorId,
+      approvalStatus: "Published",
+    })
       .populate("activityPricingRules")
       .populate("theme")
       .populate("subtheme")
