@@ -1,17 +1,19 @@
 import express from "express";
 import {
-  getAllBookings,
-  getBookingById,
-  deleteBooking,
-  getAllBookingsByActivityId,
+   getAllBookings,
+   getBookingById,
+   deleteBooking,
+   getAllBookingsByActivityId,
 } from "../../controller/bookingController.js";
+import adminAuth from "../../middleware/adminAuth.js";
 
 const router = express.Router();
-router.get("/getAllBookings", getAllBookings);
-router.get("/getBookingById/:id", getBookingById);
+router.get("/getAllBookings", adminAuth, getAllBookings);
+router.get("/getBookingById/:id", adminAuth, getBookingById);
 router.get(
-  "/getAllBookingsByActivityId/:activityId",
-  getAllBookingsByActivityId
+   "/getAllBookingsByActivityId/:activityId",
+   adminAuth,
+   getAllBookingsByActivityId
 );
-router.delete("/deleteBooking/:id", deleteBooking);
+router.delete("/deleteBooking/:id", adminAuth, deleteBooking);
 export default router;
