@@ -1,20 +1,31 @@
 import NotificationModel from "../model/notificationModel.js";
-import { NotificationEvent } from "../util/notificationRelatedEnum.js";
+import {
+  NotificationAction,
+  NotificationEvent,
+} from "../util/notificationRelatedEnum.js";
+import { Role } from "../util/roleEnum.js";
 import ActivityModel from "../model/activityModel.js";
 import ClientModel from "../model/clientModel.js";
-import { Role } from "../util/roleEnum.js";
 import VendorModel from "../model/vendorModel.js";
 import AdminModel from "../model/adminModel.js";
-import { ObjectId } from "mongodb";
+import BookingModel from "../model/bookingModel.js";
 
 export const getAdminNotifications = async (req, res) => {
   try {
     const adminId = req.adminId;
     const adminRole = req.adminRole; //in case theres any need to filter between mnger and exec exclusive notifications
-    const allNotifications = await NotificationModel.find().or([
-      { recipient: adminId },
-      { recipientRole: Role.ADMIN },
-    ]);
+    const allNotifications =
+      adminRole === Role.EXECUTIVE
+        ? await NotificationModel.find().or([
+            { recipient: adminId },
+            { recipientRole: Role.ADMIN },
+            { recipientRole: Role.EXECUTIVE },
+          ])
+        : await NotificationModel.find().or([
+            { recipient: adminId },
+            { recipientRole: Role.ADMIN },
+            { recipientRole: Role.MANAGERIAL },
+          ]);
 
     res.status(200).json({
       data: allNotifications,
@@ -26,7 +37,7 @@ export const getAdminNotifications = async (req, res) => {
 
 export const getNonAdminNotifications = async (req, res) => {
   try {
-    const recipientId = req.user._id; //might need to change to type object.id
+    const recipientId = req.user._id;
     const allNotifications = await NotificationModel.find({
       recipient: recipientId,
     });
@@ -45,7 +56,7 @@ export const createNotification = async (req, res) => {
 
     const newNotification = new NotificationModel({
       senderRole: req.senderRole,
-      sender: req.sender,
+      sender: req.sender._id,
       recipientRole: req.recipientRole,
       recipient: req.recipient ? req.recipient : undefined,
       notificationEvent: req.notificationEvent,
@@ -56,19 +67,38 @@ export const createNotification = async (req, res) => {
 
     switch (req.notificationEvent) {
       case NotificationEvent.REGISTER:
-        // const registerEvent = ClientModel.findById(req.eventId);
         newNotification.title = "Registration Notification";
-        newNotification.text = `There is a new ${req.senderRole.toLowerCase()} account registration awaiting your review`;
+        newNotification.text = `
+        There is a new ${req.senderRole.toLowerCase()} 
+        account registration for 
+        ${
+          req.senderRole === Role.CLIENT
+            ? req.sender.name.toUpperCase()
+            : req.sender.companyName.toUpperCase()
+        }
+        (${
+          req.senderRole === Role.CLIENT
+            ? req.sender.email
+            : req.sender.companyEmail
+        }) 
+        awaiting your review`;
         break;
       case NotificationEvent.ACTIVITY:
-        const activityEvent = ActivityModel.findById(req.eventId).populate(
-          "linkedVendor",
-        );
+        const activityEvent = await ActivityModel.findById(
+          req.eventId,
+        ).populate("linkedVendor");
         newNotification.title = "Activity Notification";
-        newNotification.text = `${
-          activityEvent.title
-        } is ${req.notificationAction.toLowerCase()}ed by
-                    ${req.senderRole}.`;
+        if (req.notificationAction === NotificationAction.APPROVE) {
+          newNotification.text = `
+          ${req.senderRole === Role.VENDOR ? "Vendor" : "Admin"} 
+          ${
+            req.senderRole === Role.VENDOR
+              ? req.sender.companyName.toUpperCase()
+              : req.sender.name.toUpperCase()
+          } 
+          is requesting approval to publish ${activityEvent.title} for viewing.
+          `;
+        }
         break;
       //To be uncommented when booking is implemented
       // case NotificationEvent.BOOKING:
@@ -84,7 +114,6 @@ export const createNotification = async (req, res) => {
 
     newNotification.save();
   } catch (error) {
-    console.log("notif error", error);
-    // res.status(500).json({ error: error.message });
+    console.log("notification error", error);
   }
 };

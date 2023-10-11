@@ -2,14 +2,14 @@ export const NotificationEvent = {
   BOOKING: "BOOKING",
   ACTIVITY: "ACTIVITY",
   REGISTER: "REGISTER",
-  TEST: "TEST", //Testing purposes
 };
 
 export const NotificationAction = {
-  CREATE: "CREATE", //Activity, Register?
+  CREATE: "CREATE", //Register, Activity
   REQUEST: "REQUEST", //Booking
   UPDATE: "UPDATE", //Activity, Booking
-  APPROVE: "APPROVE", //Register (Upon email validation?)
+  APPROVE: "APPROVE", //Register, Booking, Activity (Upon email validation?)
+  REJECT: "REJECT", //Activity creation?
   DISABLED: "DISABLED",
   DELETE: "DELETE",
 };

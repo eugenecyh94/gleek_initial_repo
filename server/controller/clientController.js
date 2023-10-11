@@ -129,16 +129,6 @@ export const postRegister = async (req, res) => {
 
     await encryptUserPassword(createdClient, newClient.password);
 
-    req.notificationReq = {
-      senderRole: Role.CLIENT,
-      sender: createdClient._id,
-      recipientRole: Role.ADMIN,
-      notificationEvent: NotificationEvent.REGISTER,
-      notificationAction: NotificationAction.CREATE,
-    };
-
-    createNotification(req.notificationReq, res);
-
     // Create the Consent model and link to Client
     await createClientConsent(
       createdClient.id,
@@ -149,6 +139,16 @@ export const postRegister = async (req, res) => {
     const token = await generateJwtToken(createdClient.id);
 
     await session.commitTransaction();
+
+    req.notificationReq = {
+      senderRole: Role.CLIENT,
+      sender: createdClient,
+      recipientRole: Role.ADMIN,
+      notificationEvent: NotificationEvent.REGISTER,
+      notificationAction: NotificationAction.CREATE,
+    };
+
+    await createNotification(req.notificationReq, res);
 
     sendMail(createClientWelcomeMailOptions(createdClient));
     sendMail(createVerifyEmailOptions(createdClient, token));
