@@ -1,6 +1,7 @@
 import {
   AppBar,
   Avatar,
+  Badge,
   Box,
   IconButton,
   Menu,
@@ -10,10 +11,11 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { useState } from "react";
-import { useAdminStore } from "../../zustand/GlobalStore";
+import { useEffect, useState } from "react";
+import { useAdminStore, useNotificationStore } from "../../zustand/GlobalStore";
 import { Link, useNavigate } from "react-router-dom";
 import MenuIcon from "@mui/icons-material/Menu";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 
 const HomePageNavBar = ({ toggleSidebar }) => {
   const theme = useTheme();
@@ -21,6 +23,7 @@ const HomePageNavBar = ({ toggleSidebar }) => {
   const settings = ["Profile", "Account", "Dashboard", "Logout"];
   const [anchorElUser, setAnchorElUser] = useState(null);
   const { authenticated, admin, logout, login } = useAdminStore();
+  const { unreadNotificationsCount } = useNotificationStore();
 
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
@@ -29,6 +32,10 @@ const HomePageNavBar = ({ toggleSidebar }) => {
   const handleLogout = async (event) => {
     navigate("/");
     const response = await logout();
+  };
+
+  const handleNotificationClick = () => {
+    navigate("/notificationList");
   };
 
   const handleCloseUserMenu = () => {
@@ -62,6 +69,15 @@ const HomePageNavBar = ({ toggleSidebar }) => {
         </Link>
         {authenticated ? (
           <Box sx={{ flexGrow: 0 }}>
+            <IconButton
+              size="large"
+              aria-label="show 17 new notifications"
+              color="inherit"
+            >
+              <Badge badgeContent={unreadNotificationsCount} color="error">
+                <NotificationsIcon onClick={handleNotificationClick} />
+              </Badge>
+            </IconButton>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar {...stringAvatar()} />

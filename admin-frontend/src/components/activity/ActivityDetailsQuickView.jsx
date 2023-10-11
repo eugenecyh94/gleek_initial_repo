@@ -431,7 +431,7 @@ const ActivityDetailsQuickView = ({ activity, imgs, vendorProfile }) => {
                       <MenuItem key={enumValue} value={enumValue}>
                         {enumValue}
                       </MenuItem>
-                    )
+                    ),
                   )}
                 </Select>
               </FormControl>

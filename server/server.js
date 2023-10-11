@@ -11,6 +11,7 @@ import vendorRoutes from "./routes/gleekAdmin/vendorRoute.js";
 import bookingRoutes from "./routes/gleekAdmin/bookingRoute.js";
 import client from "./routes/gleekAdmin/client.js";
 import activityTestController from "./controller/activityTestController.js";
+import notificationRoutes from "./routes/notificationRoute.js";
 
 const app = express();
 
@@ -56,6 +57,7 @@ app.use("/gleek", gleekRoutes);
 app.use("/gleekVendor", gleekVendorRoutes);
 //for activity image upload test
 app.use("/testActivity", activityTestController);
+app.use("/notification", notificationRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
