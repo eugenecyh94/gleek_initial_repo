@@ -95,30 +95,39 @@ const ActivityDetailsPage = () => {
     const dayOfWeek = dayjs(date).day();
     const isPublicHoliday = hd.isHoliday(new Date(date));
     const conditionsToCheck = [];
-
+    const phEnabled = false;
     for (const dayAvailability of currentActivity?.dayAvailabilities) {
-      if (dayAvailability.toLowerCase().includes("weekends")) {
-        // return true if not weekend
-        // return false if weekend
-        conditionsToCheck.push(!(dayOfWeek === 0 || dayOfWeek === 6));
-      }
-
-      if (dayAvailability.toLowerCase().includes("weekdays")) {
-        // return true if not weekday
-        // return false if weekday
-        conditionsToCheck.push(!(dayOfWeek >= 1 && dayOfWeek <= 5));
+      if (
+        dayAvailability.toLowerCase().includes("weekends") &&
+        (dayOfWeek === 0 || dayOfWeek === 6)
+      ) {
+        // return true if weekend
+        conditionsToCheck.push(true);
       }
 
       if (
-        !dayAvailability.toLowerCase().includes("public holidays") &&
+        dayAvailability.toLowerCase().includes("weekdays") &&
+        dayOfWeek >= 1 &&
+        dayOfWeek <= 5
+      ) {
+        // return true if weekday
+        conditionsToCheck.push(true);
+      }
+
+      if (
+        dayAvailability.toLowerCase().includes("public holidays") &&
         isPublicHoliday
       ) {
-        // return true if does not contain PH and is PH
+        phEnabled = true;
+        // return true PH
         conditionsToCheck.push(true);
       }
     }
 
-    return conditionsToCheck.some((condition) => condition);
+    if (!phEnabled && isPublicHoliday) {
+      return true;
+    }
+    return !conditionsToCheck.some((condition) => condition);
   };
 
   const clientPriceCalculated = (pax) => {

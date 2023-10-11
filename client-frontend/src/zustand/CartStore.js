@@ -42,6 +42,19 @@ const useCartStore = create((set) => ({
       throw error;
     }
   },
+  deleteCartItem: async (cartId) => {
+    try {
+      const response = await AxiosConnect.delete(
+        `/gleek/cart/deleteCartItem/${cartId}`,
+      );
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  },
+  cartItemsToCheckOut: [],
+  setCartItemsToCheckout: (newCartItemsToCheckOut) =>
+    set({ cartItemsToCheckOut: newCartItemsToCheckOut }),
 }));
 
 export default useCartStore;

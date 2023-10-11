@@ -45,4 +45,14 @@ AxiosConnect.patchMultipart = (command, req) => {
   return axios(options);
 };
 
+AxiosConnect.delete = (command, req) => {
+  const options = {
+    method: "DELETE",
+    url: uri + command,
+    data: req, // DELETE requests may include a request body, but it's less common than with POST
+    withCredentials: true,
+  };
+  return axios(options);
+};
+
 export default AxiosConnect;
