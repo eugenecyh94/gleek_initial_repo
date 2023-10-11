@@ -138,7 +138,7 @@ const ViewActivitiesBlockoutTable = ({
   ];
 
   return (
-    <Box paddingTop={2} marginLeft={2}>
+    <Box paddingTop={2} marginLeft={2} width="98%">
       <DataGrid
         checkboxSelection={false}
         initialState={{

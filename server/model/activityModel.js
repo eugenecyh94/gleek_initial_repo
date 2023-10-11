@@ -9,7 +9,7 @@ import ActivityPricingRulesModel from "./activityPricingRules.js";
 const activitySchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
-  clientMarkupPercentage: { type: Number, required: true },
+  clientMarkupPercentage: { type: Number, required: false },
   maxParticipants: { type: Number },
   minParticipants: { type: Number },
   theme: { type: mongoose.Schema.Types.ObjectId, ref: "Theme" },
@@ -116,6 +116,8 @@ const activitySchema = new mongoose.Schema({
       ref: "BlockedTimeslot",
     },
   ],
+  rejectedDraft: { type: mongoose.Schema.Types.ObjectId, ref: "Activity" },
+  parent: { type: mongoose.Schema.Types.ObjectId, ref: "Activity" },
 });
 
 activitySchema.pre("findOneAndDelete", async function (next) {
