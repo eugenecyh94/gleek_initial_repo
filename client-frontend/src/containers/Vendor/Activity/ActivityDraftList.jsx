@@ -505,7 +505,6 @@ const ActivityDraftList = ({
               <StyledBadge
                 color={"success"}
                 badgeContent={readyToPublishBadgeNumber}
-                showZero
               >
                 <TaskAltIcon />
               </StyledBadge>

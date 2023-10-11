@@ -71,7 +71,15 @@ const StyledChip = styled(Chip)`
   }
 `;
 
-const ActivityDetailsQuickView = ({ activity, imgs, vendorProfile }) => {
+const ActivityDetailsQuickView = ({
+  activity,
+  imgs,
+  vendorProfile,
+  approve,
+  setPricingRanges,
+  markup,
+  setMarkup,
+}) => {
   const theme = useTheme();
   const foodCategories = Object.values(FoodCategoryEnum);
 
@@ -98,6 +106,21 @@ const ActivityDetailsQuickView = ({ activity, imgs, vendorProfile }) => {
     const endIndex = startIndex + optionsPerColumn;
     columnsArray.push(sdgList.slice(startIndex, endIndex));
   }
+  const handleMarkupChange = (event) => {
+    const newMarkup = event.target.value;
+    setMarkup(event.target.value);
+
+    const newClientPrice = [...activity.activityPricingRules];
+    newClientPrice.forEach((rule, index) => {
+      const { pricePerPax } = rule;
+      const clientPrice = Math.ceil(
+        parseFloat(pricePerPax) * (parseFloat(newMarkup) / 100) +
+          parseFloat(pricePerPax)
+      );
+      newClientPrice[index].clientPrice = clientPrice;
+    });
+    setPricingRanges(newClientPrice);
+  };
   return (
     <Box padding={2} sx={{ backgroundColor: "FAFAFA" }}>
       <Grid container spacing={2} alignItems="left" justifyContent="left">
@@ -595,13 +618,14 @@ const ActivityDetailsQuickView = ({ activity, imgs, vendorProfile }) => {
                 label="Markup Percentage"
                 fullWidth
                 type="number"
-                value={activity.clientMarkupPercentage ?? ""}
+                value={activity.clientMarkupPercentage ?? markup}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="start">%</InputAdornment>
                   ),
-                  readOnly: true,
+                  readOnly: !approve,
                 }}
+                onChange={handleMarkupChange}
               />
             </Grid>
             <Grid item xs={12} paddingTop={2}>
@@ -630,76 +654,73 @@ const ActivityDetailsQuickView = ({ activity, imgs, vendorProfile }) => {
                           Client Price&nbsp;
                         </span>
                         <span style={{ color: "#9F91CC" }}>
-                          (after {activity.clientMarkupPercentage}% markup)
+                          (after {markup}% markup)
                         </span>
                       </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {activity.activityPricingRules
-                      .slice()
-                      .sort((a, b) => a.start - b.start)
-                      .map((row, rowIndex) => (
-                        <TableRow key={rowIndex}>
-                          <TableCell>
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-evenly",
-                              }}
-                            >
-                              <Box width={"50%"}>{row.start}</Box>
-                              <Box width={"50%"} sx={{ whiteSpace: "nowrap" }}>
-                                to
-                              </Box>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <TextField
-                              sx={{ fontSize: "0.875rem" }}
-                              type="number"
-                              InputProps={{
-                                readOnly: true,
-                                style: { fontSize: "0.875rem" },
-                                endAdornment: (
-                                  <InputAdornment position="end">
-                                    pax
-                                  </InputAdornment>
-                                ),
-                              }}
-                              value={row.end}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <TextField
-                              sx={{ fontSize: "0.875rem" }}
-                              type="number"
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    $
-                                  </InputAdornment>
-                                ),
-                                readOnly: true,
-                                style: { fontSize: "0.875rem" },
-                              }}
-                              value={row.pricePerPax}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "start",
-                              }}
-                            >
-                              <Box>$ {row.clientPrice}</Box>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                    {activity.activityPricingRules.map((row, rowIndex) => (
+                      <TableRow key={rowIndex}>
+                        <TableCell>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-evenly",
+                            }}
+                          >
+                            <Box width={"50%"}>{row.start}</Box>
+                            <Box width={"50%"} sx={{ whiteSpace: "nowrap" }}>
+                              to
+                            </Box>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <TextField
+                            sx={{ fontSize: "0.875rem" }}
+                            type="number"
+                            InputProps={{
+                              readOnly: true,
+                              style: { fontSize: "0.875rem" },
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  pax
+                                </InputAdornment>
+                              ),
+                            }}
+                            value={row.end}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <TextField
+                            sx={{ fontSize: "0.875rem" }}
+                            type="number"
+                            InputProps={{
+                              startAdornment: (
+                                <InputAdornment position="start">
+                                  $
+                                </InputAdornment>
+                              ),
+                              readOnly: true,
+                              style: { fontSize: "0.875rem" },
+                            }}
+                            value={row.pricePerPax}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "start",
+                            }}
+                          >
+                            <Box>$ {row.clientPrice}</Box>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -880,5 +901,9 @@ ActivityDetailsQuickView.propTypes = {
   activity: PropTypes.object.isRequired,
   imgs: PropTypes.array.isRequired,
   vendorProfile: PropTypes.string,
+  approve: PropTypes.boolean,
+  setPricingRanges: PropTypes.func,
+  markup: PropTypes.number,
+  setMarkup: PropTypes.func,
 };
 export default ActivityDetailsQuickView;

@@ -87,6 +87,8 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
     rejectActivity,
     setPendingApprovalActivities,
   } = useActivityStore();
+  const [markup, setMarkup] = useState();
+  const [pricingRanges, setPricingRanges] = useState();
 
   const { openSnackbar } = useSnackbarStore();
   const { admin } = useAdminStore();
@@ -126,11 +128,19 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
     setCurrentTabRows(filteredRows);
   };
   const handleApproveButton = async (activity) => {
-    const successMessage = await approveActivity(activity._id, admin._id);
-    setPendingApprovalActivities(
-      pendingApprovalActivities.filter((a) => a._id !== activity._id)
-    );
-    openSnackbar(successMessage);
+    if (!markup) {
+      console.log("DISPLAY ERROR MODAL");
+    } else {
+      const successMessage = await approveActivity(
+        activity._id,
+        admin._id,
+        markup,
+      );
+      setPendingApprovalActivities(
+        pendingApprovalActivities.filter((a) => a._id !== activity._id)
+      );
+      openSnackbar(successMessage);
+    }
   };
   const handleSubmitRejectButton = async () => {
     const successMessage = await rejectActivity(
@@ -574,6 +584,10 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
             activity={selectedActivity}
             imgs={imgs}
             vendorProfile={vendorProfile}
+            approve={selectedActivityTab === "pendingApprovalTab"}
+            setPricingRanges={setPricingRanges}
+            setMarkup={setMarkup}
+            markup={markup}
           />
         </Dialog>
       </div>
