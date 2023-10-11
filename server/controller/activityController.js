@@ -836,3 +836,20 @@ export const getVendorActivities = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
+export const getActivityTitle = async (req, res) => {
+  try {
+    const foundActivity = await ActivityModel.findById(
+      req.params.activityId,
+      "title",
+    );
+
+    if (!foundActivity) {
+      return res.status(404).json({ message: "Activity not found" });
+    }
+
+    res.status(200).json(foundActivity.title);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
