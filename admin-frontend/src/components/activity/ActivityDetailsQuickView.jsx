@@ -34,7 +34,7 @@ import {
   TableRow,
   TextField,
   Typography,
-  useTheme
+  useTheme,
 } from "@mui/material";
 import {
   DatePicker,
@@ -460,7 +460,7 @@ const ActivityDetailsQuickView = ({
                       <MenuItem key={enumValue} value={enumValue}>
                         {enumValue}
                       </MenuItem>
-                    ),
+                    )
                   )}
                 </Select>
               </FormControl>
@@ -912,12 +912,18 @@ const ActivityDetailsQuickView = ({
                             />
                           </ListItemAvatar>
                           <ListItemText
+                            disableTypography
                             primary={
-                              changelog.approvalStatus === "Ready to Publish"
-                                ? "Approved"
-                                : changelog.approvalStatus === "Rejected"
-                                ? "Rejected"
-                                : ""
+                              changelog.approvalStatus ===
+                              "Ready to Publish" ? (
+                                <Typography color="#2e7d32">
+                                  Approved
+                                </Typography>
+                              ) : changelog.approvalStatus === "Rejected" ? (
+                                <Typography color="error">Rejected</Typography>
+                              ) : (
+                                ""
+                              )
                             }
                             secondary={`by ${
                               changelog.admin.name
