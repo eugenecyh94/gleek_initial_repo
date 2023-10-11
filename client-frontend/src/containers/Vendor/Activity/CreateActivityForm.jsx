@@ -1,9 +1,8 @@
 /* eslint-disable react/prop-types */
 import styled from "@emotion/styled";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import DeleteIcon from "@mui/icons-material/Delete";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import {
-  Avatar,
   Box,
   Button,
   Chip,
@@ -24,7 +23,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import Autocomplete from "@mui/material/Autocomplete";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
@@ -51,14 +49,11 @@ import {
   FoodCategoryEnum,
   LocationEnum,
   SustainableDevelopmentGoalsEnum,
-} from "../../utils/TypeEnum";
-import { useActivityStore, useSnackbarStore } from "../../zustand/GlobalStore";
+} from "../../../utils/TypeEnum";
+import useActivityStore from "../../../zustand/ActivityStore";
+import useSnackbarStore from "../../../zustand/SnackbarStore";
 import ImageAndFileUpload from "./ImageAndFileUpload";
 import { useNavigate } from "react-router-dom";
-
-const StyledButton = styled(Button)`
-  padding-left: 6px;
-`;
 
 const DeleteIconButton = styled(IconButton)`
   background-color: white;
@@ -89,10 +84,10 @@ const StyledSubmitButton = styled(Button)`
 const errorTextPricePerPax = "Please fill in Price per Pax!";
 const errorTextEndInterval = "Please fill in end interval!";
 
-const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
-  const navigate = useNavigate();
-  const { createActivity, saveActivity } = useActivityStore();
+const CreateActivityForm = ({ themes, theme, activity }) => {
+  const { saveActivity } = useActivityStore();
   const { openSnackbar } = useSnackbarStore();
+  const navigate = useNavigate();
   const [selectedTheme, setSelectedTheme] = useState(
     activity?.theme?._id ?? null,
   );
@@ -111,9 +106,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
   );
   const [minParticipants, setMinParticipants] = useState(
     activity?.minParticipants ?? null,
-  );
-  const [markup, setMarkup] = useState(
-    activity?.clientMarkupPercentage ?? null,
   );
   const [activityType, setActivityType] = useState(
     activity?.activityType === null
@@ -173,7 +165,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
   const steps = [
     "Select number of participants",
     "Input pricing",
-    "Input markup pricing",
     "Pricing addons / discounts",
   ];
   const [isFood, setIsFood] = useState(activity?.isFood ?? false);
@@ -197,9 +188,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
   const [duration, setDuration] = useState(activity?.duration ?? null);
   const [formErrors, setFormErrors] = useState();
   const [activityImages, setActivityImages] = useState([]);
-  const [selectedVendor, setSelectedVendor] = useState(
-    activity?.linkedVendor?._id ?? null,
-  );
   const [pendingCertType, setPendingCertType] = useState(
     activity?.pendingCertificationType ?? null,
   );
@@ -207,8 +195,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     activity?.offlinePricing?.amount ||
       activity?.onlinePricing?.amount ||
       activity?.weekendPricing?.amount
-      ? 3
-      : activity?.clientMarkupPercentage
       ? 2
       : activity?.activityPricingRules?.length > 0
       ? 1
@@ -229,19 +215,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
   const sdgList = Object.values(SustainableDevelopmentGoalsEnum);
   const columns = 4;
   const optionsPerColumn = 5;
-
-  const stringAvatar = (name, theme) => {
-    const initials = name
-      ?.split(" ")
-      ?.map((word) => word[0])
-      ?.join("");
-    return {
-      sx: {
-        bgcolor: theme.palette.light_purple.main,
-      },
-      children: initials,
-    };
-  };
 
   const columnsArray = [];
   for (let i = 0; i < columns; i++) {
@@ -420,7 +393,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
       });
       setPricingRanges([]);
       setPricingRangeError([]);
-      setMarkup();
     }
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
@@ -458,36 +430,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
       if (!hasErrors) {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
       }
-    } else if (activeStep === 2) {
-      if (!markup) {
-        const error = {
-          ...formErrors,
-          markup: "Please fill in pricing markup!",
-        };
-        setFormErrors(error);
-      } else {
-        setActiveStep((prevActiveStep) => prevActiveStep + 1);
-      }
     }
-  };
-
-  const handleMarkupChange = (event) => {
-    const newMarkup = event.target.value;
-    setMarkup(event.target.value);
-    const newClientPrice = [...pricingRanges];
-    newClientPrice.forEach((rule, index) => {
-      const { pricePerPax } = rule;
-      const clientPrice = Math.ceil(
-        parseFloat(pricePerPax) * (parseFloat(newMarkup) / 100) +
-          parseFloat(pricePerPax),
-      );
-      newClientPrice[index].clientPrice = clientPrice;
-    });
-    if (newMarkup) {
-      const error = { ...formErrors, markup: "" };
-      setFormErrors(error);
-    }
-    setPricingRanges(newClientPrice);
   };
 
   const handleActivityTypeChange = (event) => {
@@ -560,13 +503,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     setDuration(event.target.value);
   };
 
-  const handleVendorChange = (event, newValue) => {
-    if (newValue) {
-      setSelectedVendor(newValue._id);
-    } else {
-      setSelectedVendor(null);
-    }
-  };
   const handlePendingCertTypeChange = (event) => {
     setPendingCertType(event.target.value);
   };
@@ -625,10 +561,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
       errors.minParticipants = "Min. Participants is required!";
     }
 
-    if (!markup) {
-      errors.markup = "Markup percentage is required!";
-    }
-
     if (
       activityType &&
       activityType === ActivityTypeEnum.POPUP &&
@@ -664,10 +596,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
       errors.foodCertDate = "Please fill in expected certification date!";
     }
 
-    if (!selectedVendor || selectedVendor === "") {
-      errors.vendor = "Please select a vendor";
-    }
-
     if (!capacity) {
       errors.capacity = "Capacity is required!";
     }
@@ -689,15 +617,18 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
         errors.endTime = "Latest Start Time must be after Earliest Start Time!";
       }
     }
-
-    pricingRanges.map((row) => {
-      if (!row.pricePerPax) {
-        errors.pricing = "Please complete price setting!";
-      }
-      if (!row.end) {
-        errors.pricing = "Please complete price setting!";
-      }
-    });
+    if (pricingRanges?.length === 0) {
+      errors.pricing = "Please complete price setting!";
+    } else {
+      pricingRanges.forEach((row) => {
+        if (!row.pricePerPax) {
+          errors.pricing = "Please complete price setting!";
+        }
+        if (!row.end) {
+          errors.pricing = "Please complete price setting!";
+        }
+      });
+    }
 
     // if (!activityImages || activityImages?.length === 0) {
     //   errors.activityImages =
@@ -729,8 +660,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     setSelectedSubTheme([]);
     setSubthemes([]);
     setMaxParticipants();
-    setMarkup();
-    setActivityType("");
+    setActivityType(null);
     setTitle();
     setDescription();
     setIsFood(false);
@@ -744,7 +674,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     setDuration();
     setFormErrors({});
     setActivityImages([]);
-    setSelectedVendor();
     setPricingAddons({
       weekendPricing: { amount: null, isDiscount: false },
       offlinePricing: { amount: null, isDiscount: false },
@@ -758,17 +687,19 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     setActiveStep(0);
     setCapacity();
     setMinParticipants();
+    setImageListToEdit([]);
+    setExistingImageList([]);
+    setActivityImages([]);
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData();
-    formData.append("adminCreated", admin._id);
     if (activity) {
       formData.append("activityId", activity._id);
     }
     formData.append("isDraft", false);
-    formData.append("approvalStatus", "Published");
+    formData.append("approvalStatus", "Pending Approval");
     formData.append("title", title);
     formData.append("description", description);
     formData.append(
@@ -781,7 +712,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     );
     formData.append("maxParticipants", maxParticipants);
     formData.append("minParticipants", minParticipants);
-    formData.append("clientMarkupPercentage", markup);
     formData.append("duration", duration);
     formData.append("theme", selectedTheme);
     if (bookingNotice) {
@@ -828,18 +758,20 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
         }
       }
     }
-    formData.append("linkedVendor", selectedVendor);
     formData.append("pendingCertificationType", pendingCertType);
 
     for (let i = 0; i < activityImages.length; i++) {
       formData.append("images", activityImages[i]);
     }
+    existingImageList.forEach((item) =>
+      formData.append("updatedImageList[]", item),
+    );
 
     if (validateForm()) {
       try {
         await saveActivity(formData);
         openSnackbar("Activity Created Successfully!");
-        navigate(-1);
+        navigate("/vendor/activities");
         // resetForm();
       } catch (error) {
         openSnackbar(error, "error");
@@ -855,12 +787,16 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
   const handleSaveDraft = async (event) => {
     event.preventDefault();
     const formData = new FormData();
-    formData.append("adminCreated", admin._id);
     if (activity) {
       formData.append("activityId", activity._id);
     }
     formData.append("isDraft", true);
-    formData.append("approvalStatus", "Pending Approval");
+    if (activity?.approvalStatus === "Rejected") {
+      formData.append("approvalStatus", "Rejected");
+    } else {
+      formData.append("approvalStatus", "Pending Approval");
+    }
+
     if (title) {
       formData.append("title", title);
     }
@@ -884,10 +820,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
       formData.append("minParticipants", minParticipants);
     }
     formData.append("isFood", isFood);
-
-    if (markup) {
-      formData.append("clientMarkupPercentage", markup);
-    }
 
     if (duration) {
       formData.append("duration", duration);
@@ -963,10 +895,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
       }
     }
 
-    if (selectedVendor) {
-      formData.append("linkedVendor", selectedVendor);
-    }
-
     if (pendingCertType) {
       formData.append("pendingCertificationType", pendingCertType);
     }
@@ -984,7 +912,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
       try {
         await saveActivity(formData);
         openSnackbar("Activity Draft Saved Successfully!");
-        navigate(-1);
+        navigate("/vendor/activities");
       } catch (error) {
         openSnackbar("Unexpected Server Error occured!", "error");
       }
@@ -994,10 +922,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
         "error",
       );
     }
-  };
-
-  const handleCancel = () => {
-    navigate(-1);
   };
 
   return (
@@ -1103,73 +1027,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                   formErrors?.description?.length > 0
                 }
               />
-            </Grid>
-          </Grid>
-        </StyledContainer>
-        <StyledContainer elevation={3}>
-          <Grid container spacing={2} alignItems="left" justifyContent="left">
-            <Grid item xs={12}>
-              <Typography
-                color={theme.palette.primary.main}
-                paddingTop={2}
-                component="div"
-                fontSize={"1.25rem"}
-              >
-                Vendor Details
-              </Typography>
-              <Grid item xs={6} paddingTop={2}>
-                <FormControl fullWidth error={formErrors?.vendor?.length > 0}>
-                  <Autocomplete
-                    onChange={handleVendorChange}
-                    disablePortal
-                    id="combo-box-demo"
-                    options={vendors}
-                    sx={{ width: 300 }}
-                    getOptionLabel={(vendor) => vendor.companyName}
-                    renderOption={(props, vendor) => (
-                      <div {...props}>
-                        <Avatar
-                          style={{ marginRight: 6 }}
-                          src={vendor?.preSignedPhoto}
-                          {...(vendor?.preSignedPhoto
-                            ? {}
-                            : stringAvatar(vendor?.companyName, theme))}
-                        />
-                        {vendor?.companyName} - {vendor?.companyUEN}
-                      </div>
-                    )}
-                    renderInput={(params) => (
-                      <TextField
-                        error={formErrors?.vendor?.length > 0}
-                        {...params}
-                        label="Pick from existing vendor"
-                      />
-                    )}
-                    value={
-                      vendors.find((vendor) => vendor._id === selectedVendor) ||
-                      null
-                    }
-                  />
-                  <FormHelperText error>{formErrors?.vendor}</FormHelperText>
-                </FormControl>
-              </Grid>
-              {/* <Grid item xs={6} paddingTop={2}>
-                <Typography fontSize={"0.75rem"}>
-                  Cannot find vendor?
-                </Typography>
-                <StyledButton variant="contained" color="light_purple">
-                  <Typography
-                    style={{
-                      display: "flex",
-                    }}
-                    component="div"
-                    color="white"
-                  >
-                    <AddIcon />
-                    Add vendor
-                  </Typography>
-                </StyledButton>
-              </Grid> */}
             </Grid>
           </Grid>
         </StyledContainer>
@@ -1768,81 +1625,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                   </>
                 )}
                 {activeStep === 2 && (
-                  <Grid
-                    container
-                    spacing={1}
-                    alignItems="left"
-                    justifyContent="left"
-                    paddingTop={2}
-                  >
-                    <Grid item xs={4}>
-                      <TextField
-                        required
-                        id="markup"
-                        name="markup"
-                        label="Markup Percentage"
-                        disabled={false}
-                        fullWidth
-                        type="number"
-                        value={markup ?? ""}
-                        InputProps={{
-                          endAdornment: (
-                            <InputAdornment position="start">%</InputAdornment>
-                          ),
-                        }}
-                        onChange={handleMarkupChange}
-                        error={
-                          (markup !== null && markup?.length === 0) ||
-                          formErrors?.markup?.length > 0
-                        }
-                        helperText={formErrors?.markup}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TableContainer component={Paper}>
-                        <Table>
-                          <TableHead>
-                            <TableRow>
-                              <TableCell>Start Range</TableCell>
-                              <TableCell>End Range</TableCell>
-                              <TableCell>Price Per Pax</TableCell>
-                              <TableCell>Client Price</TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {pricingRanges.map((row, rowIndex) => (
-                              <TableRow key={rowIndex}>
-                                <TableCell>
-                                  <Box>{row.start}</Box>
-                                </TableCell>
-                                <TableCell>
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                    }}
-                                  >
-                                    <Box>{row?.end}</Box>
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <Box>${row?.pricePerPax}</Box>
-                                </TableCell>
-                                <TableCell>
-                                  $
-                                  {!isNaN(row?.clientPrice) && (
-                                    <>{row?.clientPrice}</>
-                                  )}
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                    </Grid>
-                  </Grid>
-                )}
-                {activeStep === 3 && (
                   <>
                     <Grid
                       container
@@ -2129,7 +1911,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
         alignItems="left"
         justifyContent="left"
       >
-        <Grid item xs={5}>
+        <Grid item xs={6}>
           <StyledSubmitButton
             onClick={handleSubmit}
             type="submit"
@@ -2139,7 +1921,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
             <Typography component="div">Submit</Typography>
           </StyledSubmitButton>
         </Grid>
-        <Grid item xs={5}>
+        <Grid item xs={6}>
           <Button
             onClick={handleSaveDraft}
             type="submit"
@@ -2147,16 +1929,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
             fullWidth
           >
             <Typography component="div">Save draft</Typography>
-          </Button>
-        </Grid>
-        <Grid item xs={2}>
-          <Button
-            onClick={handleCancel}
-            variant="outlined"
-            fullWidth
-            color="unselected"
-          >
-            <Typography component="div">Cancel</Typography>
           </Button>
         </Grid>
       </Grid>

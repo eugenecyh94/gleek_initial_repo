@@ -3,6 +3,8 @@ import {
   getBlockedTimeslotsByActivityId,
   addBlockedTimeslot,
   addBlockedTimeslotMultipleActivities,
+  deleteBlockedTimeslot,
+  deleteMultipleBlockedTimeslots,
 } from "../../controller/blockedTimeslotController.js";
 import vendorVerifyToken from "../../middleware/vendorAuth.js";
 
@@ -40,4 +42,25 @@ router.post(
   vendorVerifyToken,
   addBlockedTimeslotMultipleActivities,
 );
+
+/**
+ * DELETE /gleekVendor/timeslot/blockout/:blockedTimingId
+ * Delete 1 blockedTiming record
+ */
+router.delete(
+  "/blockout/:blockedTimingId",
+  vendorVerifyToken,
+  deleteBlockedTimeslot,
+);
+
+/**
+ * POST /gleekVendor/timeslot/blockout/delete
+ * Delete multiple blockedTiming records
+ */
+router.post(
+  "/blockout/delete",
+  vendorVerifyToken,
+  deleteMultipleBlockedTimeslots,
+);
+
 export default router;

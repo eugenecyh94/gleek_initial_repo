@@ -21,7 +21,7 @@ import VendorRegisterPage from "./containers/Vendor/VendorRegisterPage";
 import ErrorPage from "./containers/ErrorPage";
 import useVendorStore from "./zustand/VendorStore";
 import VendorProtectedRoute from "./components/Routes/VendorProtectedRoute";
-import ActivitiesPage from "./containers/Vendor/ActivitiesPage";
+import ActivitiesPage from "./containers/Vendor/Activity/ActivitiesPage";
 import AccountDetailsVendor from "./containers/Vendor/AccountDetailsVendor";
 import ProfilePictureVendor from "./containers/Vendor/ProfilePictureVendor";
 import PasswordChangeVendor from "./containers/Vendor/PasswordChangeVendor";
@@ -34,6 +34,9 @@ import VendorResetPassword from "./containers/Vendor/Password/ResetPassword";
 import VendorDetails from "./containers/Client/Activity/VendorDetails";
 import BlockoutDashboard from "./containers/Vendor/Blockout/BlockoutDashboard";
 import BlockoutMultipleActivities from "./containers/Vendor/Blockout/BlockoutMultipleActivities";
+import CreateActivityPage from "./containers/Vendor/Activity/CreateActivityPage";
+import EditActivityDraftPage from "./containers/Vendor/Activity/EditActivityDraftPage";
+import BlockoutSingleActivity from "./containers/Vendor/Blockout/BlockoutSingleActivity";
 
 function App() {
   const { isLoading, clientError, login } = useClientStore();
@@ -193,6 +196,22 @@ function App() {
             }
           />
           <Route
+            path="/vendor/createActivity"
+            element={
+              <VendorProtectedRoute>
+                <CreateActivityPage />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/editActivityDraft/:activityId"
+            element={
+              <VendorProtectedRoute>
+                <EditActivityDraftPage />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
             path="/vendor/settings"
             element={
               <VendorProtectedRoute>
@@ -264,6 +283,15 @@ function App() {
             element={
               <VendorProtectedRoute>
                 <BlockoutDashboard />
+              </VendorProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/vendor/activity/:activityId/blockout"
+            element={
+              <VendorProtectedRoute>
+                <BlockoutSingleActivity />
               </VendorProtectedRoute>
             }
           />

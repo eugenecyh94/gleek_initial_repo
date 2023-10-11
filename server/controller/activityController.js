@@ -18,7 +18,11 @@ export const getAllActivities = async (req, res) => {
       .populate("activityPricingRules")
       .populate("linkedVendor")
       .populate("theme")
-      .populate("subtheme");
+      .populate("subtheme")
+      .populate({
+        path: "approvalStatusChangeLog",
+        populate: { path: "admin", model: "Admin" },
+      });
     const publishedActivities = activities.filter((row) => {
       return row.approvalStatus === "Published" && row.isDraft === false;
     });
@@ -281,10 +285,12 @@ export const saveActivity = async (req, res) => {
       foodCertDate: foodCertDate ?? null,
       foodCategory: foodCategory ?? [],
       isFoodCertPending: isFoodCertPending ?? null,
-      linkedVendor: linkedVendor ?? null,
+      linkedVendor: linkedVendor ?? req.user._id,
       pendingCertificateType: pendingCertificateType ?? null,
       modifiedDate: Date.now(),
     };
+
+    console.log("linked vendor: ", req.user);
 
     activity["weekendPricing"] = {
       amount: parsedWeekend?.amount,
@@ -299,7 +305,50 @@ export const saveActivity = async (req, res) => {
       isDiscount: parsedOffline?.isDiscount,
     };
     let savedActivity;
-    if (activityId) {
+    if (approvalStatus === "Rejected") {
+      const foundActivity =
+        await ActivityModel.findById(activityId).session(session);
+
+      // this is a reject draft (child), update existing
+      if (!foundActivity.rejectedDraft && foundActivity.parent) {
+        const updatedRejectedDraft = await ActivityModel.findByIdAndUpdate(
+          activityId,
+          { ...activity, activityPricingRules: [] },
+          {
+            new: true,
+            session,
+          },
+        );
+        savedActivity = updatedRejectedDraft;
+
+        // this is a parent, create a new reject draft (child)
+      } else {
+        const a = foundActivity.toObject();
+        const thing = {
+          ...a,
+          ...activity,
+        };
+        const { _id, __v, ...rest } = thing;
+        rest.parent = activityId;
+        rest.activityPricingRules = [];
+        const newActivity = new ActivityModel(rest);
+        const rejectDraft = await newActivity.save({
+          validateBeforeSave: false,
+          session,
+        });
+        await ActivityModel.findByIdAndUpdate(
+          activityId,
+          { rejectedDraft: rejectDraft._id },
+          {
+            new: true,
+            session,
+          },
+        );
+        savedActivity = rejectDraft;
+        console.log("New saved activity", savedActivity);
+      }
+      // submit
+    } else if (activityId) {
       try {
         const foundActivity =
           await ActivityModel.findById(activityId).session(session);
@@ -308,13 +357,31 @@ export const saveActivity = async (req, res) => {
             "Activity draft you are trying to save does not exist!",
           );
         } else {
+          let parentId;
+          if (!foundActivity.rejectedDraft && foundActivity.parent) {
+            parentId = foundActivity.parent;
+            await ActivityModel.findByIdAndDelete(foundActivity._id, {
+              session,
+            });
+          } else {
+            parentId = activityId;
+          }
           savedActivity = await ActivityModel.findByIdAndUpdate(
-            activityId,
-            { ...activity, activityPricingRules: [] },
+            parentId,
+            {
+              ...activity,
+              activityPricingRules: [],
+              rejectedDraft: null,
+              parent: null,
+            },
             {
               new: true,
               session,
             },
+          );
+          await ActivityPricingRulesModel.deleteMany(
+            { activity: activityId },
+            { session },
           );
         }
       } catch (error) {
@@ -412,20 +479,23 @@ export const approveActivity = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    console.log("approve activity body:", req.params.id);
+    console.log("approve activity body:", req.params.activityId, req.body);
     const { activityId } = req.params;
-    const { adminId } = req.body;
+    const { adminId, markup } = req.body;
 
     const approvalStatusChangeLog = await saveApprovalStatusChangeLog(
       ActivityApprovalStatusEnum.READY_TO_PUBLISH,
       null,
       activityId,
       adminId,
+      session,
     );
+
     const savedActivity = await ActivityModel.findByIdAndUpdate(
       activityId,
       {
         approvalStatus: ActivityApprovalStatusEnum.READY_TO_PUBLISH,
+        clientMarkupPercentage: markup,
         approvedDate: Date.now(),
         $push: {
           approvalStatusChangeLog: approvalStatusChangeLog._id,
@@ -436,6 +506,28 @@ export const approveActivity = async (req, res) => {
         session,
       },
     );
+    for (const ruleId of savedActivity.activityPricingRules) {
+      try {
+        const rule =
+          await ActivityPricingRulesModel.findById(ruleId).session(session);
+        if (!rule) {
+          throw new Error(`Pricing rule not found for ruleId: ${ruleId}`);
+        }
+        const { pricePerPax } = rule;
+        const clientPrice = Math.ceil(
+          parseFloat(pricePerPax) * (parseFloat(markup) / 100) +
+            parseFloat(pricePerPax),
+        );
+
+        const updatedRule = await ActivityPricingRulesModel.findByIdAndUpdate(
+          ruleId,
+          { clientPrice },
+          { new: true, session },
+        );
+      } catch (error) {
+        throw new Error(`Error processing ruleId: ${ruleId}`, error);
+      }
+    }
 
     await session.commitTransaction();
 
@@ -467,6 +559,7 @@ export const rejectActivity = async (req, res) => {
       rejectionReason,
       activityId,
       adminId,
+      session,
     );
 
     const savedActivity = await ActivityModel.findByIdAndUpdate(
@@ -501,6 +594,51 @@ export const rejectActivity = async (req, res) => {
   }
 };
 
+export const publishActivity = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    console.log("publish activity body:", req.params.id);
+    const { id } = req.params;
+
+    const savedActivity = await ActivityModel.findByIdAndUpdate(
+      id,
+      {
+        approvalStatus: ActivityApprovalStatusEnum.PUBLISHED,
+        createdDate: Date.now(),
+      },
+      {
+        new: true,
+        session,
+      },
+    )
+      .populate({
+        path: "approvalStatusChangeLog",
+        populate: { path: "admin", model: "Admin", select: "_id name" },
+      })
+      .populate("activityPricingRules")
+      .populate("theme")
+      .populate("subtheme");
+
+    console.log("savedActivity", savedActivity);
+
+    await session.commitTransaction();
+
+    res.status(201).json({
+      message: `${savedActivity.title} published successfully`,
+      activity: savedActivity,
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    res.status(500).json({
+      error: "Unexpected Server Error occured!",
+      message: error.message,
+    });
+  } finally {
+    session.endSession();
+  }
+};
+
 export const deleteActivityDraft = async (req, res) => {
   try {
     const activityId = req.params.id;
@@ -508,7 +646,26 @@ export const deleteActivityDraft = async (req, res) => {
       _id: activityId,
     });
     await ActivityPricingRulesModel.deleteMany({ activity: activityId });
-    const activities = await retrieveActivities(deletedActivity.adminCreated);
+    let activities;
+    if (deletedActivity.adminCreated) {
+      activities = await retrieveActivities(deletedActivity.adminCreated);
+    } else {
+      if (deletedActivity.parent) {
+        const parentId = deletedActivity.parent;
+        const newParent = await ActivityModel.findByIdAndUpdate(
+          parentId,
+          {
+            rejectedDraft: null,
+          },
+          { new: true },
+        );
+        console.log("new parent", newParent);
+      }
+
+      console.log("Retrieving all vendor activities", req.user);
+      activities = await getAllVendorActivities(req.user._id);
+    }
+
     res.status(201).json({
       message: "Activity draft deleted successfully!",
       activity: activities,
@@ -526,6 +683,9 @@ export const bulkDeleteActivityDraft = async (req, res) => {
     console.log("bulkDeleteActivityDraft", req.body);
     const activityIds = req.body;
     const deletedActivity = await ActivityModel.findOne({ _id: activityIds });
+    const activitiesToDelete = await ActivityModel.find({
+      _id: { $in: activityIds },
+    });
     const { deletedCount } = await ActivityModel.deleteMany({
       _id: activityIds,
     });
@@ -533,7 +693,24 @@ export const bulkDeleteActivityDraft = async (req, res) => {
       activity: { $in: activityIds },
     });
 
-    const activities = await retrieveActivities(deletedActivity.adminCreated);
+    let activities;
+    if (deletedActivity.adminCreated) {
+      activities = await retrieveActivities(deletedActivity.adminCreated);
+    } else {
+      activitiesToDelete.forEach(async (deletedActivity) => {
+        if (deletedActivity.parent) {
+          const parentId = deletedActivity.parent;
+          await ActivityModel.findByIdAndUpdate(
+            parentId,
+            {
+              rejectedDraft: null,
+            },
+            { new: true },
+          );
+        }
+      });
+      activities = await getAllVendorActivities(req.user._id);
+    }
 
     res.status(201).json({
       message: `Deleted ${deletedCount} Activity${
@@ -836,5 +1013,22 @@ export const getVendorActivities = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
+  }
+};
+
+export const getActivityTitle = async (req, res) => {
+  try {
+    const foundActivity = await ActivityModel.findById(
+      req.params.activityId,
+      "title",
+    );
+
+    if (!foundActivity) {
+      return res.status(404).json({ message: "Activity not found" });
+    }
+
+    res.status(200).json(foundActivity.title);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

@@ -3,11 +3,11 @@ import { Box, Button, Stack } from "@mui/material";
 import { DataGrid, GridToolbarFilterButton } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import EditIcon from "@mui/icons-material/Edit";
+import InfoIcon from "@mui/icons-material/Info";
 
-const SelectActivityTable = ({
+const ViewActivitiesBlockoutTable = ({
   activities,
-  selectedRows,
-  setSelectedRows,
   selectedActivity,
   setSelectedActivity,
   setOpenModal,
@@ -36,12 +36,7 @@ const SelectActivityTable = ({
       headerName: "Title",
       flex: 1,
     },
-    // {
-    //   field: "activityType",
-    //   headerName: "Activity Type",
-    //   flex: 1,
-    //   renderCell: (params) => <WrappedTextCell {...params} />,
-    // },
+
     {
       field: "theme",
       headerName: "Theme",
@@ -80,32 +75,7 @@ const SelectActivityTable = ({
       headerName: "Location",
       flex: 1,
     },
-    // {
-    //   field: "activityPricingRules",
-    //   headerName: "Price (Lowest)",
-    //   flex: 1,
-    //   valueFormatter: (params) => {
-    //     return `$${params.value}`;
-    //   },
-    //   valueGetter: (params) => {
-    //     const p = params.value;
-    //     p.sort((a, b) => a?.pricePerPax - b?.pricePerPax);
-    //     return p[0]?.pricePerPax;
-    //   },
-    // },
-    // {
-    //   field: "priceHighest",
-    //   headerName: "Price (Highest)",
-    //   flex: 1,
-    //   valueFormatter: (params) => {
-    //     return `$${params.value}`;
-    //   },
-    //   valueGetter: (params) => {
-    //     const p = params.row.activityPricingRules;
-    //     p.sort((a, b) => b?.pricePerPax - a?.pricePerPax);
-    //     return p[0]?.pricePerPax;
-    //   },
-    // },
+
     {
       field: "createdDate",
       headerName: "Date Created",
@@ -140,8 +110,20 @@ const SelectActivityTable = ({
       type: "actions",
       flex: 1,
       renderCell: (params) => {
+        const handleEditClick = () => {
+          const activityId = params.row._id;
+          navigate(`/vendor/activity/${activityId}/blockout`);
+        };
+
         return (
-          <Stack direction={"row"}>
+          <Stack direction={"row"} spacing={1}>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={handleEditClick}
+            >
+              Edit
+            </Button>
             <Button
               variant="outlined"
               color="primary"
@@ -156,13 +138,9 @@ const SelectActivityTable = ({
   ];
 
   return (
-    <Box maxWidth={"99%"} paddingTop={2} paddingLeft={2} height={"80%"}>
+    <Box paddingTop={2} marginLeft={2}>
       <DataGrid
-        checkboxSelection
-        rowSelectionModel={selectedRows}
-        onRowSelectionModelChange={(rows) => {
-          setSelectedRows(rows);
-        }}
+        checkboxSelection={false}
         initialState={{
           pagination: {
             paginationModel: { pageSize: 25, page: 0 },
@@ -180,4 +158,4 @@ const SelectActivityTable = ({
   );
 };
 
-export default SelectActivityTable;
+export default ViewActivitiesBlockoutTable;

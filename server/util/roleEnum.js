@@ -3,4 +3,5 @@ export const Role = {
   CLIENT: "CLIENT",
   EXECUTIVE: "EXECUTIVE",
   MANAGERIAL: "MANAGERIAL",
+  ADMIN: "ADMIN", //Mainly for notification purposes
 };

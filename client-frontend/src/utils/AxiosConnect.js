@@ -45,12 +45,24 @@ AxiosConnect.patchMultipart = (command, req) => {
   return axios(options);
 };
 
-AxiosConnect.delete = (command, req) => {
+AxiosConnect.delete = (command, payload) => {
+  console.log("axios delete command:", `${uri}${command}`);
   const options = {
     method: "DELETE",
-    url: uri + command,
-    data: req, // DELETE requests may include a request body, but it's less common than with POST
+    url: `${uri}${command}`,
     withCredentials: true,
+    data: payload,
+  };
+  return axios(options);
+};
+
+AxiosConnect.postMultiPart = (command, req) => {
+  const options = {
+    method: "POST",
+    url: `${uri}${command}`,
+    data: req,
+    withCredentials: true,
+    headers: { "Content-Type": "multipart/form-data" },
   };
   return axios(options);
 };

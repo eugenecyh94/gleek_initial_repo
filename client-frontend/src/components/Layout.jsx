@@ -43,9 +43,7 @@ const Layout = ({ children }) => {
         alignItems="stretch"
         minHeight="100vh"
       >
-        <Box flex={1} mt={5}>
-          {children}
-        </Box>
+        <Box flex={1}>{children}</Box>
       </Box>
       <Footer />
     </Box>

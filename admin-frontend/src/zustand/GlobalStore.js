@@ -277,12 +277,12 @@ export const useActivityStore = create((set) => ({
       console.log(error);
     }
   },
-  approveActivity: async (activityId, adminId) => {
+  approveActivity: async (activityId, adminId, markup) => {
     try {
       const updatedActivities = await AxiosConnect.patch(
         "/activity/approveActivity",
         activityId,
-        { adminId: adminId },
+        { adminId: adminId, markup: markup },
       );
       set({
         selectedActivityTab: "pendingApprovalTab",
@@ -447,4 +447,50 @@ export const useImageUploadTestStore = create((set) => ({
   setTestActivities: (newActivityList) => {
     set({ testActivities: newActivityList });
   },
+}));
+
+export const useNotificationStore = create((set) => ({
+  notifications: [],
+  unreadNotificationsCount: 0,
+  setReceivedNotifications: (allNotifications) => {
+    set({ notifications: allNotifications });
+    let unreadCount = 0;
+    allNotifications.map((notification) => {
+      notification.read === false ? unreadCount++ : unreadCount;
+    });
+    set({ unreadNotificationsCount: unreadCount });
+  },
+  // setNotificationRead: (notificationId) => {
+  // //To set in backend instead
+  //   set((state) => ({
+  //         notifications: state.notifications.map((notification) =>
+  //             notification._id === notificationId
+  //                 ? { ...notification, read: true }
+  //                 : notification),
+  //       })
+  //   )
+  // },
+  // setAllNotificationsRead: () => {
+  //   //To set in backend instead
+  //   set((state) => ({
+  //     notifications: state.notifications.map((notification) =>
+  //             notification.read === false
+  //                 ? {...notification, read: true}
+  //                 : notification),
+  //       })
+  //   )
+  // },
+
+  // adminGetAllNotifications: (id, role) => {
+  //   const params = {
+  //     adminId: id,
+  //     adminRole: role,
+  //   };
+  //   const {setReceivedNotifications} = useNotificationStore();
+  //   console.log("params for notification:", params);
+  //   AxiosConnect.getWithParams("/notification/adminAllNotifications", params).then((body) => {
+  //     console.log(body);
+  //     setReceivedNotifications(body);
+  //   });
+  //   },
 }));
