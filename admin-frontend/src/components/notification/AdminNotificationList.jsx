@@ -6,6 +6,7 @@ const AdminNotificationList = ({ notifications }) => {
     notifications.slice(0, 10),
   );
   const [page, setPage] = useState(1);
+  const [finalIndex, setFinalIndex] = useState(0);
   const itemsPerPage = 10; // Set the number of items to load per page
 
   const loadMoreNotifications = () => {
@@ -15,8 +16,13 @@ const AdminNotificationList = ({ notifications }) => {
 
     // Slice the next batch of notifications from the data
     const startIndex = (nextPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const nextBatch = notifications.slice(startIndex, endIndex);
+    const expectedEndIndex = startIndex + itemsPerPage;
+    const finalEndIndex =
+      expectedEndIndex > notifications.length
+        ? notifications.length
+        : expectedEndIndex;
+    setFinalIndex(finalEndIndex);
+    const nextBatch = notifications.slice(startIndex, finalEndIndex);
 
     // Append the new batch to the visibleNotifications
     setVisibleNotifications((prevNotifications) => [
@@ -33,7 +39,10 @@ const AdminNotificationList = ({ notifications }) => {
       const scrollTop = window.scrollY;
 
       // Check if the user has scrolled to the bottom of the page
-      if (windowHeight + scrollTop >= documentHeight - 200) {
+      if (
+        windowHeight + scrollTop >= documentHeight - 200 &&
+        visibleNotifications.length < notifications.length
+      ) {
         loadMoreNotifications();
       }
     };
@@ -43,7 +52,7 @@ const AdminNotificationList = ({ notifications }) => {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []);
+  }, [visibleNotifications, notifications]);
 
   useEffect(() => {
     // Initial load of notifications

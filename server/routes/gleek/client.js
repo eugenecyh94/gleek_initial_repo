@@ -30,7 +30,7 @@ router.patch(
   "/updateProfilePicture",
   verifyToken,
   uploadS3ProfileImage.single("image"),
-  updateProfilePicture
+  updateProfilePicture,
 );
 
 // Verify Email

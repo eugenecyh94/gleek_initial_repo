@@ -1,7 +1,10 @@
 import express from "express";
 
 import vendorVerifyToken from "../../middleware/vendorAuth.js";
-import { getActivityTitle, getVendorActivities } from "../../controller/activityController.js";
+import {
+  getActivityTitle,
+  getVendorActivities,
+} from "../../controller/activityController.js";
 
 const router = express.Router();
 
@@ -11,8 +14,6 @@ const router = express.Router();
  */
 router.get("/mine", vendorVerifyToken, getVendorActivities);
 
-
 router.get("/:activityId/title", vendorVerifyToken, getActivityTitle);
-
 
 export default router;
