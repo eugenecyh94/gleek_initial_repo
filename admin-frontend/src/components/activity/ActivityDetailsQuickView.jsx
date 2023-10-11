@@ -925,23 +925,28 @@ const ActivityDetailsQuickView = ({
                                 ""
                               )
                             }
-                            secondary={`by ${
-                              changelog.admin.name
-                            } on ${new Date(changelog.date).toLocaleDateString(
-                              undefined,
-                              {
-                                year: "2-digit",
-                                month: "2-digit",
-                                day: "2-digit",
-                              }
-                            )} at ${new Date(changelog.date).toLocaleTimeString(
-                              undefined,
-                              {
-                                hour: "numeric",
-                                minute: "numeric",
-                                hour12: true,
-                              }
-                            )}`}
+                            secondary={
+                              <Typography>
+                                by {changelog.admin.name} on&nbsp;
+                                {new Date(changelog.date).toLocaleDateString(
+                                  undefined,
+                                  {
+                                    year: "2-digit",
+                                    month: "2-digit",
+                                    day: "2-digit",
+                                  }
+                                )}{" "}
+                                at
+                                {new Date(changelog.date).toLocaleTimeString(
+                                  undefined,
+                                  {
+                                    hour: "numeric",
+                                    minute: "numeric",
+                                    hour12: true,
+                                  }
+                                )}
+                              </Typography>
+                            }
                           />
                         </ListItem>
                         <Divider variant="middle" component="li" />
