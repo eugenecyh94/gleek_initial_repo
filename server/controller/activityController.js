@@ -46,11 +46,19 @@ export const getAllActivitiesForAdmin = async (req, res) => {
       .populate({
         path: "adminCreated",
         match: { _id: adminId },
+        select: "_id name",
       })
       .populate("activityPricingRules")
+      .populate({
+        path: "approvalStatusChangeLog",
+        populate: { path: "admin", model: "Admin", select: "_id name" },
+      })
       .populate("theme")
       .populate("subtheme")
-      .populate("linkedVendor");
+      .populate({
+        path: "linkedVendor",
+        select: "-password",
+      });
     res.status(200).json({
       data: activities,
     });
@@ -286,7 +294,7 @@ export const saveActivity = async (req, res) => {
       foodCertDate: foodCertDate ?? null,
       foodCategory: foodCategory ?? [],
       isFoodCertPending: isFoodCertPending ?? null,
-      linkedVendor: linkedVendor ?? req.user._id,
+      linkedVendor: linkedVendor ?? req?.user?._id,
       pendingCertificateType: pendingCertificateType ?? null,
       modifiedDate: Date.now(),
     };
@@ -357,13 +365,16 @@ export const saveActivity = async (req, res) => {
           throw new Error(
             "Activity draft you are trying to save does not exist!"
           );
+        
         } else {
           let parentId;
+          // this is rejected draft
           if (!foundActivity.rejectedDraft && foundActivity.parent) {
             parentId = foundActivity.parent;
             await ActivityModel.findByIdAndDelete(foundActivity._id, {
               session,
             });
+          // this is regular draft
           } else {
             parentId = activityId;
           }
@@ -405,6 +416,7 @@ export const saveActivity = async (req, res) => {
     console.log("Saved Activity is: ", savedActivity);
 
     const processedS3ImageUrlToBeKept = [];
+    console.log("updatedImageList yoo", updatedImageList);
 
     if (updatedImageList !== undefined && updatedImageList.length > 0) {
       for (let i = 0; i < updatedImageList.length; i++) {

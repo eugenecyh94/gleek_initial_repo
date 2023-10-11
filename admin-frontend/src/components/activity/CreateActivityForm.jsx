@@ -121,7 +121,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
       : activity?.activityType === "Popups (Food)" ||
         activity?.activityType === "Popups (Non-food)"
       ? ActivityTypeEnum.POPUP
-      : activity?.activityType,
+      : activity?.activityType
   );
   const [title, setTitle] = useState(activity?.title ?? null);
   const [description, setDescription] = useState(activity?.description ?? null);
@@ -133,7 +133,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
       clientPrice: pricingRule.clientPrice,
     })) || [];
   const [pricingRanges, setPricingRanges] = useState(
-    extractedFields.slice().sort((a, b) => a.start - b.start),
+    extractedFields.slice().sort((a, b) => a.start - b.start)
   );
   const initialPricingRangeErrors = activity?.activityPricingRules?.map(() => ({
     range: "",
@@ -201,7 +201,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     activity?.linkedVendor?._id ?? null
   );
   const [pendingCertType, setPendingCertType] = useState(
-    activity?.pendingCertificationType ?? null,
+    activity?.pendingCertificationType ?? null
   );
   const [activeStep, setActiveStep] = useState(
     activity?.offlinePricing?.amount ||
@@ -222,7 +222,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
   const [capacity, setCapacity] = useState(activity?.capacity ?? null);
   const [imageListToEdit, setImageListToEdit] = useState([]);
   const [existingImageList, setExistingImageList] = useState(
-    activity?.preSignedImages ?? [],
+    activity?.preSignedImages ?? []
   );
 
   const foodCategories = Object.values(FoodCategoryEnum);
@@ -401,7 +401,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
   };
   const handleRemoveImage = (image) => {
     setImageListToEdit((oldState) =>
-      oldState.filter((item) => item.src !== image.src),
+      oldState.filter((item) => item.src !== image.src)
     );
     const updatedList = [...activityImages];
     updatedList.splice(activityImages.indexOf(image.file), 1);
@@ -834,6 +834,9 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     for (let i = 0; i < activityImages.length; i++) {
       formData.append("images", activityImages[i]);
     }
+    existingImageList.forEach((item) =>
+      formData.append("updatedImageList[]", item)
+    );
 
     if (validateForm()) {
       try {
@@ -978,7 +981,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
       formData.append("images", activityImages[i]);
     }
     existingImageList.forEach((item) =>
-      formData.append("updatedImageList[]", item),
+      formData.append("updatedImageList[]", item)
     );
     if (validateDraft()) {
       try {
