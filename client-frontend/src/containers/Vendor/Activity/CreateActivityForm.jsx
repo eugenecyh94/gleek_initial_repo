@@ -617,15 +617,18 @@ const CreateActivityForm = ({ themes, theme, activity }) => {
         errors.endTime = "Latest Start Time must be after Earliest Start Time!";
       }
     }
-
-    pricingRanges.map((row) => {
-      if (!row.pricePerPax) {
-        errors.pricing = "Please complete price setting!";
-      }
-      if (!row.end) {
-        errors.pricing = "Please complete price setting!";
-      }
-    });
+    if (pricingRanges?.length === 0) {
+      errors.pricing = "Please complete price setting!";
+    } else {
+      pricingRanges.forEach((row) => {
+        if (!row.pricePerPax) {
+          errors.pricing = "Please complete price setting!";
+        }
+        if (!row.end) {
+          errors.pricing = "Please complete price setting!";
+        }
+      });
+    }
 
     // if (!activityImages || activityImages?.length === 0) {
     //   errors.activityImages =

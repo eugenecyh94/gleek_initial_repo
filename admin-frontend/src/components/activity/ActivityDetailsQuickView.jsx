@@ -4,6 +4,7 @@ import {
   Box,
   Checkbox,
   Chip,
+  Divider,
   FormControl,
   FormControlLabel,
   FormGroup,
@@ -15,6 +16,10 @@ import {
   ImageListItemBar,
   InputAdornment,
   InputLabel,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
   MenuItem,
   Paper,
   Radio,
@@ -29,7 +34,7 @@ import {
   TableRow,
   TextField,
   Typography,
-  useTheme,
+  useTheme
 } from "@mui/material";
 import {
   DatePicker,
@@ -39,6 +44,7 @@ import {
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
+import { Fragment } from "react";
 import {
   ActivityDayAvailabilityEnum,
   FoodCategoryEnum,
@@ -890,6 +896,53 @@ const ActivityDetailsQuickView = ({
               >
                 Approval Status Changelog
               </Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <List>
+                {activity.approvalStatusChangeLog
+                  ?.slice()
+                  .sort((a, b) => new Date(b?.date) - new Date(a?.date))
+                  .map((changelog, index) => {
+                    return (
+                      <Fragment key={index}>
+                        <ListItem key={index}>
+                          <ListItemAvatar>
+                            <Avatar
+                              {...stringAvatar(changelog?.admin?.name, theme)}
+                            />
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={
+                              changelog.approvalStatus === "Ready to Publish"
+                                ? "Approved"
+                                : changelog.approvalStatus === "Rejected"
+                                ? "Rejected"
+                                : ""
+                            }
+                            secondary={`by ${
+                              changelog.admin.name
+                            } on ${new Date(changelog.date).toLocaleDateString(
+                              undefined,
+                              {
+                                year: "2-digit",
+                                month: "2-digit",
+                                day: "2-digit",
+                              }
+                            )} at ${new Date(changelog.date).toLocaleTimeString(
+                              undefined,
+                              {
+                                hour: "numeric",
+                                minute: "numeric",
+                                hour12: true,
+                              }
+                            )}`}
+                          />
+                        </ListItem>
+                        <Divider variant="middle" component="li" />
+                      </Fragment>
+                    );
+                  })}
+              </List>
             </Grid>
           </Grid>
         </StyledContainer>

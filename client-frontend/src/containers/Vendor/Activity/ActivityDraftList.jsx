@@ -386,9 +386,10 @@ const ActivityDraftList = ({
         headerName: "Rejected",
         type: "actions",
         flex: 1,
+        headerAlign: "left",
         renderCell: (params) => {
           const list = params.row.approvalStatusChangeLog.sort(
-            (a, b) => b?.date.getTime - a?.date.getTime
+            (a, b) => new Date(b?.date) - new Date(a?.date)
           );
           const changeLog = list.find(
             (item) => item.approvalStatus === "Rejected"
@@ -407,10 +408,14 @@ const ActivityDraftList = ({
           return (
             <div>
               <Typography color="error" fontSize={"0.875rem"}>
-                Rejected on
+                Rejected on&nbsp;
+                <span style={{ color: "black" }}>
+                  {formattedDate} at {formattedTime} by admin&nbsp;
+                </span>
+                <span style={{ color: "#9F91CC" }}>
+                  {changeLog?.admin?.name}
+                </span>
               </Typography>
-              {formattedDate} at {formattedTime} by admin&nbsp;
-              <span style={{ color: "#9F91CC" }}>{changeLog?.admin?.name}</span>
             </div>
           );
         },
@@ -425,6 +430,8 @@ const ActivityDraftList = ({
         headerName: "Actions",
         type: "actions",
         flex: 1,
+        headerAlign: "left",
+        align: "left",
         renderCell: (params) => {
           return (
             <div style={{ display: "flex" }}>
