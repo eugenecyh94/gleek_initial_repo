@@ -496,7 +496,7 @@ export const approveActivity = async (req, res) => {
       activityId,
       {
         approvalStatus: ActivityApprovalStatusEnum.READY_TO_PUBLISH,
-        markup: markup,
+        clientMarkupPercentage: markup,
         approvedDate: Date.now(),
         $push: {
           approvalStatusChangeLog: approvalStatusChangeLog._id,
@@ -612,7 +612,14 @@ export const publishActivity = async (req, res) => {
         new: true,
         session,
       }
-    );
+    )
+      .populate({
+        path: "approvalStatusChangeLog",
+        populate: { path: "admin", model: "Admin", select: "_id name" },
+      })
+      .populate("activityPricingRules")
+      .populate("theme")
+      .populate("subtheme");
 
     console.log("savedActivity", savedActivity);
 
