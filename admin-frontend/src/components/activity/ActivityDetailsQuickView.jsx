@@ -460,7 +460,7 @@ const ActivityDetailsQuickView = ({
                       <MenuItem key={enumValue} value={enumValue}>
                         {enumValue}
                       </MenuItem>
-                    )
+                    ),
                   )}
                 </Select>
               </FormControl>

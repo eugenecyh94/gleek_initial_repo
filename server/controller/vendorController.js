@@ -19,6 +19,12 @@ import {
   createRegistrationApprovalEmailOptions,
 } from "../util/sendMailOptions.js";
 import sendMail from "../util/sendMail.js";
+import { Role } from "../util/roleEnum.js";
+import {
+  NotificationAction,
+  NotificationEvent,
+} from "../util/notificationRelatedEnum.js";
+import { createNotification } from "./notificationController.js";
 
 const secret = process.env.JWT_SECRET_VENDOR;
 
@@ -132,6 +138,17 @@ export const postRegister = async (req, res) => {
 
     const token = await generateJwtToken(createdVendor.id);
     await session.commitTransaction();
+
+    req.notificationReq = {
+      senderRole: Role.VENDOR,
+      sender: createdVendor,
+      recipientRole: Role.ADMIN,
+      notificationEvent: NotificationEvent.REGISTER,
+      notificationAction: NotificationAction.CREATE,
+    };
+
+    await createNotification(req.notificationReq, res);
+
     sendMail(createVendorWelcomeMailOptions(createdVendor));
     sendMail(createVerifyEmailOptionsVendor(createdVendor, token));
 

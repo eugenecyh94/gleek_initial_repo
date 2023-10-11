@@ -62,7 +62,7 @@ const ActivityDraftList = ({
         (activity) =>
           activity.approvalStatus ===
             filterCriteria[selectedTab].approvalStatus &&
-          activity.isDraft === filterCriteria[selectedTab].isDraft
+          activity.isDraft === filterCriteria[selectedTab].isDraft,
       );
     } else {
       return [];
@@ -74,8 +74,8 @@ const ActivityDraftList = ({
       activities?.filter(
         (activity) =>
           activity.approvalStatus === filterCriteria[newValue].approvalStatus &&
-          activity.isDraft === filterCriteria[newValue].isDraft
-      )
+          activity.isDraft === filterCriteria[newValue].isDraft,
+      ),
     );
   };
   useEffect(() => {
@@ -84,7 +84,7 @@ const ActivityDraftList = ({
         (activity) =>
           activity.approvalStatus ===
             filterCriteria[selectedTab].approvalStatus &&
-          activity.isDraft === filterCriteria[selectedTab].isDraft
+          activity.isDraft === filterCriteria[selectedTab].isDraft,
       );
       setCurrentTabRows(filteredRows);
     }
@@ -125,7 +125,7 @@ const ActivityDraftList = ({
     ? activities.filter(
         (activity) =>
           activity.isDraft === true &&
-          activity.approvalStatus === "Pending Approval"
+          activity.approvalStatus === "Pending Approval",
       ).length
     : null;
 

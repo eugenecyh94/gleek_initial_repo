@@ -67,4 +67,14 @@ AxiosConnect.patchMultiPart = (command, req) => {
   return axios(options);
 };
 
+AxiosConnect.getWithParams = (command, params) => {
+  const options = {
+    method: "GET",
+    url: `${uri}${command}`,
+    data: params,
+    withCredentials: true,
+  };
+  return axios(options);
+};
+
 export default AxiosConnect;

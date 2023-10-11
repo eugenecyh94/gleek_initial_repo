@@ -150,12 +150,12 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
     const successMessage = await rejectActivity(
       activityToReject._id,
       rejectionReason,
-      admin._id
+      admin._id,
     );
     setRejectModalOpen(false);
     setOpenViewModal(false);
     setPendingApprovalActivities(
-      pendingApprovalActivities.filter((a) => a._id !== activityToReject._id)
+      pendingApprovalActivities.filter((a) => a._id !== activityToReject._id),
     );
     openSnackbar(successMessage);
   };
@@ -316,7 +316,7 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
             <div>-</div>
           );
         },
-      }
+      },
     );
   }
   if (selectedActivityTab === "pendingApprovalTab") {
@@ -456,7 +456,7 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
             </div>
           );
         },
-      }
+      },
     );
   }
 
