@@ -18,7 +18,11 @@ export const getAllActivities = async (req, res) => {
       .populate("activityPricingRules")
       .populate("linkedVendor")
       .populate("theme")
-      .populate("subtheme");
+      .populate("subtheme")
+      .populate({
+        path: "approvalStatusChangeLog",
+        populate: { path: "admin", model: "Admin" },
+      });
     const publishedActivities = activities.filter((row) => {
       return row.approvalStatus === "Published" && row.isDraft === false;
     });

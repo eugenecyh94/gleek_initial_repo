@@ -129,16 +129,20 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
   };
   const handleApproveButton = async (activity) => {
     if (!markup) {
-      console.log("DISPLAY ERROR MODAL");
+      openSnackbar(
+        "Please fill up markup percentage before approving!",
+        "error"
+      );
     } else {
       const successMessage = await approveActivity(
         activity._id,
         admin._id,
-        markup,
+        markup
       );
       setPendingApprovalActivities(
         pendingApprovalActivities.filter((a) => a._id !== activity._id)
       );
+      setOpenViewModal(false);
       openSnackbar(successMessage);
     }
   };
@@ -248,8 +252,8 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
         },
       },
       {
-        field: "createdDate",
-        headerName: "Created Date",
+        field: "modifiedDate",
+        headerName: "Published",
         flex: 1,
         renderCell: (params) => {
           const date = new Date(params.value);
@@ -266,36 +270,50 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
           return (
             <div style={{ display: "flex" }}>
               <Typography color="#9F91CC" fontSize={"0.875rem"}>
-                {"Created\u00A0"}
+                Published on&nbsp;
+                <span style={{ color: "black" }}>
+                  {formattedDate} at {formattedTime}
+                </span>
               </Typography>
-              {formattedDate} at {formattedTime}
             </div>
           );
         },
       },
       {
         field: "approvedDate",
-        headerName: "Approved Date",
+        headerName: "Approved",
         flex: 1,
         renderCell: (params) => {
-          const date = new Date(params.value);
-          const formattedDate = date.toLocaleDateString(undefined, {
+          const list = params.row.approvalStatusChangeLog;
+          const changeLog = list.find(
+            (item) => item.approvalStatus === "Ready to Publish"
+          );
+          const date = changeLog?.date ? new Date(changeLog?.date) : null;
+          const formattedDate = date?.toLocaleDateString(undefined, {
             year: "2-digit",
             month: "2-digit",
             day: "2-digit",
           });
-          const formattedTime = date.toLocaleTimeString(undefined, {
+          const formattedTime = date?.toLocaleTimeString(undefined, {
             hour: "numeric",
             minute: "numeric",
             hour12: true,
           });
-          return (
+          return date ? (
             <div style={{ display: "flex" }}>
-              <Typography color="#9F91CC" fontSize={"0.875rem"}>
-                {"Approved\u00A0"}
+              <Typography fontSize={"0.875rem"}>
+                <span style={{ color: "#2e7d32" }}>Approved on&nbsp;</span>
+                <span style={{ color: "black" }}>
+                  {formattedDate} at {formattedTime}&nbsp;
+                </span>
+                by admin&nbsp;
+                <span style={{ color: "#9F91CC" }}>
+                  {changeLog?.admin?.name}
+                </span>
               </Typography>
-              {formattedDate} at {formattedTime}
             </div>
+          ) : (
+            <div>-</div>
           );
         },
       }
@@ -318,7 +336,7 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
       },
       {
         field: "createdDate",
-        headerName: "Created Date",
+        headerName: "Created",
         flex: 1,
         renderCell: (params) => {
           const date = new Date(params.value);
@@ -335,11 +353,11 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
           return (
             <div style={{ display: "flex" }}>
               <Typography color="#9F91CC" fontSize={"0.875rem"}>
-                {selectedActivityTab === "publishedTab"
-                  ? "Published\u00A0"
-                  : "Created\u00A0"}
+                Created on&nbsp;
+                <span style={{ color: "black" }}>
+                  {formattedDate} at {formattedTime}
+                </span>
               </Typography>
-              {formattedDate} at {formattedTime}
             </div>
           );
         },
