@@ -1,34 +1,29 @@
 import { useAdminStore, useNotificationStore } from "../../zustand/GlobalStore";
 import AxiosConnect from "../../utils/AxiosConnect";
 import { useEffect, useState } from "react";
-import { Button, Typography } from "@mui/material";
+import { Button, Typography, CircularProgress } from "@mui/material";
 import AdminNotificationList from "./AdminNotificationList";
 import MainBodyContainer from "../common/MainBodyContainer";
 import { useTheme } from "@emotion/react";
 
 const AdminNotificationPage = () => {
   const adminCredentials = useAdminStore((state) => state.admin);
-  const { notifications, unreadNotificationsCount } = useNotificationStore();
+  const { notifications, unreadNotificationsCount, setReceivedNotifications } =
+    useNotificationStore();
+  const [loading, setLoading] = useState(true); // Added loading state
+
   const theme = useTheme();
 
   useEffect(() => {
-    console.log(notifications);
-    console.log(unreadNotificationsCount);
-  }, []);
-
-  useEffect(() => {
-    let unreadCount = 0;
-    notifications.map((notification) => {
-      notification.read === false ? unreadCount++ : unreadCount;
+    // Fetch notifications when the component mounts
+    AxiosConnect.getWithParams("/notification/adminAllNotifications", {
+      adminId: adminCredentials._id,
+      adminRole: adminCredentials.role,
+    }).then((body) => {
+      setReceivedNotifications(body.data.data);
+      setLoading(false);
     });
-    console.log(unreadCount);
-  }, []);
-
-  // useEffect(() => {
-  //     console.log(adminCredentials);
-  //     // console.log(adminCredentials.email);
-  //     // console.log(adminCredentials._id);
-  // },[]);
+  }, [setReceivedNotifications, adminCredentials]);
 
   return (
     <MainBodyContainer
@@ -46,7 +41,11 @@ const AdminNotificationPage = () => {
       >
         All Notifications
       </Typography>
-      <AdminNotificationList notifications={notifications} />
+      {loading ? ( // Show circular progress if loading
+        <CircularProgress />
+      ) : (
+        <AdminNotificationList notifications={notifications} />
+      )}
     </MainBodyContainer>
   );
 };
