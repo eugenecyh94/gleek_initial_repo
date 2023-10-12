@@ -11,7 +11,7 @@ function VendorProfileItem({ vendor }) {
       style={{
         textDecoration: "none",
         display: "inline-block",
-        margin: 0, 
+        margin: 0,
       }}
     >
       <Box display="flex" alignItems="center">

@@ -5,10 +5,15 @@ import { useNavigate } from "react-router-dom";
 const ErrorPage = (props) => {
   const navigate = useNavigate();
   return (
-    <Box display="flex" flexDirection="column" alignItems="center">
-      <Typography color="error">You do not access to this page</Typography>
+    <Box
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      marginTop={20}
+    >
+      <Typography color="error">You do not have access to this page</Typography>
       <Typography color="secondary" mt={8}>
-        Try Login Instead
+        Try to Login Instead
       </Typography>
       <Box mt={3}>
         <Button

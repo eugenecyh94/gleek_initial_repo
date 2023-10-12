@@ -19,6 +19,12 @@ import {
   createRegistrationApprovalEmailOptions,
 } from "../util/sendMailOptions.js";
 import sendMail from "../util/sendMail.js";
+import { Role } from "../util/roleEnum.js";
+import {
+  NotificationAction,
+  NotificationEvent,
+} from "../util/notificationRelatedEnum.js";
+import { createNotification } from "./notificationController.js";
 
 const secret = process.env.JWT_SECRET_VENDOR;
 
@@ -132,6 +138,17 @@ export const postRegister = async (req, res) => {
 
     const token = await generateJwtToken(createdVendor.id);
     await session.commitTransaction();
+
+    req.notificationReq = {
+      senderRole: Role.VENDOR,
+      sender: createdVendor,
+      recipientRole: Role.ADMIN,
+      notificationEvent: NotificationEvent.REGISTER,
+      notificationAction: NotificationAction.CREATE,
+    };
+
+    await createNotification(req.notificationReq, res);
+
     sendMail(createVendorWelcomeMailOptions(createdVendor));
     sendMail(createVerifyEmailOptionsVendor(createdVendor, token));
 
@@ -156,9 +173,7 @@ export const verifyEmail = async (req, res) => {
   const token = req.params.token;
 
   if (!token) {
-    return res
-      .status(403)
-      .json({ status: "error", message: "Token Not Found!" });
+    return res.status(403).json({ status: "error", msg: "Token Not Found!" });
   }
 
   try {
@@ -206,8 +221,8 @@ export const postLogin = async (req, res) => {
   try {
     const { companyEmail, password } = req.body;
     const vendor = await VendorModel.findOne({ companyEmail });
-    const isSamePassword = await bcrypt.compare(password, vendor.password);
     if (!vendor) return res.status(404).send({ msg: "Invalid Credentials." });
+    const isSamePassword = await bcrypt.compare(password, vendor.password);
     if (vendor && isSamePassword) {
       // If vendor REJECTED, send error message.
       if (vendor.status === "REJECTED") {

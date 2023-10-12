@@ -11,9 +11,8 @@ const router = express.Router();
 router.get("/getAllBookings", adminAuth, getAllBookings);
 router.get("/getBookingById/:id", adminAuth, getBookingById);
 router.get(
-   "/getAllBookingsByActivityId/:activityId",
-   adminAuth,
-   getAllBookingsByActivityId
+  "/getAllBookingsByActivityId/:activityId",
+  getAllBookingsByActivityId,
 );
 router.delete("/deleteBooking/:id", adminAuth, deleteBooking);
 export default router;

@@ -27,7 +27,7 @@ AxiosConnect.patch = (command, param, req) => {
   console.log("axios patch command::", `http://${uri}/${command}/${param}`);
   const options = {
     method: "PATCH",
-    url: `${uri}/${command}/${param}`,
+    url: `${uri}${command}/${param}`,
     data: req,
     withCredentials: true,
   };
@@ -63,6 +63,16 @@ AxiosConnect.patchMultiPart = (command, req) => {
     data: req,
     withCredentials: true,
     headers: { "Content-Type": "multipart/form-data" },
+  };
+  return axios(options);
+};
+
+AxiosConnect.getWithParams = (command, params) => {
+  const options = {
+    method: "GET",
+    url: `${uri}${command}`,
+    data: params,
+    withCredentials: true,
   };
   return axios(options);
 };

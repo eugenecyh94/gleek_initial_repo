@@ -156,7 +156,6 @@ function MyBookmarks() {
         >
           {vendorBookmarks.map((vendorBookmark) => (
             <Grid
-             
               item
               key={vendorBookmark._id}
               xs={4}

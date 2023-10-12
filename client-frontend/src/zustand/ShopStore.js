@@ -94,12 +94,15 @@ const useShopStore = create((set) => ({
       const response = await AxiosConnect.get(
         "/gleek/shop/getAllActivitiesNames",
       );
-      set({ suggestions: response.data.data });
+      set({ initialSuggestions: response.data.data });
     } catch (error) {
       console.error(error);
     }
   },
   suggestions: [],
+  initialSuggestions: [],
+  setInitialSuggestions: (newInitialSuggestions) =>
+    set({ initialSuggestions: newInitialSuggestions }),
   setSuggestions: (newSuggestions) => set({ suggestions: newSuggestions }),
   minPriceValue: null,
   maxPriceValue: null,
@@ -126,6 +129,34 @@ const useShopStore = create((set) => ({
   priceFilterLoading: true,
   setPriceFilterLoading: (newPriceFilterLoading) =>
     set({ priceFilterLoading: newPriceFilterLoading }),
+  timeSlots: null,
+  setTimeSlots: (newTimeSlots) => set({ timeSlots: newTimeSlots }),
+  timeSlotsLoading: false,
+  setTimeSlotsLoading: (newTimeSlotsLoading) =>
+    set({ timeSlotsLoading: newTimeSlotsLoading }),
+  getTimeSlots: async (activityId, selectedDate) => {
+    set({ timeSlotsLoading: true });
+    try {
+      const response = await AxiosConnect.get(
+        `/gleek/booking/getAvailableBookingTimeslots/${activityId}/${selectedDate}`,
+      );
+      set({
+        timeSlots: response.data.allTimeslots.filter(
+          (timeslot) => timeslot.isAvailable === true,
+        ),
+      });
+      setTimeout(() => {
+        set({ timeSlotsLoading: false });
+      }, 200);
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  parentChecked: [],
+  setParentChecked: (newParentChecked) =>
+    set({ parentChecked: newParentChecked }),
+  childChecked: [],
+  setChildChecked: (newChildChecked) => set({ childChecked: newChildChecked }),
 }));
 
 export default useShopStore;

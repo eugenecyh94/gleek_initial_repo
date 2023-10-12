@@ -21,6 +21,7 @@ import VendorDetails from "./components/vendor/VendorDetails";
 import ActivityDetails from "./components/activity/ActivityDetails";
 import ViewActivityDrafts from "./components/activity/ViewActivityDrafts";
 import EditActivityDraftPage from "./components/activity/EditActivityDraftPage";
+import AdminNotificationPage from "./components/notification/AdminNotificationPage";
 import VerifyEmailPage from "./components/VerifyEmailPage";
 
 function App() {
@@ -93,73 +94,85 @@ function App() {
               </ProtectedRoute>
             }
           /> */}
-               <Route
-                  exact
-                  path="/addVendor"
-                  element={
-                     <ProtectedRoute>
-                        <CreateVendorPage />
-                     </ProtectedRoute>
-                  }
-               />
-               <Route
-                  exact
-                  path="/manageProfile/changePassword"
-                  element={
-                     <ProtectedRoute>
-                        <ChangePassword />
-                     </ProtectedRoute>
-                  }
-               />
-               <Route
-                  exact
-                  path="/manageProfile"
-                  element={
-                     <ProtectedRoute>
-                        <AccountDetails />
-                     </ProtectedRoute>
-                  }
-               />
-               <Route
-                  exact
-                  path="/adminTeam"
-                  element={
-                     <ProtectedRoute>
-                        <ViewAllAdmins />
-                     </ProtectedRoute>
-                  }
-               />
-               <Route
-                  exact
-                  path="/adminTeam/addAdmin"
-                  element={
-                     <ProtectedRoute>
-                        <AddAdminPage />
-                     </ProtectedRoute>
-                  }
-               />
-               <Route
-                  exact
-                  path="/viewAllClients"
-                  element={
-                     <ProtectedRoute>
-                        <ViewAllClients />
-                     </ProtectedRoute>
-                  }
-               />
+          <Route
+            exact
+            path="/addVendor"
+            element={
+              <ProtectedRoute>
+                <CreateVendorPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/manageProfile/changePassword"
+            element={
+              <ProtectedRoute>
+                <ChangePassword />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/manageProfile"
+            element={
+              <ProtectedRoute>
+                <AccountDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/adminTeam"
+            element={
+              <ProtectedRoute>
+                <ViewAllAdmins />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/adminTeam/addAdmin"
+            element={
+              <ProtectedRoute>
+                <AddAdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewAllClients"
+            element={
+              <ProtectedRoute>
+                <ViewAllClients />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewClient/:clientId"
+            element={
+              <ProtectedRoute>
+                <ClientDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/notificationList"
+            element={
+              <ProtectedRoute>
+                <AdminNotificationPage />
+              </ProtectedRoute>
+            }
+          />
+         
                <Route
                   exact
                   path="/verifyEmail/:token"
                   element={<VerifyEmailPage />}
                />
-               <Route
-                  exact
-                  path="/viewClient/:clientId"
-                  element={
-                     <ProtectedRoute>
-                        <ClientDetails />
-                     </ProtectedRoute>
-                  }
+       
                />
                <Route path="/login" element={<LoginPage />} />
                <Route path="/forgotPassword" element={<ForgotPassword />} />

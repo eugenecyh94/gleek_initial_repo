@@ -1,54 +1,10 @@
 import BookingModel from "../model/bookingModel.js";
 import ActivityModel from "../model/activityModel.js";
-import ClientModel from "../model/clientModel.js";
+import CartItemModel from "../model/cartItemModel.js";
 import BlockedTimeslotModel from "../model/blockedTimeslotModel.js";
 import { validationResult } from "express-validator";
-import jwt from "jsonwebtoken";
-
-const secret = process.env.JWT_SECRET_ClIENT;
-
-/*
- * Generate JWT Token
- */
-const generateJwtToken = async (clientId) => {
-  const payload = {
-    client: { id: clientId },
-  };
-  return new Promise((resolve, reject) => {
-    jwt.sign(payload, secret, { expiresIn: 360000 }, (err, token) => {
-      if (err) reject(err);
-      resolve(token);
-    });
-  });
-};
-
-// export const validateToken = async (req, res) => {
-//   const token = req.cookies.token;
-//   if (!token) {
-//     return res.status(403).send("A token is required for authentication");
-//   }
-
-//   try {
-//     const decoded = jwt.verify(token, secret);
-//     const client = await Client.findById(decoded.client.id);
-//     if (!client) {
-//       return res.status(401).send("Client not found");
-//     }
-
-//     if (client.photo) {
-//       const preSignedUrl = await s3ImageGetService(client.photo);
-//       client.preSignedPhoto = preSignedUrl;
-//     }
-
-//     const { password, ...clientWithoutPassword } = client.toObject();
-
-//     return res.status(200).json({ token, client: clientWithoutPassword });
-//   } catch (err) {
-//     console.error(err);
-//     // If verification fails (e.g., due to an invalid or expired token), send an error response
-//     return res.status(401).send("Invalid Token");
-//   }
-// };
+import { isCartItemStillAvailable } from "./cartItemController.js";
+import mongoose from "mongoose";
 
 // GET /booking/getAllBookings
 export const getAllBookings = async (req, res) => {
@@ -104,7 +60,7 @@ function getTimeslotCapacities(
   capacity,
   bookings,
   blockedTimeslots,
-  duration
+  duration,
 ) {
   // Create a hashmap to store capacities for each starttime slot
   const capacities = new Map(startTimes.map((slot) => [slot, capacity]));
@@ -147,19 +103,19 @@ function getTimeslotCapacities(
   return finalCapacities;
 }
 
-function generateAllTimeslots(
+export function generateAllTimeslots(
   earliestStartTime,
   latestStartTime,
   interval,
   capacity,
   bookings,
   blockedTimeslots,
-  duration
+  duration,
 ) {
   const startTimes = generateStartTimes(
     earliestStartTime,
     latestStartTime,
-    interval
+    interval,
   );
 
   const timeslotCapacities = getTimeslotCapacities(
@@ -167,7 +123,7 @@ function generateAllTimeslots(
     capacity,
     bookings,
     blockedTimeslots,
-    duration
+    duration,
   );
 
   const allTimeslots = startTimes.map((startTime, index) => {
@@ -243,7 +199,7 @@ export const getAvailableBookingTimeslots = async (req, res) => {
     const minDate = new Date(
       today.getFullYear(),
       today.getMonth(),
-      today.getDate() + daysInAdvance
+      today.getDate() + daysInAdvance,
     );
     if (dateParam < minDate) {
       return res.status(400).json({
@@ -262,24 +218,24 @@ export const getAvailableBookingTimeslots = async (req, res) => {
       activity.startTime.getHours(),
       activity.startTime.getMinutes(),
       0,
-      0
+      0,
     );
     const latestStartTime = new Date(dateParam);
     latestStartTime.setHours(
       activity.endTime.getHours(),
       activity.endTime.getMinutes(),
       0,
-      0
+      0,
     );
     console.log(
       "EARLIEST START TIME: ",
       earliestStartTime.toLocaleDateString(),
-      earliestStartTime.toLocaleTimeString()
+      earliestStartTime.toLocaleTimeString(),
     );
     console.log(
       "LATEST START TIME: ",
       latestStartTime.toLocaleDateString(),
-      latestStartTime.toLocaleTimeString()
+      latestStartTime.toLocaleTimeString(),
     );
 
     const interval = 30; // 30 minutes
@@ -315,7 +271,7 @@ export const getAvailableBookingTimeslots = async (req, res) => {
       activity.capacity,
       bookings,
       blockedTimeslots,
-      activity.duration
+      activity.duration,
     );
 
     res.status(200).json({
@@ -330,30 +286,29 @@ export const getAvailableBookingTimeslots = async (req, res) => {
   }
 };
 
-// POST /gleek/booking/createBooking
-// Request body expects (for example):
-// {
-// "activityId" : "60b9b6b9e6b3a83a3c3b3b3b",
-// "startDateTime" : "2023-12-04T00:00:00.000Z",
-// "endDateTime" : "2023-12-04T02:00:00.000Z",
-// "basePricePerPax" : 50,
-// "totalPax" : 5,
-// "weekendAddOnCost" : 10,
-// "onlineAddOnCost" : 0,
-// "offlineAddOnCost" : 10,
-// "eventLocationType" : "Virtual (online sessions)",
-// "additionalComments" : "Test Comments",
-// "billingEmail" : "test@test",
-// "billingPostalCode" : "123456",
-// "billingPartyName" : "Test Party",
-// "billingAddress" : "Test Address"
-// }
+export function getTimeslotAvailability(
+  allTimeslots,
+  selectedStartDateTime,
+  selectedEndDateTime,
+) {
+  const timeslot = allTimeslots.find(
+    (timeslot) =>
+      timeslot.startTime.getTime() === selectedStartDateTime.getTime() &&
+      timeslot.endTime.getTime() === selectedEndDateTime.getTime() &&
+      timeslot.isAvailable,
+  );
 
-export const createBooking = async (req, res) => {
+  return timeslot !== undefined;
+}
+
+export const createBookings = async (req, res) => {
   const errors = validationResult(req);
 
   const client = req.user;
-  console.log("Client", client);
+  let cartItemsToCheckOut = req.body;
+  console.log(cartItemsToCheckOut);
+  const cartIds = [];
+  let cartItems = [];
 
   if (!errors.isEmpty()) {
     // 422 status due to validation errors
@@ -361,18 +316,6 @@ export const createBooking = async (req, res) => {
   }
 
   try {
-    const {
-      activityId,
-      startDateTime,
-      endDateTime,
-      basePricePerPax,
-      totalPax,
-      weekendAddOnCost,
-      onlineAddOnCost,
-      offlineAddOnCost,
-      ...restBody
-    } = req.body;
-
     // Check if client is approved to make bookings
     if (client.status !== "APPROVED") {
       return res.status(400).json({
@@ -380,140 +323,75 @@ export const createBooking = async (req, res) => {
       });
     }
 
-    // Check if activity exists
-    const activity =
-      await ActivityModel.findById(activityId).populate("linkedVendor");
+    // Get Client's billing details
+    const {
+      billingEmail,
+      billingOfficePostalCode,
+      billingPartyName,
+      billingAddress,
+    } = client;
 
-    if (activity === null) {
-      return res.status(404).json({
-        error: "Activity not found with the provided ID.",
-      });
+    for (const item of cartItemsToCheckOut) {
+      cartIds.push(item._id);
     }
 
-    // Get activity title and vendor name
-    const activityTitle = activity.title;
-    const vendorName = activity.linkedVendor.companyName;
+    try {
+      cartItems = await CartItemModel.find({ _id: { $in: cartIds } });
+      console.log(cartItems);
+    } catch (error) {
+      console.error("Error finding cart items:", error);
+    }
 
-    // Calculate total cost
-    const totalCost =
-      basePricePerPax * totalPax +
-      weekendAddOnCost +
-      onlineAddOnCost +
-      offlineAddOnCost;
-
-    // Check if activity is available for booking
-    // Generate timeslots in 30 min intervals from earliest start to latest start time
-    const selectedStartDateTime = new Date(startDateTime);
-    const selectedEndDateTime = new Date(endDateTime);
-    console.log(
-      "SELECTED STARTTIME: ",
-      selectedStartDateTime.toLocaleDateString(),
-      selectedStartDateTime.toLocaleTimeString()
-    );
-    console.log(
-      "SELECTED ENDTIME: ",
-      selectedEndDateTime.toLocaleDateString(),
-      selectedEndDateTime.toLocaleTimeString()
-    );
-
-    const earliestStartTime = new Date(startDateTime);
-    earliestStartTime.setHours(
-      activity.startTime.getHours(),
-      activity.startTime.getMinutes(),
-      0,
-      0
-    );
-    const latestStartTime = new Date(startDateTime);
-    latestStartTime.setHours(
-      activity.endTime.getHours(),
-      activity.endTime.getMinutes(),
-      0,
-      0
-    );
-    console.log(
-      "EARLIEST START TIME: ",
-      earliestStartTime.toLocaleDateString(),
-      earliestStartTime.toLocaleTimeString()
-    );
-    console.log(
-      "LATEST START TIME: ",
-      latestStartTime.toLocaleDateString(),
-      latestStartTime.toLocaleTimeString()
-    );
-
-    const interval = 30; // 30 minutes
-
-    const startOfDay = new Date(startDateTime);
-    startOfDay.setHours(0, 0, 0, 0); // Set time to 00:00:00.000 of the selected day
-
-    const endOfDay = new Date(startDateTime);
-    endOfDay.setHours(23, 59, 59, 999); // Set time to 23:59:59.999 of the selected day
-
-    // Get activity's bookings for the selected date
-    const bookings = await BookingModel.find({
-      activityId,
-      startDateTime: {
-        $gte: startOfDay,
-        $lt: endOfDay,
-      },
-    });
-
-    // Get activities blocked timeslots for the selected date
-    const blockedTimeslots = await BlockedTimeslotModel.find({
-      activityId,
-      blockedStartDateTime: {
-        $gte: startOfDay,
-        $lt: endOfDay,
-      },
-    });
-
-    const allTimeslots = generateAllTimeslots(
-      earliestStartTime,
-      latestStartTime,
-      interval,
-      activity.capacity,
-      bookings,
-      blockedTimeslots,
-      activity.duration
-    );
-
-    // If selected timeslot is not available, return error
-    const timeslot = allTimeslots.find(
-      (timeslot) =>
-        timeslot.startTime.getTime() === selectedStartDateTime.getTime() &&
-        timeslot.endTime.getTime() === selectedEndDateTime.getTime()
-    );
-    console.log("Selected timeslot: ", timeslot);
-
-    if (timeslot === undefined || !timeslot.isAvailable) {
+    // Check if cart is empty
+    if (cartItems.length === 0) {
       return res.status(400).json({
-        error: `Selected booking timeslot for ${activityTitle} is no longer available. Please book another timeslot!`,
+        error: "Cart is empty. Please add activities to cart before booking.",
       });
     }
 
-    // Create booking
-    const booking = new BookingModel({
-      clientId: client.id,
-      activityId,
-      startDateTime,
-      endDateTime,
-      totalCost,
-      totalPax,
-      basePricePerPax,
-      weekendAddOnCost,
-      onlineAddOnCost,
-      offlineAddOnCost,
-      activityTitle,
-      vendorName,
-      ...restBody,
-    });
-    await booking.save();
+    // Check if cart items are still available
+    let isBookingValid = true;
+    let bookings = [];
+    for (const cartItem of cartItems) {
+      isBookingValid = await isCartItemStillAvailable(cartItem._id);
+      if (!isBookingValid) {
+        return res.status(400).json({
+          error: `Selected booking timeslot for ${cartItem.activityTitle} is no longer available. Please book another timeslot!`,
+        });
+      }
 
-    // Send email to client, vendor and admin
+      const cartItemPlainObject = cartItem.toObject();
+      delete cartItemPlainObject._id;
 
-    res.status(201).json({
-      message: `Successfully booked ${activityTitle}! Booking is now pending for confirmation.`,
-      booking,
+      bookings.push({
+        billingEmail,
+        billingOfficePostalCode,
+        billingPartyName,
+        billingAddress,
+        ...cartItemPlainObject,
+      });
+    }
+
+    let createdBookings = [];
+    // Start transaction to create bookings
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    for (const bookingDetails of bookings) {
+      // Create booking
+      const booking = new BookingModel(bookingDetails);
+      await booking.save();
+      createdBookings.push(booking);
+    }
+
+    // Delete cart items
+    await CartItemModel.deleteMany({ _id: { $in: cartIds } });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json({
+      message: "Successfully created bookings!",
+      bookings: createdBookings,
     });
   } catch (error) {
     console.log(error);

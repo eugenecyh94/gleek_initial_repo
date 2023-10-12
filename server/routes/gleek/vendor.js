@@ -36,7 +36,7 @@ router.post(
     check("companyEmail", "Please enter a valid email").isEmail(),
     check("password", "Minimum password length is 8").isLength({ min: 8 }),
   ],
-  postRegister
+  postRegister,
 );
 router.post(
   "/login",
@@ -45,7 +45,7 @@ router.post(
     check("companyEmail", "Please enter a valid email").isEmail(),
     check("password", "Minimum password length is 8").isLength({ min: 8 }),
   ],
-  postLogin
+  postLogin,
 );
 router.post("/validateToken", validateToken);
 router.get("/logout", clearCookies);
@@ -53,7 +53,7 @@ router.patch(
   "/updateCompanyLogo",
   verifyToken,
   uploadS3CompanyLogo.single("image"),
-  updateCompanyLogo
+  updateCompanyLogo,
 );
 // Verify Email
 router.get("/verifyEmail/:token", verifyEmail);
