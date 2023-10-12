@@ -12,8 +12,10 @@ import {
   Button,
 } from "@mui/material";
 import { lighten, useTheme } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
 
 const CartPage = (props) => {
+  const navigate = useNavigate();
   const {
     cartItems,
     getCartItems,
@@ -85,6 +87,7 @@ const CartPage = (props) => {
       const errorMessage =
         error?.response?.data?.errors?.[0]?.msg ||
         error?.response?.data ||
+        error.response.data.msg ||
         null;
       openSnackbar(errorMessage, "error");
     }
@@ -112,6 +115,7 @@ const CartPage = (props) => {
       }
     }
     setCartItemsToCheckout(cartItemsToCheckout);
+    navigate(`/cart/checkout`);
   };
 
   return (

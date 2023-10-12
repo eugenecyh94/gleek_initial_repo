@@ -33,7 +33,8 @@ export const addCartItem = async (req, res) => {
     // Check if client is approved to make bookings
     if (client.status !== "APPROVED") {
       return res.status(400).json({
-        error: "Client is not approved to make bookings yet.",
+        status: "error",
+        msg: "Client is not approved to make bookings yet.",
       });
     }
 
@@ -43,7 +44,8 @@ export const addCartItem = async (req, res) => {
 
     if (activity === null) {
       return res.status(404).json({
-        error: "Activity not found with the provided ID.",
+        status: "error",
+        msg: "Activity not found with the provided ID.",
       });
     }
 

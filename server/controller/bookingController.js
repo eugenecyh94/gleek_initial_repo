@@ -305,6 +305,10 @@ export const createBookings = async (req, res) => {
   const errors = validationResult(req);
 
   const client = req.user;
+  let cartItemsToCheckOut = req.body;
+  console.log(cartItemsToCheckOut);
+  const cartIds = [];
+  let cartItems = [];
 
   if (!errors.isEmpty()) {
     // 422 status due to validation errors
@@ -327,8 +331,16 @@ export const createBookings = async (req, res) => {
       billingAddress,
     } = client;
 
-    // Get Client's cart items
-    const cartItems = await CartItemModel.find({ clientId: client._id });
+    for (const item of cartItemsToCheckOut) {
+      cartIds.push(item._id);
+    }
+
+    try {
+      cartItems = await CartItemModel.find({ _id: { $in: cartIds } });
+      console.log(cartItems);
+    } catch (error) {
+      console.error("Error finding cart items:", error);
+    }
 
     // Check if cart is empty
     if (cartItems.length === 0) {
@@ -372,7 +384,7 @@ export const createBookings = async (req, res) => {
     }
 
     // Delete cart items
-    await CartItemModel.deleteMany({ clientId: client._id });
+    await CartItemModel.deleteMany({ _id: { $in: cartIds } });
 
     await session.commitTransaction();
     session.endSession();
