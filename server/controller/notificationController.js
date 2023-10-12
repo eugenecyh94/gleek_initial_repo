@@ -50,7 +50,7 @@ export const getNonAdminNotifications = async (req, res) => {
   }
 };
 
-export const createNotification = async (req, res) => {
+export const createNotification = async (req, session) => {
   try {
     console.log("req in notification controller:", req);
 
@@ -62,6 +62,7 @@ export const createNotification = async (req, res) => {
       notificationEvent: req.notificationEvent,
       notificationAction: req.notificationAction,
       eventId: req.eventId ? req.eventId : undefined,
+      eventObj: req.eventObj ? req.eventObj : undefined,
       createdDate: Date.now(),
     });
 
@@ -84,19 +85,16 @@ export const createNotification = async (req, res) => {
         awaiting your review`;
         break;
       case NotificationEvent.ACTIVITY:
-        const activityEvent = await ActivityModel.findById(
-          req.eventId,
-        ).populate("linkedVendor");
+        console.log("activity requesting approval::", req.eventObj);
+
+        const activityVendor = await VendorModel.findById(req.sender).exec();
+        console.log("vendor of activity::", activityVendor);
+
         newNotification.title = "Activity Notification";
         if (req.notificationAction === NotificationAction.APPROVE) {
           newNotification.text = `
-          ${req.senderRole === Role.VENDOR ? "Vendor" : "Admin"} 
-          ${
-            req.senderRole === Role.VENDOR
-              ? req.sender.companyName.toUpperCase()
-              : req.sender.name.toUpperCase()
-          } 
-          is requesting approval to publish ${activityEvent.title} for viewing.
+          Vendor ${activityVendor.companyName.toUpperCase()} 
+          is requesting approval to publish ${req.eventObj.title.toUpperCase()}
           `;
         }
         break;
@@ -112,7 +110,7 @@ export const createNotification = async (req, res) => {
 
     console.log("new notification after save:", newNotification);
 
-    newNotification.save();
+    await newNotification.save({ session });
   } catch (error) {
     console.log("notification error", error);
   }
