@@ -1,26 +1,26 @@
 import { header } from "./header.js";
 import { footer } from "./footer.js";
 export const InvoiceTemplate = (booking) => {
-   let { startDateTime, endDateTime } = booking;
+  let { startDateTime, endDateTime } = booking;
 
-   const getDateTime = (datetime) => {
-      datetime = new Date(datetime);
-      const date = datetime.toLocaleDateString(undefined, {
-         day: "2-digit",
-         month: "short",
-      });
-      const time = datetime.toLocaleTimeString(undefined, {
-         hour: "2-digit",
-         minute: "2-digit",
-         hour12: true,
-      });
-      return [date, time];
-   };
+  const getDateTime = (datetime) => {
+    datetime = new Date(datetime);
+    const date = datetime.toLocaleDateString(undefined, {
+      day: "2-digit",
+      month: "short",
+    });
+    const time = datetime.toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+    return [date, time];
+  };
 
-   const [startDate, startTime] = getDateTime(startDateTime);
-   const [endDate, endTime] = getDateTime(endDateTime);
+  const [startDate, startTime] = getDateTime(startDateTime);
+  const [endDate, endTime] = getDateTime(endDateTime);
 
-   return ` 
+  return ` 
    <!doctype html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
    <head>
@@ -67,9 +67,9 @@ export const InvoiceTemplate = (booking) => {
             >
                <p style="white-space: nowrap" class="ft12">
                   <b>Attn: ${
-                     booking.client.companyName
+                    booking.client.companyName
                   }<br />Checkout APAC<br /></b>${
-                     booking.billingAddress
+                    booking.billingAddress
                   }<br />Singapore ${booking.billingPostalCode}
                </p>
                <p style="white-space: nowrap" class="ft12">
@@ -97,7 +97,7 @@ export const InvoiceTemplate = (booking) => {
                   <th class="ft113" style="width: 40%; text-align: left">
                      <b
                         >${booking.activityTitle} by<br />${
-                           booking.vendorName
+                          booking.vendorName
                         }</b
                      >
                      <ul style="padding-top: unset; line-height: 16px">
@@ -107,10 +107,10 @@ export const InvoiceTemplate = (booking) => {
                   </th>
                   <th class="ft113" style="width: 20%">${booking.totalPax}</th>
                   <th class="ft113" style="width: 20%">$${
-                     booking.totalCost / booking.totalPax
+                    booking.totalCost / booking.totalPax
                   }</th>
                   <th class="ft113" style="width: 20%">$${
-                     booking.totalCost
+                    booking.totalCost
                   }</th>
                </tr>
             </table>

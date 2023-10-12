@@ -1,7 +1,7 @@
 import {
-   getAllClients,
-   updateClient,
-   getClientDetails,
+  getAllClients,
+  updateClient,
+  getClientDetails,
 } from "../../controller/manageClientController.js";
 import express from "express";
 import adminAuth from "../../middleware/adminAuth.js";

@@ -337,7 +337,7 @@ export const saveActivity = async (req, res) => {
         savedActivity = updatedRejectedDraft;
         await ActivityPricingRulesModel.deleteMany(
           { activity: activityId },
-          { session }
+          { session },
         );
         // this is a parent, create a new reject draft (child)
       } else {
@@ -414,6 +414,7 @@ export const saveActivity = async (req, res) => {
               notificationEvent: NotificationEvent.ACTIVITY,
               notificationAction: NotificationAction.APPROVE,
               eventId: activityId,
+              eventObj: savedActivity,
             };
 
             await createNotification(req.notificationReq, session);
@@ -426,7 +427,7 @@ export const saveActivity = async (req, res) => {
           message: "Invalid activity Id!",
         });
       }
-    // new draft -> straightaway submit
+      // new draft -> straightaway submit
     } else {
       const newActivity = new ActivityModel({
         ...activity,
@@ -698,7 +699,7 @@ export const deleteActivityDraft = async (req, res) => {
     const deletedActivity = await ActivityModel.findByIdAndDelete(activityId);
     await ActivityPricingRulesModel.deleteMany(
       { activity: activityId },
-      { session }
+      { session },
     );
     let activities;
     if (deletedActivity.adminCreated) {

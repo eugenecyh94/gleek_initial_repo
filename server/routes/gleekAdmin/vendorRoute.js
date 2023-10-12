@@ -1,10 +1,10 @@
 import express from "express";
 import {
-   addVendor,
-   deleteAllVendors,
-   updateVendor,
-   getAllVendors,
-   getVendor,
+  addVendor,
+  deleteAllVendors,
+  updateVendor,
+  getAllVendors,
+  getVendor,
 } from "../../controller/vendorController.js";
 const router = express.Router();
 import adminAuth from "../../middleware/adminAuth.js";

@@ -25,67 +25,67 @@ import AdminNotificationPage from "./components/notification/AdminNotificationPa
 import VerifyEmailPage from "./components/VerifyEmailPage";
 
 function App() {
-   return (
-      <div>
-         <SocketConnection />
-         <Layout>
-            <Routes>
-               <Route exact path="/" element={<Home />} />
-               <Route
-                  exact
-                  path="/createActivity"
-                  element={
-                     <ProtectedRoute>
-                        <CreateActivityPage />
-                     </ProtectedRoute>
-                  }
-               />
-               <Route
-                  exact
-                  path="/viewPublishedActivities"
-                  element={
-                     <ProtectedRoute>
-                        <ViewPublishedActivities />
-                     </ProtectedRoute>
-                  }
-               />
-               <Route
-                  exact
-                  path="/viewActivityDrafts"
-                  element={
-                     <ProtectedRoute>
-                        <ViewActivityDrafts />
-                     </ProtectedRoute>
-                  }
-               />
-               <Route
-                  exact
-                  path="/viewActivity/:activityId"
-                  element={
-                     <ProtectedRoute>
-                        <ActivityDetails />
-                     </ProtectedRoute>
-                  }
-               />
-               <Route
-                  exact
-                  path="/editActivityDraft/:activityId"
-                  element={
-                     <ProtectedRoute>
-                        <EditActivityDraftPage />
-                     </ProtectedRoute>
-                  }
-               />
-               <Route
-                  exact
-                  path="/viewAllVendors"
-                  element={
-                     <ProtectedRoute>
-                        <ViewAllVendors />
-                     </ProtectedRoute>
-                  }
-               />
-               {/* <Route
+  return (
+    <div>
+      <SocketConnection />
+      <Layout>
+        <Routes>
+          <Route exact path="/" element={<Home />} />
+          <Route
+            exact
+            path="/createActivity"
+            element={
+              <ProtectedRoute>
+                <CreateActivityPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewPublishedActivities"
+            element={
+              <ProtectedRoute>
+                <ViewPublishedActivities />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewActivityDrafts"
+            element={
+              <ProtectedRoute>
+                <ViewActivityDrafts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewActivity/:activityId"
+            element={
+              <ProtectedRoute>
+                <ActivityDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/editActivityDraft/:activityId"
+            element={
+              <ProtectedRoute>
+                <EditActivityDraftPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/viewAllVendors"
+            element={
+              <ProtectedRoute>
+                <ViewAllVendors />
+              </ProtectedRoute>
+            }
+          />
+          {/* <Route
             exact
             path="/viewVendor/:vendorId"
             element={
@@ -166,28 +166,25 @@ function App() {
               </ProtectedRoute>
             }
           />
-         
-               <Route
-                  exact
-                  path="/verifyEmail/:token"
-                  element={<VerifyEmailPage />}
-               />
-       
-               />
-               <Route path="/login" element={<LoginPage />} />
-               <Route path="/forgotPassword" element={<ForgotPassword />} />
-
-               {/*for testing image upload component*/}
-               <Route
-                  path="/uploadTest"
-                  element={
-                     <ImageAndFileUpload limit={5} name="test" size={2000000} />
-                  }
-               />
-            </Routes>
-         </Layout>
-      </div>
-   );
+          <Route
+            exact
+            path="/verifyEmail/:token"
+            element={<VerifyEmailPage />}
+          />
+          />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgotPassword" element={<ForgotPassword />} />
+          {/*for testing image upload component*/}
+          <Route
+            path="/uploadTest"
+            element={
+              <ImageAndFileUpload limit={5} name="test" size={2000000} />
+            }
+          />
+        </Routes>
+      </Layout>
+    </div>
+  );
 }
 
 export default App;

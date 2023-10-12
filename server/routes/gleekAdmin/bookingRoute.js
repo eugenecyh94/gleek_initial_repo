@@ -1,9 +1,9 @@
 import express from "express";
 import {
-   getAllBookings,
-   getBookingById,
-   deleteBooking,
-   getAllBookingsByActivityId,
+  getAllBookings,
+  getBookingById,
+  deleteBooking,
+  getAllBookingsByActivityId,
 } from "../../controller/bookingController.js";
 import adminAuth from "../../middleware/adminAuth.js";
 
