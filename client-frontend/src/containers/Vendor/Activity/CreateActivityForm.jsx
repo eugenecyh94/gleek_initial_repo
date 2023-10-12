@@ -923,6 +923,9 @@ const CreateActivityForm = ({ themes, theme, activity }) => {
       );
     }
   };
+  const handleCancel = () => {
+    navigate(-1);
+  };
 
   return (
     <form>
@@ -1348,10 +1351,6 @@ const CreateActivityForm = ({ themes, theme, activity }) => {
                 }}
                 value={bookingNotice ?? ""}
                 onChange={handleBookingNoticeChange}
-                error={
-                  (bookingNotice !== null && bookingNotice === 0) ||
-                  formErrors?.bookingNotice?.length > 0
-                }
                 helperText={formErrors?.bookingNotice}
               />
             </Grid>
@@ -1519,11 +1518,35 @@ const CreateActivityForm = ({ themes, theme, activity }) => {
                       <TableContainer component={Paper}>
                         <Table>
                           <TableHead>
-                            <TableRow>
-                              <TableCell>Start Range</TableCell>
-                              <TableCell>End Range</TableCell>
-                              <TableCell>Price Per Pax</TableCell>
-                              <TableCell>Action</TableCell>
+                            <TableRow
+                              sx={{
+                                backgroundColor: "rgba(159 145 204 / 0.12)",
+                              }}
+                            >
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                Start Range
+                              </TableCell>
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                End Range
+                              </TableCell>
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                Price Per Pax
+                              </TableCell>
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                Action
+                              </TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
@@ -1911,7 +1934,7 @@ const CreateActivityForm = ({ themes, theme, activity }) => {
         alignItems="left"
         justifyContent="left"
       >
-        <Grid item xs={6}>
+        <Grid item xs={5}>
           <StyledSubmitButton
             onClick={handleSubmit}
             type="submit"
@@ -1921,7 +1944,7 @@ const CreateActivityForm = ({ themes, theme, activity }) => {
             <Typography component="div">Submit</Typography>
           </StyledSubmitButton>
         </Grid>
-        <Grid item xs={6}>
+        <Grid item xs={5}>
           <Button
             onClick={handleSaveDraft}
             type="submit"
@@ -1929,6 +1952,16 @@ const CreateActivityForm = ({ themes, theme, activity }) => {
             fullWidth
           >
             <Typography component="div">Save draft</Typography>
+          </Button>
+        </Grid>
+        <Grid item xs={2}>
+          <Button
+            onClick={handleCancel}
+            variant="outlined"
+            fullWidth
+            color="unselected"
+          >
+            <Typography component="div">Cancel</Typography>
           </Button>
         </Grid>
       </Grid>

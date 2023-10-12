@@ -109,9 +109,6 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
     setActivityToReject();
   }, [activities, pendingApprovalActivities, selectedActivityTab]);
 
-  const handleCreateButtonClick = () => {
-    navigate("/createActivity");
-  };
   const handleRowClick = async (activity) => {
     // navigate(`/viewActivity/${activity._id}`);
     const res = await AxiosConnect.get(`/activity/getImages/${activity._id}`);
@@ -151,12 +148,12 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
     const successMessage = await rejectActivity(
       activityToReject._id,
       rejectionReason,
-      admin._id,
+      admin._id
     );
     setRejectModalOpen(false);
     setOpenViewModal(false);
     setPendingApprovalActivities(
-      pendingApprovalActivities.filter((a) => a._id !== activityToReject._id),
+      pendingApprovalActivities.filter((a) => a._id !== activityToReject._id)
     );
     openSnackbar(successMessage);
   };
@@ -317,7 +314,7 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
             <div>-</div>
           );
         },
-      },
+      }
     );
   }
   if (selectedActivityTab === "pendingApprovalTab") {
@@ -457,7 +454,7 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
             </div>
           );
         },
-      },
+      }
     );
   }
 
@@ -496,24 +493,6 @@ const ActivityListTable = ({ activities, pendingApprovalActivities }) => {
             }
           />
         </Tabs>
-        <StyledDiv>
-          <StyledButton
-            variant="contained"
-            color="light_purple"
-            onClick={handleCreateButtonClick}
-          >
-            <Typography
-              style={{
-                display: "flex",
-              }}
-              component="div"
-              color="white"
-            >
-              <AddIcon />
-              Create
-            </Typography>
-          </StyledButton>
-        </StyledDiv>
       </div>
       <div style={{ height: 500, width: "99%" }}>
         <DataGrid

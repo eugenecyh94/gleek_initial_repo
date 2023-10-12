@@ -46,11 +46,19 @@ export const getAllActivitiesForAdmin = async (req, res) => {
       .populate({
         path: "adminCreated",
         match: { _id: adminId },
+        select: "_id name",
       })
       .populate("activityPricingRules")
+      .populate({
+        path: "approvalStatusChangeLog",
+        populate: { path: "admin", model: "Admin", select: "_id name" },
+      })
       .populate("theme")
       .populate("subtheme")
-      .populate("linkedVendor");
+      .populate({
+        path: "linkedVendor",
+        select: "-password",
+      });
     res.status(200).json({
       data: activities,
     });
@@ -286,7 +294,7 @@ export const saveActivity = async (req, res) => {
       foodCertDate: foodCertDate ?? null,
       foodCategory: foodCategory ?? [],
       isFoodCertPending: isFoodCertPending ?? null,
-      linkedVendor: linkedVendor ?? req.user._id,
+      linkedVendor: linkedVendor ?? req?.user?._id,
       pendingCertificateType: pendingCertificateType ?? null,
       modifiedDate: Date.now(),
     };
@@ -321,7 +329,10 @@ export const saveActivity = async (req, res) => {
           },
         );
         savedActivity = updatedRejectedDraft;
-
+        await ActivityPricingRulesModel.deleteMany(
+          { activity: activityId },
+          { session }
+        );
         // this is a parent, create a new reject draft (child)
       } else {
         const a = foundActivity.toObject();
@@ -359,11 +370,13 @@ export const saveActivity = async (req, res) => {
           );
         } else {
           let parentId;
+          // this is rejected draft
           if (!foundActivity.rejectedDraft && foundActivity.parent) {
             parentId = foundActivity.parent;
             await ActivityModel.findByIdAndDelete(foundActivity._id, {
               session,
             });
+            // this is regular draft
           } else {
             parentId = activityId;
           }
@@ -392,6 +405,7 @@ export const saveActivity = async (req, res) => {
           message: "Invalid activity Id!",
         });
       }
+    // new draft -> straightaway submit
     } else {
       const newActivity = new ActivityModel({
         ...activity,
@@ -405,6 +419,7 @@ export const saveActivity = async (req, res) => {
     console.log("Saved Activity is: ", savedActivity);
 
     const processedS3ImageUrlToBeKept = [];
+    console.log("updatedImageList yoo", updatedImageList);
 
     if (updatedImageList !== undefined && updatedImageList.length > 0) {
       for (let i = 0; i < updatedImageList.length; i++) {
@@ -447,10 +462,6 @@ export const saveActivity = async (req, res) => {
       { new: true, session },
     );
 
-    await ActivityPricingRulesModel.deleteMany(
-      { activity: activityId },
-      { session },
-    );
     if (activityPricingRules) {
       await saveActivityPricingRules(
         activityPricingRules,
@@ -643,10 +654,11 @@ export const publishActivity = async (req, res) => {
 export const deleteActivityDraft = async (req, res) => {
   try {
     const activityId = req.params.id;
-    const deletedActivity = await ActivityModel.findOneAndDelete({
-      _id: activityId,
-    });
-    await ActivityPricingRulesModel.deleteMany({ activity: activityId });
+    const deletedActivity = await ActivityModel.findByIdAndDelete(activityId);
+    await ActivityPricingRulesModel.deleteMany(
+      { activity: activityId },
+      { session }
+    );
     let activities;
     if (deletedActivity.adminCreated) {
       activities = await retrieveActivities(deletedActivity.adminCreated);
@@ -666,12 +678,12 @@ export const deleteActivityDraft = async (req, res) => {
       console.log("Retrieving all vendor activities", req.user);
       activities = await getAllVendorActivities(req.user._id);
     }
-
     res.status(201).json({
       message: "Activity draft deleted successfully!",
       activity: activities,
     });
   } catch (e) {
+    console.error("error when deleting draft", e);
     res.status(500).json({
       error: "Error when deleting activity draft!",
       message: e.message,
@@ -690,10 +702,12 @@ export const bulkDeleteActivityDraft = async (req, res) => {
     const { deletedCount } = await ActivityModel.deleteMany({
       _id: activityIds,
     });
-    await ActivityPricingRulesModel.deleteMany({
+    const thing = await ActivityPricingRulesModel.find({
       activity: { $in: activityIds },
     });
-
+    const ting = await ActivityPricingRulesModel.deleteMany({
+      activity: { $in: activityIds },
+    });
     let activities;
     if (deletedActivity.adminCreated) {
       activities = await retrieveActivities(deletedActivity.adminCreated);
@@ -736,7 +750,11 @@ const retrieveActivities = async (adminId) => {
     .populate("activityPricingRules")
     .populate("theme")
     .populate("subtheme")
-    .populate("linkedVendor");
+    .populate("linkedVendor")
+    .populate({
+      path: "approvalStatusChangeLog",
+      populate: { path: "admin", model: "Admin", select: "_id name" },
+    });
 };
 
 export const bulkAddThemes = async (req, res) => {

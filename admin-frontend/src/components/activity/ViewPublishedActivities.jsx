@@ -5,6 +5,7 @@ import { useActivityStore } from "../../zustand/GlobalStore";
 import MainBodyContainer from "../common/MainBodyContainer";
 import ActivityListTable from "./ActivityListTable";
 import styled from "@emotion/styled";
+import InfoIcon from "@mui/icons-material/Info";
 
 const StyledPage = styled("div")(({ theme }) => ({
   backgroundColor: theme.palette.grey.pale_grey,
@@ -38,6 +39,12 @@ const ViewPublishedActivities = () => {
         >
           View Published Activities
         </Typography>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <InfoIcon fontSize="small" sx={{ color: "#9F91CC" }} />
+          <Typography color="#9F91CC">
+            View all published activities and handle activity creation requests
+          </Typography>
+        </div>
         {isLoading ? (
           <CircularProgress sx={{ margin: "auto", marginTop: "32px" }} />
         ) : (

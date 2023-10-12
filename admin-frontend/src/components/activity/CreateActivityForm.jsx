@@ -121,7 +121,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
       : activity?.activityType === "Popups (Food)" ||
         activity?.activityType === "Popups (Non-food)"
       ? ActivityTypeEnum.POPUP
-      : activity?.activityType,
+      : activity?.activityType
   );
   const [title, setTitle] = useState(activity?.title ?? null);
   const [description, setDescription] = useState(activity?.description ?? null);
@@ -133,7 +133,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
       clientPrice: pricingRule.clientPrice,
     })) || [];
   const [pricingRanges, setPricingRanges] = useState(
-    extractedFields.slice().sort((a, b) => a.start - b.start),
+    extractedFields.slice().sort((a, b) => a.start - b.start)
   );
   const initialPricingRangeErrors = activity?.activityPricingRules?.map(() => ({
     range: "",
@@ -201,7 +201,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     activity?.linkedVendor?._id ?? null,
   );
   const [pendingCertType, setPendingCertType] = useState(
-    activity?.pendingCertificationType ?? null,
+    activity?.pendingCertificationType ?? null
   );
   const [activeStep, setActiveStep] = useState(
     activity?.offlinePricing?.amount ||
@@ -222,7 +222,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
   const [capacity, setCapacity] = useState(activity?.capacity ?? null);
   const [imageListToEdit, setImageListToEdit] = useState([]);
   const [existingImageList, setExistingImageList] = useState(
-    activity?.preSignedImages ?? [],
+    activity?.preSignedImages ?? []
   );
 
   const foodCategories = Object.values(FoodCategoryEnum);
@@ -401,7 +401,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
   };
   const handleRemoveImage = (image) => {
     setImageListToEdit((oldState) =>
-      oldState.filter((item) => item.src !== image.src),
+      oldState.filter((item) => item.src !== image.src)
     );
     const updatedList = [...activityImages];
     updatedList.splice(activityImages.indexOf(image.file), 1);
@@ -834,6 +834,9 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
     for (let i = 0; i < activityImages.length; i++) {
       formData.append("images", activityImages[i]);
     }
+    existingImageList.forEach((item) =>
+      formData.append("updatedImageList[]", item)
+    );
 
     if (validateForm()) {
       try {
@@ -978,7 +981,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
       formData.append("images", activityImages[i]);
     }
     existingImageList.forEach((item) =>
-      formData.append("updatedImageList[]", item),
+      formData.append("updatedImageList[]", item)
     );
     if (validateDraft()) {
       try {
@@ -1491,11 +1494,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                 }}
                 value={bookingNotice ?? ""}
                 onChange={handleBookingNoticeChange}
-                error={
-                  (bookingNotice !== null && bookingNotice === 0) ||
-                  formErrors?.bookingNotice?.length > 0
-                }
-                helperText={formErrors?.bookingNotice}
               />
             </Grid>
             <Grid item xs={3}>
@@ -1659,14 +1657,43 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                       </Typography>
                     </Grid>
                     <Grid item xs={12} paddingTop={2}>
-                      <TableContainer component={Paper}>
+                      <TableContainer
+                        component={Paper}
+                        sx={{
+                          borderRadius: "10px",
+                        }}
+                      >
                         <Table>
                           <TableHead>
-                            <TableRow>
-                              <TableCell>Start Range</TableCell>
-                              <TableCell>End Range</TableCell>
-                              <TableCell>Price Per Pax</TableCell>
-                              <TableCell>Action</TableCell>
+                            <TableRow
+                              sx={{
+                                backgroundColor: "rgba(159 145 204 / 0.12)",
+                              }}
+                            >
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                Start Range
+                              </TableCell>
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                End Range
+                              </TableCell>
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                Price Per Pax
+                              </TableCell>
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                Action
+                              </TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
@@ -1799,14 +1826,46 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                       />
                     </Grid>
                     <Grid item xs={12}>
-                      <TableContainer component={Paper}>
+                      <TableContainer
+                        component={Paper}
+                        sx={{
+                          borderRadius: "10px",
+                        }}
+                      >
                         <Table>
                           <TableHead>
-                            <TableRow>
-                              <TableCell>Start Range</TableCell>
-                              <TableCell>End Range</TableCell>
-                              <TableCell>Price Per Pax</TableCell>
-                              <TableCell>Client Price</TableCell>
+                            <TableRow
+                              sx={{
+                                backgroundColor: "rgba(159 145 204 / 0.12)",
+                              }}
+                            >
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                Start Range
+                              </TableCell>
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                End Range
+                              </TableCell>
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                Price Per Pax
+                              </TableCell>
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                <span>Client Price&nbsp;</span>
+                                <span style={{ color: "#9F91CC" }}>
+                                  (after {markup}% markup)
+                                </span>
+                              </TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
