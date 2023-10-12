@@ -152,6 +152,11 @@ const useShopStore = create((set) => ({
       console.error(error);
     }
   },
+  parentChecked: [],
+  setParentChecked: (newParentChecked) =>
+    set({ parentChecked: newParentChecked }),
+  childChecked: [],
+  setChildChecked: (newChildChecked) => set({ childChecked: newChildChecked }),
 }));
 
 export default useShopStore;

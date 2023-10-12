@@ -12,8 +12,10 @@ import {
   Button,
 } from "@mui/material";
 import { lighten, useTheme } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
 
 const CartPage = (props) => {
+  const navigate = useNavigate();
   const {
     cartItems,
     getCartItems,
@@ -112,6 +114,7 @@ const CartPage = (props) => {
       }
     }
     setCartItemsToCheckout(cartItemsToCheckout);
+    navigate(`/cart/checkout`);
   };
 
   return (

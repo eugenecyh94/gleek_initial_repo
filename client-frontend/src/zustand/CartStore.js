@@ -55,6 +55,24 @@ const useCartStore = create((set) => ({
   cartItemsToCheckOut: [],
   setCartItemsToCheckout: (newCartItemsToCheckOut) =>
     set({ cartItemsToCheckOut: newCartItemsToCheckOut }),
+  checkout: async (cartItemsToCheckOut) => {
+    try {
+      // set({ addToCartLoading: false });
+      const response = await AxiosConnect.post(
+        `/gleek/booking/createBookings`,
+        cartItemsToCheckOut,
+      );
+      // console.log(response.data.data);
+      // set({ newCartItem: response.data.data });
+      // setTimeout(() => {
+      //   set({ addToCartLoading: false });
+      // }, 500);
+      set({ cartItemsToCheckOut: [] });
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  },
 }));
 
 export default useCartStore;

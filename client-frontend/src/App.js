@@ -15,6 +15,7 @@ import ProfilePicture from "./containers/Client/Account/ProfilePicture";
 import VerifyEmail from "./containers/Client/Account/VerifyEmail";
 import MyBookmarks from "./containers/Client/Bookmark/MyBookmarks";
 import ActivityDetailsPage from "./containers/ActivityDetailsPage/ActivityDetailsPage";
+import CheckoutPage from "./containers/Client/CheckoutPage";
 
 import useClientStore from "./zustand/ClientStore";
 import VendorRegisterPage from "./containers/Vendor/VendorRegisterPage";
@@ -143,6 +144,15 @@ function App() {
             element={
               <ClientProtectedRoute>
                 <VendorDetails />
+              </ClientProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/cart/checkout"
+            element={
+              <ClientProtectedRoute>
+                <CheckoutPage />
               </ClientProtectedRoute>
             }
           />

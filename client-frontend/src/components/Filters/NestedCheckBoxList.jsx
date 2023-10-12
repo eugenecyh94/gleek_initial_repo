@@ -20,15 +20,18 @@ const NestedCheckboxList = (props) => {
   const accent = theme.palette.accent.main;
 
   const [openIndex, setOpenIndex] = useState(null);
-  const { filter, setFilter } = useShopStore();
+  const {
+    filter,
+    setFilter,
+    parentChecked,
+    setParentChecked,
+    childChecked,
+    setChildChecked,
+  } = useShopStore();
   const parentThemes = props.themes;
 
   // Loading state
   const [isLoading, setIsLoading] = useState(true);
-
-  // Initialize the checked states for parents and children
-  const [parentChecked, setParentChecked] = useState([]);
-  const [childChecked, setChildChecked] = useState([]);
 
   useEffect(() => {
     // Check if props.themes is available

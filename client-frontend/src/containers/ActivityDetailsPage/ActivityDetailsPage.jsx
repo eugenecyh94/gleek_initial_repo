@@ -507,8 +507,8 @@ const ActivityDetailsPage = () => {
                             key={index}
                             value={`${timeSlot.startTime},${timeSlot.endTime}`}
                           >
-                            {timeSlot.startTime.substring(11, 16)} -
-                            {timeSlot.endTime.substring(11, 16)}
+                            {new Date(timeSlot.startTime).toLocaleTimeString()}{" "}
+                            -{new Date(timeSlot.endTime).toLocaleTimeString()}
                           </MenuItem>
                         ))}
                       </Select>

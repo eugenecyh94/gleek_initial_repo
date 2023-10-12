@@ -44,7 +44,8 @@ function NavBar(props) {
     filter,
     getFilteredActivitiesWithSearchValue,
   } = useShopStore();
-  const { getCartItems, newCartItem, cartItems } = useCartStore();
+  const { getCartItems, newCartItem, cartItems, cartItemsToCheckOut } =
+    useCartStore();
   const { role, setRole } = useGlobalStore();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [anchorE2, setAnchorE2] = React.useState(null);
@@ -111,7 +112,7 @@ function NavBar(props) {
 
   useEffect(() => {
     fetchCart();
-  }, [newCartItem, client]);
+  }, [newCartItem, client, cartItemsToCheckOut]);
 
   const fetchCart = async () => {
     try {
