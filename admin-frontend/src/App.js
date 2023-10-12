@@ -94,86 +94,85 @@ function App() {
               </ProtectedRoute>
             }
           /> */}
-          <Route
-            exact
-            path="/addVendor"
-            element={
-              <ProtectedRoute>
-                <CreateVendorPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/manageProfile/changePassword"
-            element={
-              <ProtectedRoute>
-                <ChangePassword />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/manageProfile"
-            element={
-              <ProtectedRoute>
-                <AccountDetails />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/adminTeam"
-            element={
-              <ProtectedRoute>
-                <ViewAllAdmins />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/adminTeam/addAdmin"
-            element={
-              <ProtectedRoute>
-                <AddAdminPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/viewAllClients"
-            element={
-              <ProtectedRoute>
-                <ViewAllClients />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/viewClient/:clientId"
-            element={
-              <ProtectedRoute>
-                <ClientDetails />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/notificationList"
-            element={
-              <ProtectedRoute>
-                <AdminNotificationPage />
-              </ProtectedRoute>
-            }
-          />
-         
+               <Route
+                  exact
+                  path="/addVendor"
+                  element={
+                     <ProtectedRoute>
+                        <CreateVendorPage />
+                     </ProtectedRoute>
+                  }
+               />
+               <Route
+                  exact
+                  path="/manageProfile/changePassword"
+                  element={
+                     <ProtectedRoute>
+                        <ChangePassword />
+                     </ProtectedRoute>
+                  }
+               />
+               <Route
+                  exact
+                  path="/manageProfile"
+                  element={
+                     <ProtectedRoute>
+                        <AccountDetails />
+                     </ProtectedRoute>
+                  }
+               />
+               <Route
+                  exact
+                  path="/adminTeam"
+                  element={
+                     <ProtectedRoute>
+                        <ViewAllAdmins />
+                     </ProtectedRoute>
+                  }
+               />
+               <Route
+                  exact
+                  path="/adminTeam/addAdmin"
+                  element={
+                     <ProtectedRoute>
+                        <AddAdminPage />
+                     </ProtectedRoute>
+                  }
+               />
+               <Route
+                  exact
+                  path="/viewAllClients"
+                  element={
+                     <ProtectedRoute>
+                        <ViewAllClients />
+                     </ProtectedRoute>
+                  }
+               />
+               <Route
+                  exact
+                  path="/viewClient/:clientId"
+                  element={
+                     <ProtectedRoute>
+                        <ClientDetails />
+                     </ProtectedRoute>
+                  }
+               />
+               <Route
+                  exact
+                  path="/notificationList"
+                  element={
+                     <ProtectedRoute>
+                        <AdminNotificationPage />
+                     </ProtectedRoute>
+                  }
+               />
+
                <Route
                   exact
                   path="/verifyEmail/:token"
                   element={<VerifyEmailPage />}
                />
-       
-               />
+
                <Route path="/login" element={<LoginPage />} />
                <Route path="/forgotPassword" element={<ForgotPassword />} />
 

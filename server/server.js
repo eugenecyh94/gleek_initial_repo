@@ -60,29 +60,6 @@ app.use("/gleekVendor", gleekVendorRoutes);
 app.use("/testActivity", activityTestController);
 app.use("/notification", notificationRoutes);
 
-app.get("/pdf", (req, res, next) => {
-   const booking = {
-      client: {
-         name: "Yunus",
-      },
-      startDateTime: "2023-10-20T01:00:00.000+00:00",
-      endDateTime: "2023-10-20T04:00:00.000+00:00",
-      totalCost: 900,
-      totalPax: 20,
-      activityTitle: "Coffee Grounds",
-      vendorName: "Sustainability Project",
-      status: "PENDING_CONFIRMATION",
-      billingAddress: "test",
-      billingPostalCode: "1",
-   };
-
-   pdf.create(InvoiceTemplate(booking), {}).toStream(function (err, stream) {
-      res.setHeader("Content-Type", "appplication/pdf");
-      res.setHeader("Content-Disposition", "inline;filename=test.pdf");
-      stream.pipe(res);
-   });
-});
-
 app.listen(port, () => {
    console.log(`Server is running on port: ${port}`);
 });

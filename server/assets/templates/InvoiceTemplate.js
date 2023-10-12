@@ -1,24 +1,25 @@
 import { header } from "./header.js";
 import { footer } from "./footer.js";
 export const InvoiceTemplate = (booking) => {
-   let { startDateTime, endDateTime } = booking;
+   let { selectedDate, time } = booking;
 
-   const getDateTime = (datetime) => {
-      datetime = new Date(datetime);
-      const date = datetime.toLocaleDateString(undefined, {
-         day: "2-digit",
-         month: "short",
-      });
-      const time = datetime.toLocaleTimeString(undefined, {
-         hour: "2-digit",
-         minute: "2-digit",
-         hour12: true,
-      });
-      return [date, time];
-   };
+   selectedDate = new Date(selectedDate);
 
-   const [startDate, startTime] = getDateTime(startDateTime);
-   const [endDate, endTime] = getDateTime(endDateTime);
+   const startDate = selectedDate.toLocaleDateString(undefined, {
+      day: "2-digit",
+      month: "short",
+   });
+   const startTime = selectedDate.toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+   });
+   let endTime = new Date(time.split(",")[1]);
+   endTime = endTime.toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+   });
 
    return ` 
    <!doctype html>
@@ -64,17 +65,7 @@ export const InvoiceTemplate = (booking) => {
                   flex-direction: row;
                   justify-content: space-between;
                "
-            >
-               <p style="white-space: nowrap" class="ft12">
-                  <b>Attn: ${
-                     booking.client.companyName
-                  }<br />Checkout APAC<br /></b>${
-                     booking.billingAddress
-                  }<br />Singapore ${booking.billingPostalCode}
-               </p>
-               <p style="white-space: nowrap" class="ft12">
-                  <b>Status: ${booking.status}</b>
-               </p>
+            >           
             </div>
             <hr
                style="color: #255f41; height: 2.5px; background-color: #255f41"
@@ -95,14 +86,10 @@ export const InvoiceTemplate = (booking) => {
             <table style="width: 100%">
                <tr>
                   <th class="ft113" style="width: 40%; text-align: left">
-                     <b
-                        >${booking.activityTitle} by<br />${
-                           booking.vendorName
-                        }</b
-                     >
+                     <b>${booking.title}</b>
                      <ul style="padding-top: unset; line-height: 16px">
                         <li class="ft110">Date: ${startDate}</li>
-                        <li class="ft110">Time: ${startTime} to ${endTime}</li>
+                        <li class="ft110">Time: ${startTime} - ${endTime}</li>
                      </ul>
                   </th>
                   <th class="ft113" style="width: 20%">${booking.totalPax}</th>
