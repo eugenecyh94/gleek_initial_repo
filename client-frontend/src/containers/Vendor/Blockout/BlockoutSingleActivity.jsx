@@ -210,6 +210,14 @@ function BlockoutSingleActivity() {
                         ? blockedStartDateTime.add(1, "minute")
                         : null
                     }
+                    maxDateTime={
+                      blockedStartDateTime
+                        ? dayjs(blockedStartDateTime)
+                          
+                            .set("hour", 23)
+                            .set("minute", 59)
+                        : null
+                    }
                   />
                   <FormHelperText>{endError}</FormHelperText>
                 </FormControl>
