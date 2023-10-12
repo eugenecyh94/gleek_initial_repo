@@ -4,6 +4,7 @@ import { useActivityStore, useAdminStore } from "../../zustand/GlobalStore";
 import ActivityDraftList from "./ActivityDraftList";
 import { useEffect } from "react";
 import styled from "@emotion/styled";
+import InfoIcon from "@mui/icons-material/Info";
 
 const StyledPage = styled("div")(({ theme }) => ({
   backgroundColor: theme.palette.grey.pale_grey,
@@ -42,6 +43,13 @@ const ViewActivityDrafts = () => {
         >
           View My Activities
         </Typography>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <InfoIcon fontSize="small" sx={{ color: "#9F91CC" }} />
+          <Typography color="#9F91CC">
+            View all the activities I created
+          </Typography>
+        </div>
+
         {isLoading ? (
           <CircularProgress sx={{ margin: "auto", marginTop: "32px" }} />
         ) : (

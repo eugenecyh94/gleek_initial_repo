@@ -1494,11 +1494,6 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                 }}
                 value={bookingNotice ?? ""}
                 onChange={handleBookingNoticeChange}
-                error={
-                  (bookingNotice !== null && bookingNotice === 0) ||
-                  formErrors?.bookingNotice?.length > 0
-                }
-                helperText={formErrors?.bookingNotice}
               />
             </Grid>
             <Grid item xs={3}>
@@ -1662,14 +1657,43 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                       </Typography>
                     </Grid>
                     <Grid item xs={12} paddingTop={2}>
-                      <TableContainer component={Paper}>
+                      <TableContainer
+                        component={Paper}
+                        sx={{
+                          borderRadius: "10px",
+                        }}
+                      >
                         <Table>
                           <TableHead>
-                            <TableRow>
-                              <TableCell>Start Range</TableCell>
-                              <TableCell>End Range</TableCell>
-                              <TableCell>Price Per Pax</TableCell>
-                              <TableCell>Action</TableCell>
+                            <TableRow
+                              sx={{
+                                backgroundColor: "rgba(159 145 204 / 0.12)",
+                              }}
+                            >
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                Start Range
+                              </TableCell>
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                End Range
+                              </TableCell>
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                Price Per Pax
+                              </TableCell>
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                Action
+                              </TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
@@ -1802,14 +1826,46 @@ const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
                       />
                     </Grid>
                     <Grid item xs={12}>
-                      <TableContainer component={Paper}>
+                      <TableContainer
+                        component={Paper}
+                        sx={{
+                          borderRadius: "10px",
+                        }}
+                      >
                         <Table>
                           <TableHead>
-                            <TableRow>
-                              <TableCell>Start Range</TableCell>
-                              <TableCell>End Range</TableCell>
-                              <TableCell>Price Per Pax</TableCell>
-                              <TableCell>Client Price</TableCell>
+                            <TableRow
+                              sx={{
+                                backgroundColor: "rgba(159 145 204 / 0.12)",
+                              }}
+                            >
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                Start Range
+                              </TableCell>
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                End Range
+                              </TableCell>
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                Price Per Pax
+                              </TableCell>
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                <span>Client Price&nbsp;</span>
+                                <span style={{ color: "#9F91CC" }}>
+                                  (after {markup}% markup)
+                                </span>
+                              </TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>

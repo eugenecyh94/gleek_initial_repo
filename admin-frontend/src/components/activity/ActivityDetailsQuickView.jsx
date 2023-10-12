@@ -898,7 +898,7 @@ const ActivityDetailsQuickView = ({
                 Approval Status Changelog
               </Typography>
             </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={6}>
               <List>
                 {activity.approvalStatusChangeLog
                   ?.slice()
@@ -949,6 +949,7 @@ const ActivityDetailsQuickView = ({
                               </Typography>
                             }
                           />
+
                           {changelog.approvalStatus === "Rejected" && (
                             <Divider
                               orientation="vertical"
@@ -956,19 +957,21 @@ const ActivityDetailsQuickView = ({
                               sx={{ paddingLeft: 2 }}
                             />
                           )}
-                          <div
-                            style={{
-                              paddingLeft: 4,
-                              display: "flex",
-                            }}
-                          >
-                            {changelog.approvalStatus === "Rejected" && (
-                              <div style={{ paddingTop: 4, paddingRight: 2 }}>
-                                <FeedbackIcon fontSize="small" />
-                              </div>
-                            )}
-                            {changelog.rejectionReason}
-                          </div>
+                          <Typography>
+                            <div
+                              style={{
+                                paddingLeft: 4,
+                                display: "flex",
+                              }}
+                            >
+                              {changelog.approvalStatus === "Rejected" && (
+                                <div style={{ paddingTop: 4, paddingRight: 2 }}>
+                                  <FeedbackIcon fontSize="small" />
+                                </div>
+                              )}
+                              {changelog.rejectionReason}
+                            </div>
+                          </Typography>
                         </ListItem>
                         <Divider variant="middle" component="li" />
                       </Fragment>
