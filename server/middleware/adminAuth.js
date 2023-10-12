@@ -1,25 +1,33 @@
 import jwt from "jsonwebtoken";
-import "../loadEnvironment.js";
-import express from "express";
-import { model } from "mongoose";
+import Admin from "../model/adminModel.js";
 
-const secret = process.env.JWT_SECRET || "";
+const secret = process.env.JWT_SECRET;
 
-const auth = async function (req, res, next) {
-  try {
-    const token = req.header("x-auth-token");
+const adminAuth = async function (req, res, next) {
+   try {
+      const token =
+         req.cookies.token ||
+         req.body.token ||
+         req.query.token ||
+         req.headers["x-access-token"];
 
-    if (!token) {
-      return res.status(401).json({ ms: "No Token Provided" });
+      if (!token) {
+         return res.status(401).send("No Token Provided");
+      }
 
       const decoded = await jwt.verify(token, secret);
 
-      req.user = decoded.user;
+      const user = await Admin.findById(decoded.admin.id);
+
+      if (!user) {
+         return res.status(401).send("Admin not Found");
+      }
+
+      req.user = user;
       next();
-    }
-  } catch (e) {
-    return res.status(401).json({ ms: "Invalid Token Provided" });
-  }
+   } catch (e) {
+      return res.status(401).send("Invalid Token Provided");
+   }
 };
 
-export default auth;
+export default adminAuth;

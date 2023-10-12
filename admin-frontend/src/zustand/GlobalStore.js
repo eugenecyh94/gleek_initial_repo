@@ -168,6 +168,33 @@ export const useAdminStore = create((set) => ({
       return false;
     }
   },
+  verifyEmail: async (token) => {
+      try {
+         const response = await AxiosConnect.get(`/gleekAdmin/verify/${token}`);
+         console.log(response);
+         if (response.data.status === "success") {
+            set({ admin: response.data.admin });
+         }
+         return response;
+      } catch (error) {
+         console.log(error);
+         throw error;
+      }
+   },
+   resendVerifyEmail: async (email) => {
+      try {
+         const response = await AxiosConnect.post(
+            `/gleekAdmin/resendVerificationEmail/`,
+            {
+               email: email,
+            }
+         );
+         return response;
+      } catch (error) {
+         console.log(error);
+         throw error;
+      }
+   },
 }));
 
 export const useActivityStore = create((set) => ({

@@ -11,8 +11,10 @@ import {
   getPreSignedImgs,
   rejectActivity,
   saveActivity,
+
 } from "../../controller/activityController.js";
 import { uploadS3ActivityImages } from "../../middleware/multer.js";
+import adminAuth from "../../middleware/adminAuth.js";
 
 const router = express.Router();
 router.post(
@@ -30,4 +32,5 @@ router.delete("/bulkDelete", bulkDeleteActivityDraft);
 router.patch("/approveActivity/:activityId", approveActivity);
 router.patch("/rejectActivity/:activityId", rejectActivity);
 router.get("/getImages/:id", getPreSignedImgs);
+
 export default router;
