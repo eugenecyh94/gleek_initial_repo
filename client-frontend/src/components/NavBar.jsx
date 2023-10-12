@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   AppBar,
   Typography,
@@ -25,7 +25,8 @@ import SearchIcon from "@mui/icons-material/Search";
 import useGlobalStore from "../zustand/GlobalStore.js";
 import useVendorStore from "../zustand/VendorStore.js";
 import useShopStore from "../zustand/ShopStore.js";
-import AxiosConnect from "../utils/AxiosConnect.js";
+import useSnackbarStore from "../zustand/SnackbarStore.js";
+import useCartStore from "../zustand/CartStore.js";
 import {
   BookmarkBorderOutlined,
   LogoutOutlined,
@@ -35,6 +36,7 @@ import {
 function NavBar(props) {
   const { authenticated, client, logoutClient } = useClientStore();
   const { vendorAuthenticated, vendor, logoutVendor } = useVendorStore();
+  const { openSnackbar } = useSnackbarStore();
   const {
     searchValue,
     searchValueOnClicked,
@@ -42,6 +44,8 @@ function NavBar(props) {
     filter,
     getFilteredActivitiesWithSearchValue,
   } = useShopStore();
+  const { getCartItems, newCartItem, cartItems, cartItemsToCheckOut } =
+    useCartStore();
   const { role, setRole } = useGlobalStore();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [anchorE2, setAnchorE2] = React.useState(null);
@@ -104,6 +108,22 @@ function NavBar(props) {
     navigate("/shop");
     getFilteredActivitiesWithSearchValue(filter, searchValue);
     setSearchValueOnClicked(searchValue);
+  };
+
+  useEffect(() => {
+    fetchCart();
+  }, [newCartItem, client, cartItemsToCheckOut]);
+
+  const fetchCart = async () => {
+    try {
+      const responseStatus = await getCartItems();
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.errors?.[0]?.msg ||
+        error?.response?.data ||
+        null;
+      openSnackbar(errorMessage, "error");
+    }
   };
 
   return (
@@ -245,6 +265,32 @@ function NavBar(props) {
                 sx={{ marginRight: "16px" }}
               >
                 <ShoppingBagOutlinedIcon />
+                {cartItems.length > 0 && (
+                  <span
+                    style={{
+                      backgroundColor: "white",
+                      color: "#3D246C",
+                      borderRadius: "50%",
+                      width: "20px",
+                      height: "20px",
+                      position: "absolute",
+                      top: "-1px",
+                      right: "-8px",
+                      fontSize: "12px",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography
+                      fontWeight={700}
+                      color="accent"
+                      variant="subtitle2"
+                    >
+                      {cartItems.length}
+                    </Typography>
+                  </span>
+                )}
               </IconButton>
               <Button
                 sx={{ marginRight: "16px" }}

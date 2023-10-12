@@ -120,7 +120,6 @@ const ViewActivitiesBlockoutTable = ({
             <Button
               variant="outlined"
               color="primary"
-           
               onClick={handleEditClick}
             >
               Edit
@@ -128,7 +127,6 @@ const ViewActivitiesBlockoutTable = ({
             <Button
               variant="outlined"
               color="primary"
-           
               onClick={() => handleViewButton(params.row)}
             >
               View
@@ -140,7 +138,7 @@ const ViewActivitiesBlockoutTable = ({
   ];
 
   return (
-    <Box paddingTop={2} marginLeft={2}>
+    <Box paddingTop={2} marginLeft={2} width="98%">
       <DataGrid
         checkboxSelection={false}
         initialState={{

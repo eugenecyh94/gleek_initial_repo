@@ -11,7 +11,7 @@ const router = express.Router();
 router.get(
   "/getAvailableBookingTimeslots/:activityId/:selectedDate",
   verifyToken,
-  getAvailableBookingTimeslots
+  getAvailableBookingTimeslots,
 );
 
 // /gleek/booking/createBookings

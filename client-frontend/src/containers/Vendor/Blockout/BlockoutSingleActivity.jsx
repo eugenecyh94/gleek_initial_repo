@@ -165,7 +165,7 @@ function BlockoutSingleActivity() {
         <Typography color="secondary" variant="h3">
           Manage <b>{activityTitle}</b> Blockouts
         </Typography>
-        <Typography variant="h6" gutterBottom color="primary"   marginTop={2}>
+        <Typography variant="h6" gutterBottom color="primary" marginTop={2}>
           Add New Timing
         </Typography>
         <Stack
@@ -173,7 +173,6 @@ function BlockoutSingleActivity() {
           justifyContent="space-between"
           alignItems="center"
           spacing={2}
-        
         >
           <Stack spacing={2} paddingTop={2}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>

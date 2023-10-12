@@ -12,7 +12,7 @@ export async function findMinimumPricePerPax(foundActivity) {
 }
 
 export async function prepareActivityMinimumPricePerPaxAndSingleImage(
-  activity
+  activity,
 ) {
   activity.minimumPricePerPax = await findMinimumPricePerPax(activity);
   if (activity.images && activity.images.length > 0) {

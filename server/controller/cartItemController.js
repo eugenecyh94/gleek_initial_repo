@@ -3,6 +3,7 @@ import { validationResult } from "express-validator";
 import ActivityModel from "../model/activityModel.js";
 import BookingModel from "../model/bookingModel.js";
 import BlockedTimeslotModel from "../model/blockedTimeslotModel.js";
+import { s3GetImages } from "../service/s3ImageServices.js";
 import {
   getTimeslotAvailability,
   generateAllTimeslots,
@@ -32,7 +33,8 @@ export const addCartItem = async (req, res) => {
     // Check if client is approved to make bookings
     if (client.status !== "APPROVED") {
       return res.status(400).json({
-        error: "Client is not approved to make bookings yet.",
+        status: "error",
+        msg: "Client is not approved to make bookings yet.",
       });
     }
 
@@ -42,7 +44,8 @@ export const addCartItem = async (req, res) => {
 
     if (activity === null) {
       return res.status(404).json({
-        error: "Activity not found with the provided ID.",
+        status: "error",
+        msg: "Activity not found with the provided ID.",
       });
     }
 
@@ -97,16 +100,21 @@ export const getCartItemsByClientId = async (req, res) => {
   }
 
   try {
-    const cartItems = await CartItemModel.find({ clientId: client._id });
+    const cartItems = await CartItemModel.find({
+      clientId: client._id,
+    });
     // for each cartItem, check if the activity is still available
-
+    for (const cartItem of cartItems) {
+      const activity = await ActivityModel.findById(cartItem.activityId);
+      cartItem.preSignedImages = await s3GetImages(activity.images);
+    }
     const updatedCartItems = await Promise.all(
       cartItems.map(async (cartItem) => {
         const isTimeslotAvailable = await isCartItemStillAvailable(
-          cartItem._id
+          cartItem._id,
         );
         return { cartItem, isItemStillAvailable: isTimeslotAvailable }; // Add the 'isAvailable' field to the updated cart items
-      })
+      }),
     );
 
     res.status(200).json(updatedCartItems);
@@ -165,14 +173,14 @@ export async function isCartItemStillAvailable(cartItemId) {
     activity.startTime.getHours(),
     activity.startTime.getMinutes(),
     0,
-    0
+    0,
   );
   const latestStartTime = new Date(cartItem.startDateTime);
   latestStartTime.setHours(
     activity.endTime.getHours(),
     activity.endTime.getMinutes(),
     0,
-    0
+    0,
   );
 
   const interval = 30; // 30 minutes
@@ -208,14 +216,14 @@ export async function isCartItemStillAvailable(cartItemId) {
     activity.capacity,
     bookings,
     blockedTimeslots,
-    activity.duration
+    activity.duration,
   );
 
   // use isTimeslotAvailable
   const isTimeslotAvailable = await getTimeslotAvailability(
     allTimeslots,
     cartItem.startDateTime,
-    cartItem.endDateTime
+    cartItem.endDateTime,
   );
   return isTimeslotAvailable;
 }

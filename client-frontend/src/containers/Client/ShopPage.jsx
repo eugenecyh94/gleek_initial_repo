@@ -43,6 +43,8 @@ const ShopPage = (props) => {
     searchValueOnClicked,
     setSearchValue,
     setSearchValueOnClicked,
+    setParentChecked,
+    setChildChecked,
   } = useShopStore();
   const theme = useTheme();
 
@@ -300,6 +302,8 @@ const ShopPage = (props) => {
     setActivityTypeState(initialActivityTypeState);
     setDurationState(initialDurationState);
     setSliderValue([minPriceValue, maxPriceValue]);
+    setParentChecked([]);
+    setChildChecked([]);
   };
   return (
     <Grid container spacing={5} p={5}>

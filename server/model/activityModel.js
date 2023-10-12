@@ -9,7 +9,7 @@ import ActivityPricingRulesModel from "./activityPricingRules.js";
 const activitySchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
-  clientMarkupPercentage: { type: Number, required: true },
+  clientMarkupPercentage: { type: Number, required: false },
   maxParticipants: { type: Number },
   minParticipants: { type: Number },
   theme: { type: mongoose.Schema.Types.ObjectId, ref: "Theme" },

@@ -122,7 +122,7 @@ const ActivityDetailsQuickView = ({
       const { pricePerPax } = rule;
       const clientPrice = Math.ceil(
         parseFloat(pricePerPax) * (parseFloat(newMarkup) / 100) +
-          parseFloat(pricePerPax)
+          parseFloat(pricePerPax),
       );
       newClientPrice[index].clientPrice = clientPrice;
     });
@@ -461,7 +461,7 @@ const ActivityDetailsQuickView = ({
                       <MenuItem key={enumValue} value={enumValue}>
                         {enumValue}
                       </MenuItem>
-                    )
+                    ),
                   )}
                 </Select>
               </FormControl>
@@ -935,7 +935,7 @@ const ActivityDetailsQuickView = ({
                                     year: "2-digit",
                                     month: "2-digit",
                                     day: "2-digit",
-                                  }
+                                  },
                                 )}{" "}
                                 at&nbsp;
                                 {new Date(changelog.date).toLocaleTimeString(
@@ -944,7 +944,7 @@ const ActivityDetailsQuickView = ({
                                     hour: "numeric",
                                     minute: "numeric",
                                     hour12: true,
-                                  }
+                                  },
                                 )}
                               </Typography>
                             }
