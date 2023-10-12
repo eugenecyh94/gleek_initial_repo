@@ -264,11 +264,7 @@ const ActivityDetailsPage = () => {
         setComments("");
       }
     } catch (error) {
-      const errorMessage =
-        error?.response?.data?.errors?.[0]?.msg ||
-        error?.response?.data ||
-        null;
-      openSnackbar(errorMessage, "error");
+      openSnackbar(error.response.data.msg, "error");
     }
   };
   useEffect(() => {

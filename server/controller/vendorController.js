@@ -173,9 +173,7 @@ export const verifyEmail = async (req, res) => {
   const token = req.params.token;
 
   if (!token) {
-    return res
-      .status(403)
-      .json({ status: "error", message: "Token Not Found!" });
+    return res.status(403).json({ status: "error", msg: "Token Not Found!" });
   }
 
   try {

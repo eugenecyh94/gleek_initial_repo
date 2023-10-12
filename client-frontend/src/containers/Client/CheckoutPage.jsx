@@ -62,6 +62,7 @@ const CheckoutPage = (props) => {
       const errorMessage =
         error?.response?.data?.errors?.[0]?.msg ||
         error?.response?.data ||
+        error.response.data.msg ||
         null;
       openSnackbar(errorMessage, "error");
     }
