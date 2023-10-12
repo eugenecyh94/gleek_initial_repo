@@ -35,6 +35,7 @@ const notificationSchema = new mongoose.Schema({
     required: true,
   },
   eventId: { type: mongoose.Schema.Types.ObjectId },
+  eventObj: { type: Object },
   title: { type: String, require: true },
   text: { type: String, require: true },
   read: { type: Boolean, require: true, default: false },

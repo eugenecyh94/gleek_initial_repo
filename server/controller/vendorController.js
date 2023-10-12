@@ -137,7 +137,6 @@ export const postRegister = async (req, res) => {
     );
 
     const token = await generateJwtToken(createdVendor.id);
-    await session.commitTransaction();
 
     req.notificationReq = {
       senderRole: Role.VENDOR,
@@ -147,7 +146,9 @@ export const postRegister = async (req, res) => {
       notificationAction: NotificationAction.CREATE,
     };
 
-    await createNotification(req.notificationReq, res);
+    await createNotification(req.notificationReq, session);
+
+    await session.commitTransaction();
 
     sendMail(createVendorWelcomeMailOptions(createdVendor));
     sendMail(createVerifyEmailOptionsVendor(createdVendor, token));

@@ -10,6 +10,12 @@ import {
 } from "../service/activityService.js";
 import { s3GetImages, s3RemoveImages } from "../service/s3ImageServices.js";
 import { ActivityApprovalStatusEnum } from "../util/activityApprovalStatusEnum.js";
+import { Role } from "../util/roleEnum.js";
+import {
+  NotificationAction,
+  NotificationEvent,
+} from "../util/notificationRelatedEnum.js";
+import { createNotification } from "./notificationController.js";
 
 // yt: this endpoint retrieves and returns PUBLISHED & PENDING APPROVAL activities only
 export const getAllActivities = async (req, res) => {
@@ -397,6 +403,21 @@ export const saveActivity = async (req, res) => {
             { activity: activityId },
             { session },
           );
+
+          if (savedActivity.adminCreated === undefined) {
+            console.log("activity is created by vendor::");
+
+            req.notificationReq = {
+              senderRole: Role.VENDOR,
+              sender: savedActivity.linkedVendor,
+              recipientRole: Role.ADMIN,
+              notificationEvent: NotificationEvent.ACTIVITY,
+              notificationAction: NotificationAction.APPROVE,
+              eventId: activityId,
+            };
+
+            await createNotification(req.notificationReq, session);
+          }
         }
       } catch (error) {
         console.error(error);
@@ -410,6 +431,26 @@ export const saveActivity = async (req, res) => {
       const newActivity = new ActivityModel({
         ...activity,
       });
+
+      if (newActivity.isDraft === false) {
+        console.log("This is a direct non draft submit");
+
+        if (newActivity.adminCreated === undefined) {
+          console.log("activity is created by vendor::");
+
+          req.notificationReq = {
+            senderRole: Role.VENDOR,
+            sender: newActivity.linkedVendor,
+            recipientRole: Role.ADMIN,
+            notificationEvent: NotificationEvent.ACTIVITY,
+            notificationAction: NotificationAction.APPROVE,
+            eventObj: newActivity,
+          };
+
+          await createNotification(req.notificationReq, session);
+        }
+      }
+
       savedActivity = await newActivity.save({
         validateBeforeSave: false,
         session,
