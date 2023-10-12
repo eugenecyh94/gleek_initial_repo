@@ -3,6 +3,7 @@ import { validationResult } from "express-validator";
 import ActivityModel from "../model/activityModel.js";
 import BookingModel from "../model/bookingModel.js";
 import BlockedTimeslotModel from "../model/blockedTimeslotModel.js";
+import { s3GetImages } from "../service/s3ImageServices.js";
 import {
   getTimeslotAvailability,
   generateAllTimeslots,
@@ -97,9 +98,14 @@ export const getCartItemsByClientId = async (req, res) => {
   }
 
   try {
-    const cartItems = await CartItemModel.find({ clientId: client._id });
+    const cartItems = await CartItemModel.find({
+      clientId: client._id,
+    });
     // for each cartItem, check if the activity is still available
-
+    for (const cartItem of cartItems) {
+      const activity = await ActivityModel.findById(cartItem.activityId);
+      cartItem.preSignedImages = await s3GetImages(activity.images);
+    }
     const updatedCartItems = await Promise.all(
       cartItems.map(async (cartItem) => {
         const isTimeslotAvailable = await isCartItemStillAvailable(

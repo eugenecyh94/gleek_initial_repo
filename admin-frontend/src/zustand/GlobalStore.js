@@ -277,12 +277,12 @@ export const useActivityStore = create((set) => ({
       console.log(error);
     }
   },
-  approveActivity: async (activityId, adminId) => {
+  approveActivity: async (activityId, adminId, markup) => {
     try {
       const updatedActivities = await AxiosConnect.patch(
         "/activity/approveActivity",
         activityId,
-        { adminId: adminId },
+        { adminId: adminId, markup: markup },
       );
       set({
         selectedActivityTab: "pendingApprovalTab",

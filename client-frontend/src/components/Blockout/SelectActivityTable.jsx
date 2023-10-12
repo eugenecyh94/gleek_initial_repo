@@ -156,7 +156,7 @@ const SelectActivityTable = ({
   ];
 
   return (
-    <Box maxWidth={"99%"} paddingTop={2} paddingLeft={2} height={"80%"}>
+    <Box maxWidth={"98%"} paddingTop={2} paddingLeft={2} height={"80%"}>
       <DataGrid
         checkboxSelection
         rowSelectionModel={selectedRows}

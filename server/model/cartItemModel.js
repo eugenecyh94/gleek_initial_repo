@@ -61,6 +61,9 @@ const cartItemSchema = new mongoose.Schema({
   additionalComments: {
     type: String,
   },
+  preSignedImages: {
+    type: Array,
+  },
 });
 
 const cartItemModel = mongoose.model("CartItem", cartItemSchema, "cartitems");

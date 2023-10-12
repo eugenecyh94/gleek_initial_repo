@@ -1,5 +1,4 @@
 import styled from "@emotion/styled";
-import FeedbackIcon from "@mui/icons-material/FeedbackOutlined";
 import {
   Avatar,
   Box,
@@ -51,7 +50,8 @@ import {
   FoodCategoryEnum,
   LocationEnum,
   SustainableDevelopmentGoalsEnum,
-} from "../../utils/TypeEnum";
+} from "../../../utils/TypeEnum";
+import FeedbackIcon from "@mui/icons-material/FeedbackOutlined";
 
 const StyledAvatar = styled("div")(() => ({
   display: "flex",
@@ -78,15 +78,7 @@ const StyledChip = styled(Chip)`
   }
 `;
 
-const ActivityDetailsQuickView = ({
-  activity,
-  imgs,
-  vendorProfile,
-  approve,
-  setPricingRanges,
-  markup,
-  setMarkup,
-}) => {
+const ActivityDetailsQuickView = ({ activity, imgs, vendorProfile }) => {
   const theme = useTheme();
   const foodCategories = Object.values(FoodCategoryEnum);
 
@@ -113,21 +105,6 @@ const ActivityDetailsQuickView = ({
     const endIndex = startIndex + optionsPerColumn;
     columnsArray.push(sdgList.slice(startIndex, endIndex));
   }
-  const handleMarkupChange = (event) => {
-    const newMarkup = event.target.value;
-    setMarkup(event.target.value);
-
-    const newClientPrice = [...activity.activityPricingRules];
-    newClientPrice.forEach((rule, index) => {
-      const { pricePerPax } = rule;
-      const clientPrice = Math.ceil(
-        parseFloat(pricePerPax) * (parseFloat(newMarkup) / 100) +
-          parseFloat(pricePerPax),
-      );
-      newClientPrice[index].clientPrice = clientPrice;
-    });
-    setPricingRanges(newClientPrice);
-  };
   return (
     <Box padding={2} sx={{ backgroundColor: "FAFAFA" }}>
       <Grid container spacing={2} alignItems="left" justifyContent="left">
@@ -617,24 +594,6 @@ const ActivityDetailsQuickView = ({
                 inputProps={{ readOnly: true }}
               />
             </Grid>
-            <Grid item xs={4}>
-              <TextField
-                required
-                id="markup"
-                name="markup"
-                label="Markup Percentage"
-                fullWidth
-                type="number"
-                value={activity.clientMarkupPercentage ?? markup}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="start">%</InputAdornment>
-                  ),
-                  readOnly: !approve,
-                }}
-                onChange={handleMarkupChange}
-              />
-            </Grid>
             <Grid item xs={12} paddingTop={2}>
               <TableContainer
                 component={Paper}
@@ -647,87 +606,71 @@ const ActivityDetailsQuickView = ({
                     <TableRow
                       sx={{ backgroundColor: "rgba(159 145 204 / 0.12)" }}
                     >
-                      <TableCell width={"25%"} sx={{ fontSize: "1rem" }}>
+                      <TableCell width={"33%"} sx={{ fontSize: "1rem" }}>
                         <span style={{ color: "#3D246C" }}>Start Range</span>
                       </TableCell>
-                      <TableCell width={"25%"} sx={{ fontSize: "1rem" }}>
+                      <TableCell width={"33%"} sx={{ fontSize: "1rem" }}>
                         <span style={{ color: "#3D246C" }}>End Range</span>
                       </TableCell>
-                      <TableCell width={"25%"} sx={{ fontSize: "1rem" }}>
+                      <TableCell width={"33%"} sx={{ fontSize: "1rem" }}>
                         <span style={{ color: "#3D246C" }}>Price Per Pax</span>
-                      </TableCell>
-                      <TableCell width={"25%"} sx={{ fontSize: "1rem" }}>
-                        <span style={{ color: "#3D246C" }}>
-                          Client Price&nbsp;
-                        </span>
-                        <span style={{ color: "#9F91CC" }}>
-                          (after {markup}% markup)
-                        </span>
                       </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {activity.activityPricingRules.map((row, rowIndex) => (
-                      <TableRow key={rowIndex}>
-                        <TableCell>
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "space-evenly",
-                            }}
-                          >
-                            <Box width={"50%"}>{row.start}</Box>
-                            <Box width={"50%"} sx={{ whiteSpace: "nowrap" }}>
-                              to
-                            </Box>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <TextField
-                            sx={{ fontSize: "0.875rem" }}
-                            type="number"
-                            InputProps={{
-                              readOnly: true,
-                              style: { fontSize: "0.875rem" },
-                              endAdornment: (
-                                <InputAdornment position="end">
-                                  pax
-                                </InputAdornment>
-                              ),
-                            }}
-                            value={row.end}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <TextField
-                            sx={{ fontSize: "0.875rem" }}
-                            type="number"
-                            InputProps={{
-                              startAdornment: (
-                                <InputAdornment position="start">
-                                  $
-                                </InputAdornment>
-                              ),
-                              readOnly: true,
-                              style: { fontSize: "0.875rem" },
-                            }}
-                            value={row.pricePerPax}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "start",
-                            }}
-                          >
-                            <Box>$ {row.clientPrice}</Box>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {activity.activityPricingRules
+                      .slice()
+                      .sort((a, b) => a.start - b.start)
+                      .map((row, rowIndex) => (
+                        <TableRow key={rowIndex}>
+                          <TableCell>
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-evenly",
+                              }}
+                            >
+                              <Box width={"50%"}>{row.start}</Box>
+                              <Box width={"50%"} sx={{ whiteSpace: "nowrap" }}>
+                                to
+                              </Box>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              sx={{ fontSize: "0.875rem" }}
+                              type="number"
+                              InputProps={{
+                                readOnly: true,
+                                style: { fontSize: "0.875rem" },
+                                endAdornment: (
+                                  <InputAdornment position="end">
+                                    pax
+                                  </InputAdornment>
+                                ),
+                              }}
+                              value={row.end}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              sx={{ fontSize: "0.875rem" }}
+                              type="number"
+                              InputProps={{
+                                startAdornment: (
+                                  <InputAdornment position="start">
+                                    $
+                                  </InputAdornment>
+                                ),
+                                readOnly: true,
+                                style: { fontSize: "0.875rem" },
+                              }}
+                              value={row.pricePerPax}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -873,7 +816,7 @@ const ActivityDetailsQuickView = ({
                 {imgs?.map((image, index) => {
                   return (
                     <ImageListItem key={index}>
-                      <img src={image} loading="lazy" />
+                      <img src={image} loading="lazy" alt="" />
                       <ImageListItemBar
                         sx={{ background: "none" }}
                         position="top"
@@ -926,28 +869,23 @@ const ActivityDetailsQuickView = ({
                                 ""
                               )
                             }
-                            secondary={
-                              <Typography>
-                                by {changelog.admin.name} on&nbsp;
-                                {new Date(changelog.date).toLocaleDateString(
-                                  undefined,
-                                  {
-                                    year: "2-digit",
-                                    month: "2-digit",
-                                    day: "2-digit",
-                                  },
-                                )}{" "}
-                                at&nbsp;
-                                {new Date(changelog.date).toLocaleTimeString(
-                                  undefined,
-                                  {
-                                    hour: "numeric",
-                                    minute: "numeric",
-                                    hour12: true,
-                                  },
-                                )}
-                              </Typography>
-                            }
+                            secondary={`by ${
+                              changelog.admin.name
+                            } on ${new Date(changelog.date).toLocaleDateString(
+                              undefined,
+                              {
+                                year: "2-digit",
+                                month: "2-digit",
+                                day: "2-digit",
+                              },
+                            )} at ${new Date(changelog.date).toLocaleTimeString(
+                              undefined,
+                              {
+                                hour: "numeric",
+                                minute: "numeric",
+                                hour12: true,
+                              },
+                            )}`}
                           />
                           {changelog.approvalStatus === "Rejected" && (
                             <Divider
@@ -983,12 +921,8 @@ const ActivityDetailsQuickView = ({
   );
 };
 ActivityDetailsQuickView.propTypes = {
-  activity: PropTypes.object.isRequired,
+  activity: PropTypes.object,
   imgs: PropTypes.array.isRequired,
   vendorProfile: PropTypes.string,
-  approve: PropTypes.boolean,
-  setPricingRanges: PropTypes.func,
-  markup: PropTypes.number,
-  setMarkup: PropTypes.func,
 };
 export default ActivityDetailsQuickView;

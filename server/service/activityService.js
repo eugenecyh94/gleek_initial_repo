@@ -23,6 +23,7 @@ export async function prepareActivityMinimumPricePerPaxAndSingleImage(
 
 export async function getAllVendorActivities(vendorId) {
   const activities = await ActivityModel.find({ linkedVendor: vendorId })
+    .select("-clientMarkupPercentage")
     .populate("activityPricingRules")
     .populate("theme")
     .populate("subtheme")
@@ -33,6 +34,11 @@ export async function getAllVendorActivities(vendorId) {
     .populate({
       path: "blockedTimeslots",
       options: { sort: { blockedStartDateTime: 1 } },
-    });
+    })
+    .populate({
+      path: "approvalStatusChangeLog",
+      populate: { path: "admin", model: "Admin", select: "_id name" },
+    })
+    .populate("rejectedDraft");
   return activities;
 }
