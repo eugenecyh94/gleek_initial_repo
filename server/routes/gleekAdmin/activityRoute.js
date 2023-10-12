@@ -11,7 +11,6 @@ import {
   getPreSignedImgs,
   rejectActivity,
   saveActivity,
-
 } from "../../controller/activityController.js";
 import { uploadS3ActivityImages } from "../../middleware/multer.js";
 import adminAuth from "../../middleware/adminAuth.js";

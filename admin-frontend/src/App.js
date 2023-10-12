@@ -166,16 +166,13 @@ function App() {
                      </ProtectedRoute>
                   }
                />
-
                <Route
                   exact
                   path="/verifyEmail/:token"
                   element={<VerifyEmailPage />}
                />
-
                <Route path="/login" element={<LoginPage />} />
                <Route path="/forgotPassword" element={<ForgotPassword />} />
-
                {/*for testing image upload component*/}
                <Route
                   path="/uploadTest"
