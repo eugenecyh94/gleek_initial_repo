@@ -1,19 +1,21 @@
 import mongoose from "mongoose";
-import { PaxIntervalEnum } from "../util/paxIntervalEnum.js";
 
 const activityPricingRulesSchema = new mongoose.Schema({
-  paxInterval: {
-    type: String,
-    enum: PaxIntervalEnum,
+  start: {
+    type: Number,
+    required: true,
+  },
+  end: {
+    type: Number,
   },
   pricePerPax: {
     type: Number,
     required: true,
   },
-  weekendAddon: Number,
-  publicHolidayAddon: Number,
-  onlineAddon: Number,
-  offlineAddon: Number,
+  clientPrice: {
+    type: Number,
+    required: true,
+  },
   activity: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Activity",

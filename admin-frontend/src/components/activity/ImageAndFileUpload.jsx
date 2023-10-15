@@ -1,21 +1,31 @@
 /* eslint-disable react/prop-types */
-import DeleteIcon from "@mui/icons-material/Delete";
-import { Box, IconButton, Stack, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
-import { Fragment, useCallback, useRef } from "react";
+import styled from "@emotion/styled";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  Stack,
+  Typography,
+} from "@mui/material";
+import { Fragment, useCallback, useRef, useState } from "react";
 import { ImageConfig } from "../../utils/ImageConfig";
 
-export const CustomBox = styled(Box)({
+export const CustomBox = styled(Box)(({ error }) => ({
   "&.MuiBox-root": {
     backgroundColor: "#fff",
     borderRadius: "2rem",
-    boxShadow: "rgba(149, 157, 165, 0.2) 0px 8px 24px",
+    boxShadow: `${
+      error ? "rgba(211, 47, 47, 0.2)" : "rgba(149, 157, 165, 0.2)"
+    } 0px 8px 24px`,
     padding: "1rem",
+    border: error ? "1px solid rgba(211, 47, 47, 1)" : null,
   },
   "&.MuiBox-root:hover, &.MuiBox-root.dragover": {
     opacity: 0.6,
   },
-});
+}));
 
 const ImageAndFileUpload = ({
   limit,
@@ -23,49 +33,55 @@ const ImageAndFileUpload = ({
   size,
   setActivityImages,
   activityImages,
+  setImageListToEdit,
+  error,
+  existingImageList,
 }) => {
   const wrapperRef = useRef(null);
 
   const onDragEnter = () => wrapperRef.current?.classList.add("dragover");
   const onDragLeave = () => wrapperRef.current?.classList.remove("dragover");
+  const [open, setOpen] = useState();
+
+  const handleClose = () => {
+    setOpen();
+  };
 
   const onFileDrop = useCallback(
     (e) => {
       const target = e.target;
       if (!target.files) return;
-      console.log("problem", target.files);
       if (target.files[0].size > size) {
-        console.log("too big");
-        return alert(`Image size must be smaller than ${size / 1000000} MB`);
+        setOpen(`Image size must be smaller than ${size / 1000000} MB`);
+        return;
       }
       const newFiles = Object.values(target.files).map((file) => file);
       if (newFiles) {
         const updatedList = [...activityImages, ...newFiles];
-        if (updatedList.length > limit) {
-          return alert(`Image must not be more than ${limit}`);
+        if (updatedList.length + existingImageList?.length > limit) {
+          setOpen(`You cannot upload more than ${limit} images!`);
+          return;
         }
-        console.log("filelist added");
         setActivityImages(updatedList);
+        const newImg = [];
+        updatedList.forEach((file) => {
+          newImg.push({ src: URL.createObjectURL(file), file: file });
+        });
+        setImageListToEdit(newImg);
       }
     },
     [activityImages, limit],
   );
 
-  const fileRemove = (file) => {
-    const updatedList = [...activityImages];
-    updatedList.splice(activityImages.indexOf(file), 1);
-    setActivityImages(updatedList);
-  };
-
-  const calcSize = (size) => {
-    return size < 1000000
-      ? `${Math.floor(size / 1000)} KB`
-      : `${Math.floor(size / 1000000)} MB`;
-  };
+  // const calcSize = (size) => {
+  //   return size < 1000000
+  //     ? `${Math.floor(size / 1000)} KB`
+  //     : `${Math.floor(size / 1000000)} MB`;
+  // };
 
   return (
     <Fragment>
-      <CustomBox>
+      <CustomBox error={error}>
         <Box
           display="flex"
           justifyContent="center"
@@ -120,55 +136,22 @@ const ImageAndFileUpload = ({
           />
         </Box>
       </CustomBox>
-      {activityImages.length > 0 ? (
-        <Stack spacing={2} sx={{ my: 2 }}>
-          {activityImages.map((item, index) => {
-            console.log("item type is::", item.type);
-            const imageType = item.type.split("/")[1];
-            console.log("image type is::", imageType);
-            return (
-              <Box
-                key={index}
-                sx={{
-                  position: "relative",
-                  backgroundColor: "#f5f8ff",
-                  borderRadius: 1.5,
-                  p: 0.5,
-                }}
-              >
-                <Box display="flex">
-                  <img
-                    src={ImageConfig[`${imageType}`]}
-                    alt="upload"
-                    style={{
-                      height: "3.5rem",
-                      objectFit: "contain",
-                    }}
-                  />
-                  <Box sx={{ ml: 1 }}>
-                    <Typography>{item.name}</Typography>
-                    <Typography variant="body2">
-                      {calcSize(item.size)}
-                    </Typography>
-                  </Box>
-                </Box>
-                <IconButton
-                  onClick={() => fileRemove(item)}
-                  sx={{
-                    color: "#df2c0e",
-                    position: "absolute",
-                    right: "1rem",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                  }}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            );
-          })}
-        </Stack>
-      ) : null}
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        sx={{
+          "& .MuiDialog-paper": {
+            border: "3px solid #D32F2F",
+            borderRadius: "10px",
+            boxShadow: "none",
+          },
+        }}
+      >
+        <DialogTitle>{open}</DialogTitle>
+        <DialogActions>
+          <Button onClick={handleClose}>OK</Button>
+        </DialogActions>
+      </Dialog>
     </Fragment>
   );
 };

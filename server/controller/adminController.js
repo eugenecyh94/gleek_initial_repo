@@ -104,7 +104,7 @@ export const register = async (req, res) => {
     jwt.sign(payload, secret, { expiresIn: 360000 }, (err, token) => {
       if (err) throw err;
       // Set the JWT token as a cookie
-      const message = `Please verify your account by clicking on the link: http://localhost:5000/gleekAdmin/verify/${token}`;
+      const message = `Please verify your account by clicking on the link: http://localhost:3002/verifyEmail/${token}`;
       const options = {
         to: email,
         subject: "Verify your Account",
@@ -265,20 +265,91 @@ export const verifyEmail = async (req, res) => {
     }
 
     if (admin.verified) {
-      res.status(404).send("Account already verified!");
+      res.status(200).json({
+        status: "already-verified",
+        msg: "Account already verified!",
+      });
     }
 
     admin.verified = true;
 
     await admin.save();
-
-    return res
-      .status(200)
-      .send("Account has been verified. Welcome to Urban Origins!");
+    const payload = {
+      admin: {
+        id: admin.id,
+        email: admin.email,
+        name: admin.name,
+      },
+    };
+    jwt.sign(payload, secret, { expiresIn: 360000 }, (err, token) => {
+      if (err) throw err;
+      try {
+        res
+          .cookie("token", token, {
+            httpOnly: true,
+            maxAge: 3600000, // Expires in 1 hour (milliseconds)
+            sameSite: "None", // Adjust this based on your security requirements
+            secure: true, // Use secure cookies in production
+            path: "/", // Set the path to your application root
+          })
+          .status(200)
+          .json({
+            status: "success",
+            msg: "Account has been verified. Welcome to Urban Origins!",
+            admin: admin,
+          });
+      } catch (cookieError) {
+        return res.status(500).send("Error setting cookie");
+      }
+    });
   } catch (err) {
-    console.log(err.message);
+    if (err.name === "TokenExpiredError") {
+      return res.status(200).json({
+        status: "token-expired",
+        msg: "Token has expired. Please request a new verification email.",
+      });
+    }
+    console.log(err);
     // If verification fails (e.g., due to an invalid or expired token), send an error response
-    return res.status(401).send("Invalid Token");
+    return res.status(500).json({ status: "error", msg: "Server Error" });
+  }
+};
+
+export const resendVerifyEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const admin = await Admin.findOne({ email });
+
+    if (!admin) {
+      return res.status(401).json({ status: "error", msg: "Admin not found!" });
+    }
+    const payload = {
+      admin: {
+        id: admin.id,
+        email: admin.email,
+        name: admin.name,
+      },
+    };
+    jwt.sign(payload, secret, { expiresIn: 360000 }, (err, token) => {
+      if (err) throw err;
+      // Set the JWT token as a cookie
+      const message = `Please verify your account by clicking on the link: http://localhost:3002/verifyEmail/${token}`;
+      const options = {
+        to: email,
+        subject: "Verify your Account",
+        text: message,
+      };
+
+      sendMail(options);
+      res.status(200).json({
+        token,
+        admin: payload.admin,
+        msg: "Verification email resent.",
+      });
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ status: "error", msg: "Server Error" });
   }
 };
 

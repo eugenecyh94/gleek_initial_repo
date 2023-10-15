@@ -1,6 +1,9 @@
 import DoneIcon from "@mui/icons-material/Done";
+import QueryBuilderIcon from "@mui/icons-material/QueryBuilder";
+import DoDisturbIcon from "@mui/icons-material/DoDisturb";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import CloseIcon from "@mui/icons-material/Close";
-import { Tab, Tabs } from "@mui/material";
+import { Badge, Tab, Tabs } from "@mui/material";
 import Box from "@mui/material/Box";
 import {
   DataGrid,
@@ -18,6 +21,10 @@ const ClientsTable = ({ clients, updateClient }) => {
     await updateClient(id, approvedRow);
   };
 
+  const badgeNumber = clients.filter(
+    (client) => client.status === "PENDING",
+  ).length;
+
   const filterCriteria = {
     approvedTab: { status: "APPROVED" },
     pendingTab: { status: "PENDING" },
@@ -27,7 +34,7 @@ const ClientsTable = ({ clients, updateClient }) => {
   const [selectedTab, setSelectedTab] = useState("approvedTab");
   const [currentTabRows, setCurrentTabRows] = useState(() => {
     return clients.filter(
-      (client) => client.status === filterCriteria[selectedTab].status
+      (client) => client.status === filterCriteria[selectedTab].status,
     );
   });
 
@@ -35,8 +42,8 @@ const ClientsTable = ({ clients, updateClient }) => {
     setSelectedTab(newValue);
     setCurrentTabRows(
       clients.filter(
-        (client) => client.status === filterCriteria[newValue].status
-      )
+        (client) => client.status === filterCriteria[newValue].status,
+      ),
     );
   };
 
@@ -123,17 +130,24 @@ const ClientsTable = ({ clients, updateClient }) => {
   return (
     <Box>
       <Tabs value={selectedTab} onChange={handleTabChange} centered>
-        <Tab label="Approved" value="approvedTab" />
-        <Tab label="To be Approved" value="pendingTab" />
-        <Tab label="Rejected" value="rejectedTab" />
+        <Tab label="Approved" value="approvedTab" icon={<TaskAltIcon />} />
+        <Tab
+          label="To be Approved"
+          value="pendingTab"
+          icon={
+            <Badge color="error" badgeContent={badgeNumber}>
+              <QueryBuilderIcon />
+            </Badge>
+          }
+        ></Tab>
+        <Tab label="Rejected" value="rejectedTab" icon={<DoDisturbIcon />} />
       </Tabs>
-      {/* <div style={{ height: 500, width: "100%" }}> */}
       <div style={{ flex: 1, maxHeight: "500px", overflow: "auto" }}>
         <Box
           flexDirection="column"
           justifyItems="center"
           display="flex"
-          width={"100%"}
+          width={"99%"}
           height={500}
         >
           <DataGrid

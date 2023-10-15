@@ -16,7 +16,7 @@ const StyledPage = styled("div")(({ theme }) => ({
 
 const CreateActivityPage = () => {
   const theme = useTheme();
-  const { themes, getThemes, isLoading } = useThemeStore();
+  const { themes, getThemes, isThemeLoading } = useThemeStore();
   const { vendors, getVendors } = useVendorStore();
   const { admin } = useAdminStore();
 
@@ -51,10 +51,10 @@ const CreateActivityPage = () => {
             display: "flex",
           }}
         >
-          <CreateIcon />
+          <CreateIcon sx={{ marginRight: 1 }} />
           Create Activity
         </Typography>
-        {isLoading ? (
+        {isThemeLoading ? (
           <CircularProgress sx={{ margin: "auto", marginTop: "32px" }} />
         ) : (
           <CreateActivityForm

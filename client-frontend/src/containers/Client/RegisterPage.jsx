@@ -160,7 +160,7 @@ const RegisterPage = () => {
       flexDirection="row"
       justifyContent="space-evenly"
       alignItems="center"
-      height="90vh"
+      minHeight="80%"
     >
       <Box
         display="flex"

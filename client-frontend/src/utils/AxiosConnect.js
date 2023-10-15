@@ -45,4 +45,26 @@ AxiosConnect.patchMultipart = (command, req) => {
   return axios(options);
 };
 
+AxiosConnect.delete = (command, payload) => {
+  console.log("axios delete command:", `${uri}${command}`);
+  const options = {
+    method: "DELETE",
+    url: `${uri}${command}`,
+    withCredentials: true,
+    data: payload,
+  };
+  return axios(options);
+};
+
+AxiosConnect.postMultiPart = (command, req) => {
+  const options = {
+    method: "POST",
+    url: `${uri}${command}`,
+    data: req,
+    withCredentials: true,
+    headers: { "Content-Type": "multipart/form-data" },
+  };
+  return axios(options);
+};
+
 export default AxiosConnect;

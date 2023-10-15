@@ -99,6 +99,7 @@ const LoginPage = (props) => {
       flexDirection="row"
       justifyContent="space-evenly"
       alignItems="center"
+      minHeight="80%"
     >
       <form onSubmit={handleSubmit}>
         <Box

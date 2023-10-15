@@ -13,8 +13,8 @@ import { useSelectedNavItemStore } from "../../zustand/GlobalStore";
 
 const drawerWidth = 240;
 const activityManagementList = [
-  { "View Published Activities": "/viewPublishedActivities" },
-  // { "View Unpublished Activities": "/viewUnpublishedActivities" },
+  { "Activity Approvals": "/viewPublishedActivities" },
+  { "View My Activities": "/viewActivityDrafts" },
 ];
 const userManagementList = [
   { "Admin Team": "/adminTeam" },
@@ -32,7 +32,7 @@ const StyledDiv = styled("div")`
   color: ${({ theme }) => theme.palette.primary.main};
 `;
 
-const SideNavBar = () => {
+const SideNavBar = ({ isSidebarOpen }) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const selectedItem = useSelectedNavItemStore((state) => state.selectedItem);
@@ -47,7 +47,9 @@ const SideNavBar = () => {
   return (
     <Box sx={{ display: "flex" }}>
       <Drawer
-        variant="permanent"
+        //variant="permanent"
+        variant="persistent"
+        open={isSidebarOpen}
         sx={{
           width: 120,
           flexShrink: 0,

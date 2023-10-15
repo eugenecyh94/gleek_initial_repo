@@ -239,3 +239,22 @@ export const createResetPasswordEmailOptionsVendor = (vendor, token) => {
   };
   return options;
 };
+
+// for when admin rejects client / vendor registration
+export const createRegistrationApprovalEmailOptions = (user) => {
+  console.log("reject called");
+  console.log(user.name ?? user.companyName);
+  console.log(user.email ?? user.companyEmail);
+
+  const message = `Hi ${
+    user.name ?? user.companyName
+  }! Your registration for an account with Gleek has been ${
+    user.status === "APPROVED" ? "approved" : "rejected"
+  }.`;
+  const options = {
+    to: user.email ?? user.companyEmail,
+    subject: "Gleek: Registration",
+    text: message,
+  };
+  return options;
+};

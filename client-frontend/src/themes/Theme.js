@@ -12,7 +12,7 @@ const theme = createTheme({
       main: "#5C4B99",
     },
     backgroundColor: {
-      main: "#F5F5F5",
+      main: "#FCFCFC",
     },
     tertiary: {
       main: "#FFDBC3",
@@ -35,6 +35,21 @@ const theme = createTheme({
       A200: "#AAAAAA",
       A400: "#303030",
       A700: "#616161",
+    },
+    light_purple: {
+      main: "#9F91CC",
+    },
+    dark_purple: {
+      main: "#3D246C",
+    },
+    error: {
+      main: "#D32F2F",
+    },
+    unselected: {
+      main: "#919191",
+    },
+    success: {
+      main: "#2e7d32",
     },
   },
   typography: {

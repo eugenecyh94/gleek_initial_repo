@@ -5,6 +5,8 @@ import {
   Chip,
   CircularProgress,
   Grid,
+  ImageList,
+  ImageListItem,
   Paper,
   Table,
   TableBody,
@@ -64,9 +66,9 @@ const ActivityDetails = () => {
   return (
     <MainBodyContainer
       hasBackButton={false}
-      breadcrumbNames={[]}
-      breadcrumbLinks={[]}
-      currentBreadcrumbName={"View Published Activities"}
+      breadcrumbNames={["View Published Activities"]}
+      breadcrumbLinks={["/viewPublishedActivities"]}
+      currentBreadcrumbName={"View Activity Details"}
     >
       {isLoading ? (
         <CircularProgress sx={{ margin: "auto", marginTop: "32px" }} />
@@ -225,11 +227,22 @@ const ActivityDetails = () => {
                 >
                   Activity Images
                 </Typography>
-                <StyledDiv>
-                  {activityDetails?.preSignedImages?.map((img, index) => (
-                    <img src={img} key={index} style={{ maxWidth: "100px" }} />
+                <ImageList
+                  sx={{ width: 500, height: 450 }}
+                  cols={3}
+                  rowHeight={164}
+                >
+                  {activityDetails?.preSignedImages?.map((item, index) => (
+                    <ImageListItem key={index}>
+                      <img
+                        // srcSet={`${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                        size={"w=164&h=164&fit=crop&auto=format&dpr=2 2x"}
+                        src={item}
+                        loading="lazy"
+                      />
+                    </ImageListItem>
                   ))}
-                </StyledDiv>
+                </ImageList>
               </Grid>
             </Grid>
           </Grid>

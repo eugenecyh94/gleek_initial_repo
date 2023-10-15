@@ -10,14 +10,21 @@ import {
 import { validationResult } from "express-validator";
 import { createVendorConsent } from "../service/consentService.js";
 import bcrypt from "bcryptjs";
-import { s3ImageGetService } from "../service/s3ImageGetService.js";
+import { s3GetImages } from "../service/s3ImageServices.js";
 import {
   createVendorWelcomeMailOptions,
   createResendVerifyEmailOptionsVendor,
   createVerifyEmailOptionsVendor,
   createResetPasswordEmailOptionsVendor,
+  createRegistrationApprovalEmailOptions,
 } from "../util/sendMailOptions.js";
 import sendMail from "../util/sendMail.js";
+import { Role } from "../util/roleEnum.js";
+import {
+  NotificationAction,
+  NotificationEvent,
+} from "../util/notificationRelatedEnum.js";
+import { createNotification } from "./notificationController.js";
 
 const secret = process.env.JWT_SECRET_VENDOR;
 
@@ -108,7 +115,7 @@ export const postRegister = async (req, res) => {
     const { acceptTermsAndConditions, ...newVendor } = req.body;
     console.log(
       "vendorController postRegister(): acceptTermsAndConditions",
-      acceptTermsAndConditions
+      acceptTermsAndConditions,
     );
 
     if (await vendorExists(newVendor.companyEmail)) {
@@ -126,11 +133,23 @@ export const postRegister = async (req, res) => {
     await createVendorConsent(
       createdVendor.id,
       acceptTermsAndConditions,
-      session
+      session,
     );
 
     const token = await generateJwtToken(createdVendor.id);
+
+    req.notificationReq = {
+      senderRole: Role.VENDOR,
+      sender: createdVendor,
+      recipientRole: Role.ADMIN,
+      notificationEvent: NotificationEvent.REGISTER,
+      notificationAction: NotificationAction.CREATE,
+    };
+
+    await createNotification(req.notificationReq, session);
+
     await session.commitTransaction();
+
     sendMail(createVendorWelcomeMailOptions(createdVendor));
     sendMail(createVerifyEmailOptionsVendor(createdVendor, token));
 
@@ -155,9 +174,7 @@ export const verifyEmail = async (req, res) => {
   const token = req.params.token;
 
   if (!token) {
-    return res
-      .status(403)
-      .json({ status: "error", message: "Token Not Found!" });
+    return res.status(403).json({ status: "error", msg: "Token Not Found!" });
   }
 
   try {
@@ -205,8 +222,8 @@ export const postLogin = async (req, res) => {
   try {
     const { companyEmail, password } = req.body;
     const vendor = await VendorModel.findOne({ companyEmail });
+    if (!vendor) return res.status(404).send({ msg: "Invalid Credentials." });
     const isSamePassword = await bcrypt.compare(password, vendor.password);
-
     if (vendor && isSamePassword) {
       // If vendor REJECTED, send error message.
       if (vendor.status === "REJECTED") {
@@ -215,7 +232,7 @@ export const postLogin = async (req, res) => {
           .send({ msg: "Your Vendor registration has been rejected." });
       }
       if (vendor.companyLogo) {
-        const preSignedUrl = await s3ImageGetService(vendor.companyLogo);
+        const preSignedUrl = await s3GetImages(vendor.companyLogo);
         vendor.preSignedPhoto = preSignedUrl;
       }
       // Convert the Map to a plain JavaScript object
@@ -253,7 +270,7 @@ export const validateToken = async (req, res) => {
     }
 
     if (vendor.companyLogo) {
-      const preSignedUrl = await s3ImageGetService(vendor.companyLogo);
+      const preSignedUrl = await s3GetImages(vendor.companyLogo);
       vendor.preSignedPhoto = preSignedUrl;
     }
 
@@ -345,7 +362,11 @@ export const getVendor = async (req, res) => {
   try {
     console.log(req.params.id);
     const vendor = await VendorModel.findById(req.params.id);
-    return res.status(201).json(vendor);
+    if (vendor.companyLogo) {
+      const preSignedUrl = await s3GetImages(vendor.companyLogo);
+      vendor.preSignedPhoto = preSignedUrl;
+    }
+    return res.status(200).json(vendor);
   } catch (e) {
     console.log(e);
     res.status(500).json("Server Error");
@@ -368,8 +389,9 @@ export const updateVendor = async (req, res) => {
     const updatedVendor = await VendorModel.findOneAndUpdate(
       { _id: req.params.id },
       { ...updateData, approvedDate: new Date() },
-      { new: true }
+      { new: true },
     );
+    sendMail(createRegistrationApprovalEmailOptions(updatedVendor));
     return res.status(201).json(updatedVendor);
   } catch (e) {
     console.log(e);
@@ -397,11 +419,11 @@ export const updateCompanyLogo = async (req, res) => {
     const updatedVendor = await VendorModel.findOneAndUpdate(
       { _id: vendor._id },
       { companyLogo: fileS3Location },
-      { new: true }
+      { new: true },
     );
 
     if (updatedVendor.companyLogo) {
-      const preSignedUrl = await s3ImageGetService(updatedVendor.companyLogo);
+      const preSignedUrl = await s3GetImages(updatedVendor.companyLogo);
       updatedVendor.preSignedPhoto = preSignedUrl;
     }
 
@@ -445,7 +467,7 @@ export const postChangePassword = async (req, res) => {
     const updatedVendor = await VendorModel.findOneAndUpdate(
       { _id: vendor.id },
       { password: hashed },
-      { new: true }
+      { new: true },
     );
 
     return res.status(200).json("Password successfully changed.");

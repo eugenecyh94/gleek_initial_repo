@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   AppBar,
   Typography,
@@ -13,6 +13,8 @@ import {
   Select,
   Grid,
   Avatar,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
@@ -22,9 +24,28 @@ import SearchBar from "./SearchBar/SearchBar.jsx";
 import SearchIcon from "@mui/icons-material/Search";
 import useGlobalStore from "../zustand/GlobalStore.js";
 import useVendorStore from "../zustand/VendorStore.js";
+import useShopStore from "../zustand/ShopStore.js";
+import useSnackbarStore from "../zustand/SnackbarStore.js";
+import useCartStore from "../zustand/CartStore.js";
+import {
+  BookmarkBorderOutlined,
+  LogoutOutlined,
+  Person2Outlined,
+} from "@mui/icons-material";
+
 function NavBar(props) {
   const { authenticated, client, logoutClient } = useClientStore();
   const { vendorAuthenticated, vendor, logoutVendor } = useVendorStore();
+  const { openSnackbar } = useSnackbarStore();
+  const {
+    searchValue,
+    searchValueOnClicked,
+    setSearchValueOnClicked,
+    filter,
+    getFilteredActivitiesWithSearchValue,
+  } = useShopStore();
+  const { getCartItems, newCartItem, cartItems, cartItemsToCheckOut } =
+    useCartStore();
   const { role, setRole } = useGlobalStore();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [anchorE2, setAnchorE2] = React.useState(null);
@@ -64,12 +85,6 @@ function NavBar(props) {
     }
   };
 
-  // Search bar (WIP)
-  const [value, setValue] = useState("");
-  const onChange = (event, { newValue }) => {
-    setValue(newValue);
-  };
-
   // Role selection
   const handleRoleChange = (event) => {
     setRole(event.target.value);
@@ -88,6 +103,28 @@ function NavBar(props) {
   } else {
     registerLink = "/register";
   }
+
+  const searchOnClick = async () => {
+    navigate("/shop");
+    getFilteredActivitiesWithSearchValue(filter, searchValue);
+    setSearchValueOnClicked(searchValue);
+  };
+
+  useEffect(() => {
+    fetchCart();
+  }, [newCartItem, client, cartItemsToCheckOut]);
+
+  const fetchCart = async () => {
+    try {
+      const responseStatus = await getCartItems();
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.errors?.[0]?.msg ||
+        error?.response?.data ||
+        null;
+      openSnackbar(errorMessage, "error");
+    }
+  };
 
   return (
     <div>
@@ -206,11 +243,9 @@ function NavBar(props) {
               </Typography>
             </Link>
             <Box display="flex" flexDirection="row">
-              <SearchBar value={value} onChange={onChange} />
+              <SearchBar />
               <IconButton
-                onClick={() => {
-                  navigate("/shop");
-                }}
+                onClick={searchOnClick}
                 sx={{ marginLeft: "5px" }}
                 color="tertiary"
                 aria-label="search"
@@ -230,6 +265,32 @@ function NavBar(props) {
                 sx={{ marginRight: "16px" }}
               >
                 <ShoppingBagOutlinedIcon />
+                {cartItems.length > 0 && (
+                  <span
+                    style={{
+                      backgroundColor: "white",
+                      color: "#3D246C",
+                      borderRadius: "50%",
+                      width: "20px",
+                      height: "20px",
+                      position: "absolute",
+                      top: "-1px",
+                      right: "-8px",
+                      fontSize: "12px",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography
+                      fontWeight={700}
+                      color="accent"
+                      variant="subtitle2"
+                    >
+                      {cartItems.length}
+                    </Typography>
+                  </span>
+                )}
               </IconButton>
               <Button
                 sx={{ marginRight: "16px" }}
@@ -265,6 +326,7 @@ function NavBar(props) {
                 anchorEl={anchorE2}
                 open={open2}
                 onClose={handleClose2}
+                onClick={handleClose2}
                 MenuListProps={{
                   "aria-labelledby": "icon-button",
                 }}
@@ -273,6 +335,7 @@ function NavBar(props) {
                     elevation: 2,
                   },
                 }}
+                disableScrollLock={true}
               >
                 <MenuItem disabled sx={{ px: "32px" }}>
                   {client?.email}
@@ -283,10 +346,27 @@ function NavBar(props) {
                     navigate("/settings");
                   }}
                 >
-                  Profile Settings
+                  <ListItemIcon>
+                    <Person2Outlined />
+                  </ListItemIcon>
+                  <ListItemText>Settings</ListItemText>
+                </MenuItem>
+                <MenuItem
+                  sx={{ px: "32px" }}
+                  onClick={() => {
+                    navigate("/bookmarks");
+                  }}
+                >
+                  <ListItemIcon>
+                    <BookmarkBorderOutlined />
+                  </ListItemIcon>
+                  <ListItemText>Bookmarks</ListItemText>
                 </MenuItem>
                 <MenuItem sx={{ px: "32px" }} onClick={logout}>
-                  Log out
+                  <ListItemIcon>
+                    <LogoutOutlined />
+                  </ListItemIcon>
+                  <ListItemText>Logout</ListItemText>
                 </MenuItem>
               </Menu>
             </Box>
@@ -367,6 +447,14 @@ function NavBar(props) {
                   }}
                 >
                   My Activities
+                </MenuItem>{" "}
+                <MenuItem
+                  sx={{ px: "32px" }}
+                  onClick={() => {
+                    navigate("/vendor/blockout");
+                  }}
+                >
+                  Blockouts
                 </MenuItem>
                 <MenuItem sx={{ px: "32px" }} onClick={logout}>
                   Log out

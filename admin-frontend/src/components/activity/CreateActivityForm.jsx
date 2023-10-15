@@ -1,16 +1,26 @@
 /* eslint-disable react/prop-types */
 import styled from "@emotion/styled";
-import AddIcon from "@mui/icons-material/Add";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
-  Alert,
   Avatar,
+  Box,
   Button,
+  Chip,
   FormControl,
   FormHelperText,
   Grid,
+  IconButton,
+  ImageList,
+  ImageListItem,
+  ImageListItemBar,
   InputLabel,
   MenuItem,
   Select,
+  Stack,
+  Step,
+  StepLabel,
+  Stepper,
   TextField,
   Typography,
 } from "@mui/material";
@@ -23,17 +33,18 @@ import InputAdornment from "@mui/material/InputAdornment";
 import Paper from "@mui/material/Paper";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
-import Snackbar from "@mui/material/Snackbar";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import { TimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { useEffect, useState } from "react";
+import dayjs from "dayjs";
+import { Fragment, useState } from "react";
 import {
   ActivityDayAvailabilityEnum,
   ActivityTypeEnum,
@@ -41,11 +52,27 @@ import {
   LocationEnum,
   SustainableDevelopmentGoalsEnum,
 } from "../../utils/TypeEnum";
-import { useActivityStore } from "../../zustand/GlobalStore";
+import { useActivityStore, useSnackbarStore } from "../../zustand/GlobalStore";
 import ImageAndFileUpload from "./ImageAndFileUpload";
+import { useNavigate } from "react-router-dom";
 
 const StyledButton = styled(Button)`
   padding-left: 6px;
+`;
+
+const DeleteIconButton = styled(IconButton)`
+  background-color: white;
+  border-radius: 50%;
+  left: 5px;
+  top: 5px;
+`;
+
+const StyledChip = styled(Chip)`
+  &.Mui-disabled {
+    color: #ffffff;
+    background-color: #9f91cc;
+    opacity: 1;
+  }
 `;
 const StyledContainer = styled(Paper)`
   padding: 20px;
@@ -59,35 +86,144 @@ const StyledSubmitButton = styled(Button)`
   }
 `;
 
-const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
-  const { createActivity } = useActivityStore();
-  const [isOpen, setIsOpen] = useState(false);
-  const [isError, setError] = useState(false);
+const errorTextPricePerPax = "Please fill in Price per Pax!";
+const errorTextEndInterval = "Please fill in end interval!";
+
+const CreateActivityForm = ({ themes, theme, vendors, admin, activity }) => {
+  const navigate = useNavigate();
+  const { createActivity, saveActivity } = useActivityStore();
+  const { openSnackbar } = useSnackbarStore();
   const [selectedTheme, setSelectedTheme] = useState(
-    themes?.[0]?.parent?._id || ""
+    activity?.theme?._id ?? null,
   );
-  const [selectedSubTheme, setSelectedSubTheme] = useState([]);
-  const [subthemes, setSubthemes] = useState([]);
+  const [selectedSubTheme, setSelectedSubTheme] = useState(
+    activity?.subtheme?.length > 0 ? activity?.subtheme?.map((x) => x._id) : [],
+  );
+  const [subthemes, setSubthemes] = useState(
+    activity?.theme?._id
+      ? themes?.find((theme) => theme.parent?._id === activity?.theme?._id)
+          ?.children
+      : [],
+  );
 
-  const [maxParticipants, setMaxParticipants] = useState();
-  const [markup, setMarkup] = useState();
-  const [activityType, setActivityType] = useState("");
-  const [title, setTitle] = useState();
-  const [description, setDescription] = useState();
-
-  const [activityPricingRuleList, setData] = useState([]);
-  const [isFood, setIsFood] = useState(false);
-  const [isFoodCertPending, setIsFoodCertPending] = useState(false);
-  const [selectedFoodCat, setSelectedFoodCat] = useState([]);
-  const [foodCertDate, setFoodCertDate] = useState(null);
-  const [location, setLocation] = useState("");
-  const [popupitems, setPopupitems] = useState();
-  const [sdg, setSdg] = useState([]);
-  const [dayAvailabilities, setDayAvailabilities] = useState([]);
-  const [duration, setDuration] = useState();
+  const [maxParticipants, setMaxParticipants] = useState(
+    activity?.maxParticipants ?? null,
+  );
+  const [minParticipants, setMinParticipants] = useState(
+    activity?.minParticipants ?? null,
+  );
+  const [markup, setMarkup] = useState(
+    activity?.clientMarkupPercentage ?? null,
+  );
+  const [activityType, setActivityType] = useState(
+    activity?.activityType === null
+      ? null
+      : activity?.activityType === "Popups (Food)" ||
+        activity?.activityType === "Popups (Non-food)"
+      ? ActivityTypeEnum.POPUP
+      : activity?.activityType,
+  );
+  const [title, setTitle] = useState(activity?.title ?? null);
+  const [description, setDescription] = useState(activity?.description ?? null);
+  const extractedFields =
+    activity?.activityPricingRules?.map((pricingRule) => ({
+      start: pricingRule.start,
+      end: pricingRule.end,
+      pricePerPax: pricingRule.pricePerPax,
+      clientPrice: pricingRule.clientPrice,
+    })) || [];
+  const [pricingRanges, setPricingRanges] = useState(
+    extractedFields.slice().sort((a, b) => a.start - b.start),
+  );
+  const initialPricingRangeErrors = activity?.activityPricingRules?.map(() => ({
+    range: "",
+    pricePerPax: null,
+  }));
+  const [pricingRangeError, setPricingRangeError] = useState(
+    activity?.activityPricingRules?.length > 0 ? initialPricingRangeErrors : [],
+  );
+  const initialPricingRangeDone = activity?.activityPricingRules?.some(
+    (pricingRule) => {
+      return pricingRule?.end === activity?.maxParticipants;
+    },
+  );
+  const [pricingRangeDone, setPricingRangeDone] = useState(
+    activity?.activityPricingRules ? initialPricingRangeDone : false,
+  );
+  const [pricingAddons, setPricingAddons] = useState({
+    weekendPricing: {
+      amount: activity?.weekendPricing?.amount ?? null,
+      isDiscount: activity?.weekendPricing?.amount
+        ? activity?.weekendPricing?.isDiscount
+        : false,
+    },
+    offlinePricing: {
+      amount: activity?.offlinePricing?.amount ?? null,
+      isDiscount: activity?.offlinePricing?.amount
+        ? activity?.offlinePricing?.isDiscount
+        : false,
+    },
+    onlinePricing: {
+      amount: activity?.onlinePricing?.amount ?? null,
+      isDiscount: activity?.onlinePricing?.amount
+        ? activity?.onlinePricing?.isDiscount
+        : false,
+    },
+  });
+  const steps = [
+    "Select number of participants",
+    "Input pricing",
+    "Input markup pricing",
+    "Pricing addons / discounts",
+  ];
+  const [isFood, setIsFood] = useState(activity?.isFood ?? false);
+  const [isFoodCertPending, setIsFoodCertPending] = useState(
+    activity?.isFoodCertPending ?? false,
+  );
+  const [selectedFoodCat, setSelectedFoodCat] = useState(
+    activity?.foodCategory ?? [],
+  );
+  const [foodCertDate, setFoodCertDate] = useState(
+    activity?.foodCertDate ?? null,
+  );
+  const [location, setLocation] = useState(activity?.location ?? []);
+  const [popupitems, setPopupitems] = useState(
+    activity?.popupItemsSold ?? null,
+  );
+  const [sdg, setSdg] = useState(activity?.sdg ?? []);
+  const [dayAvailabilities, setDayAvailabilities] = useState(
+    activity?.dayAvailabilities ?? [],
+  );
+  const [duration, setDuration] = useState(activity?.duration ?? null);
   const [formErrors, setFormErrors] = useState();
   const [activityImages, setActivityImages] = useState([]);
-  const [selectedVendor, setSelectedVendor] = useState();
+  const [selectedVendor, setSelectedVendor] = useState(
+    activity?.linkedVendor?._id ?? null,
+  );
+  const [pendingCertType, setPendingCertType] = useState(
+    activity?.pendingCertificationType ?? null,
+  );
+  const [activeStep, setActiveStep] = useState(
+    activity?.offlinePricing?.amount ||
+      activity?.onlinePricing?.amount ||
+      activity?.weekendPricing?.amount
+      ? 3
+      : activity?.clientMarkupPercentage
+      ? 2
+      : activity?.activityPricingRules?.length > 0
+      ? 1
+      : 0,
+  );
+  const [bookingNotice, setBookingNotice] = useState(
+    activity?.bookingNotice ?? null,
+  );
+  const [startTime, setStartTime] = useState(activity?.startTime ?? null);
+  const [endTime, setEndTime] = useState(activity?.endTime ?? null);
+  const [capacity, setCapacity] = useState(activity?.capacity ?? null);
+  const [imageListToEdit, setImageListToEdit] = useState([]);
+  const [existingImageList, setExistingImageList] = useState(
+    activity?.preSignedImages ?? [],
+  );
 
   const foodCategories = Object.values(FoodCategoryEnum);
   const sdgList = Object.values(SustainableDevelopmentGoalsEnum);
@@ -114,20 +250,13 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     columnsArray.push(sdgList.slice(startIndex, endIndex));
   }
 
-  const handleClose = (event, reason) => {
-    if (reason === "clickaway") {
-      setIsOpen(false);
-      setError(false);
-      return;
-    }
-  };
-
   const handleThemeChange = (event) => {
     const themeId = event.target.value;
     setSelectedTheme(themeId);
     setSubthemes(
-      themes?.find((theme) => theme.parent?._id === themeId)?.children
+      themes?.find((theme) => theme.parent?._id === themeId)?.children,
     );
+    setSelectedSubTheme([]);
   };
 
   const handleSubThemeChange = (event) => {
@@ -135,45 +264,230 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     setSelectedSubTheme(themeId);
   };
 
-  const handleMaxParticipantsChange = (event) => {
-    const newMaxParticipants = parseInt(event.target.value, 10) || null;
-    setMaxParticipants(newMaxParticipants);
-
-    const newData = [];
-    for (let i = 0; i < Math.ceil(newMaxParticipants / 10); i++) {
-      const startRange = i * 10 + 1;
-      const endRange = startRange + 9;
-      newData.push({
-        paxInterval: `${startRange} - ${endRange}`,
-        pricePerPax: 0,
-        weekendAddon: 0,
-        publicHolidayAddon: 0,
-        onlineAddon: 0,
-        offlineAddon: 0,
-      });
-      if (startRange + 9 === 50 && newMaxParticipants > 50) {
-        newData.push({
-          paxInterval: `> ${50}`,
-          pricePerPax: 0,
-          weekendAddon: 0,
-          publicHolidayAddon: 0,
-          onlineAddon: 0,
-          offlineAddon: 0,
-        });
-        break;
-      }
-    }
-    setData(newData);
+  const handleMinParticipantsChange = (event) => {
+    setMinParticipants(event.target.value);
   };
 
-  const handleFieldChange = (event, rowIndex, columnName) => {
-    const updatedData = [...activityPricingRuleList];
-    updatedData[rowIndex][columnName] = event.target.value;
-    setData(updatedData);
+  const isMaxSmallerThanMin = () => {
+    return parseInt(maxParticipants) < parseInt(minParticipants);
+  };
+
+  const handleMaxParticipantsChange = (event) => {
+    const limitChar = 4;
+    let newMaxParticipants = 0;
+    if (event.target.value.toString().length <= limitChar) {
+      newMaxParticipants = parseInt(event.target.value, 10) || null;
+      setMaxParticipants(newMaxParticipants);
+    } else {
+      newMaxParticipants = maxParticipants;
+    }
+  };
+
+  const handleAddRange = (rowIndex) => {
+    const currentData = [...pricingRanges];
+    const errorData = [...pricingRangeError];
+    const currentEnd = parseInt(pricingRanges?.[rowIndex]?.end);
+    const currentStart = parseInt(pricingRanges?.[rowIndex]?.start);
+    if (
+      currentEnd >= parseInt(minParticipants) &&
+      currentEnd <= parseInt(maxParticipants)
+    ) {
+      currentData.push({
+        start: parseInt(currentEnd + 1),
+        end: null,
+        pricePerPax: null,
+        clientPrice: null,
+      });
+      errorData.push({ range: "", pricePerPax: null });
+      setPricingRanges(currentData);
+      setPricingRangeError(errorData);
+    } else {
+      let message = "";
+      if (currentEnd < currentStart) {
+        message = "End Range must be less than Start Range";
+      } else if (currentEnd > maxParticipants) {
+        message = "End Range cannot be more than max participants";
+      }
+      const pricingErrors = [...pricingRangeError];
+      pricingErrors[rowIndex]["range"] = message;
+      setPricingRangeError(pricingErrors);
+    }
+  };
+
+  const pricingRangeHasError = () => {
+    return pricingRangeError.some((e) => e.range?.length > 0);
+  };
+
+  const handlePricingRangesChange = (event, rowIndex, columnName) => {
+    const newVal = event.target.value;
+    const updatedData = [...pricingRanges];
+    const errors = [...pricingRangeError];
+
+    if (parseInt(newVal) > maxParticipants) {
+      errors[rowIndex]["range"] =
+        "End Range cannot be more than max participants";
+    } else if (
+      updatedData?.[rowIndex]?.["start"] <= parseInt(newVal) &&
+      parseInt(newVal) < maxParticipants
+    ) {
+      errors[rowIndex]["range"] = "";
+      setPricingRangeDone(false);
+    } else if (
+      updatedData?.[rowIndex]?.["start"] <= parseInt(newVal) &&
+      parseInt(newVal) === maxParticipants
+    ) {
+      errors[rowIndex]["range"] = "";
+      setPricingRangeDone(true);
+      const thing = updatedData.slice(0, rowIndex + 1);
+      thing[rowIndex][columnName] = parseInt(newVal);
+      setPricingRanges(thing);
+      setPricingRangeError(errors);
+      return;
+    } else if (updatedData?.[rowIndex]?.["start"] > parseInt(newVal)) {
+      errors[rowIndex]["range"] = "End Range must be more than Start Range";
+    }
+    updatedData[rowIndex][columnName] = parseInt(newVal);
+    if (updatedData?.[rowIndex + 1]) {
+      updatedData[rowIndex + 1]["start"] = parseInt(parseInt(newVal) + 1);
+    }
+    if (updatedData?.[rowIndex + 1]) {
+      if (
+        updatedData?.[rowIndex + 1]?.["start"] >
+        updatedData?.[rowIndex + 1]?.["end"]
+      ) {
+        errors[rowIndex + 1]["range"] =
+          "End Range must be more than Start Range";
+      } else if (updatedData?.[rowIndex + 1]?.["end"] === maxParticipants) {
+        errors[rowIndex + 1]["range"] = "";
+        setPricingRangeDone(true);
+      } else {
+        errors[rowIndex + 1]["range"] = "";
+      }
+    }
+
+    setPricingRanges(updatedData);
+    setPricingRangeError(errors);
+  };
+  const handlePriceChange = (event, rowIndex, columnName) => {
+    let error = [...pricingRangeError];
+    const newPrice = parseInt(event.target.value);
+    if (newPrice > 0) {
+      error[rowIndex]["pricePerPax"] = null;
+    } else if (newPrice === 0) {
+      error[rowIndex]["pricePerPax"] = "Price per pax has to be more than 0";
+    }
+    const updatedData = [...pricingRanges];
+    updatedData[rowIndex][columnName] = newPrice;
+    setPricingRanges(updatedData);
+    setPricingRangeError(error);
+  };
+  const handlePricingAddonChange = (event, type) => {
+    const percentage = event.target.value;
+
+    const newPricingAddons = { ...pricingAddons };
+    newPricingAddons[type] = {
+      ...pricingAddons[type],
+      amount: isNaN(percentage) ? null : percentage,
+    };
+    setPricingAddons(newPricingAddons);
+  };
+  const handleDiscountChange = (type, isDiscount) => {
+    const newPricingAddons = { ...pricingAddons };
+    newPricingAddons[type] = {
+      ...pricingAddons[type],
+      isDiscount: isDiscount ?? pricingAddons[type]?.isDiscount,
+    };
+    setPricingAddons(newPricingAddons);
+  };
+  const handleRemoveImage = (image) => {
+    setImageListToEdit((oldState) =>
+      oldState.filter((item) => item.src !== image.src),
+    );
+    const updatedList = [...activityImages];
+    updatedList.splice(activityImages.indexOf(image.file), 1);
+    setActivityImages(updatedList);
+  };
+  const handleRemoveExistingImage = (id) => {
+    setExistingImageList((oldState) => oldState.filter((item) => item !== id));
+  };
+
+  const handleBack = () => {
+    if (activeStep === 1) {
+      setPricingAddons({
+        weekendPricing: { amount: null, isDiscount: false },
+        offlinePricing: { amount: null, isDiscount: false },
+        onlinePricing: { amount: null, isDiscount: false },
+      });
+      setPricingRanges([]);
+      setPricingRangeError([]);
+      setMarkup();
+    }
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const handleNext = () => {
+    if (activeStep === 0) {
+      const newData = [];
+      const errorData = [];
+      if (!isMaxSmallerThanMin()) {
+        newData.push({
+          start: parseInt(minParticipants),
+          end: null,
+          pricePerPax: null,
+          clientPrice: null,
+        });
+        errorData.push({ range: "", pricePerPax: null });
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      }
+      setPricingRanges(newData);
+      setPricingRangeError(errorData);
+    } else if (activeStep === 1) {
+      const errors = [...pricingRangeError];
+      let hasErrors = false;
+      pricingRanges.map((row, index) => {
+        if (!row.pricePerPax) {
+          errors[index]["pricePerPax"] = errorTextPricePerPax;
+          hasErrors = true;
+        }
+        if (!row.end) {
+          errors[index]["end"] = errorTextEndInterval;
+          hasErrors = true;
+        }
+      });
+      setPricingRangeError(errors);
+      if (!hasErrors) {
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      }
+    } else if (activeStep === 2) {
+      if (!markup) {
+        const error = {
+          ...formErrors,
+          markup: "Please fill in pricing markup!",
+        };
+        setFormErrors(error);
+      } else {
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      }
+    }
   };
 
   const handleMarkupChange = (event) => {
+    const newMarkup = event.target.value;
     setMarkup(event.target.value);
+    const newClientPrice = [...pricingRanges];
+    newClientPrice.forEach((rule, index) => {
+      const { pricePerPax } = rule;
+      const clientPrice = Math.ceil(
+        parseFloat(pricePerPax) * (parseFloat(newMarkup) / 100) +
+          parseFloat(pricePerPax),
+      );
+      newClientPrice[index].clientPrice = clientPrice;
+    });
+    if (newMarkup) {
+      const error = { ...formErrors, markup: "" };
+      setFormErrors(error);
+    }
+    setPricingRanges(newClientPrice);
   };
 
   const handleActivityTypeChange = (event) => {
@@ -189,7 +503,19 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
   };
 
   const handleFoodCertDateChange = (date) => {
-    setFoodCertDate(date);
+    setFoodCertDate(date?.toISOString());
+  };
+
+  const handleStartTimeChange = (date) => {
+    setStartTime(date?.toISOString());
+  };
+
+  const handleEndTimeChange = (date) => {
+    setEndTime(date?.toISOString());
+  };
+
+  const handleCapacityChange = (event) => {
+    setCapacity(event.target.value);
   };
 
   const handleFoodCatChange = (event) => {
@@ -241,12 +567,33 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
       setSelectedVendor(null);
     }
   };
-
+  const handlePendingCertTypeChange = (event) => {
+    setPendingCertType(event.target.value);
+  };
+  const handleBookingNoticeChange = (event) => {
+    setBookingNotice(event.target.value);
+  };
   const validateForm = () => {
     const errors = {};
+    const priceError = {};
+    pricingRanges.forEach((rule, rowIndex) => {
+      if (rule.pricePerPax === null) {
+        priceError[rowIndex] = errorTextPricePerPax;
+      }
+    });
+    if (Object.keys(priceError).length > 0) {
+      errors.activityPricingRules = priceError;
+    }
+
+    if (!selectedTheme || selectedTheme?.length === 0) {
+      errors.theme = "Please select a theme!";
+    }
+    if (!selectedSubTheme || selectedSubTheme?.length === 0) {
+      errors.subtheme = "Please select at least one learning point!";
+    }
 
     if (!dayAvailabilities || dayAvailabilities?.length === 0) {
-      errors.dayAvailabilities = "At least one Day Availability is required";
+      errors.dayAvailabilities = "At least one Day Availability is required!";
     }
     if (!sdg || sdg?.length === 0) {
       errors.sdg = "At least one sustainability goal needs to be provided!";
@@ -262,8 +609,8 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
       errors.activityType = "Activity Type is required!";
     }
 
-    if (!location || location === "") {
-      errors.location = "Location is required!";
+    if (!location || location?.length === 0) {
+      errors.location = "At least one Location is required!";
     }
 
     if (!duration) {
@@ -272,6 +619,10 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
 
     if (!maxParticipants) {
       errors.maxParticipants = "Max. Participants is required!";
+    }
+
+    if (!minParticipants) {
+      errors.minParticipants = "Min. Participants is required!";
     }
 
     if (!markup) {
@@ -285,22 +636,96 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     ) {
       errors.popupitems = "Please fill in popup items sold!";
     }
+    if (
+      activityType &&
+      activityType === ActivityTypeEnum.POPUP &&
+      !selectedFoodCat
+    ) {
+      errors.foodCat = "Please select at least one food category!";
+    }
+
+    if (
+      activityType &&
+      activityType === ActivityTypeEnum.POPUP &&
+      isFood &&
+      isFoodCertPending &&
+      (!pendingCertType || pendingCertType === "")
+    ) {
+      errors.pendingCertType = "Please fill in pending cert type!";
+    }
+
+    if (
+      activityType &&
+      activityType === ActivityTypeEnum.POPUP &&
+      isFood &&
+      isFoodCertPending &&
+      !foodCertDate
+    ) {
+      errors.foodCertDate = "Please fill in expected certification date!";
+    }
 
     if (!selectedVendor || selectedVendor === "") {
-      errors.selectedVendor = "Please select a vendor";
+      errors.vendor = "Please select a vendor";
     }
 
-    if (!activityImages || activityImages?.length === 0) {
-      errors.activityImages =
-        "Please upload at least one photo of your activity!";
+    if (!capacity) {
+      errors.capacity = "Capacity is required!";
     }
+
+    if (!startTime) {
+      errors.startTime = "Earliest Start Time is required!";
+    }
+
+    if (!endTime) {
+      errors.endTime = "Latest Start Time is required!";
+    }
+
+    if (startTime && endTime) {
+      const time1 = new Date(startTime);
+      const time2 = new Date(endTime);
+      if (time1 > time2) {
+        errors.startTime =
+          "Earliest Start Time must be before Latest Start Time!";
+        errors.endTime = "Latest Start Time must be after Earliest Start Time!";
+      }
+    }
+
+    pricingRanges.map((row) => {
+      if (!row.pricePerPax) {
+        errors.pricing = "Please complete price setting!";
+      }
+      if (!row.end) {
+        errors.pricing = "Please complete price setting!";
+      }
+    });
+
+    // if (!activityImages || activityImages?.length === 0) {
+    //   errors.activityImages =
+    //     "Please upload at least one photo of your activity!";
+    // }
 
     setFormErrors(errors);
-    return Object.keys(errors).length === 0;
+    return Object.keys(errors).length === 0 && !pricingRangeHasError();
+  };
+
+  const validateDraft = () => {
+    const errors = [...pricingRangeError];
+    if (pricingRanges?.length > 0) {
+      pricingRanges.map((row, index) => {
+        if (!row?.end) {
+          errors[index]["range"] = errorTextEndInterval;
+        }
+        if (!row?.pricePerPax) {
+          errors[index].pricePerPax = errorTextPricePerPax;
+        }
+      });
+      setPricingRangeError(errors);
+    }
+    return !pricingRangeHasError() && !isMaxSmallerThanMin();
   };
 
   const resetForm = () => {
-    setSelectedTheme(themes?.[0]?.parent?._id || "");
+    setSelectedTheme();
     setSelectedSubTheme([]);
     setSubthemes([]);
     setMaxParticipants();
@@ -308,12 +733,11 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     setActivityType("");
     setTitle();
     setDescription();
-    setData([]);
     setIsFood(false);
     setIsFoodCertPending(false);
     setSelectedFoodCat([]);
     setFoodCertDate(null);
-    setLocation("");
+    setLocation([]);
     setPopupitems();
     setSdg([]);
     setDayAvailabilities([]);
@@ -321,12 +745,30 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
     setFormErrors({});
     setActivityImages([]);
     setSelectedVendor();
+    setPricingAddons({
+      weekendPricing: { amount: null, isDiscount: false },
+      offlinePricing: { amount: null, isDiscount: false },
+      onlinePricing: { amount: null, isDiscount: false },
+    });
+    setPricingRanges([]);
+    setPricingRangeError([]);
+    setStartTime(null);
+    setEndTime(null);
+    setBookingNotice();
+    setActiveStep(0);
+    setCapacity();
+    setMinParticipants();
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData();
     formData.append("adminCreated", admin._id);
+    if (activity) {
+      formData.append("activityId", activity._id);
+    }
+    formData.append("isDraft", false);
+    formData.append("approvalStatus", "Published");
     formData.append("title", title);
     formData.append("description", description);
     formData.append(
@@ -335,64 +777,231 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
         ? isFood
           ? "Popups (Food)"
           : "Popups (Non-food)"
-        : activityType
+        : activityType,
     );
     formData.append("maxParticipants", maxParticipants);
+    formData.append("minParticipants", minParticipants);
     formData.append("clientMarkupPercentage", markup);
     formData.append("duration", duration);
     formData.append("theme", selectedTheme);
-    formData.append("location", location);
-    dayAvailabilities.forEach((obj, index) => {
+    if (bookingNotice) {
+      formData.append("bookingNotice", bookingNotice);
+    } else {
+      formData.append("bookingNotice", 0);
+    }
+
+    formData.append("startTime", startTime);
+    formData.append("endTime", endTime);
+    formData.append("capacity", capacity);
+    location.forEach((obj) => {
+      formData.append("location", obj);
+    });
+    dayAvailabilities.forEach((obj) => {
       formData.append("dayAvailabilities", obj);
     });
-    selectedSubTheme.forEach((obj, index) => {
+    selectedSubTheme.forEach((obj) => {
       formData.append("subtheme", obj);
     });
-    sdg.forEach((obj, index) => {
+    sdg.forEach((obj) => {
       formData.append("sdg", obj);
     });
-    activityPricingRuleList.forEach((pricingRuleObj, index) => {
-      const pricingJSON = JSON.stringify(pricingRuleObj);
+    pricingRanges.forEach((obj) => {
+      const pricingJSON = JSON.stringify(obj);
       formData.append("activityPricingRules", pricingJSON);
     });
+    for (const key in pricingAddons) {
+      formData.append(key, JSON.stringify(pricingAddons[key]));
+    }
+
     if (activityType === ActivityTypeEnum.POPUP) {
       {
         formData.append("popupItemsSold", popupitems);
         if (isFood) {
+          formData.append("isFood", isFood);
           formData.append("isFoodCertPending", isFoodCertPending);
+          selectedFoodCat.forEach((obj) => {
+            formData.append("foodCategory", obj);
+          });
           if (isFoodCertPending) {
-            formData.append("foodCertDate", foodCertDate?.toISOString());
-            selectedFoodCat.forEach((obj, index) => {
-              formData.append("foodCategory", obj);
-            });
+            formData.append("foodCertDate", foodCertDate);
           }
         }
       }
     }
     formData.append("linkedVendor", selectedVendor);
+    formData.append("pendingCertificationType", pendingCertType);
 
     for (let i = 0; i < activityImages.length; i++) {
       formData.append("images", activityImages[i]);
     }
+    existingImageList.forEach((item) =>
+      formData.append("updatedImageList[]", item),
+    );
 
     if (validateForm()) {
       try {
-        const responseStatus = await createActivity(formData);
-        resetForm();
-        setIsOpen(true);
+        await saveActivity(formData);
+        openSnackbar("Activity Created Successfully!");
+        navigate(-1);
+        // resetForm();
       } catch (error) {
-        setError(true);
+        openSnackbar(error, "error");
       }
     } else {
-      setError(true);
+      openSnackbar(
+        "Error creating form! Please fill in required fields.",
+        "error",
+      );
     }
   };
 
-  useEffect(() => {
-    if (selectedTheme && subthemes.length > 0) {
-      setSelectedSubTheme([subthemes[0]._id]);
+  const handleSaveDraft = async (event) => {
+    event.preventDefault();
+    const formData = new FormData();
+    formData.append("adminCreated", admin._id);
+    if (activity) {
+      formData.append("activityId", activity._id);
     }
-  }, [selectedTheme, subthemes]);
+    formData.append("isDraft", true);
+    formData.append("approvalStatus", "Pending Approval");
+    if (title) {
+      formData.append("title", title);
+    }
+    if (description) {
+      formData.append("description", description);
+    }
+    if (activityType) {
+      formData.append(
+        "activityType",
+        activityType === ActivityTypeEnum.POPUP
+          ? isFood
+            ? "Popups (Food)"
+            : "Popups (Non-food)"
+          : activityType,
+      );
+    }
+    if (maxParticipants) {
+      formData.append("maxParticipants", maxParticipants);
+    }
+    if (minParticipants) {
+      formData.append("minParticipants", minParticipants);
+    }
+    formData.append("isFood", isFood);
+
+    if (markup) {
+      formData.append("clientMarkupPercentage", markup);
+    }
+
+    if (duration) {
+      formData.append("duration", duration);
+    }
+
+    if (selectedTheme) {
+      formData.append("theme", selectedTheme);
+    }
+
+    if (bookingNotice) {
+      formData.append("bookingNotice", bookingNotice);
+    }
+
+    if (startTime) {
+      formData.append("startTime", startTime);
+    }
+    if (endTime) {
+      formData.append("endTime", endTime);
+    }
+
+    if (capacity) {
+      formData.append("capacity", capacity);
+    }
+
+    if (location.length > 0) {
+      location.forEach((obj) => {
+        formData.append("location", obj);
+      });
+    }
+
+    if (dayAvailabilities.length > 0) {
+      dayAvailabilities.forEach((obj) => {
+        formData.append("dayAvailabilities", obj);
+      });
+    }
+
+    if (selectedSubTheme.length > 0) {
+      selectedSubTheme.forEach((obj) => {
+        formData.append("subtheme", obj);
+      });
+    }
+
+    if (sdg) {
+      sdg.forEach((obj) => {
+        formData.append("sdg", obj);
+      });
+    }
+
+    if (pricingRanges.length > 0) {
+      pricingRanges.forEach((obj) => {
+        const pricingJSON = JSON.stringify(obj);
+        formData.append("activityPricingRules", pricingJSON);
+      });
+    }
+    if (activityType === ActivityTypeEnum.POPUP) {
+      if (popupitems) {
+        formData.append("popupItemsSold", popupitems);
+      }
+      if (isFood) {
+        if (isFoodCertPending) {
+          if (foodCertDate) {
+            formData.append("foodCertDate", foodCertDate);
+          }
+          if (selectedFoodCat) {
+            selectedFoodCat.forEach((obj) => {
+              formData.append("foodCategory", obj);
+            });
+          }
+        }
+        if (isFoodCertPending) {
+          formData.append("isFoodCertPending", isFoodCertPending);
+        }
+      }
+    }
+
+    if (selectedVendor) {
+      formData.append("linkedVendor", selectedVendor);
+    }
+
+    if (pendingCertType) {
+      formData.append("pendingCertificationType", pendingCertType);
+    }
+
+    for (const key in pricingAddons) {
+      formData.append(key, JSON.stringify(pricingAddons[key]));
+    }
+    for (let i = 0; i < activityImages.length; i++) {
+      formData.append("images", activityImages[i]);
+    }
+    existingImageList.forEach((item) =>
+      formData.append("updatedImageList[]", item),
+    );
+    if (validateDraft()) {
+      try {
+        await saveActivity(formData);
+        openSnackbar("Activity Draft Saved Successfully!");
+        navigate(-1);
+      } catch (error) {
+        openSnackbar("Unexpected Server Error occured!", "error");
+      }
+    } else {
+      openSnackbar(
+        "Error saving draft! Please resolve highlighted errors before saving.",
+        "error",
+      );
+    }
+  };
+
+  const handleCancel = () => {
+    navigate(-1);
+  };
 
   return (
     <form>
@@ -410,6 +1019,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                 color={theme.palette.primary.main}
                 paddingTop={2}
                 component="div"
+                fontSize={"1.25rem"}
               >
                 Basic Information
               </Typography>
@@ -426,11 +1036,15 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                 fullWidth
                 value={title ?? ""}
                 onChange={handleTitleChange}
-                error={title !== null && title?.length === 0}
+                helperText={formErrors?.title}
+                error={
+                  (title !== null && title?.length === 0) ||
+                  formErrors?.title?.length > 0
+                }
               />
             </Grid>
             <Grid item xs={4}>
-              <FormControl fullWidth>
+              <FormControl fullWidth error={formErrors?.theme?.length > 0}>
                 <InputLabel id="themeLabel" required>
                   Theme
                 </InputLabel>
@@ -447,18 +1061,19 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                         <MenuItem key={index} value={item.parent._id}>
                           {item.parent.name}
                         </MenuItem>
-                      )
+                      ),
                   )}
                 </Select>
+                <FormHelperText error>{formErrors?.theme}</FormHelperText>
               </FormControl>
             </Grid>
             <Grid item xs={4}>
-              <FormControl fullWidth>
+              <FormControl fullWidth error={formErrors?.subtheme?.length > 0}>
                 <InputLabel id="subThemeLabel">Learning Points</InputLabel>
                 <Select
                   labelId="subThemeLabel"
                   label="Sub-Theme"
-                  placeholder="Theme"
+                  placeholder="Learning Points"
                   multiple
                   onChange={handleSubThemeChange}
                   value={selectedSubTheme || ""}
@@ -469,7 +1084,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                     </MenuItem>
                   ))}
                 </Select>
-                <FormHelperText>
+                <FormHelperText error={formErrors?.subtheme?.length > 0}>
                   Select one or more learning points based on theme
                 </FormHelperText>
               </FormControl>
@@ -485,7 +1100,11 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                 onChange={handleDescriptionChange}
                 value={description ?? ""}
                 required
-                error={description !== null && description?.length === 0}
+                helperText={formErrors?.description}
+                error={
+                  (description !== null && description?.length === 0) ||
+                  formErrors?.description?.length > 0
+                }
               />
             </Grid>
           </Grid>
@@ -497,37 +1116,45 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                 color={theme.palette.primary.main}
                 paddingTop={2}
                 component="div"
+                fontSize={"1.25rem"}
               >
                 Vendor Details
               </Typography>
               <Grid item xs={6} paddingTop={2}>
-                <Autocomplete
-                  onChange={handleVendorChange}
-                  disablePortal
-                  id="combo-box-demo"
-                  options={vendors}
-                  sx={{ width: 300 }}
-                  getOptionLabel={(vendor) => vendor.companyName}
-                  renderOption={(props, vendor) => (
-                    <div {...props}>
-                      <Avatar
-                        style={{ marginRight: 6 }}
-                        src={vendor?.preSignedPhoto}
-                        {...(vendor?.preSignedPhoto
-                          ? {}
-                          : stringAvatar(vendor?.companyName, theme))}
+                <FormControl fullWidth error={formErrors?.vendor?.length > 0}>
+                  <Autocomplete
+                    onChange={handleVendorChange}
+                    disablePortal
+                    id="combo-box-demo"
+                    options={vendors}
+                    sx={{ width: 300 }}
+                    getOptionLabel={(vendor) => vendor.companyName}
+                    renderOption={(props, vendor) => (
+                      <div {...props}>
+                        <Avatar
+                          style={{ marginRight: 6 }}
+                          src={vendor?.preSignedPhoto}
+                          {...(vendor?.preSignedPhoto
+                            ? {}
+                            : stringAvatar(vendor?.companyName, theme))}
+                        />
+                        {vendor?.companyName} - {vendor?.companyUEN}
+                      </div>
+                    )}
+                    renderInput={(params) => (
+                      <TextField
+                        error={formErrors?.vendor?.length > 0}
+                        {...params}
+                        label="Pick from existing vendor"
                       />
-                      {vendor?.companyName} - {vendor?.companyUEN}
-                    </div>
-                  )}
-                  renderInput={(params) => (
-                    <TextField {...params} label="Pick from existing vendor" />
-                  )}
-                  value={
-                    vendors.find((vendor) => vendor._id === selectedVendor) ||
-                    null
-                  }
-                />
+                    )}
+                    value={
+                      vendors.find((vendor) => vendor._id === selectedVendor) ||
+                      null
+                    }
+                  />
+                  <FormHelperText error>{formErrors?.vendor}</FormHelperText>
+                </FormControl>
               </Grid>
               {/* <Grid item xs={6} paddingTop={2}>
                 <Typography fontSize={"0.75rem"}>
@@ -556,12 +1183,16 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                 color={theme.palette.primary.main}
                 paddingTop={2}
                 component="div"
+                fontSize={"1.25rem"}
               >
                 More details on activity
               </Typography>
             </Grid>
             <Grid item xs={6} paddingTop={2}>
-              <FormControl fullWidth>
+              <FormControl
+                fullWidth
+                error={formErrors?.activityType?.length > 0}
+              >
                 <InputLabel id="activityType" required>
                   Activity Type
                 </InputLabel>
@@ -578,6 +1209,9 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText error>
+                  {formErrors?.activityType}
+                </FormHelperText>
               </FormControl>
 
               {activityType === ActivityTypeEnum.POPUP && (
@@ -589,7 +1223,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                       </FormLabel>
                       <RadioGroup
                         aria-labelledby="demo-radio-buttons-group-label"
-                        defaultValue="yes"
+                        defaultValue="false"
                         name="radio-buttons-group"
                         value={isFood.toString()}
                         onChange={handleIsFoodChange}
@@ -618,17 +1252,28 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                       disabled={false}
                       fullWidth
                       onChange={handlePopupItemsChange}
-                      error={popupitems !== null && popupitems?.length === 0}
+                      helperText={formErrors?.popupitems}
+                      error={
+                        (popupitems !== null && popupitems?.length === 0) ||
+                        formErrors?.popupitems?.length > 0
+                      }
+                      value={popupitems}
                     />
                   </Grid>
                 </Grid>
               )}
             </Grid>
-
             <Grid item xs={3} paddingTop={2}>
               {activityType === ActivityTypeEnum.POPUP && isFood && (
-                <FormGroup>
-                  <InputLabel id="foodCategory">Food Category</InputLabel>
+                <FormGroup error={formErrors?.foodCat?.length > 0}>
+                  <InputLabel
+                    id="foodCategory"
+                    required
+                    error={formErrors?.foodCat?.length > 0}
+                  >
+                    Food Category
+                  </InputLabel>
+                  <FormHelperText error>{formErrors?.foodCat}</FormHelperText>
                   {foodCategories.map((label) => (
                     <FormControlLabel
                       key={label}
@@ -640,6 +1285,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                         />
                       }
                       label={label}
+                      error={formErrors?.foodCat?.length > 0}
                     />
                   ))}
                 </FormGroup>
@@ -675,15 +1321,40 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                             label="Pending cert type"
                             disabled={false}
                             fullWidth
+                            onChange={handlePendingCertTypeChange}
+                            error={
+                              pendingCertType === "" ||
+                              formErrors?.pendingCertType?.length > 0
+                            }
+                            value={pendingCertType}
                           />
                         </Grid>
                         <Grid item paddingTop={2}>
-                          <LocalizationProvider dateAdapter={AdapterDayjs}>
-                            <DatePicker
-                              label="Expected certified date"
-                              onChange={handleFoodCertDateChange}
-                            />
-                          </LocalizationProvider>
+                          <FormControl
+                            fullWidth
+                            error={formErrors?.foodCertDate?.length > 0}
+                          >
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                              <DatePicker
+                                value={
+                                  foodCertDate ? dayjs(foodCertDate) : null
+                                }
+                                error={formErrors?.foodCertDate?.length > 0}
+                                label="Expected certified date"
+                                onChange={handleFoodCertDateChange}
+                                renderInput={(params) => (
+                                  <TextField
+                                    sx={{ width: "100%" }}
+                                    {...params}
+                                    error
+                                  />
+                                )}
+                              />
+                            </LocalizationProvider>
+                            <FormHelperText>
+                              {formErrors?.foodCertDate}
+                            </FormHelperText>
+                          </FormControl>
                         </Grid>
                       </Grid>
                     )}
@@ -697,8 +1368,8 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
               )}
             </Grid>
             <Grid item xs={6}>
-              <FormControl fullWidth>
-                <InputLabel id="activityType" required>
+              <FormControl fullWidth error={formErrors?.location?.length > 0}>
+                <InputLabel id="location" required>
                   Location
                 </InputLabel>
                 <Select
@@ -707,6 +1378,14 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                   placeholder="Location"
                   onChange={handleLocationTypeChange}
                   value={location}
+                  multiple
+                  renderValue={(selected) => (
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                      {selected.map((value) => (
+                        <Chip key={value} label={value} />
+                      ))}
+                    </Box>
+                  )}
                 >
                   {Object.values(LocationEnum).map((enumValue) => (
                     <MenuItem key={enumValue} value={enumValue}>
@@ -714,10 +1393,14 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText error>{formErrors?.location}</FormHelperText>
               </FormControl>
             </Grid>
             <Grid item xs={3}>
-              <FormControl fullWidth>
+              <FormControl
+                fullWidth
+                error={formErrors?.dayAvailabilities?.length > 0}
+              >
                 <InputLabel id="dayAvailabilities" required>
                   Day Availabilities
                 </InputLabel>
@@ -734,27 +1417,108 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
                       <MenuItem key={enumValue} value={enumValue}>
                         {enumValue}
                       </MenuItem>
-                    )
+                    ),
                   )}
                 </Select>
+                <FormHelperText error>
+                  {formErrors?.dayAvailabilities}
+                </FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid item xs={3}>
+              <FormControl
+                fullWidth
+                error={
+                  (duration !== null && duration?.length === 0) ||
+                  formErrors?.duration?.length > 0
+                }
+              >
+                <InputLabel id="duration">Duration</InputLabel>
+                <Select
+                  labelId="durationLabel"
+                  id="duration"
+                  value={duration ?? ""}
+                  label="Duration"
+                  onChange={handleDurationChange}
+                >
+                  <MenuItem value={30}>30 min</MenuItem>
+                  <MenuItem value={60}>60 min</MenuItem>
+                  <MenuItem value={90}>90 min</MenuItem>
+                  <MenuItem value={120}>120 min</MenuItem>
+                  <MenuItem value={150}>150 min</MenuItem>
+                  <MenuItem value={180}>180 min</MenuItem>
+                </Select>
+                <FormHelperText error>{formErrors?.duration}</FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid item xs={3}>
+              <FormControl fullWidth error={formErrors?.startTime?.length > 0}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <TimePicker
+                    label="Earliest Start Time"
+                    minutesStep={30}
+                    onChange={handleStartTimeChange}
+                    value={startTime ? dayjs(startTime) : null}
+                  />
+                </LocalizationProvider>
+                <FormHelperText>{formErrors?.startTime}</FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid item xs={3}>
+              <FormControl fullWidth error={formErrors?.endTime?.length > 0}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <TimePicker
+                    label="Latest Start Time"
+                    minutesStep={30}
+                    onChange={handleEndTimeChange}
+                    value={endTime ? dayjs(endTime) : null}
+                  />
+                </LocalizationProvider>
+                <FormHelperText>{formErrors?.endTime}</FormHelperText>
               </FormControl>
             </Grid>
             <Grid item xs={3}>
               <TextField
-                id="duration"
-                label="Duration"
-                placeholder="Duration"
-                type="number"
+                id="bookingNotice"
+                name="bookingNotice"
+                label="Advance Booking Notice"
+                disabled={false}
                 fullWidth
-                onChange={handleDurationChange}
-                required
+                type="number"
                 InputProps={{
                   endAdornment: (
-                    <InputAdornment position="end">min</InputAdornment>
+                    <InputAdornment position="end">
+                      {parseInt(bookingNotice) === 1 ? <>day</> : <>days</>}
+                    </InputAdornment>
                   ),
                 }}
-                value={duration ?? ""}
-                error={duration !== null && duration?.length === 0}
+                value={bookingNotice ?? ""}
+                onChange={handleBookingNoticeChange}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <TextField
+                required
+                id="capacity"
+                name="capacity"
+                label="Capacity"
+                disabled={false}
+                fullWidth
+                type="number"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      {parseInt(capacity) === 1 ? <>client</> : <>clients</>}
+                    </InputAdornment>
+                  ),
+                }}
+                value={capacity ?? ""}
+                onChange={handleCapacityChange}
+                error={
+                  (capacity !== null && capacity === 0) ||
+                  formErrors?.capacity?.length > 0
+                }
+                helperText={formErrors?.capacity}
               />
             </Grid>
           </Grid>
@@ -767,7 +1531,10 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
             paddingTop={2}
           >
             <Grid item xs={12}>
-              <InputLabel id="sdg">Sustainability Development Goals</InputLabel>
+              <InputLabel id="sdg" required error={formErrors?.sdg?.length > 0}>
+                Sustainability Development Goals
+              </InputLabel>
+              <FormHelperText error>{formErrors?.sdg}</FormHelperText>
             </Grid>
             {columnsArray.map((column, columnIndex) => (
               <Grid item xs={3} key={columnIndex}>
@@ -791,151 +1558,536 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
         </StyledContainer>
         <StyledContainer elevation={3}>
           <Grid container spacing={1} alignItems="left" justifyContent="left">
-            <Grid item xs={12}>
+            <Grid item xs={12} justifyContent={"space-between"}>
               <Typography
                 color={theme.palette.primary.main}
                 component="div"
                 paddingTop={2}
+                fontSize={"1.25rem"}
               >
                 Participants and Pricing
               </Typography>
-            </Grid>
-            <Grid item xs={4}>
-              <TextField
-                required
-                id="maxParticipants"
-                name="maxParticipants"
-                label="Max. participants"
-                disabled={false}
-                fullWidth
-                type="number"
-                value={maxParticipants ?? ""}
-                onChange={handleMaxParticipantsChange}
-                error={maxParticipants !== null && maxParticipants === 0}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField
-                required
-                id="markup"
-                name="markup"
-                label="Markup Percentage"
-                disabled={false}
-                fullWidth
-                type="number"
-                value={markup ?? ""}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="start">%</InputAdornment>
-                  ),
-                }}
-                onChange={handleMarkupChange}
-                error={markup !== null && markup?.length === 0}
-              />
+              {formErrors?.pricing && (
+                <Typography
+                  color={theme.palette.error.main}
+                  style={{ display: "flex", alignItems: "center" }}
+                >
+                  <WarningAmberIcon />
+                  {formErrors?.pricing}
+                </Typography>
+              )}
             </Grid>
             <Grid item xs={12}>
-              {maxParticipants > 0 && (
-                <TableContainer component={Paper}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Pax Interval</TableCell>
-                        <TableCell>Price Per Pax</TableCell>
-                        <TableCell>Weekend Addon</TableCell>
-                        <TableCell>Public Holiday Addon</TableCell>
-                        <TableCell>Online Addon</TableCell>
-                        <TableCell>Offline Addon</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {activityPricingRuleList.map((row, rowIndex) => (
-                        <TableRow key={rowIndex}>
-                          <TableCell>{row.paxInterval}</TableCell>
-                          <TableCell>
-                            <TextField
-                              value={row.pricePerPax}
-                              onChange={(e) =>
-                                handleFieldChange(e, rowIndex, "pricePerPax")
-                              }
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    $
-                                  </InputAdornment>
-                                ),
+              <Stepper activeStep={activeStep}>
+                {steps.map((label) => {
+                  const stepProps = {};
+                  const labelProps = {};
+                  return (
+                    <Step key={label} {...stepProps}>
+                      <StepLabel {...labelProps}>{label}</StepLabel>
+                    </Step>
+                  );
+                })}
+              </Stepper>
+              <Fragment>
+                {activeStep === 0 && (
+                  <Grid
+                    container
+                    spacing={1}
+                    alignItems="left"
+                    justifyContent="left"
+                    paddingTop={2}
+                  >
+                    <Grid item xs={4}>
+                      <TextField
+                        required
+                        id="minParticipants"
+                        name="minParticipants"
+                        label="Min. participants"
+                        disabled={false}
+                        fullWidth
+                        type="number"
+                        value={minParticipants ?? ""}
+                        onChange={handleMinParticipantsChange}
+                        error={
+                          (minParticipants !== null && minParticipants === 0) ||
+                          isMaxSmallerThanMin() ||
+                          formErrors?.minParticipants?.length > 0
+                        }
+                        helperText={
+                          isMaxSmallerThanMin()
+                            ? "Min Participants must be smaller than Max Participants"
+                            : formErrors?.minParticipants
+                        }
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        required
+                        id="maxParticipants"
+                        name="maxParticipants"
+                        label="Max. participants"
+                        disabled={false}
+                        fullWidth
+                        type="number"
+                        value={maxParticipants ?? ""}
+                        onChange={handleMaxParticipantsChange}
+                        error={
+                          (maxParticipants !== null && maxParticipants === 0) ||
+                          isMaxSmallerThanMin() ||
+                          formErrors?.maxParticipants?.length > 0
+                        }
+                        helperText={
+                          isMaxSmallerThanMin()
+                            ? "Max Participants must be greater than Min Participants"
+                            : formErrors?.maxParticipants
+                        }
+                      />
+                    </Grid>
+                  </Grid>
+                )}
+                {activeStep === 1 && (
+                  <>
+                    <Grid item xs={12}>
+                      <Typography
+                        color={theme.palette.primary.main}
+                        sx={{ paddingTop: 2 }}
+                      >
+                        Participant range: {minParticipants} - {maxParticipants}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} paddingTop={2}>
+                      <TableContainer
+                        component={Paper}
+                        sx={{
+                          borderRadius: "10px",
+                        }}
+                      >
+                        <Table>
+                          <TableHead>
+                            <TableRow
+                              sx={{
+                                backgroundColor: "rgba(159 145 204 / 0.12)",
                               }}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <TextField
-                              value={row.weekendAddon}
-                              onChange={(e) =>
-                                handleFieldChange(e, rowIndex, "weekendAddon")
-                              }
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    $
-                                  </InputAdornment>
-                                ),
+                            >
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                Start Range
+                              </TableCell>
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                End Range
+                              </TableCell>
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                Price Per Pax
+                              </TableCell>
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                Action
+                              </TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {pricingRanges.map((row, rowIndex) => (
+                              <TableRow key={rowIndex}>
+                                <TableCell>
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "space-evenly",
+                                    }}
+                                  >
+                                    <Box>{row.start}</Box>
+
+                                    <Box sx={{ whiteSpace: "nowrap" }}>to</Box>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    <TextField
+                                      error={
+                                        pricingRangeError?.[rowIndex]?.range
+                                          ?.length > 0
+                                      }
+                                      helperText={
+                                        pricingRangeError?.[rowIndex]?.range
+                                      }
+                                      type="number"
+                                      onChange={(e) =>
+                                        handlePricingRangesChange(
+                                          e,
+                                          rowIndex,
+                                          "end",
+                                        )
+                                      }
+                                      value={
+                                        !isNaN(row?.end) && row?.end
+                                          ? row?.end
+                                          : ""
+                                      }
+                                    />
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <TextField
+                                    type="number"
+                                    error={
+                                      pricingRangeError?.[rowIndex]?.pricePerPax
+                                        ?.length > 0
+                                    }
+                                    helperText={
+                                      pricingRangeError?.[rowIndex]?.pricePerPax
+                                    }
+                                    InputProps={{
+                                      startAdornment: (
+                                        <InputAdornment position="start">
+                                          $
+                                        </InputAdornment>
+                                      ),
+                                    }}
+                                    value={
+                                      !isNaN(row?.pricePerPax) &&
+                                      row?.pricePerPax
+                                        ? row?.pricePerPax
+                                        : ""
+                                    }
+                                    onChange={(e) =>
+                                      handlePriceChange(
+                                        e,
+                                        rowIndex,
+                                        "pricePerPax",
+                                      )
+                                    }
+                                  />
+                                </TableCell>
+                                <TableCell>
+                                  {rowIndex + 1 === pricingRanges.length &&
+                                    !pricingRangeDone && (
+                                      <Button
+                                        disabled={pricingRangeHasError()}
+                                        onClick={() => handleAddRange(rowIndex)}
+                                      >
+                                        Add
+                                      </Button>
+                                    )}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </Grid>
+                  </>
+                )}
+                {activeStep === 2 && (
+                  <Grid
+                    container
+                    spacing={1}
+                    alignItems="left"
+                    justifyContent="left"
+                    paddingTop={2}
+                  >
+                    <Grid item xs={4}>
+                      <TextField
+                        required
+                        id="markup"
+                        name="markup"
+                        label="Markup Percentage"
+                        disabled={false}
+                        fullWidth
+                        type="number"
+                        value={markup ?? ""}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="start">%</InputAdornment>
+                          ),
+                        }}
+                        onChange={handleMarkupChange}
+                        error={
+                          (markup !== null && markup?.length === 0) ||
+                          formErrors?.markup?.length > 0
+                        }
+                        helperText={formErrors?.markup}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TableContainer
+                        component={Paper}
+                        sx={{
+                          borderRadius: "10px",
+                        }}
+                      >
+                        <Table>
+                          <TableHead>
+                            <TableRow
+                              sx={{
+                                backgroundColor: "rgba(159 145 204 / 0.12)",
                               }}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <TextField
-                              value={row.publicHolidayAddon}
-                              onChange={(e) =>
-                                handleFieldChange(
-                                  e,
-                                  rowIndex,
-                                  "publicHolidayAddon"
-                                )
-                              }
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    $
-                                  </InputAdornment>
-                                ),
-                              }}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <TextField
-                              value={row.onlineAddon}
-                              onChange={(e) =>
-                                handleFieldChange(e, rowIndex, "onlineAddon")
-                              }
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    $
-                                  </InputAdornment>
-                                ),
-                              }}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <TextField
-                              value={row.offlineAddon}
-                              onChange={(e) =>
-                                handleFieldChange(e, rowIndex, "offlineAddon")
-                              }
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    $
-                                  </InputAdornment>
-                                ),
-                              }}
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              )}
+                            >
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                Start Range
+                              </TableCell>
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                End Range
+                              </TableCell>
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                Price Per Pax
+                              </TableCell>
+                              <TableCell
+                                width={"25%"}
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                <span>Client Price&nbsp;</span>
+                                <span style={{ color: "#9F91CC" }}>
+                                  (after {markup}% markup)
+                                </span>
+                              </TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {pricingRanges.map((row, rowIndex) => (
+                              <TableRow key={rowIndex}>
+                                <TableCell>
+                                  <Box>{row.start}</Box>
+                                </TableCell>
+                                <TableCell>
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    <Box>{row?.end}</Box>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <Box>${row?.pricePerPax}</Box>
+                                </TableCell>
+                                <TableCell>
+                                  $
+                                  {!isNaN(row?.clientPrice) && (
+                                    <>{row?.clientPrice}</>
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </Grid>
+                  </Grid>
+                )}
+                {activeStep === 3 && (
+                  <>
+                    <Grid
+                      container
+                      spacing={1}
+                      alignItems="left"
+                      justifyContent="left"
+                      paddingTop={2}
+                      paddingLeft={2}
+                    >
+                      <Grid sx={4}>
+                        <TextField
+                          id="weekendPrice"
+                          name="weekendPrice"
+                          label="Weekend Pricing"
+                          fullWidth
+                          value={pricingAddons?.weekendPricing?.amount}
+                          type="number"
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position="start">
+                                %
+                              </InputAdornment>
+                            ),
+                          }}
+                          onChange={(event) =>
+                            handlePricingAddonChange(event, "weekendPricing")
+                          }
+                        />
+                      </Grid>
+                      <Grid item xs={4} paddingTop={2} paddingLeft={2}>
+                        <Stack direction="row" spacing={1}>
+                          <StyledChip
+                            label="Discount"
+                            onClick={() =>
+                              handleDiscountChange("weekendPricing", true)
+                            }
+                            disabled={
+                              pricingAddons?.weekendPricing?.isDiscount === true
+                            }
+                          />
+                          <StyledChip
+                            label="Addon"
+                            onClick={() =>
+                              handleDiscountChange("weekendPricing", false)
+                            }
+                            disabled={
+                              pricingAddons?.weekendPricing?.isDiscount ===
+                              false
+                            }
+                          />
+                        </Stack>
+                      </Grid>
+                    </Grid>
+                    <Grid
+                      container
+                      spacing={1}
+                      alignItems="left"
+                      justifyContent="left"
+                      paddingTop={2}
+                      paddingLeft={2}
+                    >
+                      <Grid sx={4}>
+                        <TextField
+                          id="onlinePrice"
+                          name="onlinePrice"
+                          label="Online Pricing"
+                          disabled={false}
+                          fullWidth
+                          value={pricingAddons?.onlinePricing?.amount}
+                          type="number"
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position="start">
+                                %
+                              </InputAdornment>
+                            ),
+                          }}
+                          onChange={(event) =>
+                            handlePricingAddonChange(event, "onlinePricing")
+                          }
+                        />
+                      </Grid>
+                      <Grid item xs={4} paddingTop={2} paddingLeft={2}>
+                        <Stack direction="row" spacing={1}>
+                          <StyledChip
+                            label="Discount"
+                            onClick={() =>
+                              handleDiscountChange("onlinePricing", true)
+                            }
+                            disabled={
+                              pricingAddons?.onlinePricing?.isDiscount === true
+                            }
+                          />
+                          <StyledChip
+                            label="Addon"
+                            onClick={() =>
+                              handleDiscountChange("onlinePricing", false)
+                            }
+                            disabled={
+                              pricingAddons?.onlinePricing?.isDiscount === false
+                            }
+                          />
+                        </Stack>
+                      </Grid>
+                    </Grid>
+                    <Grid
+                      container
+                      spacing={1}
+                      alignItems="left"
+                      justifyContent="left"
+                      paddingTop={2}
+                      paddingLeft={2}
+                    >
+                      <Grid sx={4}>
+                        <TextField
+                          id="offlinePrice"
+                          name="offlinePrice"
+                          label="Offline Pricing"
+                          disabled={false}
+                          fullWidth
+                          type="number"
+                          value={pricingAddons?.offlinePricing?.amount}
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position="start">
+                                %
+                              </InputAdornment>
+                            ),
+                          }}
+                          onChange={(event) =>
+                            handlePricingAddonChange(event, "offlinePricing")
+                          }
+                        />
+                      </Grid>
+                      <Grid item xs={4} paddingTop={2} paddingLeft={2}>
+                        <Stack direction="row" spacing={1}>
+                          <StyledChip
+                            label="Discount"
+                            onClick={() =>
+                              handleDiscountChange("offlinePricing", true)
+                            }
+                            disabled={
+                              pricingAddons?.offlinePricing?.isDiscount === true
+                            }
+                          />
+                          <StyledChip
+                            label="Addon"
+                            onClick={() =>
+                              handleDiscountChange("offlinePricing", false)
+                            }
+                            disabled={
+                              pricingAddons?.offlinePricing?.isDiscount ===
+                              false
+                            }
+                          />
+                        </Stack>
+                      </Grid>
+                    </Grid>
+                  </>
+                )}
+                <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+                  <Button
+                    color="inherit"
+                    disabled={activeStep === 0}
+                    onClick={handleBack}
+                    sx={{ mr: 1 }}
+                  >
+                    Back
+                  </Button>
+                  <Box sx={{ flex: "1 1 auto" }} />
+                  {activeStep < steps.length - 1 && (
+                    <Button
+                      disabled={
+                        (!pricingRangeDone && activeStep === 1) ||
+                        (activeStep === 0 &&
+                          (!maxParticipants ||
+                            !minParticipants ||
+                            isMaxSmallerThanMin()))
+                      }
+                      onClick={handleNext}
+                    >
+                      Next
+                    </Button>
+                  )}
+                </Box>
+              </Fragment>
             </Grid>
           </Grid>
 
@@ -945,21 +2097,86 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
             alignItems="left"
             justifyContent="left"
           ></Grid>
-          <Grid item xs={12}>
-            <Typography
-              color={theme.palette.primary.main}
-              component="div"
-              paddingTop={2}
-            >
-              Upload activity images
-            </Typography>
-            <ImageAndFileUpload
-              limit={4}
-              name={"idk"}
-              size={5000000}
-              setActivityImages={setActivityImages}
-              activityImages={activityImages}
-            />
+        </StyledContainer>
+        <StyledContainer elevation={3}>
+          <Grid container spacing={1} alignItems="left" justifyContent="left">
+            <Grid item xs={12}>
+              <Typography
+                color={theme.palette.primary.main}
+                component="div"
+                paddingTop={2}
+                paddingBottom={2}
+                fontSize={"1.25rem"}
+              >
+                Upload activity images
+              </Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <ImageList>
+                {existingImageList?.map((image, index) => {
+                  return (
+                    <ImageListItem key={index}>
+                      <img src={image} loading="lazy" />
+                      <ImageListItemBar
+                        sx={{
+                          background: "none",
+                        }}
+                        position="top"
+                        actionIcon={
+                          <DeleteIconButton
+                            sx={{
+                              backgroundColor: "white",
+                              color: "#D32F2F",
+                            }}
+                            onClick={() => handleRemoveExistingImage(image)}
+                          >
+                            <DeleteIcon />
+                          </DeleteIconButton>
+                        }
+                        actionPosition="left"
+                      />
+                    </ImageListItem>
+                  );
+                })}
+                {imageListToEdit?.map((image, index) => {
+                  return (
+                    <ImageListItem key={index}>
+                      <img src={image.src} loading="lazy" />
+                      <ImageListItemBar
+                        sx={{ background: "none" }}
+                        position="top"
+                        actionIcon={
+                          <DeleteIconButton
+                            sx={{ backgroundColor: "white", color: "#D32F2F" }}
+                            onClick={() => handleRemoveImage(image)}
+                          >
+                            <DeleteIcon />
+                          </DeleteIconButton>
+                        }
+                        actionPosition="left"
+                      />
+                    </ImageListItem>
+                  );
+                })}
+              </ImageList>
+            </Grid>
+            <Grid item xs={12}>
+              <FormGroup>
+                <ImageAndFileUpload
+                  limit={4}
+                  name={"idk"}
+                  size={5000000}
+                  setActivityImages={setActivityImages}
+                  activityImages={activityImages}
+                  error={formErrors?.activityImages?.length > 0}
+                  setImageListToEdit={setImageListToEdit}
+                  existingImageList={existingImageList}
+                />
+                <FormHelperText error>
+                  {formErrors?.activityImages}
+                </FormHelperText>
+              </FormGroup>
+            </Grid>
           </Grid>
         </StyledContainer>
       </div>
@@ -971,7 +2188,7 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
         alignItems="left"
         justifyContent="left"
       >
-        <Grid item xs={12}>
+        <Grid item xs={5}>
           <StyledSubmitButton
             onClick={handleSubmit}
             type="submit"
@@ -981,22 +2198,27 @@ const CreateActivityForm = ({ themes, theme, vendors, admin }) => {
             <Typography component="div">Submit</Typography>
           </StyledSubmitButton>
         </Grid>
+        <Grid item xs={5}>
+          <Button
+            onClick={handleSaveDraft}
+            type="submit"
+            variant="outlined"
+            fullWidth
+          >
+            <Typography component="div">Save draft</Typography>
+          </Button>
+        </Grid>
+        <Grid item xs={2}>
+          <Button
+            onClick={handleCancel}
+            variant="outlined"
+            fullWidth
+            color="unselected"
+          >
+            <Typography component="div">Cancel</Typography>
+          </Button>
+        </Grid>
       </Grid>
-
-      <Snackbar open={isOpen} autoHideDuration={6000} onClose={handleClose}>
-        <Alert severity="success" sx={{ width: "100%" }}>
-          Activity Created Successfully!
-        </Alert>
-      </Snackbar>
-      <Snackbar open={isError} autoHideDuration={6000} onClose={handleClose}>
-        <Alert severity="error" sx={{ width: "100%" }}>
-          {!formErrors
-            ? "Error creating form!"
-            : Object.values(formErrors)?.map((item, key) => (
-                <div key={key}>{item}</div>
-              ))}
-        </Alert>
-      </Snackbar>
     </form>
   );
 };

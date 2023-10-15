@@ -11,7 +11,10 @@ import {
   verifyEmail,
   recoverPassword,
   resetPassword,
+  resendVerifyEmail,
 } from "../../controller/adminController.js";
+
+import adminAuth from "../../middleware/adminAuth.js";
 const router = express.Router();
 
 // /gleek/register => POST
@@ -37,18 +40,20 @@ router.post(
 
 router.post("/validate-token", validateToken);
 
-router.get("/logout", clearCookies);
+router.get("/logout", adminAuth, clearCookies);
 
-router.get("/", getAllAdmin);
+router.get("/", adminAuth, getAllAdmin);
 
-router.get("/:id", getAdmin);
+router.get("/:id", adminAuth, getAdmin);
 
-router.post("/changePassword", changePassword);
+router.post("/changePassword", adminAuth, changePassword);
 
 router.get("/verify/:token", verifyEmail);
 
 router.post("/recoverPassword", recoverPassword);
 
 router.get("/resetPassword/:token", resetPassword);
+
+router.post("/resendVerificationEmail", resendVerifyEmail);
 
 export default router;

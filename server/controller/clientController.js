@@ -15,13 +15,19 @@ import {
   updateConsent,
 } from "../service/consentService.js";
 import sendMail from "../util/sendMail.js";
-import { s3ImageGetService } from "../service/s3ImageGetService.js";
+import { s3GetImages } from "../service/s3ImageServices.js";
 import {
   createClientWelcomeMailOptions,
   createResendVerifyEmailOptions,
   createResetPasswordEmailOptions,
   createVerifyEmailOptions,
 } from "../util/sendMailOptions.js";
+import { Role } from "../util/roleEnum.js";
+import {
+  NotificationAction,
+  NotificationEvent,
+} from "../util/notificationRelatedEnum.js";
+import { createNotification } from "./notificationController.js";
 
 const secret = process.env.JWT_SECRET_ClIENT;
 
@@ -96,7 +102,8 @@ const setCookies = (res, token) => {
  * Handles user registration by creating a new client and associated consent.
  * If an error occurs during the process, the transaction will be rolled back.
  * Sends welcome to Gleek email.
- * Sends verify email email.
+ * Sends verify email.
+ * Test - sends notification to admin (To be removed subsequently)
  */
 export const postRegister = async (req, res) => {
   console.log("clientController postRegister(): req.body", req.body);
@@ -127,10 +134,19 @@ export const postRegister = async (req, res) => {
       createdClient.id,
       acceptTermsAndConditions,
       session,
-      session,
     );
 
     const token = await generateJwtToken(createdClient.id);
+
+    req.notificationReq = {
+      senderRole: Role.CLIENT,
+      sender: createdClient,
+      recipientRole: Role.ADMIN,
+      notificationEvent: NotificationEvent.REGISTER,
+      notificationAction: NotificationAction.CREATE,
+    };
+
+    await createNotification(req.notificationReq, session);
 
     await session.commitTransaction();
 
@@ -172,7 +188,7 @@ export const postLogin = async (req, res) => {
       }
 
       if (client.photo) {
-        const preSignedUrl = await s3ImageGetService(client.photo);
+        const preSignedUrl = await s3GetImages(client.photo);
         client.preSignedPhoto = preSignedUrl;
       }
 
@@ -202,7 +218,7 @@ export const validateToken = async (req, res) => {
     }
 
     if (client.photo) {
-      const preSignedUrl = await s3ImageGetService(client.photo);
+      const preSignedUrl = await s3GetImages(client.photo);
       client.preSignedPhoto = preSignedUrl;
     }
 
@@ -400,7 +416,7 @@ export const updateProfilePicture = async (req, res) => {
     );
 
     if (updatedClient.photo) {
-      const preSignedUrl = await s3ImageGetService(updatedClient.photo);
+      const preSignedUrl = await s3GetImages(updatedClient.photo);
       updatedClient.preSignedPhoto = preSignedUrl;
     }
 

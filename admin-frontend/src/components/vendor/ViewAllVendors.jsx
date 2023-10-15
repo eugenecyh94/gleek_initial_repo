@@ -1,10 +1,9 @@
 import { useTheme } from "@emotion/react";
-import { CircularProgress, Toolbar, Typography } from "@mui/material";
+import { CircularProgress, Typography } from "@mui/material";
 import { useEffect } from "react";
 import { useVendorStore } from "../../zustand/GlobalStore";
-import Layout from "../Layout";
-import VendorsTable from "./VendorsTable";
 import MainBodyContainer from "../common/MainBodyContainer";
+import VendorsTable from "./VendorsTable";
 
 const ViewAllVendors = () => {
   const theme = useTheme();
@@ -35,7 +34,10 @@ const ViewAllVendors = () => {
       {isLoading ? (
         <CircularProgress sx={{ margin: "auto", marginTop: "32px" }} />
       ) : (
-        <VendorsTable vendors={vendors} updateVendor={updateVendor}></VendorsTable>
+        <VendorsTable
+          vendors={vendors}
+          updateVendor={updateVendor}
+        ></VendorsTable>
       )}
     </MainBodyContainer>
   );

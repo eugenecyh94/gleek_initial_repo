@@ -1,14 +1,19 @@
 import styled from "@emotion/styled";
 import AddIcon from "@mui/icons-material/Add";
-import DoneIcon from "@mui/icons-material/Done";
 import CloseIcon from "@mui/icons-material/Close";
-import SearchIcon from "@mui/icons-material/Search";
-import { Button, InputBase, Typography, alpha } from "@mui/material";
-import PropTypes from "prop-types";
-import { Tab, Tabs } from "@mui/material";
+import DoDisturbIcon from "@mui/icons-material/DoDisturb";
+import DoneIcon from "@mui/icons-material/Done";
+import QueryBuilderIcon from "@mui/icons-material/QueryBuilder";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
+import { Badge, Button, Tab, Tabs, Typography, alpha } from "@mui/material";
 import Box from "@mui/material/Box";
-import { DataGrid, GridToolbarFilterButton, GridActionsCellItem } from "@mui/x-data-grid";
-import { useEffect, useState } from "react";
+import {
+  DataGrid,
+  GridActionsCellItem,
+  GridToolbarFilterButton,
+} from "@mui/x-data-grid";
+import PropTypes from "prop-types";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const StyledButton = styled(Button)`
@@ -27,54 +32,15 @@ const StyledDiv = styled("div")(({ theme }) => ({
   marginBottom: 16,
 }));
 
-const Search = styled("div")(({ theme }) => ({
-  position: "relative",
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  "&:hover": {
-    backgroundColor: alpha(theme.palette.light_purple.main, 0.15),
-  },
-  marginRight: theme.spacing(2),
-  marginLeft: 0,
-  marginTop: 16,
-  marginBottom: 16,
-  width: "100%",
-}));
-
-const SearchIconWrapper = styled("div")(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: "100%",
-  position: "absolute",
-  pointerEvents: "none",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: "inherit",
-  "& .MuiInputBase-input": {
-    padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create("width"),
-    width: "100%",
-    [theme.breakpoints.up("md")]: {
-      width: "20ch",
-    },
-  },
-}));
-
-
-
-
-
 const VendorsTable = ({ vendors, updateVendor }) => {
-  console.log(vendors)
   const handleStatusUpdate = async (id, row, newStatus) => {
     const approvedRow = { ...row, status: newStatus };
     await updateVendor(id, approvedRow);
   };
+
+  const badgeNumber = vendors.filter(
+    (vendor) => vendor.status === "PENDING",
+  ).length;
 
   const filterCriteria = {
     approvedTab: { status: "APPROVED" },
@@ -99,21 +65,8 @@ const VendorsTable = ({ vendors, updateVendor }) => {
   };
 
   const navigate = useNavigate();
-  // const { vendors } = vendors;
-  const [searchedRows, setSearchedRows] = useState([]);
-  useEffect(() => {
-    setSearchedRows(vendors);
-  }, [vendors]);
-
-  const requestSearch = (searchedVal) => {
-    const filteredRows = vendors.filter((row) => {
-      return row.companyName.toLowerCase().includes(searchedVal.toLowerCase());
-    });
-    setSearchedRows(filteredRows);
-  };
 
   const handleRowClick = (vendor) => {
-    console.log(vendor)
     navigate(`/viewVendor/${vendor._id}`);
   };
 
@@ -205,17 +158,6 @@ const VendorsTable = ({ vendors, updateVendor }) => {
   return (
     <Box>
       <div style={{ display: "flex" }}>
-
-        <Search>
-          <SearchIconWrapper>
-            <SearchIcon />
-          </SearchIconWrapper>
-          <StyledInputBase
-            placeholder="Find a vendor…"
-            inputProps={{ "aria-label": "search" }}
-            onChange={(event) => requestSearch(event.target.value)}
-          />
-        </Search>
         <StyledDiv>
           <StyledButton
             variant="contained"
@@ -236,26 +178,41 @@ const VendorsTable = ({ vendors, updateVendor }) => {
         </StyledDiv>
       </div>
       <Tabs value={selectedTab} onChange={handleTabChange} centered>
-        <Tab label="Approved" value="approvedTab" />
-        <Tab label="To be Approved" value="pendingTab" />
-        <Tab label="Rejected" value="rejectedTab" />
-      </Tabs>
-      <div style={{ height: 500, width: "100%" }}>
-        <DataGrid
-          initialState={{
-            pagination: {
-              paginationModel: { pageSize: 25, page: 0 },
-            },
-          }}
-          getRowId={(row) => row._id}
-          //rows={searchedRows}
-          rows = {currentTabRows}
-          columns={columns}
-          slots={{
-            toolbar: GridToolbarFilterButton,
-          }}
-          onRowClick={(params) => handleRowClick(params.row)}
+        <Tab label="Approved" value="approvedTab" icon={<TaskAltIcon />} />
+        <Tab
+          label="To be Approved"
+          value="pendingTab"
+          icon={
+            <Badge color="error" badgeContent={badgeNumber}>
+              <QueryBuilderIcon />
+            </Badge>
+          }
         />
+        <Tab label="Rejected" value="rejectedTab" icon={<DoDisturbIcon />} />
+      </Tabs>
+      <div style={{ flex: 1, maxHeight: "500px", overflow: "auto" }}>
+        <Box
+          flexDirection="column"
+          justifyItems="center"
+          display="flex"
+          width={"99%"}
+          height={500}
+        >
+          <DataGrid
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: 25, page: 0 },
+              },
+            }}
+            getRowId={(row) => row._id}
+            rows={currentTabRows}
+            columns={columns}
+            slots={{
+              toolbar: GridToolbarFilterButton,
+            }}
+            onRowClick={(params) => handleRowClick(params.row)}
+          />
+        </Box>
       </div>
     </Box>
   );

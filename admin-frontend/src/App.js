@@ -6,7 +6,6 @@ import LoginPage from "./components/LoginPage";
 import ViewPublishedActivities from "./components/activity/ViewPublishedActivities";
 import ProtectedRoute from "./components/ProtectedRoutes.jsx";
 import ChangePassword from "./components/profile/ChangePassword.jsx";
-import ResetPassword from "./components/ResetPassword";
 import ViewAllVendors from "./components/vendor/ViewAllVendors";
 import ViewAllClients from "./components/client/ViewAllClients";
 import ClientDetails from "./components/client/ClientDetails";
@@ -20,6 +19,10 @@ import AddAdminPage from "./components/admin/AddAdminPage";
 import ViewAllAdmins from "./components/admin/ViewAllAdmins";
 import VendorDetails from "./components/vendor/VendorDetails";
 import ActivityDetails from "./components/activity/ActivityDetails";
+import ViewActivityDrafts from "./components/activity/ViewActivityDrafts";
+import EditActivityDraftPage from "./components/activity/EditActivityDraftPage";
+import AdminNotificationPage from "./components/notification/AdminNotificationPage";
+import VerifyEmailPage from "./components/VerifyEmailPage";
 
 function App() {
   return (
@@ -48,10 +51,28 @@ function App() {
           />
           <Route
             exact
+            path="/viewActivityDrafts"
+            element={
+              <ProtectedRoute>
+                <ViewActivityDrafts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
             path="/viewActivity/:activityId"
             element={
               <ProtectedRoute>
                 <ActivityDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/editActivityDraft/:activityId"
+            element={
+              <ProtectedRoute>
+                <EditActivityDraftPage />
               </ProtectedRoute>
             }
           />
@@ -79,15 +100,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <CreateVendorPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/resetPassword"
-            element={
-              <ProtectedRoute>
-                <ResetPassword />
               </ProtectedRoute>
             }
           />
@@ -145,9 +157,22 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            exact
+            path="/notificationList"
+            element={
+              <ProtectedRoute>
+                <AdminNotificationPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            exact
+            path="/verifyEmail/:token"
+            element={<VerifyEmailPage />}
+          />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
-
           {/*for testing image upload component*/}
           <Route
             path="/uploadTest"
