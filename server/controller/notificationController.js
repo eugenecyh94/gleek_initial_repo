@@ -9,6 +9,7 @@ import ClientModel from "../model/clientModel.js";
 import VendorModel from "../model/vendorModel.js";
 import AdminModel from "../model/adminModel.js";
 import BookingModel from "../model/bookingModel.js";
+import notificationModel from "../model/notificationModel.js";
 
 export const getAdminNotifications = async (req, res) => {
   try {
@@ -16,16 +17,20 @@ export const getAdminNotifications = async (req, res) => {
     const adminRole = req.adminRole; //in case theres any need to filter between mnger and exec exclusive notifications
     const allNotifications =
       adminRole === Role.EXECUTIVE
-        ? await NotificationModel.find().or([
-            { recipient: adminId },
-            { recipientRole: Role.ADMIN },
-            { recipientRole: Role.EXECUTIVE },
-          ])
-        : await NotificationModel.find().or([
-            { recipient: adminId },
-            { recipientRole: Role.ADMIN },
-            { recipientRole: Role.MANAGERIAL },
-          ]);
+        ? await NotificationModel.find()
+            .or([
+              { recipient: adminId },
+              { recipientRole: Role.ADMIN },
+              { recipientRole: Role.EXECUTIVE },
+            ])
+            .sort({ createdDate: -1 })
+        : await NotificationModel.find()
+            .or([
+              { recipient: adminId },
+              { recipientRole: Role.ADMIN },
+              { recipientRole: Role.MANAGERIAL },
+            ])
+            .sort({ createdDate: -1 });
 
     res.status(200).json({
       data: allNotifications,
@@ -113,5 +118,46 @@ export const createNotification = async (req, session) => {
     await newNotification.save({ session });
   } catch (error) {
     console.log("notification error", error);
+  }
+};
+
+export const updateNotificationAsRead = async (req, res) => {
+  try {
+    const { _id, ...remainingFields } = req.body;
+    console.log("_id", _id);
+    console.log("remaining fields", remainingFields);
+
+    const updatedNotification = await notificationModel.findByIdAndUpdate(
+      { _id: _id },
+      { read: true },
+    );
+
+    console.log(updatedNotification);
+
+    res.status(200).json({
+      message: "Notification successfully marked as read",
+    });
+  } catch (error) {
+    console.log("notification error", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const updateAllNotificationsAsRead = async (req, res) => {};
+
+export const deleteNotification = async (req, res) => {
+  try {
+    const { _id, ...remainingFields } = req.body;
+    console.log("_id", _id);
+    console.log("remaining fields", remainingFields);
+
+    await notificationModel.findByIdAndDelete(_id);
+
+    res.status(200).json({
+      message: "Notification successfully deleted",
+    });
+  } catch (error) {
+    console.log("notification error", error);
+    res.status(500).json({ error: error.message });
   }
 };
