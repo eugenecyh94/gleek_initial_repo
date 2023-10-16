@@ -24,7 +24,7 @@ AxiosConnect.get = (command) => {
 };
 
 AxiosConnect.patch = (command, param, req) => {
-  console.log("axios patch command::", `http://${uri}/${command}/${param}`);
+  console.log("axios patch command::", `${uri}${command}/${param}`);
   const options = {
     method: "PATCH",
     url: `${uri}${command}/${param}`,

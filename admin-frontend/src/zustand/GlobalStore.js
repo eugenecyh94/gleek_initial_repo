@@ -383,7 +383,7 @@ export const useVendorStore = create((set) => ({
   updateVendor: async (id, payload) => {
     try {
       set(() => ({ isLoading: true }));
-      await AxiosConnect.patch("vendor/updateVendor", id, payload);
+      await AxiosConnect.patch("/vendor/updateVendor", id, payload);
       const response = await AxiosConnect.get("/vendor/viewAllVendors");
       set({ vendors: response.data });
       set(() => ({ isLoading: false }));
@@ -446,7 +446,7 @@ export const useClientStore = create((set) => ({
   updateClient: async (id, payload) => {
     try {
       set(() => ({ isLoading: true }));
-      await AxiosConnect.patch("client/update", id, payload);
+      await AxiosConnect.patch("/client/update", id, payload);
       const response = await AxiosConnect.get("/client/getAllClients");
       set({ clients: response.data });
       set(() => ({ isLoading: false }));

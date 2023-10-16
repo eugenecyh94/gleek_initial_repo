@@ -36,7 +36,6 @@ export const addBlockedTimeslot = async (req, res) => {
     updateActivity.blockedTimeslots.push({ _id: blockedTimeslot._id });
     await updateActivity.save();
 
-
     const blockedTimeslots = await BlockedTimeslotModel.find({
       activityId,
     }).sort({ blockedStartDateTime: 1 });
